@@ -34,7 +34,9 @@ export const Footer = () => {
 
           {/* Navigation */}
           <div>
-            <h4 className="font-semibold text-white mb-4">Navigacija</h4>
+            <h4 className="font-semibold text-white mb-4">
+              {language === 'sr' ? 'Navigacija' : 'Navigation'}
+            </h4>
             <nav className="flex flex-col gap-2">
               {navItems.map((item) => (
                 <Link
