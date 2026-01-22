@@ -39,7 +39,8 @@ import {
   XCircle,
   Clock,
   Truck,
-  AlertCircle
+  AlertCircle,
+  LogOut
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
