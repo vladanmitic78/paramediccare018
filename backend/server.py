@@ -129,6 +129,7 @@ class ContactCreate(BaseModel):
     email: EmailStr
     phone: Optional[str] = None
     message: str
+    inquiry_type: str = "general"  # general, transport, medical
 
 class ContactResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
