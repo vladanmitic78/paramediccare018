@@ -83,7 +83,9 @@ export const Footer = () => {
               <div className="flex items-center gap-3">
                 <Stethoscope className="w-5 h-5 text-sky-400 flex-shrink-0" />
                 <div className="text-sm">
-                  <p className="text-slate-500 text-xs mb-0.5">Medicinska Nega</p>
+                  <p className="text-slate-500 text-xs mb-0.5">
+                    {language === 'sr' ? 'Medicinska Nega' : 'Medical Care'}
+                  </p>
                   <a 
                     href="mailto:ambulanta@paramedic-care018.rs" 
                     className="text-slate-400 hover:text-white transition-colors"
