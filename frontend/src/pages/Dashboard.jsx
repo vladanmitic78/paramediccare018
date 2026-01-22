@@ -234,12 +234,11 @@ const Dashboard = () => {
           {/* Logo and User */}
           <div className="mb-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-sky-500 to-sky-600 rounded-xl flex items-center justify-center text-white shadow-lg">
-                <HeartPulse size={24} />
-              </div>
-              <span className="text-xl font-bold tracking-tight">
-                Paramedic<span className="text-sky-600">018</span>
-              </span>
+              <img 
+                src="https://customer-assets.emergentagent.com/job_433955cc-2ea1-4976-bce7-1cf9f8ad9654/artifacts/j7ye45w5_Paramedic%20Care%20018%20Logo.jpg"
+                alt="Paramedic Care 018"
+                className="h-12 w-auto object-contain"
+              />
             </div>
             <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
               <p className="text-sm font-semibold text-slate-900">{user?.full_name}</p>
