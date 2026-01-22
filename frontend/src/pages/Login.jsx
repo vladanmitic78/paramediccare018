@@ -1,0 +1,207 @@
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Cross, Loader2, Mail, Lock, User, Phone } from 'lucide-react';
+import { toast } from 'sonner';
+
+const Login = () => {
+  const { login, register } = useAuth();
+  const { t, language } = useLanguage();
+  const navigate = useNavigate();
+  
+  const [isLogin, setIsLogin] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    full_name: '',
+    phone: ''
+  });
+
+  const handleInputChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      if (isLogin) {
+        const user = await login(formData.email, formData.password);
+        toast.success(language === 'sr' ? 'Uspešna prijava!' : 'Login successful!');
+        
+        // Redirect based on role
+        if (['admin', 'superadmin', 'doctor', 'nurse', 'driver'].includes(user.role)) {
+          navigate('/dashboard');
+        } else {
+          navigate('/');
+        }
+      } else {
+        await register(formData.email, formData.password, formData.full_name, formData.phone);
+        toast.success(language === 'sr' ? 'Uspešna registracija!' : 'Registration successful!');
+        navigate('/');
+      }
+    } catch (error) {
+      console.error('Auth error:', error);
+      toast.error(error.response?.data?.detail || (language === 'sr' ? 'Greška pri autentifikaciji' : 'Authentication error'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center py-12 px-4" data-testid="login-page">
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-flex items-center gap-2">
+            <div className="w-12 h-12 bg-gradient-to-br from-sky-500 to-sky-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Cross className="w-7 h-7 text-white" />
+            </div>
+            <div>
+              <span className="font-bold text-xl text-slate-900">Paramedic Care</span>
+              <span className="text-sky-600 font-bold ml-1">018</span>
+            </div>
+          </Link>
+        </div>
+
+        {/* Form Card */}
+        <div className="card-base">
+          <h1 className="text-2xl font-bold text-slate-900 text-center mb-2">
+            {isLogin ? t('auth_login') : t('auth_register')}
+          </h1>
+          <p className="text-slate-600 text-center mb-8">
+            {isLogin 
+              ? (language === 'sr' ? 'Dobrodošli nazad' : 'Welcome back')
+              : (language === 'sr' ? 'Kreirajte novi nalog' : 'Create a new account')}
+          </p>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {!isLogin && (
+              <>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">
+                    {t('auth_name')} *
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Input
+                      name="full_name"
+                      value={formData.full_name}
+                      onChange={handleInputChange}
+                      placeholder={language === 'sr' ? 'Puno ime' : 'Full name'}
+                      className="pl-10"
+                      required={!isLogin}
+                      data-testid="register-name-input"
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">
+                    {t('auth_phone')}
+                  </label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Input
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      placeholder="+381..."
+                      className="pl-10"
+                      data-testid="register-phone-input"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700">
+                {t('auth_email')} *
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="email@example.com"
+                  className="pl-10"
+                  required
+                  data-testid="login-email-input"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700">
+                {t('auth_password')} *
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input
+                  name="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  placeholder="••••••••"
+                  className="pl-10"
+                  required
+                  data-testid="login-password-input"
+                />
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              className="btn-primary w-full"
+              disabled={loading}
+              data-testid="auth-submit-btn"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {language === 'sr' ? 'Učitavanje...' : 'Loading...'}
+                </>
+              ) : (
+                isLogin ? t('auth_submit_login') : t('auth_submit_register')
+              )}
+            </Button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <p className="text-slate-600 text-sm">
+              {isLogin ? t('auth_no_account') : t('auth_have_account')}{' '}
+              <button
+                type="button"
+                onClick={() => setIsLogin(!isLogin)}
+                className="text-sky-600 hover:text-sky-700 font-medium"
+                data-testid="toggle-auth-mode"
+              >
+                {isLogin ? t('auth_register') : t('auth_login')}
+              </button>
+            </p>
+          </div>
+        </div>
+
+        {/* Demo Credentials */}
+        <div className="mt-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
+          <p className="text-xs text-slate-500 text-center mb-2">
+            {language === 'sr' ? 'Demo pristup za admin' : 'Demo admin access'}:
+          </p>
+          <p className="text-xs text-slate-700 text-center font-mono">
+            admin@paramedic-care018.rs / Admin123!
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Login;
