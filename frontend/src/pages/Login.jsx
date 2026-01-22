@@ -190,12 +190,35 @@ const Login = () => {
 
         {/* Demo Credentials */}
         <div className="mt-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
-          <p className="text-xs text-slate-500 text-center mb-2">
-            {language === 'sr' ? 'Demo pristup za admin' : 'Demo admin access'}:
+          <p className="text-xs text-slate-500 text-center mb-3 font-medium uppercase tracking-wide">
+            {language === 'sr' ? 'Demo Pristup' : 'Demo Access'}
           </p>
-          <p className="text-xs text-slate-700 text-center font-mono">
-            admin@paramedic-care018.rs / Admin123!
-          </p>
+          
+          <div className="space-y-3">
+            {/* Super Admin */}
+            <div className="p-3 bg-red-50 rounded-lg border border-red-100">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-semibold text-red-700">Super Admin</span>
+                <span className="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
+                  {language === 'sr' ? 'Puna kontrola' : 'Full control'}
+                </span>
+              </div>
+              <p className="text-xs text-slate-700 font-mono">admin@paramedic-care018.rs</p>
+              <p className="text-xs text-slate-500 font-mono">Admin123!</p>
+            </div>
+
+            {/* Admin */}
+            <div className="p-3 bg-purple-50 rounded-lg border border-purple-100">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-semibold text-purple-700">Admin</span>
+                <span className="text-[10px] bg-purple-100 text-purple-600 px-2 py-0.5 rounded-full">
+                  {language === 'sr' ? 'Upravljanje' : 'Management'}
+                </span>
+              </div>
+              <p className="text-xs text-slate-700 font-mono">office@paramedic-care018.rs</p>
+              <p className="text-xs text-slate-500 font-mono">Office123!</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
