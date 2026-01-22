@@ -96,10 +96,6 @@ export const Footer = () => {
                   </a>
                 </div>
               </div>
-              <div className="mt-4 pt-4 border-t border-slate-800">
-                <p className="text-slate-500 text-xs">PIB: 115243796</p>
-                <p className="text-slate-500 text-xs">MB: 68211557</p>
-              </div>
             </div>
           </div>
         </div>
@@ -109,9 +105,14 @@ export const Footer = () => {
       <div className="border-t border-slate-800">
         <div className="section-container py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
-            <p className="text-slate-500 text-xs">
-              © 2026 Paramedics Care 018. {t('footer_rights')}.
-            </p>
+            <div>
+              <p className="text-slate-500 text-xs">
+                © 2026 Paramedics Care 018. {t('footer_rights')}.
+              </p>
+              <p className="text-slate-500 text-xs mt-1">
+                PIB: 115243796 | MB: 68211557
+              </p>
+            </div>
             <div className="text-slate-500 text-xs">
               <span>{t('footer_platform')} © MITA ICT AB. {t('footer_license')}.</span>
               <span className="mx-2">|</span>
