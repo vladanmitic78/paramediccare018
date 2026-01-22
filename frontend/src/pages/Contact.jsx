@@ -77,10 +77,18 @@ const Contact = () => {
       link: 'tel:+38118123456'
     },
     {
-      icon: Mail,
-      title: 'Email',
+      icon: Ambulance,
+      title: language === 'sr' ? 'Transport Email' : 'Transport Email',
       lines: ['transport@paramedic-care018.rs'],
-      link: 'mailto:transport@paramedic-care018.rs'
+      link: 'mailto:transport@paramedic-care018.rs',
+      color: 'text-red-500'
+    },
+    {
+      icon: Stethoscope,
+      title: language === 'sr' ? 'Medicinska Nega Email' : 'Medical Care Email',
+      lines: ['ambulanta@paramedic-care018.rs'],
+      link: 'mailto:ambulanta@paramedic-care018.rs',
+      color: 'text-sky-500'
     },
     {
       icon: Clock,
