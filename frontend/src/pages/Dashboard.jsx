@@ -568,11 +568,6 @@ const Dashboard = () => {
               </div>
             </div>
           )}
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
-          )}
 
           {/* Contacts (Admin only) */}
           {activeTab === 'contacts' && isAdmin() && (
