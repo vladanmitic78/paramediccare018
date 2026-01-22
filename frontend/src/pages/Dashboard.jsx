@@ -347,6 +347,11 @@ const Dashboard = () => {
             </div>
           )}
 
+          {/* CMS - Page Management */}
+          {activeTab === 'cms' && isAdmin() && (
+            <CMSManager />
+          )}
+
           {/* Bookings */}
           {activeTab === 'bookings' && (
             <div className="space-y-6">
