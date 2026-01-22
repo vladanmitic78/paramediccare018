@@ -37,6 +37,7 @@ const OperationsDashboard = () => {
   const [activeTab, setActiveTab] = useState('transportation');
   const [bookings, setBookings] = useState([]);
   const [stats, setStats] = useState(null);
+  const [isMapFullscreen, setIsMapFullscreen] = useState(false);
 
   useEffect(() => {
     fetchData();
