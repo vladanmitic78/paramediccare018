@@ -3,6 +3,13 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select';
 import { 
   Mail, 
   Phone, 
@@ -10,7 +17,10 @@ import {
   Clock,
   Loader2,
   CheckCircle,
-  Send
+  Send,
+  Stethoscope,
+  Ambulance,
+  HelpCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
@@ -25,11 +35,16 @@ const Contact = () => {
     name: '',
     email: '',
     phone: '',
-    message: ''
+    message: '',
+    inquiry_type: 'general'
   });
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSelectChange = (value) => {
+    setFormData({ ...formData, inquiry_type: value });
   };
 
   const handleSubmit = async (e) => {
@@ -40,7 +55,7 @@ const Contact = () => {
       await axios.post(`${API}/contact`, formData);
       setSuccess(true);
       toast.success(t('contact_success'));
-      setFormData({ name: '', email: '', phone: '', message: '' });
+      setFormData({ name: '', email: '', phone: '', message: '', inquiry_type: 'general' });
     } catch (error) {
       console.error('Contact error:', error);
       toast.error(language === 'sr' ? 'Greška pri slanju poruke' : 'Error sending message');
