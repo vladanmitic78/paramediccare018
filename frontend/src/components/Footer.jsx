@@ -3,7 +3,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { MapPin, Phone, Ambulance, Stethoscope } from 'lucide-react';
 
 export const Footer = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const navItems = [
     { path: '/', label: t('nav_home') },
