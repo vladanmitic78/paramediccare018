@@ -61,6 +61,8 @@ const Dashboard = () => {
   const [services, setServices] = useState([]);
   const [staff, setStaff] = useState([]);
 
+  const isSuperAdmin = () => user?.role === 'superadmin';
+
   useEffect(() => {
     if (!user) {
       navigate('/login');
