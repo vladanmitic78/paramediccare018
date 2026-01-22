@@ -47,10 +47,21 @@
         <link rel="icon" type="image/jpeg" href="https://customer-assets.emergentagent.com/job_433955cc-2ea1-4976-bce7-1cf9f8ad9654/artifacts/j7ye45w5_Paramedic%20Care%20018%20Logo.jpg" />
         <style>
             /* Hide Emergent badge */
-            #emergent-badge, [id*="emergent"], a[href*="emergent.sh"][style*="position: fixed"] {
+            #emergent-badge,
+            [id*="emergent"],
+            a[href*="emergent.sh"],
+            a[href*="emergent.sh"][style*="fixed"],
+            div[style*="Made with Emergent"],
+            a:has(> div > p:contains("Made with Emergent")),
+            body > a[style*="position: fixed"][style*="bottom"],
+            body > a[target="_blank"][style*="z-index: 9999"] {
                 display: none !important;
                 visibility: hidden !important;
                 opacity: 0 !important;
+                pointer-events: none !important;
+                width: 0 !important;
+                height: 0 !important;
+                overflow: hidden !important;
             }
         </style>
         <script src="https://assets.emergent.sh/scripts/emergent-main.js"></script>
