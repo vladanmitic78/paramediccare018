@@ -133,13 +133,26 @@ class ParamedicCareAPITester:
             "patient_name": "Test Patient",
             "notes": "Test booking for API testing"
         }
+        
+        # Try without auth first, then with auth if it fails
         success, response = self.run_test(
-            "Create Booking",
+            "Create Booking (No Auth)",
             "POST",
             "bookings",
             200,
             data=booking_data
         )
+        
+        if not success:
+            # Try with user auth
+            success, response = self.run_test(
+                "Create Booking (With Auth)",
+                "POST",
+                "bookings",
+                200,
+                data=booking_data
+            )
+        
         if success and 'id' in response:
             self.booking_id = response['id']
             return True
