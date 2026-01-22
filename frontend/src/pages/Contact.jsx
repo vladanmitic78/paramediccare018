@@ -64,8 +64,8 @@ const Contact = () => {
     {
       icon: Mail,
       title: 'Email',
-      lines: ['transporta@paramedic-care018.rs'],
-      link: 'mailto:transporta@paramedic-care018.rs'
+      lines: ['transport@paramedic-care018.rs'],
+      link: 'mailto:transport@paramedic-care018.rs'
     },
     {
       icon: Clock,
