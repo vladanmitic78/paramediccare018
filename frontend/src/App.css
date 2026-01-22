@@ -1,34 +1,93 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* Utility classes for the app */
+.glass-header {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+.btn-primary {
+  @apply bg-sky-600 hover:bg-sky-700 text-white shadow-sm rounded-full px-6 py-2.5 font-medium transition-colors active:scale-95;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+.btn-urgent {
+  @apply bg-red-600 hover:bg-red-700 text-white shadow-sm rounded-full px-6 py-2.5 font-medium transition-colors active:scale-95;
 }
 
-.App-link {
-    color: #61dafb;
+.btn-outline {
+  @apply border-2 border-slate-200 bg-transparent hover:bg-slate-50 text-slate-900 rounded-full px-6 py-2.5 font-medium transition-colors;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+.card-base {
+  @apply bg-white rounded-xl border border-slate-200 shadow-sm p-6;
+}
+
+.card-interactive {
+  @apply bg-white rounded-xl border border-slate-200 shadow-sm p-6 hover:border-sky-200 hover:shadow-md transition-all cursor-pointer;
+}
+
+.section-container {
+  @apply container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl;
+}
+
+.section-spacing {
+  @apply py-16 md:py-24;
+}
+
+/* Service card colors */
+.service-medical {
+  @apply border-l-4 border-l-sky-500;
+}
+
+.service-transport {
+  @apply border-l-4 border-l-red-500;
+}
+
+/* Badge variants */
+.badge-medical {
+  @apply inline-flex items-center rounded-full border-transparent bg-sky-100 text-sky-800 px-2.5 py-0.5 text-xs font-semibold;
+}
+
+.badge-transport {
+  @apply inline-flex items-center rounded-full border-transparent bg-red-100 text-red-800 px-2.5 py-0.5 text-xs font-semibold;
+}
+
+/* Status badges */
+.status-pending {
+  @apply bg-amber-100 text-amber-800;
+}
+
+.status-confirmed {
+  @apply bg-sky-100 text-sky-800;
+}
+
+.status-in-progress {
+  @apply bg-purple-100 text-purple-800;
+}
+
+.status-completed {
+  @apply bg-emerald-100 text-emerald-800;
+}
+
+.status-cancelled {
+  @apply bg-red-100 text-red-800;
+}
+
+/* Input focus styles */
+input:focus, textarea:focus, select:focus {
+  @apply ring-2 ring-sky-500 ring-offset-2 outline-none;
+}
+
+/* Hero section */
+.hero-gradient {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.05) 0%, rgba(248, 250, 252, 1) 50%, rgba(239, 68, 68, 0.05) 100%);
+}
+
+/* Map marker pulse */
+@keyframes pulse-marker {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.5; }
+}
+
+.marker-pulse {
+  animation: pulse-marker 2s infinite;
 }
