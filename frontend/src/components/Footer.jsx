@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
-import { MapPin, Phone, Mail } from 'lucide-react';
+import { MapPin, Phone, Ambulance, Stethoscope } from 'lucide-react';
 
 export const Footer = () => {
   const { t } = useLanguage();
