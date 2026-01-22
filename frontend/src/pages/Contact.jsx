@@ -135,8 +135,8 @@ const Contact = () => {
                   className="flex items-start gap-4 p-4 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors"
                   data-testid={`contact-info-${i}`}
                 >
-                  <div className="w-10 h-10 bg-sky-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <item.icon className="w-5 h-5 text-sky-600" />
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${item.color ? 'bg-slate-100' : 'bg-sky-100'}`}>
+                    <item.icon className={`w-5 h-5 ${item.color || 'text-sky-600'}`} />
                   </div>
                   <div>
                     <p className="font-medium text-slate-900 mb-1">{item.title}</p>
@@ -145,7 +145,7 @@ const Contact = () => {
                         <a 
                           key={j}
                           href={item.link}
-                          className="block text-slate-600 hover:text-sky-600 transition-colors"
+                          className={`block text-slate-600 hover:${item.color || 'text-sky-600'} transition-colors`}
                         >
                           {line}
                         </a>
