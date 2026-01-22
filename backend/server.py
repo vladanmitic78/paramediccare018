@@ -164,6 +164,38 @@ class ContentResponse(BaseModel):
     order: int
     updated_at: str
 
+class PageContentCreate(BaseModel):
+    page: str  # medical-care, transport, about
+    section: str  # hero, services, team, etc.
+    title_sr: str
+    title_en: str
+    subtitle_sr: Optional[str] = None
+    subtitle_en: Optional[str] = None
+    content_sr: str
+    content_en: str
+    image_url: Optional[str] = None
+    icon: Optional[str] = None
+    order: int = 0
+    is_active: bool = True
+
+class PageContentResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    page: str
+    section: str
+    title_sr: str
+    title_en: str
+    subtitle_sr: Optional[str] = None
+    subtitle_en: Optional[str] = None
+    content_sr: str
+    content_en: str
+    image_url: Optional[str] = None
+    icon: Optional[str] = None
+    order: int
+    is_active: bool
+    updated_at: str
+    updated_by: Optional[str] = None
+
 class ServiceCreate(BaseModel):
     name_sr: str
     name_en: str
