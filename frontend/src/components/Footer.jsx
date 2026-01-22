@@ -71,10 +71,10 @@ export const Footer = () => {
               <div className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-sky-400 flex-shrink-0" />
                 <a 
-                  href="mailto:transporta@paramedic-care018.rs" 
+                  href="mailto:transport@paramedic-care018.rs" 
                   className="text-slate-400 hover:text-white text-sm transition-colors"
                 >
-                  transporta@paramedic-care018.rs
+                  transport@paramedic-care018.rs
                 </a>
               </div>
               <div className="mt-4 pt-4 border-t border-slate-800">
