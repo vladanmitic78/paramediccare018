@@ -189,7 +189,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-slate-50" data-testid="dashboard-page">
       <div className="flex">
         {/* Sidebar */}
-        <aside className="w-64 bg-white border-r border-slate-200 min-h-screen p-4 hidden lg:block">
+        <aside className="w-64 bg-white border-r border-slate-200 min-h-screen p-4 hidden lg:flex lg:flex-col">
           <div className="mb-8">
             <h2 className="text-lg font-semibold text-slate-900">{t('dashboard_title')}</h2>
             <p className="text-sm text-slate-500">{user?.full_name}</p>
