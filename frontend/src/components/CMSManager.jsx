@@ -498,12 +498,12 @@ const CMSManager = () => {
                 <label className="text-sm font-medium text-slate-700">
                   {language === 'sr' ? 'Ikonica' : 'Icon'}
                 </label>
-                <Select value={formData.icon} onValueChange={(v) => handleSelectChange('icon', v)}>
+                <Select value={formData.icon || "none"} onValueChange={(v) => handleSelectChange('icon', v === "none" ? "" : v)}>
                   <SelectTrigger>
                     <SelectValue placeholder={language === 'sr' ? 'Izaberi ikonicu' : 'Select icon'} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">{language === 'sr' ? 'Bez ikonice' : 'No icon'}</SelectItem>
                     {iconOptions.map((icon) => (
                       <SelectItem key={icon} value={icon}>{icon}</SelectItem>
                     ))}
