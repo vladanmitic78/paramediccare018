@@ -139,6 +139,37 @@ const Dashboard = () => {
     }
   };
 
+  const updateUserRole = async (userId, newRole) => {
+    try {
+      await axios.put(`${API}/users/${userId}/role`, { role: newRole });
+      toast.success(language === 'sr' ? 'Uloga ažurirana' : 'Role updated');
+      fetchData();
+    } catch (error) {
+      toast.error(language === 'sr' ? 'Greška' : 'Error');
+    }
+  };
+
+  const toggleUserStatus = async (userId, isActive) => {
+    try {
+      await axios.put(`${API}/users/${userId}/status`, { is_active: !isActive });
+      toast.success(language === 'sr' ? 'Status ažuriran' : 'Status updated');
+      fetchData();
+    } catch (error) {
+      toast.error(language === 'sr' ? 'Greška' : 'Error');
+    }
+  };
+
+  const deleteUser = async (userId) => {
+    if (!window.confirm(language === 'sr' ? 'Da li ste sigurni da želite obrisati korisnika?' : 'Are you sure you want to delete this user?')) return;
+    try {
+      await axios.delete(`${API}/users/${userId}`);
+      toast.success(language === 'sr' ? 'Korisnik obrisan' : 'User deleted');
+      fetchData();
+    } catch (error) {
+      toast.error(language === 'sr' ? 'Greška' : 'Error');
+    }
+  };
+
   const getStatusBadge = (status) => {
     const styles = {
       pending: 'bg-amber-100 text-amber-800',
