@@ -216,10 +216,18 @@ def require_roles(allowed_roles: List[str]):
         return user
     return role_checker
 
-async def send_email(to_email: str, subject: str, body_html: str):
+async def send_email(to_email: str, subject: str, body_html: str, email_type: str = "transport"):
+    """Send email using appropriate account based on type (transport or medical)"""
     try:
+        if email_type == "medical":
+            from_email = MEDICAL_EMAIL
+            password = MEDICAL_PASS
+        else:
+            from_email = SMTP_USER
+            password = SMTP_PASS
+        
         message = MIMEMultipart("alternative")
-        message["From"] = SMTP_USER
+        message["From"] = from_email
         message["To"] = to_email
         message["Subject"] = subject
         message.attach(MIMEText(body_html, "html"))
@@ -228,11 +236,11 @@ async def send_email(to_email: str, subject: str, body_html: str):
             message,
             hostname=SMTP_HOST,
             port=SMTP_PORT,
-            username=SMTP_USER,
-            password=SMTP_PASS,
+            username=from_email,
+            password=password,
             use_tls=True
         )
-        logger.info(f"Email sent to {to_email}")
+        logger.info(f"Email sent to {to_email} from {from_email}")
         return True
     except Exception as e:
         logger.error(f"Email failed: {e}")
