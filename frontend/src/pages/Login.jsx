@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import { Cross, Loader2, Mail, Lock, User, Phone } from 'lucide-react';
+import { Loader2, Mail, Lock, User, Phone } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Login = () => {
@@ -58,14 +58,12 @@ const Login = () => {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2">
-            <div className="w-12 h-12 bg-gradient-to-br from-sky-500 to-sky-600 rounded-xl flex items-center justify-center shadow-lg">
-              <Cross className="w-7 h-7 text-white" />
-            </div>
-            <div>
-              <span className="font-bold text-xl text-slate-900">Paramedic Care</span>
-              <span className="text-sky-600 font-bold ml-1">018</span>
-            </div>
+          <Link to="/" className="inline-block">
+            <img 
+              src="https://customer-assets.emergentagent.com/job_433955cc-2ea1-4976-bce7-1cf9f8ad9654/artifacts/j7ye45w5_Paramedic%20Care%20018%20Logo.jpg"
+              alt="Paramedic Care 018"
+              className="h-20 w-auto object-contain mx-auto"
+            />
           </Link>
         </div>
 
