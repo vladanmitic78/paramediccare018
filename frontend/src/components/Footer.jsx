@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Cross, MapPin, Phone, Mail } from 'lucide-react';
+import { MapPin, Phone, Mail } from 'lucide-react';
 
 export const Footer = () => {
   const { t } = useLanguage();
@@ -21,13 +21,11 @@ export const Footer = () => {
           {/* Logo Section */}
           <div className="lg:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-sky-500 to-sky-600 rounded-lg flex items-center justify-center">
-                <Cross className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <span className="font-bold text-lg text-white">Paramedic Care</span>
-                <span className="text-sky-400 font-bold ml-1">018</span>
-              </div>
+              <img 
+                src="https://customer-assets.emergentagent.com/job_433955cc-2ea1-4976-bce7-1cf9f8ad9654/artifacts/j7ye45w5_Paramedic%20Care%20018%20Logo.jpg"
+                alt="Paramedic Care 018"
+                className="h-16 w-auto object-contain bg-white rounded-lg p-1"
+              />
             </Link>
             <p className="text-slate-400 text-sm leading-relaxed">
               {t('about_mission_text')}

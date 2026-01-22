@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
-import { Menu, X, Cross, ChevronDown } from 'lucide-react';
+import { Menu, X, ChevronDown } from 'lucide-react';
 import { Button } from './ui/button';
 import {
   DropdownMenu,
@@ -38,13 +38,11 @@ export const Header = () => {
             className="flex items-center gap-2 group"
             data-testid="logo-link"
           >
-            <div className="w-10 h-10 bg-gradient-to-br from-sky-500 to-sky-600 rounded-lg flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
-              <Cross className="w-6 h-6 text-white" />
-            </div>
-            <div className="hidden sm:block">
-              <span className="font-bold text-lg text-slate-900">Paramedic Care</span>
-              <span className="text-sky-600 font-bold ml-1">018</span>
-            </div>
+            <img 
+              src="https://customer-assets.emergentagent.com/job_433955cc-2ea1-4976-bce7-1cf9f8ad9654/artifacts/j7ye45w5_Paramedic%20Care%20018%20Logo.jpg"
+              alt="Paramedic Care 018"
+              className="h-12 w-auto object-contain"
+            />
           </Link>
 
           {/* Desktop Navigation */}
