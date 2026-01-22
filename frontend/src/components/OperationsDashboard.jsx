@@ -248,96 +248,175 @@ const OperationsDashboard = () => {
 
       {/* TRANSPORTATION VIEW */}
       {activeTab === 'transportation' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Map Section */}
-          <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden min-h-[450px] flex flex-col">
-            <div className="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
-              <h2 className="font-bold flex items-center gap-2 text-sm">
-                <MapPin size={18} className="text-blue-600" /> 
-                {language === 'sr' ? 'Pozicije Flote' : 'Fleet Geofencing'}
-              </h2>
-              <div className="flex gap-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                  <span className="text-[10px] font-bold text-slate-500">{language === 'sr' ? 'NA PUTU' : 'EN ROUTE'}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                  <span className="text-[10px] font-bold text-slate-500">{language === 'sr' ? 'ČEKA' : 'LOADING'}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                  <span className="text-[10px] font-bold text-slate-500">{language === 'sr' ? 'DOSTUPNO' : 'AVAILABLE'}</span>
-                </div>
-              </div>
-            </div>
-            <div className="flex-1 relative">
-              <iframe
-                src="https://www.openstreetmap.org/export/embed.html?bbox=21.82%2C43.28%2C21.98%2C43.36&layer=mapnik&marker=43.32%2C21.90"
-                width="100%"
-                height="100%"
-                style={{ border: 0, minHeight: '400px' }}
-                allowFullScreen
-                loading="lazy"
-                title="Fleet Map"
-              ></iframe>
-              {/* Overlay info */}
-              <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-lg border border-slate-200">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <Ambulance className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-slate-900 text-sm">
-                      {language === 'sr' ? '9 Vozila Praćeno' : '9 Vehicles Tracked'}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      {language === 'sr' ? 'Niš, Srbija - 50km radius' : 'Niš, Serbia - 50km radius'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Mission Timeline */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-            <div className="p-4 border-b border-slate-200 flex justify-between items-center">
-              <h2 className="font-bold text-sm">
-                {language === 'sr' ? 'Vremenska Linija Misija' : 'Mission Timeline'}
-              </h2>
-              <button className="text-blue-600 text-[10px] font-black uppercase hover:underline tracking-widest">
-                {language === 'sr' ? 'Svi Logovi' : 'Live Logs'}
-              </button>
-            </div>
-            <div className="p-4 space-y-4 overflow-y-auto flex-1">
-              {recentMissions.length > 0 ? recentMissions.map((mission, i) => (
-                <div key={i} className="relative pl-6 pb-4 last:pb-0 group">
-                  <div className={`absolute left-0 top-1 w-2 h-2 rounded-full z-10 ${getStatusColor(mission.status)}`}></div>
-                  <div className="absolute left-[3.5px] top-1 bottom-0 w-[1px] bg-slate-200 group-last:hidden"></div>
-                  <div className="flex flex-col">
+        <>
+          {/* Fullscreen Map Overlay */}
+          {isMapFullscreen && (
+            <div className="fixed inset-0 z-50 bg-slate-900/95 flex flex-col" data-testid="fullscreen-map">
+              <div className="p-4 bg-white border-b border-slate-200 flex justify-between items-center">
+                <h2 className="font-bold flex items-center gap-2 text-sm">
+                  <MapPin size={18} className="text-blue-600" /> 
+                  {language === 'sr' ? 'Pozicije Flote - Prikaz na Celom Ekranu' : 'Fleet Geofencing - Full Screen View'}
+                </h2>
+                <div className="flex items-center gap-4">
+                  <div className="flex gap-4">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-black text-slate-400">{mission.id}</span>
-                      <Badge className={`text-[8px] ${mission.status === 'in_progress' ? 'bg-purple-100 text-purple-700' : mission.status === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}`}>
-                        {getStatusLabel(mission.status)}
-                      </Badge>
+                      <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                      <span className="text-[10px] font-bold text-slate-500">{language === 'sr' ? 'NA PUTU' : 'EN ROUTE'}</span>
                     </div>
-                    <p className="text-xs font-bold text-slate-900 mt-1">{mission.patient}</p>
-                    <p className="text-[10px] text-slate-500">{mission.from} → {mission.to}</p>
-                    <p className="text-[10px] text-slate-400 mt-1">{mission.time}</p>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                      <span className="text-[10px] font-bold text-slate-500">{language === 'sr' ? 'ČEKA' : 'LOADING'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                      <span className="text-[10px] font-bold text-slate-500">{language === 'sr' ? 'DOSTUPNO' : 'AVAILABLE'}</span>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsMapFullscreen(false)}
+                    className="flex items-center gap-2"
+                    data-testid="close-fullscreen-map"
+                  >
+                    <X size={16} />
+                    {language === 'sr' ? 'Zatvori' : 'Close'}
+                  </Button>
+                </div>
+              </div>
+              <div className="flex-1 relative">
+                <iframe
+                  src="https://www.openstreetmap.org/export/embed.html?bbox=21.82%2C43.28%2C21.98%2C43.36&layer=mapnik&marker=43.32%2C21.90"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  title="Fleet Map Fullscreen"
+                ></iframe>
+                {/* Overlay info */}
+                <div className="absolute bottom-6 left-6 bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-lg border border-slate-200">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <Ambulance className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-900 text-sm">
+                        {language === 'sr' ? '9 Vozila Praćeno' : '9 Vehicles Tracked'}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {language === 'sr' ? 'Niš, Srbija - 50km radius' : 'Niš, Serbia - 50km radius'}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              )) : (
-                <div className="text-center py-8">
-                  <Navigation className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                  <p className="text-sm text-slate-500">
-                    {language === 'sr' ? 'Nema aktivnih misija' : 'No active missions'}
-                  </p>
+              </div>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Map Section - Now takes 3 columns */}
+            <div className="lg:col-span-3 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden min-h-[500px] flex flex-col">
+              <div className="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                <h2 className="font-bold flex items-center gap-2 text-sm">
+                  <MapPin size={18} className="text-blue-600" /> 
+                  {language === 'sr' ? 'Pozicije Flote' : 'Fleet Geofencing'}
+                </h2>
+                <div className="flex items-center gap-4">
+                  <div className="flex gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                      <span className="text-[10px] font-bold text-slate-500">{language === 'sr' ? 'NA PUTU' : 'EN ROUTE'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                      <span className="text-[10px] font-bold text-slate-500">{language === 'sr' ? 'ČEKA' : 'LOADING'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                      <span className="text-[10px] font-bold text-slate-500">{language === 'sr' ? 'DOSTUPNO' : 'AVAILABLE'}</span>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsMapFullscreen(true)}
+                    className="flex items-center gap-2"
+                    data-testid="expand-map-btn"
+                  >
+                    <Maximize2 size={14} />
+                    {language === 'sr' ? 'Ceo Ekran' : 'Full Screen'}
+                  </Button>
                 </div>
-              )}
+              </div>
+              <div className="flex-1 relative">
+                <iframe
+                  src="https://www.openstreetmap.org/export/embed.html?bbox=21.82%2C43.28%2C21.98%2C43.36&layer=mapnik&marker=43.32%2C21.90"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0, minHeight: '450px' }}
+                  allowFullScreen
+                  loading="lazy"
+                  title="Fleet Map"
+                ></iframe>
+                {/* Overlay info */}
+                <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-lg border border-slate-200">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <Ambulance className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-900 text-sm">
+                        {language === 'sr' ? '9 Vozila Praćeno' : '9 Vehicles Tracked'}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {language === 'sr' ? 'Niš, Srbija - 50km radius' : 'Niš, Serbia - 50km radius'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Mission Timeline - Now takes 1 column (narrower) */}
+            <div className="lg:col-span-1 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col max-h-[550px]">
+              <div className="p-3 border-b border-slate-200 flex justify-between items-center">
+                <h2 className="font-bold text-xs">
+                  {language === 'sr' ? 'Misije' : 'Missions'}
+                </h2>
+                <button className="text-blue-600 text-[9px] font-black uppercase hover:underline tracking-widest">
+                  {language === 'sr' ? 'Logovi' : 'Logs'}
+                </button>
+              </div>
+              <div className="p-3 space-y-3 overflow-y-auto flex-1">
+                {recentMissions.length > 0 ? recentMissions.map((mission, i) => (
+                  <div key={i} className="relative pl-4 pb-3 last:pb-0 group">
+                    <div className={`absolute left-0 top-1 w-2 h-2 rounded-full z-10 ${getStatusColor(mission.status)}`}></div>
+                    <div className="absolute left-[3.5px] top-1 bottom-0 w-[1px] bg-slate-200 group-last:hidden"></div>
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-1 flex-wrap">
+                        <span className="text-[9px] font-black text-slate-400">{mission.id}</span>
+                        <Badge className={`text-[7px] px-1 py-0 ${mission.status === 'in_progress' ? 'bg-purple-100 text-purple-700' : mission.status === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}`}>
+                          {getStatusLabel(mission.status)}
+                        </Badge>
+                      </div>
+                      <p className="text-[10px] font-bold text-slate-900 mt-0.5 truncate">{mission.patient}</p>
+                      <p className="text-[9px] text-slate-500 truncate">{mission.from} → {mission.to}</p>
+                      <p className="text-[8px] text-slate-400 mt-0.5">{mission.time}</p>
+                    </div>
+                  </div>
+                )) : (
+                  <div className="text-center py-6">
+                    <Navigation className="w-6 h-6 text-slate-300 mx-auto mb-2" />
+                    <p className="text-xs text-slate-500">
+                      {language === 'sr' ? 'Nema misija' : 'No missions'}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* MEDICAL CARE VIEW */}
