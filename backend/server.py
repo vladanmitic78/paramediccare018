@@ -591,6 +591,273 @@ async def delete_content(content_id: str, user: dict = Depends(require_roles([Us
     await db.content.delete_one({"id": content_id})
     return {"success": True}
 
+# ============ PAGE CONTENT MANAGEMENT (CMS) ============
+
+@api_router.get("/pages")
+async def get_all_pages():
+    """Get all page content"""
+    content = await db.page_content.find({}, {"_id": 0}).sort([("page", 1), ("order", 1)]).to_list(1000)
+    return content
+
+@api_router.get("/pages/{page}")
+async def get_page_content(page: str):
+    """Get content for a specific page"""
+    content = await db.page_content.find({"page": page, "is_active": True}, {"_id": 0}).sort("order", 1).to_list(1000)
+    return content
+
+@api_router.get("/pages/{page}/{section}")
+async def get_page_section(page: str, section: str):
+    """Get specific section content"""
+    content = await db.page_content.find_one({"page": page, "section": section}, {"_id": 0})
+    return content
+
+@api_router.post("/pages", response_model=PageContentResponse)
+async def create_page_content(content: PageContentCreate, user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))):
+    content_id = str(uuid.uuid4())
+    content_doc = {
+        "id": content_id,
+        **content.model_dump(),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "updated_by": user["full_name"]
+    }
+    await db.page_content.insert_one(content_doc)
+    return PageContentResponse(**{k: v for k, v in content_doc.items() if k != "_id"})
+
+@api_router.put("/pages/{content_id}", response_model=PageContentResponse)
+async def update_page_content(content_id: str, content: PageContentCreate, user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))):
+    update_doc = {
+        **content.model_dump(),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "updated_by": user["full_name"]
+    }
+    await db.page_content.update_one({"id": content_id}, {"$set": update_doc})
+    updated = await db.page_content.find_one({"id": content_id}, {"_id": 0})
+    return PageContentResponse(**updated)
+
+@api_router.delete("/pages/{content_id}")
+async def delete_page_content(content_id: str, user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))):
+    await db.page_content.delete_one({"id": content_id})
+    return {"success": True}
+
+@api_router.post("/pages/seed")
+async def seed_page_content(user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))):
+    """Seed default page content"""
+    count = await db.page_content.count_documents({})
+    if count > 0:
+        return {"message": "Content already exists", "count": count}
+    
+    default_content = [
+        # Medical Care Page
+        {
+            "id": str(uuid.uuid4()),
+            "page": "medical-care",
+            "section": "hero",
+            "title_sr": "Profesionalna Medicinska Pomoć",
+            "title_en": "Professional Medical Assistance",
+            "subtitle_sr": "Medicinska Nega",
+            "subtitle_en": "Medical Care",
+            "content_sr": "Pružamo vrhunsku medicinsku negu sa fokusom na bezbednost i udobnost pacijenata. Naš tim je dostupan 24 sata dnevno, 7 dana u nedelji.",
+            "content_en": "We provide top-quality medical care with a focus on patient safety and comfort. Our team is available 24 hours a day, 7 days a week.",
+            "image_url": "https://images.pexels.com/photos/4173251/pexels-photo-4173251.jpeg",
+            "order": 1,
+            "is_active": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": "System"
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "page": "medical-care",
+            "section": "service-1",
+            "title_sr": "Hitna medicinska pomoć",
+            "title_en": "Emergency Medical Assistance",
+            "content_sr": "Brza i profesionalna hitna medicinska pomoć dostupna 24/7. Naš tim je obučen za sve vrste hitnih situacija.",
+            "content_en": "Fast and professional emergency medical assistance available 24/7. Our team is trained for all types of emergencies.",
+            "icon": "Siren",
+            "order": 2,
+            "is_active": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": "System"
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "page": "medical-care",
+            "section": "service-2",
+            "title_sr": "Medicinska stabilizacija",
+            "title_en": "On-site Medical Stabilization",
+            "content_sr": "Stručna medicinska stabilizacija na licu mesta pre transporta. Osiguravamo da su pacijenti stabilni pre pomeranja.",
+            "content_en": "Expert on-site medical stabilization before transport. We ensure patients are stable before moving.",
+            "icon": "HeartPulse",
+            "order": 3,
+            "is_active": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": "System"
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "page": "medical-care",
+            "section": "service-3",
+            "title_sr": "Profesionalno medicinsko osoblje",
+            "title_en": "Professional Medical Staff",
+            "content_sr": "Tim stručnih lekara i medicinskih sestara sa višegodišnjim iskustvom u hitnoj medicini.",
+            "content_en": "Team of professional doctors and nurses with years of experience in emergency medicine.",
+            "icon": "UserCheck",
+            "order": 4,
+            "is_active": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": "System"
+        },
+        # Transport Page
+        {
+            "id": str(uuid.uuid4()),
+            "page": "transport",
+            "section": "hero",
+            "title_sr": "Medicinski Transport",
+            "title_en": "Medical Transport",
+            "subtitle_sr": "Hitno",
+            "subtitle_en": "Urgent",
+            "content_sr": "Pružamo siguran i pouzdan medicinski transport sa profesionalnom pratnjom. Naša flota je opremljena najmodernijom medicinskom opremom.",
+            "content_en": "We provide safe and reliable medical transport with professional escort. Our fleet is equipped with the most modern medical equipment.",
+            "image_url": "https://images.pexels.com/photos/6520105/pexels-photo-6520105.jpeg",
+            "order": 1,
+            "is_active": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": "System"
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "page": "transport",
+            "section": "service-1",
+            "title_sr": "Transport sanitetom",
+            "title_en": "Ambulance Transport",
+            "content_sr": "Siguran i udoban transport specijalizovanim sanitetskim vozilom opremljenim najmodernijom medicinskom opremom.",
+            "content_en": "Safe and comfortable transport in specialized ambulance vehicle equipped with the most modern medical equipment.",
+            "icon": "Ambulance",
+            "order": 2,
+            "is_active": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": "System"
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "page": "transport",
+            "section": "service-2",
+            "title_sr": "Transport između bolnica",
+            "title_en": "Hospital-to-Hospital Transport",
+            "content_sr": "Profesionalan transport pacijenata između zdravstvenih ustanova sa punom medicinskom pratnjom.",
+            "content_en": "Professional patient transport between healthcare facilities with full medical escort.",
+            "icon": "Building2",
+            "order": 3,
+            "is_active": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": "System"
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "page": "transport",
+            "section": "service-3",
+            "title_sr": "Transport od kuće do bolnice",
+            "title_en": "Home-to-Hospital Transport",
+            "content_sr": "Bezbedna vožnja od vašeg doma do zdravstvene ustanove. Preuzimamo pacijenta na adresi i pratimo do destinacije.",
+            "content_en": "Safe ride from your home to the healthcare facility. We pick up the patient at the address and accompany them to the destination.",
+            "icon": "Home",
+            "order": 4,
+            "is_active": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": "System"
+        },
+        # About Page
+        {
+            "id": str(uuid.uuid4()),
+            "page": "about",
+            "section": "hero",
+            "title_sr": "Paramedic Care 018 - Vaš partner u zdravlju",
+            "title_en": "Paramedic Care 018 - Your Health Partner",
+            "subtitle_sr": "O Nama",
+            "subtitle_en": "About Us",
+            "content_sr": "Paramedic Care 018 je vodeća kompanija za medicinski transport i hitnu pomoć u Srbiji. Sa sedištem u Nišu, pružamo profesionalne usluge širom zemlje.",
+            "content_en": "Paramedic Care 018 is a leading medical transport and emergency services company in Serbia. Based in Niš, we provide professional services throughout the country.",
+            "image_url": "https://images.pexels.com/photos/6519910/pexels-photo-6519910.jpeg",
+            "order": 1,
+            "is_active": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": "System"
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "page": "about",
+            "section": "mission",
+            "title_sr": "Naša Misija",
+            "title_en": "Our Mission",
+            "content_sr": "Pružiti najkvalitetniju medicinsku negu i transport, osiguravajući bezbednost i udobnost svakog pacijenta. Verujemo da svaka osoba zaslužuje pristup profesionalnoj medicinskoj pomoći, bez obzira na okolnosti.",
+            "content_en": "To provide the highest quality medical care and transport, ensuring the safety and comfort of every patient. We believe that every person deserves access to professional medical assistance, regardless of circumstances.",
+            "image_url": "https://images.pexels.com/photos/4173251/pexels-photo-4173251.jpeg",
+            "icon": "Target",
+            "order": 2,
+            "is_active": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": "System"
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "page": "about",
+            "section": "value-1",
+            "title_sr": "Profesionalnost",
+            "title_en": "Professionalism",
+            "content_sr": "Najviši standardi u svemu što radimo",
+            "content_en": "Highest standards in everything we do",
+            "icon": "Shield",
+            "order": 3,
+            "is_active": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": "System"
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "page": "about",
+            "section": "value-2",
+            "title_sr": "Pouzdanost",
+            "title_en": "Reliability",
+            "content_sr": "Možete se osloniti na nas",
+            "content_en": "You can count on us",
+            "icon": "Heart",
+            "order": 4,
+            "is_active": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": "System"
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "page": "about",
+            "section": "value-3",
+            "title_sr": "Empatija",
+            "title_en": "Empathy",
+            "content_sr": "Razumemo vaše potrebe",
+            "content_en": "We understand your needs",
+            "icon": "Users",
+            "order": 5,
+            "is_active": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": "System"
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "page": "about",
+            "section": "value-4",
+            "title_sr": "Dostupnost 24/7",
+            "title_en": "Availability 24/7",
+            "content_sr": "Uvek tu kada vam zatrebamo",
+            "content_en": "Always there when you need us",
+            "icon": "Clock",
+            "order": 6,
+            "is_active": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": "System"
+        },
+    ]
+    
+    await db.page_content.insert_many(default_content)
+    return {"message": "Content seeded successfully", "count": len(default_content)}
+
 # ============ SERVICES MANAGEMENT ============
 
 @api_router.get("/services")
