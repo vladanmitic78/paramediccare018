@@ -214,6 +214,7 @@ const Dashboard = () => {
     { id: 'overview', icon: LayoutDashboard, label: language === 'sr' ? 'Pregled' : 'Overview' },
     { id: 'bookings', icon: Calendar, label: t('dashboard_bookings') },
     ...(isAdmin() ? [
+      { id: 'cms', icon: Globe, label: language === 'sr' ? 'Upravljanje Stranicama' : 'Page Management' },
       { id: 'users', icon: Users, label: t('dashboard_users') },
       { id: 'contacts', icon: MessageSquare, label: t('dashboard_contacts') },
       { id: 'services', icon: FileText, label: t('dashboard_services') },
