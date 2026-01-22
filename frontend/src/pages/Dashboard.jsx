@@ -382,16 +382,25 @@ const Dashboard = () => {
               ))}
             </TabsList>
           </Tabs>
+          )}
         </div>
 
         {/* Main Content */}
-        <main className="flex-1 p-6 lg:p-8">
-          {/* Overview */}
-          {activeTab === 'overview' && (
-            <div className="space-y-6">
-              <h1 className="text-2xl font-bold text-slate-900">
-                {language === 'sr' ? 'Dobrodošli,' : 'Welcome,'} {user?.full_name}
-              </h1>
+        <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
+          {/* Operations Dashboard View */}
+          {mainView === 'operations' && (
+            <OperationsDashboard />
+          )}
+
+          {/* Admin Views */}
+          {mainView === 'admin' && (
+            <>
+              {/* Overview */}
+              {activeTab === 'overview' && (
+                <div className="space-y-6">
+                  <h1 className="text-2xl font-bold text-slate-900">
+                    {language === 'sr' ? 'Dobrodošli,' : 'Welcome,'} {user?.full_name}
+                  </h1>
 
               {isAdmin() && stats && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
