@@ -41,11 +41,15 @@ import {
   Truck,
   AlertCircle,
   LogOut,
-  Globe
+  Globe,
+  Activity,
+  HeartPulse,
+  Navigation
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
 import CMSManager from '../components/CMSManager';
+import OperationsDashboard from '../components/OperationsDashboard';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -54,6 +58,7 @@ const Dashboard = () => {
   const { language, t } = useLanguage();
   const navigate = useNavigate();
   
+  const [mainView, setMainView] = useState('operations'); // 'operations' or 'admin'
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
