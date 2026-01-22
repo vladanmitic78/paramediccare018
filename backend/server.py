@@ -323,8 +323,47 @@ async def update_user(user_id: str, role: str = None, is_active: bool = None, ad
         await db.users.update_one({"id": user_id}, {"$set": update_doc})
     return {"success": True}
 
+class RoleUpdate(BaseModel):
+    role: str
+
+class StatusUpdate(BaseModel):
+    is_active: bool
+
+@api_router.put("/users/{user_id}/role")
+async def update_user_role(user_id: str, data: RoleUpdate, admin: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))):
+    # Check if trying to set superadmin role - only superadmin can do that
+    if data.role == UserRole.SUPERADMIN and admin["role"] != UserRole.SUPERADMIN:
+        raise HTTPException(status_code=403, detail="Only Super Admin can assign Super Admin role")
+    
+    # Admin can only assign: regular, doctor, nurse, driver
+    # Super Admin can also assign: admin
+    allowed_roles = [UserRole.REGULAR, UserRole.DOCTOR, UserRole.NURSE, UserRole.DRIVER]
+    if admin["role"] == UserRole.SUPERADMIN:
+        allowed_roles.append(UserRole.ADMIN)
+    
+    if data.role not in allowed_roles:
+        raise HTTPException(status_code=403, detail="Cannot assign this role")
+    
+    await db.users.update_one({"id": user_id}, {"$set": {"role": data.role}})
+    return {"success": True}
+
+@api_router.put("/users/{user_id}/status")
+async def update_user_status(user_id: str, data: StatusUpdate, admin: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))):
+    # Cannot deactivate superadmin unless you are superadmin
+    target_user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if target_user and target_user.get("role") == UserRole.SUPERADMIN and admin["role"] != UserRole.SUPERADMIN:
+        raise HTTPException(status_code=403, detail="Cannot modify Super Admin status")
+    
+    await db.users.update_one({"id": user_id}, {"$set": {"is_active": data.is_active}})
+    return {"success": True}
+
 @api_router.delete("/users/{user_id}")
 async def delete_user(user_id: str, admin: dict = Depends(require_roles([UserRole.SUPERADMIN]))):
+    # Cannot delete superadmin
+    target_user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if target_user and target_user.get("role") == UserRole.SUPERADMIN:
+        raise HTTPException(status_code=403, detail="Cannot delete Super Admin")
+    
     await db.users.delete_one({"id": user_id})
     return {"success": True}
 
