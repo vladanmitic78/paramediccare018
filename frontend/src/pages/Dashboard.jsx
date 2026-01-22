@@ -438,6 +438,11 @@ const Dashboard = () => {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-bold text-slate-900">{t('dashboard_users')}</h1>
+                <div className="text-sm text-slate-500">
+                  {isSuperAdmin() 
+                    ? (language === 'sr' ? 'Super Admin - Puna kontrola' : 'Super Admin - Full Control')
+                    : (language === 'sr' ? 'Admin - Upravljanje ulogama' : 'Admin - Role Management')}
+                </div>
               </div>
 
               <div className="card-base overflow-x-auto">
@@ -449,6 +454,7 @@ const Dashboard = () => {
                       <TableHead>{language === 'sr' ? 'Telefon' : 'Phone'}</TableHead>
                       <TableHead>{language === 'sr' ? 'Uloga' : 'Role'}</TableHead>
                       <TableHead>{t('status')}</TableHead>
+                      <TableHead>{t('actions')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -457,7 +463,30 @@ const Dashboard = () => {
                         <TableCell className="font-medium">{u.full_name}</TableCell>
                         <TableCell>{u.email}</TableCell>
                         <TableCell>{u.phone || '-'}</TableCell>
-                        <TableCell>{getRoleBadge(u.role)}</TableCell>
+                        <TableCell>
+                          {/* Admin can change roles, but not their own or superadmin's */}
+                          {(u.id === user?.id || u.role === 'superadmin') ? (
+                            getRoleBadge(u.role)
+                          ) : (
+                            <Select
+                              defaultValue={u.role}
+                              onValueChange={(value) => updateUserRole(u.id, value)}
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="regular">{language === 'sr' ? 'Korisnik' : 'User'}</SelectItem>
+                                <SelectItem value="doctor">{language === 'sr' ? 'Lekar' : 'Doctor'}</SelectItem>
+                                <SelectItem value="nurse">{language === 'sr' ? 'Sestra' : 'Nurse'}</SelectItem>
+                                <SelectItem value="driver">{language === 'sr' ? 'Vozač' : 'Driver'}</SelectItem>
+                                {isSuperAdmin() && (
+                                  <SelectItem value="admin">Admin</SelectItem>
+                                )}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </TableCell>
                         <TableCell>
                           {u.is_active ? (
                             <Badge className="bg-emerald-100 text-emerald-800">
@@ -469,8 +498,76 @@ const Dashboard = () => {
                             </Badge>
                           )}
                         </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {/* Can't modify own account or superadmin (unless you are superadmin) */}
+                            {u.id !== user?.id && (u.role !== 'superadmin' || isSuperAdmin()) && (
+                              <>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => toggleUserStatus(u.id, u.is_active)}
+                                  className={u.is_active ? 'text-amber-600 hover:text-amber-700' : 'text-emerald-600 hover:text-emerald-700'}
+                                  title={u.is_active ? (language === 'sr' ? 'Deaktiviraj' : 'Deactivate') : (language === 'sr' ? 'Aktiviraj' : 'Activate')}
+                                >
+                                  {u.is_active ? <XCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
+                                </Button>
+                                {/* Only Super Admin can delete users */}
+                                {isSuperAdmin() && u.role !== 'superadmin' && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => deleteUser(u.id)}
+                                    className="text-red-600 hover:text-red-700"
+                                    title={language === 'sr' ? 'Obriši' : 'Delete'}
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        </TableCell>
                       </TableRow>
                     ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Role Legend */}
+              <div className="card-base">
+                <h3 className="text-sm font-semibold text-slate-900 mb-3">
+                  {language === 'sr' ? 'Legenda Uloga' : 'Role Legend'}
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 text-sm">
+                  <div className="flex items-center gap-2">
+                    {getRoleBadge('superadmin')}
+                    <span className="text-slate-500">{language === 'sr' ? 'Puna kontrola' : 'Full control'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {getRoleBadge('admin')}
+                    <span className="text-slate-500">{language === 'sr' ? 'Upravljanje' : 'Management'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {getRoleBadge('doctor')}
+                    <span className="text-slate-500">{language === 'sr' ? 'Med. slučajevi' : 'Med. cases'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {getRoleBadge('nurse')}
+                    <span className="text-slate-500">{language === 'sr' ? 'Med. nega' : 'Med. care'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {getRoleBadge('driver')}
+                    <span className="text-slate-500">{language === 'sr' ? 'Transport' : 'Transport'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {getRoleBadge('regular')}
+                    <span className="text-slate-500">{language === 'sr' ? 'Pacijent' : 'Patient'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
                   </TableBody>
                 </Table>
               </div>
