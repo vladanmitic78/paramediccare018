@@ -69,13 +69,28 @@ export const Footer = () => {
                 </a>
               </div>
               <div className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-sky-400 flex-shrink-0" />
-                <a 
-                  href="mailto:transport@paramedic-care018.rs" 
-                  className="text-slate-400 hover:text-white text-sm transition-colors"
-                >
-                  transport@paramedic-care018.rs
-                </a>
+                <Ambulance className="w-5 h-5 text-red-400 flex-shrink-0" />
+                <div className="text-sm">
+                  <p className="text-slate-500 text-xs mb-0.5">Transport</p>
+                  <a 
+                    href="mailto:transport@paramedic-care018.rs" 
+                    className="text-slate-400 hover:text-white transition-colors"
+                  >
+                    transport@paramedic-care018.rs
+                  </a>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Stethoscope className="w-5 h-5 text-sky-400 flex-shrink-0" />
+                <div className="text-sm">
+                  <p className="text-slate-500 text-xs mb-0.5">Medicinska Nega</p>
+                  <a 
+                    href="mailto:ambulanta@paramedic-care018.rs" 
+                    className="text-slate-400 hover:text-white transition-colors"
+                  >
+                    ambulanta@paramedic-care018.rs
+                  </a>
+                </div>
               </div>
               <div className="mt-4 pt-4 border-t border-slate-800">
                 <p className="text-slate-500 text-xs">PIB: 115243796</p>
