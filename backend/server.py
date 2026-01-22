@@ -236,6 +236,13 @@ async def send_email(to_email: str, subject: str, body_html: str):
         logger.error(f"Email failed: {e}")
         return False
 
+# ============ HEALTH CHECK ============
+
+# Health check
+@api_router.get("/health")
+async def health():
+    return {"status": "healthy", "service": "Paramedic Care 018 API"}
+
 # ============ AUTH ROUTES ============
 
 @api_router.post("/auth/register", response_model=TokenResponse)
