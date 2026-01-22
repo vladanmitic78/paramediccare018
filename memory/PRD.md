@@ -27,18 +27,33 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
    - Super Admin
 
 4. **Admin Dashboard**
+   - Two main views: Operations and Administration
    - Statistics overview
    - Booking management
    - User management
    - Contact messages
    - Services management
+   - Company logo in sidebar
 
-5. **Booking System**
+5. **Operations Dashboard (NEW - Jan 22, 2026)**
+   - Transportation Command view with:
+     - Large fleet map (3 columns) with fullscreen toggle
+     - Compact mission timeline (1 column)
+     - Live booking status from API
+     - Fleet statistics
+   - Medical Care view with:
+     - Patient vital signs monitoring (HR, BP, SpO2, Temp)
+     - Critical/Stable patient status indicators
+     - Medical protocols quick access
+     - Doctor consultation feature
+   - Tab switching between Transportation and Medical Care
+
+6. **Booking System**
    - Start/End point with map selection
    - Date picker
    - Patient details
-   - Document upload
-   - Email notifications to transporta@paramedic-care018.rs
+   - Document upload (PENDING)
+   - Email notifications to transport@paramedic-care018.rs (PENDING)
 
 ### Technology Stack
 - Frontend: React with Tailwind CSS, Shadcn UI, react-leaflet
@@ -60,8 +75,14 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
 - [x] Booking form with maps
 - [x] Role-based auth
 - [x] Admin CMS
+- [x] Operations Dashboard with Transportation/Medical Care views
+- [x] Fullscreen map toggle
+- [x] Company logo integration in dashboard
 
-### P1 (Phase 2)
+### P1 (Phase 2 - In Progress)
+- [ ] Document upload on booking page
+- [ ] Email notification on new booking
+- [ ] Integrate live data into Operations Dashboard (replace mocked data)
 - [ ] GPS real-time tracking
 - [ ] Push notifications
 - [ ] Mobile responsive improvements
@@ -73,6 +94,7 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
 - [ ] Insurance integration
 - [ ] Mobile applications
 - [ ] Advanced analytics
+- [ ] Role-specific dashboards for Doctors/Nurses/Drivers
 
 ## Company Details
 - Address: Žarka Zrenjanina 50A, 18103 Niš, Serbia
