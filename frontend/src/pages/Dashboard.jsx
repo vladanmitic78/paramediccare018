@@ -40,10 +40,12 @@ import {
   Clock,
   Truck,
   AlertCircle,
-  LogOut
+  LogOut,
+  Globe
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
+import CMSManager from '../components/CMSManager';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
