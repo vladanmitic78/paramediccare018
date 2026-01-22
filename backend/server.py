@@ -481,11 +481,20 @@ async def create_contact(contact: ContactCreate):
     }
     await db.contacts.insert_one(contact_doc)
     
+    # Determine which email to send to based on inquiry type
+    inquiry_labels = {
+        "general": "Opšti upit / General Inquiry",
+        "transport": "Transport / Transport",
+        "medical": "Medicinska nega / Medical Care"
+    }
+    inquiry_label = inquiry_labels.get(contact.inquiry_type, "Opšti upit / General Inquiry")
+    
     # Send notification email
     email_body = f"""
     <html>
     <body>
         <h2>Nova Kontakt Poruka / New Contact Message</h2>
+        <p><strong>Tip upita / Inquiry Type:</strong> {inquiry_label}</p>
         <p><strong>Ime / Name:</strong> {contact.name}</p>
         <p><strong>Email:</strong> {contact.email}</p>
         <p><strong>Telefon / Phone:</strong> {contact.phone or 'N/A'}</p>
@@ -494,7 +503,12 @@ async def create_contact(contact: ContactCreate):
     </body>
     </html>
     """
-    await send_email(TRANSPORT_EMAIL, f"Kontakt: {contact.name}", email_body)
+    
+    # Route to appropriate email based on inquiry type
+    if contact.inquiry_type == "medical":
+        await send_email(MEDICAL_EMAIL, f"Medicinska nega - {contact.name}", email_body, "medical")
+    else:
+        await send_email(TRANSPORT_EMAIL, f"Kontakt: {contact.name}", email_body, "transport")
     
     return ContactResponse(**{k: v for k, v in contact_doc.items() if k != "_id"})
 
