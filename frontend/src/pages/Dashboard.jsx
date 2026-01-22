@@ -231,29 +231,113 @@ const Dashboard = () => {
       <div className="flex">
         {/* Sidebar */}
         <aside className="w-64 bg-white border-r border-slate-200 min-h-screen p-4 hidden lg:flex lg:flex-col">
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold text-slate-900">{t('dashboard_title')}</h2>
-            <p className="text-sm text-slate-500">{user?.full_name}</p>
-            {getRoleBadge(user?.role)}
+          {/* Logo and User */}
+          <div className="mb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-sky-500 to-sky-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+                <HeartPulse size={24} />
+              </div>
+              <span className="text-xl font-bold tracking-tight">
+                Paramedic<span className="text-sky-600">018</span>
+              </span>
+            </div>
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+              <p className="text-sm font-semibold text-slate-900">{user?.full_name}</p>
+              <div className="flex items-center gap-2 mt-1">
+                {getRoleBadge(user?.role)}
+              </div>
+            </div>
           </div>
 
-          <nav className="space-y-1">
-            {sidebarItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                  activeTab === item.id 
-                    ? 'bg-sky-50 text-sky-700' 
-                    : 'text-slate-600 hover:bg-slate-50'
+          {/* Main View Switcher */}
+          <div className="mb-6">
+            <p className="px-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+              {language === 'sr' ? 'Glavni Prikaz' : 'Main View'}
+            </p>
+            <div className="space-y-1">
+              <button 
+                onClick={() => setMainView('operations')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                  mainView === 'operations' 
+                    ? 'bg-sky-600 text-white shadow-md' 
+                    : 'text-slate-500 hover:bg-slate-50'
                 }`}
-                data-testid={`sidebar-${item.id}`}
+                data-testid="main-view-operations"
               >
-                <item.icon className="w-5 h-5" />
-                {item.label}
+                <Navigation size={20} />
+                {language === 'sr' ? 'Operacije' : 'Operations'}
               </button>
-            ))}
-          </nav>
+              <button 
+                onClick={() => { setMainView('admin'); setActiveTab('overview'); }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                  mainView === 'admin' 
+                    ? 'bg-sky-600 text-white shadow-md' 
+                    : 'text-slate-500 hover:bg-slate-50'
+                }`}
+                data-testid="main-view-admin"
+              >
+                <Settings size={20} />
+                {language === 'sr' ? 'Administracija' : 'Administration'}
+              </button>
+            </div>
+          </div>
+
+          {/* Admin Navigation - only show when in admin view */}
+          {mainView === 'admin' && (
+            <>
+              <p className="px-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                {language === 'sr' ? 'Admin Meni' : 'Admin Menu'}
+              </p>
+              <nav className="space-y-1 flex-1">
+                {sidebarItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                      activeTab === item.id 
+                        ? 'bg-slate-100 text-slate-900' 
+                        : 'text-slate-600 hover:bg-slate-50'
+                    }`}
+                    data-testid={`sidebar-${item.id}`}
+                  >
+                    <item.icon className="w-5 h-5" />
+                    {item.label}
+                  </button>
+                ))}
+              </nav>
+            </>
+          )}
+
+          {/* Operations Quick Stats - only show when in operations view */}
+          {mainView === 'operations' && (
+            <div className="flex-1">
+              <p className="px-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                {language === 'sr' ? 'Brzi Status' : 'Quick Status'}
+              </p>
+              <div className="space-y-2">
+                <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <span className="text-xs font-bold text-emerald-700">
+                      {language === 'sr' ? 'Sistem Aktivan' : 'System Active'}
+                    </span>
+                  </div>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase">
+                    {language === 'sr' ? 'Aktivni Transporti' : 'Active Transports'}
+                  </p>
+                  <p className="text-lg font-black text-slate-900">{bookings.filter(b => b.status === 'in_progress').length}</p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase">
+                    {language === 'sr' ? 'Na Čekanju' : 'Pending'}
+                  </p>
+                  <p className="text-lg font-black text-slate-900">{bookings.filter(b => b.status === 'pending').length}</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Logout Button */}
           <div className="mt-auto pt-6 border-t border-slate-200">
@@ -273,11 +357,26 @@ const Dashboard = () => {
 
         {/* Mobile Tabs */}
         <div className="lg:hidden w-full">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="w-full overflow-x-auto flex justify-start p-2 bg-white border-b">
-              {sidebarItems.map((item) => (
-                <TabsTrigger key={item.id} value={item.id} className="flex-shrink-0">
-                  <item.icon className="w-4 h-4 mr-2" />
+          <div className="bg-white border-b p-2 flex gap-2">
+            <button 
+              onClick={() => setMainView('operations')}
+              className={`flex-1 py-2 rounded-lg text-xs font-bold ${mainView === 'operations' ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-600'}`}
+            >
+              {language === 'sr' ? 'Operacije' : 'Operations'}
+            </button>
+            <button 
+              onClick={() => setMainView('admin')}
+              className={`flex-1 py-2 rounded-lg text-xs font-bold ${mainView === 'admin' ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-600'}`}
+            >
+              {language === 'sr' ? 'Admin' : 'Admin'}
+            </button>
+          </div>
+          {mainView === 'admin' && (
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="w-full overflow-x-auto flex justify-start p-2 bg-white border-b">
+                {sidebarItems.map((item) => (
+                  <TabsTrigger key={item.id} value={item.id} className="flex-shrink-0">
+                    <item.icon className="w-4 h-4 mr-2" />
                   {item.label}
                 </TabsTrigger>
               ))}
