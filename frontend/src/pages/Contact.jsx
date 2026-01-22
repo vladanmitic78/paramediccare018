@@ -195,6 +195,43 @@ const Contact = () => {
                   <h2 className="text-xl font-semibold text-slate-900 mb-6">
                     {language === 'sr' ? 'Pošaljite nam poruku' : 'Send us a message'}
                   </h2>
+
+                  {/* Inquiry Type Selector */}
+                  <div className="space-y-2 mb-6">
+                    <label className="text-sm font-medium text-slate-700">
+                      {language === 'sr' ? 'Tip Upita' : 'Inquiry Type'} *
+                    </label>
+                    <Select value={formData.inquiry_type} onValueChange={handleSelectChange}>
+                      <SelectTrigger className="w-full" data-testid="inquiry-type-select">
+                        <SelectValue placeholder={language === 'sr' ? 'Izaberite tip upita' : 'Select inquiry type'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="general">
+                          <div className="flex items-center gap-2">
+                            <HelpCircle className="w-4 h-4 text-slate-500" />
+                            {language === 'sr' ? 'Opšti upit' : 'General Inquiry'}
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="transport">
+                          <div className="flex items-center gap-2">
+                            <Ambulance className="w-4 h-4 text-red-500" />
+                            {language === 'sr' ? 'Transport' : 'Transport'}
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="medical">
+                          <div className="flex items-center gap-2">
+                            <Stethoscope className="w-4 h-4 text-sky-500" />
+                            {language === 'sr' ? 'Medicinska Nega' : 'Medical Care'}
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-slate-500">
+                      {language === 'sr' 
+                        ? 'Vaš upit će biti prosleđen odgovarajućem timu'
+                        : 'Your inquiry will be forwarded to the appropriate team'}
+                    </p>
+                  </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div className="space-y-2">
