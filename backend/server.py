@@ -33,9 +33,11 @@ JWT_EXPIRATION_HOURS = 24
 # Email Settings
 SMTP_HOST = os.environ.get('SMTP_HOST', 'mailcluster.loopia.se')
 SMTP_PORT = int(os.environ.get('SMTP_PORT', 465))
-SMTP_USER = os.environ.get('SMTP_USER', 'transporta@paramedic-care018.rs')
+SMTP_USER = os.environ.get('SMTP_USER', 'transport@paramedic-care018.rs')
 SMTP_PASS = os.environ.get('SMTP_PASS', 'Ambulanta!SSSS2026')
-TRANSPORT_EMAIL = os.environ.get('TRANSPORT_EMAIL', 'transporta@paramedic-care018.rs')
+TRANSPORT_EMAIL = os.environ.get('TRANSPORT_EMAIL', 'transport@paramedic-care018.rs')
+MEDICAL_EMAIL = os.environ.get('MEDICAL_EMAIL', 'ambulanta@paramedic-care018.rs')
+MEDICAL_PASS = os.environ.get('MEDICAL_PASS', 'Ambulanta!SSS2026')
 
 # Create the main app
 app = FastAPI(title="Paramedic Care 018 API")
