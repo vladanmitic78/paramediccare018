@@ -150,7 +150,6 @@ const Dashboard = () => {
   // Handle viewing a patient booking from notification
   const handleViewPatientBooking = (booking) => {
     setSelectedPatientBooking(booking);
-    setMainView('admin');
     setActiveTab('bookings');
   };
 
