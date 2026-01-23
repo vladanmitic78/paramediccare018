@@ -21,6 +21,26 @@
   @apply bg-white rounded-xl border border-slate-200 shadow-sm p-6;
 }
 
+.dark .card-base {
+  @apply bg-slate-700 border-slate-600;
+}
+
+.dark .text-slate-900 {
+  @apply text-slate-100;
+}
+
+.dark .text-slate-500 {
+  @apply text-slate-400;
+}
+
+.dark .bg-white {
+  background-color: rgb(51 65 85) !important;
+}
+
+.dark .border-slate-200 {
+  border-color: rgb(71 85 105) !important;
+}
+
 .card-interactive {
   @apply bg-white rounded-xl border border-slate-200 shadow-sm p-6 hover:border-sky-200 hover:shadow-md transition-all cursor-pointer;
 }
