@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { 
@@ -12,9 +13,67 @@ import {
   Truck
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import axios from 'axios';
+
+const API = process.env.REACT_APP_BACKEND_URL;
 
 const Transport = () => {
   const { language } = useLanguage();
+  const [pageContent, setPageContent] = useState(null);
+
+  // Fetch transport page content from CMS
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const response = await axios.get(`${API}/api/pages/transport`);
+        const content = {};
+        response.data.forEach(item => {
+          content[item.section] = item;
+        });
+        setPageContent(content);
+      } catch (error) {
+        console.log('Using default transport content');
+      }
+    };
+    fetchContent();
+  }, []);
+
+  // Get content from CMS or use defaults
+  const heroTitle = pageContent?.hero?.[language === 'sr' ? 'title_sr' : 'title_en'] || 
+    (language === 'sr' ? 'Medicinski Transport' : 'Medical Transport');
+  
+  const heroSubtitle = pageContent?.hero?.[language === 'sr' ? 'content_sr' : 'content_en'] || 
+    (language === 'sr'
+      ? 'Pružamo siguran i pouzdan medicinski transport sa profesionalnom pratnjom. Naša flota je opremljena najmodernijom medicinskom opremom.'
+      : 'We provide safe and reliable medical transport with professional escort. Our fleet is equipped with the most modern medical equipment.');
+  
+  const heroImage = pageContent?.hero?.image_url || 'https://images.pexels.com/photos/6520105/pexels-photo-6520105.jpeg';
+
+  const servicesTitle = pageContent?.['services-title']?.[language === 'sr' ? 'title_sr' : 'title_en'] || 
+    (language === 'sr' ? 'Vrste Transporta' : 'Transport Types');
+  
+  const servicesSubtitle = pageContent?.['services-title']?.[language === 'sr' ? 'content_sr' : 'content_en'] || 
+    (language === 'sr' ? 'Odaberite vrstu transporta koja vam najviše odgovara' : 'Choose the type of transport that suits you best');
+
+  const fleetTitle = pageContent?.fleet?.[language === 'sr' ? 'title_sr' : 'title_en'] || 
+    (language === 'sr' ? 'Moderna Flota Vozila' : 'Modern Vehicle Fleet');
+  
+  const fleetContent = pageContent?.fleet?.[language === 'sr' ? 'content_sr' : 'content_en'] || 
+    (language === 'sr'
+      ? 'Naša flota sanitetskih vozila je opremljena najmodernijom medicinskom opremom. Sva vozila su klimatizovana i redovno servisirana kako bi osigurali maksimalnu udobnost i bezbednost pacijenata.'
+      : 'Our ambulance fleet is equipped with the most modern medical equipment. All vehicles are air-conditioned and regularly serviced to ensure maximum comfort and safety for patients.');
+  
+  const fleetImage = pageContent?.fleet?.image_url || 'https://images.pexels.com/photos/6519910/pexels-photo-6519910.jpeg';
+
+  const ctaTitle = pageContent?.cta?.[language === 'sr' ? 'title_sr' : 'title_en'] || 
+    (language === 'sr' ? 'Zakažite Transport Sada' : 'Book Transport Now');
+  
+  const ctaContent = pageContent?.cta?.[language === 'sr' ? 'content_sr' : 'content_en'] || 
+    (language === 'sr'
+      ? 'Jednostavno zakažite medicinski transport putem naše online forme ili nas pozovite direktno.'
+      : 'Easily book medical transport through our online form or call us directly.');
+
+  const emergencyPhone = pageContent?.['emergency-phone']?.[language === 'sr' ? 'content_sr' : 'content_en'] || '+381 18 123 456';
 
   const services = [
     {
@@ -86,15 +145,11 @@ const Transport = () => {
               </div>
               
               <h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight mb-6">
-                {language === 'sr' 
-                  ? 'Medicinski Transport'
-                  : 'Medical Transport'}
+                {heroTitle}
               </h1>
               
               <p className="text-lg text-slate-600 leading-relaxed mb-8">
-                {language === 'sr'
-                  ? 'Pružamo siguran i pouzdan medicinski transport sa profesionalnom pratnjom. Naša flota je opremljena najmodernijom medicinskom opremom.'
-                  : 'We provide safe and reliable medical transport with professional escort. Our fleet is equipped with the most modern medical equipment.'}
+                {heroSubtitle}
               </p>
 
               <div className="flex flex-wrap gap-4">
@@ -104,10 +159,10 @@ const Transport = () => {
                     {language === 'sr' ? 'Zakažite Transport' : 'Book Transport'}
                   </Button>
                 </Link>
-                <a href="tel:+38118123456">
+                <a href={`tel:${emergencyPhone.replace(/\s/g, '')}`}>
                   <Button variant="outline" className="btn-outline gap-2">
                     <Phone className="w-4 h-4" />
-                    +381 18 123 456
+                    {emergencyPhone}
                   </Button>
                 </a>
               </div>
@@ -115,7 +170,7 @@ const Transport = () => {
 
             <div className="relative">
               <img
-                src="https://images.pexels.com/photos/6520105/pexels-photo-6520105.jpeg"
+                src={heroImage}
                 alt="Ambulance"
                 className="rounded-2xl shadow-2xl w-full h-[400px] object-cover"
               />
@@ -159,12 +214,10 @@ const Transport = () => {
         <div className="section-container">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-              {language === 'sr' ? 'Vrste Transporta' : 'Transport Types'}
+              {servicesTitle}
             </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              {language === 'sr'
-                ? 'Odaberite vrstu transporta koja vam najviše odgovara'
-                : 'Choose the type of transport that suits you best'}
+              {servicesSubtitle}
             </p>
           </div>
 
@@ -207,14 +260,10 @@ const Transport = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="order-2 lg:order-1">
               <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">
-                {language === 'sr' 
-                  ? 'Moderna Flota Vozila'
-                  : 'Modern Vehicle Fleet'}
+                {fleetTitle}
               </h2>
               <p className="text-lg text-slate-600 mb-6">
-                {language === 'sr'
-                  ? 'Naša flota sanitetskih vozila je opremljena najmodernijom medicinskom opremom. Sva vozila su klimatizovana i redovno servisirana kako bi osigurali maksimalnu udobnost i bezbednost pacijenata.'
-                  : 'Our ambulance fleet is equipped with the most modern medical equipment. All vehicles are air-conditioned and regularly serviced to ensure maximum comfort and safety for patients.'}
+                {fleetContent}
               </p>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
@@ -239,7 +288,7 @@ const Transport = () => {
             </div>
             <div className="order-1 lg:order-2">
               <img
-                src="https://images.pexels.com/photos/6519910/pexels-photo-6519910.jpeg"
+                src={fleetImage}
                 alt="Paramedic team"
                 className="rounded-2xl shadow-xl w-full h-[400px] object-cover"
               />
@@ -252,12 +301,10 @@ const Transport = () => {
       <section className="py-16 bg-red-600">
         <div className="section-container text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            {language === 'sr' ? 'Zakažite Transport Sada' : 'Book Transport Now'}
+            {ctaTitle}
           </h2>
           <p className="text-lg text-red-100 mb-8 max-w-xl mx-auto">
-            {language === 'sr'
-              ? 'Jednostavno zakažite medicinski transport putem naše online forme ili nas pozovite direktno.'
-              : 'Easily book medical transport through our online form or call us directly.'}
+            {ctaContent}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/booking">
@@ -265,10 +312,10 @@ const Transport = () => {
                 {language === 'sr' ? 'Online Rezervacija' : 'Online Booking'}
               </Button>
             </Link>
-            <a href="tel:+38118123456">
+            <a href={`tel:${emergencyPhone.replace(/\s/g, '')}`}>
               <Button variant="outline" className="border-2 border-white text-white hover:bg-white/10 rounded-full px-8 py-3 font-medium">
                 <Phone className="w-4 h-4 mr-2" />
-                +381 18 123 456
+                {emergencyPhone}
               </Button>
             </a>
           </div>
