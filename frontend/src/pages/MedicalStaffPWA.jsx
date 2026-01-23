@@ -39,9 +39,9 @@ import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-// Large button styles for gloved hands
-const bigButtonClass = "h-16 text-lg font-semibold rounded-xl";
-const inputBigClass = "h-14 text-xl text-center font-bold rounded-xl";
+// Extra large styles for gloved hands in shaking ambulance
+const bigButtonClass = "h-20 text-xl font-bold rounded-2xl shadow-lg";
+const inputBigClass = "h-16 text-2xl text-center font-bold rounded-2xl border-2";
 
 const MedicalStaffPWA = () => {
   const navigate = useNavigate();
