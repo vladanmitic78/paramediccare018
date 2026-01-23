@@ -824,6 +824,14 @@ const MedicalDashboard = () => {
               </div>
             </div>
             
+            {/* Vital Signs Graph */}
+            <VitalSignsGraph 
+              vitals={patientVitals}
+              patientName={selectedPatient.full_name}
+              language={language}
+              darkMode={darkMode}
+            />
+            
             {/* Vital Signs History */}
             <div className={`${cardClass} border rounded-xl p-4`}>
               <h3 className={`font-semibold ${textClass} mb-4 flex items-center gap-2`}>
