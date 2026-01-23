@@ -67,7 +67,7 @@ export const Header = () => {
             data-testid="logo-link"
           >
             <img 
-              src="https://customer-assets.emergentagent.com/job_433955cc-2ea1-4976-bce7-1cf9f8ad9654/artifacts/j7ye45w5_Paramedic%20Care%20018%20Logo.jpg"
+              src={logoUrl}
               alt="Paramedic Care 018"
               className="h-12 w-auto object-contain"
             />
