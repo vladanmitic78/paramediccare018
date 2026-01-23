@@ -2980,6 +2980,196 @@ async def sign_medical_check(
     
     return {"success": True, "message": "Medical check signed"}
 
+# ============ EMERGENCY TRANSPORT VITALS ============
+
+class TransportVitalsEntry(BaseModel):
+    booking_id: str
+    patient_name: str
+    # Core Vitals
+    systolic_bp: Optional[int] = None
+    diastolic_bp: Optional[int] = None
+    heart_rate: Optional[int] = None
+    oxygen_saturation: Optional[int] = None
+    respiratory_rate: Optional[int] = None
+    temperature: Optional[float] = None
+    blood_glucose: Optional[float] = None
+    pain_score: Optional[int] = None
+    gcs_score: Optional[int] = None
+    # Transport specific
+    consciousness_level: Optional[str] = None  # alert, verbal, pain, unresponsive
+    oxygen_delivery: Optional[str] = None  # room_air, nasal_cannula, mask, bvm, intubated
+    iv_access: Optional[bool] = None
+    notes: Optional[str] = None
+
+def check_critical_vitals(vitals: dict) -> dict:
+    """Check for life-threatening vital signs"""
+    alerts = []
+    severity = "normal"  # normal, warning, critical, life_threatening
+    
+    # Blood Pressure - Life threatening
+    if vitals.get("systolic_bp"):
+        if vitals["systolic_bp"] < 70 or vitals["systolic_bp"] > 200:
+            alerts.append({"type": "CRITICAL_BP", "message": f"Critical BP: {vitals['systolic_bp']}/{vitals.get('diastolic_bp', '?')} mmHg", "level": "life_threatening"})
+            severity = "life_threatening"
+        elif vitals["systolic_bp"] < 90 or vitals["systolic_bp"] > 180:
+            alerts.append({"type": "SEVERE_BP", "message": f"Severe BP: {vitals['systolic_bp']}/{vitals.get('diastolic_bp', '?')} mmHg", "level": "critical"})
+            if severity != "life_threatening": severity = "critical"
+        elif vitals["systolic_bp"] > 140:
+            alerts.append({"type": "HIGH_BP", "message": f"High BP: {vitals['systolic_bp']}/{vitals.get('diastolic_bp', '?')} mmHg", "level": "warning"})
+            if severity == "normal": severity = "warning"
+    
+    # Heart Rate - Life threatening
+    if vitals.get("heart_rate"):
+        if vitals["heart_rate"] < 30 or vitals["heart_rate"] > 180:
+            alerts.append({"type": "CRITICAL_HR", "message": f"Critical HR: {vitals['heart_rate']} bpm", "level": "life_threatening"})
+            severity = "life_threatening"
+        elif vitals["heart_rate"] < 40 or vitals["heart_rate"] > 150:
+            alerts.append({"type": "SEVERE_HR", "message": f"Severe HR: {vitals['heart_rate']} bpm", "level": "critical"})
+            if severity != "life_threatening": severity = "critical"
+        elif vitals["heart_rate"] < 50 or vitals["heart_rate"] > 120:
+            alerts.append({"type": "ABNORMAL_HR", "message": f"Abnormal HR: {vitals['heart_rate']} bpm", "level": "warning"})
+            if severity == "normal": severity = "warning"
+    
+    # Oxygen Saturation - Life threatening
+    if vitals.get("oxygen_saturation"):
+        if vitals["oxygen_saturation"] < 85:
+            alerts.append({"type": "CRITICAL_SPO2", "message": f"Critical SpO₂: {vitals['oxygen_saturation']}%", "level": "life_threatening"})
+            severity = "life_threatening"
+        elif vitals["oxygen_saturation"] < 90:
+            alerts.append({"type": "SEVERE_SPO2", "message": f"Severe SpO₂: {vitals['oxygen_saturation']}%", "level": "critical"})
+            if severity != "life_threatening": severity = "critical"
+        elif vitals["oxygen_saturation"] < 94:
+            alerts.append({"type": "LOW_SPO2", "message": f"Low SpO₂: {vitals['oxygen_saturation']}%", "level": "warning"})
+            if severity == "normal": severity = "warning"
+    
+    # Temperature - Life threatening
+    if vitals.get("temperature"):
+        if vitals["temperature"] < 32 or vitals["temperature"] > 41:
+            alerts.append({"type": "CRITICAL_TEMP", "message": f"Critical Temp: {vitals['temperature']}°C", "level": "life_threatening"})
+            severity = "life_threatening"
+        elif vitals["temperature"] < 35 or vitals["temperature"] > 40:
+            alerts.append({"type": "SEVERE_TEMP", "message": f"Severe Temp: {vitals['temperature']}°C", "level": "critical"})
+            if severity != "life_threatening": severity = "critical"
+        elif vitals["temperature"] < 36 or vitals["temperature"] > 38.5:
+            alerts.append({"type": "ABNORMAL_TEMP", "message": f"Abnormal Temp: {vitals['temperature']}°C", "level": "warning"})
+            if severity == "normal": severity = "warning"
+    
+    # Respiratory Rate
+    if vitals.get("respiratory_rate"):
+        if vitals["respiratory_rate"] < 6 or vitals["respiratory_rate"] > 40:
+            alerts.append({"type": "CRITICAL_RR", "message": f"Critical RR: {vitals['respiratory_rate']}/min", "level": "life_threatening"})
+            severity = "life_threatening"
+        elif vitals["respiratory_rate"] < 8 or vitals["respiratory_rate"] > 30:
+            alerts.append({"type": "SEVERE_RR", "message": f"Severe RR: {vitals['respiratory_rate']}/min", "level": "critical"})
+            if severity != "life_threatening": severity = "critical"
+    
+    # GCS - Life threatening
+    if vitals.get("gcs_score"):
+        if vitals["gcs_score"] <= 8:
+            alerts.append({"type": "CRITICAL_GCS", "message": f"Critical GCS: {vitals['gcs_score']} - Severe brain injury", "level": "life_threatening"})
+            severity = "life_threatening"
+        elif vitals["gcs_score"] <= 12:
+            alerts.append({"type": "LOW_GCS", "message": f"Low GCS: {vitals['gcs_score']} - Moderate brain injury", "level": "critical"})
+            if severity != "life_threatening": severity = "critical"
+    
+    # Blood Glucose
+    if vitals.get("blood_glucose"):
+        if vitals["blood_glucose"] < 40 or vitals["blood_glucose"] > 500:
+            alerts.append({"type": "CRITICAL_GLUCOSE", "message": f"Critical Glucose: {vitals['blood_glucose']} mg/dL", "level": "life_threatening"})
+            severity = "life_threatening"
+        elif vitals["blood_glucose"] < 54 or vitals["blood_glucose"] > 400:
+            alerts.append({"type": "SEVERE_GLUCOSE", "message": f"Severe Glucose: {vitals['blood_glucose']} mg/dL", "level": "critical"})
+            if severity != "life_threatening": severity = "critical"
+    
+    return {"alerts": alerts, "severity": severity, "is_critical": severity in ["critical", "life_threatening"]}
+
+@api_router.post("/transport/vitals")
+async def record_transport_vitals(
+    vitals: TransportVitalsEntry,
+    user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.DRIVER, UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Record vitals during emergency transport - alerts admin if life-threatening"""
+    # Check for critical values
+    critical_check = check_critical_vitals(vitals.model_dump())
+    
+    vitals_data = vitals.model_dump()
+    vitals_data["id"] = str(uuid.uuid4())
+    vitals_data["recorded_by"] = user["id"]
+    vitals_data["recorded_by_name"] = user.get("full_name", "Unknown")
+    vitals_data["recorded_at"] = datetime.now(timezone.utc).isoformat()
+    vitals_data["alerts"] = critical_check["alerts"]
+    vitals_data["severity"] = critical_check["severity"]
+    vitals_data["is_critical"] = critical_check["is_critical"]
+    
+    await db.transport_vitals.insert_one(vitals_data)
+    vitals_data.pop("_id", None)
+    
+    # If critical, create an alert for admin dashboard
+    if critical_check["is_critical"]:
+        alert_data = {
+            "id": str(uuid.uuid4()),
+            "type": "transport_critical_vitals",
+            "booking_id": vitals.booking_id,
+            "patient_name": vitals.patient_name,
+            "severity": critical_check["severity"],
+            "alerts": critical_check["alerts"],
+            "vitals_id": vitals_data["id"],
+            "recorded_by": user.get("full_name", "Unknown"),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "is_read": False,
+            "is_acknowledged": False
+        }
+        await db.critical_alerts.insert_one(alert_data)
+    
+    return vitals_data
+
+@api_router.get("/transport/vitals/{booking_id}")
+async def get_transport_vitals(
+    booking_id: str,
+    user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.DRIVER, UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Get all vitals recorded during a transport"""
+    vitals = await db.transport_vitals.find(
+        {"booking_id": booking_id},
+        {"_id": 0}
+    ).sort("recorded_at", -1).to_list(100)
+    return {"booking_id": booking_id, "vitals": vitals}
+
+@api_router.get("/admin/critical-alerts")
+async def get_critical_alerts(
+    unread_only: bool = False,
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.DOCTOR]))
+):
+    """Get critical alerts for admin dashboard"""
+    query = {}
+    if unread_only:
+        query["is_acknowledged"] = False
+    
+    alerts = await db.critical_alerts.find(
+        query, {"_id": 0}
+    ).sort("created_at", -1).limit(50).to_list(50)
+    
+    unread_count = await db.critical_alerts.count_documents({"is_acknowledged": False})
+    
+    return {"alerts": alerts, "unread_count": unread_count}
+
+@api_router.put("/admin/critical-alerts/{alert_id}/acknowledge")
+async def acknowledge_critical_alert(
+    alert_id: str,
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.DOCTOR]))
+):
+    """Acknowledge a critical alert"""
+    await db.critical_alerts.update_one(
+        {"id": alert_id},
+        {"$set": {
+            "is_acknowledged": True,
+            "acknowledged_by": user["id"],
+            "acknowledged_by_name": user.get("full_name", "Unknown"),
+            "acknowledged_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    return {"success": True}
+
 # ============ DOCTOR/NURSE DASHBOARD ROUTES ============
 
 @api_router.get("/medical/dashboard")
