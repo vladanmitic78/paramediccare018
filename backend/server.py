@@ -31,47 +31,46 @@ from reportlab.lib.units import mm
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image as RLImage
 from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
 
-ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
+# Import configuration
+from config import (
+    db, client, ROOT_DIR, UPLOADS_DIR, 
+    JWT_SECRET, JWT_ALGORITHM, JWT_EXPIRATION_HOURS,
+    SMTP_HOST, SMTP_PORT, INFO_EMAIL, INFO_PASS,
+    TRANSPORT_EMAIL, MEDICAL_EMAIL, FRONTEND_URL,
+    VERIFICATION_TOKEN_HOURS, logger
+)
 
-# Create uploads directory
-UPLOADS_DIR = ROOT_DIR / 'uploads'
-UPLOADS_DIR.mkdir(exist_ok=True)
+# Import models from models package
+from models import (
+    UserRole, UserCreate, UserLogin, UserResponse, TokenResponse,
+    RoleUpdate, StatusUpdate,
+    BookingStatus, MobilityStatus, BookingCreate, BookingResponse,
+    BookingStatusUpdate, PatientBookingCreate, PatientBookingResponse,
+    SavedAddress, EmergencyContact, PatientProfileUpdate,
+    InvoiceResponse, NotificationResponse, ContactCreate, ContactResponse,
+    MedicalCondition, Medication, Allergy, MedicalEmergencyContact,
+    PatientMedicalProfileCreate, PatientMedicalProfileUpdate,
+    PatientMedicalProfileResponse, VitalSignsEntry, VitalSignsResponse,
+    MedicalCheckCreate, MedicalCheckResponse,
+    AvailabilityStatus, AvailabilityCreate, AvailabilityUpdate, AvailabilityResponse,
+    DriverStatus, DriverLocationUpdate, DriverStatusUpdate,
+    DriverAssignment, ConnectionManager
+)
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
-
-# JWT Settings
-JWT_SECRET = os.environ.get('JWT_SECRET', 'paramedic-care-018-secret-key-2024')
-JWT_ALGORITHM = "HS256"
-JWT_EXPIRATION_HOURS = 24
-
-# Email Settings - All emails sent from info@paramedic-care018.rs
-SMTP_HOST = os.environ.get('SMTP_HOST', 'mailcluster.loopia.se')
-SMTP_PORT = int(os.environ.get('SMTP_PORT', 465))
-INFO_EMAIL = os.environ.get('INFO_EMAIL', 'info@paramedic-care018.rs')
-INFO_PASS = os.environ.get('INFO_PASS', 'Ambulanta!SSSS2026')
-TRANSPORT_EMAIL = os.environ.get('TRANSPORT_EMAIL', 'transport@paramedic-care018.rs')
-MEDICAL_EMAIL = os.environ.get('MEDICAL_EMAIL', 'ambulanta@paramedic-care018.rs')
-
-# Frontend URL for verification links
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://healthtrack-pwa.preview.emergentagent.com')
-
-# Verification token expiration (24 hours)
-VERIFICATION_TOKEN_HOURS = 24
+# Import auth utilities
+from utils.auth import (
+    hash_password, verify_password, create_token,
+    get_current_user, get_optional_user, require_roles, security
+)
 
 # Create the main app
 app = FastAPI(title="Paramedic Care 018 API")
 api_router = APIRouter(prefix="/api")
-security = HTTPBearer()
 
-# Logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+# WebSocket connection manager instance
+manager = ConnectionManager()
 
-# ============ MODELS ============
+# ============ CMS MODELS ============
 
 class UserRole:
     REGULAR = "regular"
