@@ -1,178 +1,177 @@
 <analysis>**original_problem_statement:**
-The user wants to build a medical system called Paramedic Care 018.
+The user wants to build a medical system called Paramedic Care 018. The initial MVP included a public website, a booking system, a 5-tier RBAC system, and a full CMS.
 
-**Phase 1 requirements (Initial MVP):**
-- A public-facing, multilingual website (Serbian default, English).
-- Core pages: Home, Medical Care, Transport, Booking, About Us, Contact.
-- Booking form with map integration (Open Street Maps/Google Maps) for start/end points, date, contact details, and document upload. Booking info should be sent to an email.
-- A robust role-based user system with 5 roles: Regular User, Doctors/Nurses, Drivers, Admin, and Super Admin, each with specific permissions.
-- A comprehensive Content Management System (CMS) for Admins/Super Admins to manage all website text and images without developer intervention.
-- The header should have a logo and navigation.
-- The footer should contain the logo, navigation, and company details (Address, PIB, MB).
-- The website should be responsive and fast-loading.
+Recently, the user provided a detailed specification for a new **Patient/End-User Portal**.
 
-PRODUCT REQUIREMENTS are detailed in .
+**PRODUCT REQUIREMENTS (Patient Portal - Phase 1):**
+-   **Authentication:** Secure login/logout for patients.
+-   **Dashboard:** Welcome message, a Book Medical Transport button, status of the current active booking, and an emergency contact button.
+-   **Booking Management:** A My Bookings section listing all past and active bookings with details (ID, date, locations, status). Patients can cancel bookings if not yet dispatched.
+-   **New Booking Flow:** A step-by-step wizard for new bookings, collecting patient info, transport needs, and transport details, ending with a confirmation summary.
+-   **Invoices & Billing:** A section to view and download PDF invoices for completed bookings. No online payments in Phase 1.
+-   **Profile & Settings:** Manage personal info, saved addresses, emergency contacts, and preferred language.
+-   **Notifications:** Web and email notifications for booking confirmations and status updates.
+-   **Design:** A clean, calm, mobile-first, multilingual (Serbian/English) UI suitable for users in stressful situations.
+
+The full, original PRD is in .
 
 **User's preferred language**: The user communicates in English. The application's default language is Serbian, with an English translation option. The next agent should communicate in **English**.
 
 **what currently exists?**
 A full-stack application with a React frontend and FastAPI backend using a MongoDB database.
-- **Frontend:** All public-facing pages (Home, Medical Care, etc.) are implemented with multilingual support (Serbian/English). It features a sophisticated dashboard with two distinct views:
-    1.  **Administration View:** For user management (role assignment, deactivation) and a full-fledged CMS to edit page content in both Serbian and English.
-    2.  **Operations View:** A new, modern dashboard inspired by the user-provided MedRoute design for monitoring Transportation and Medical Care activities. This view is currently using static data.
-- **Backend:** A robust API supports JWT-based authentication, a 5-tier role-based access control (RBAC) system, CRUD operations for users, bookings, services, and a multi-lingual content model for the CMS. SMTP is configured for sending emails from the contact form.
-- **Branding:** The client's logo, social media meta tags, and brand-specific email addresses are integrated throughout the application.
+-   **Frontend:** All public pages (Home, Medical Care, Transport, etc.) are implemented and fully wired to a CMS. There is a sophisticated admin dashboard with two views: Operations (a modern UI for monitoring activities, currently with static data) and Administration (for user management and a full-fledged CMS). The image gallery alignment on the home page has been fixed. Placeholder files for the new patient portal have been created.
+-   **Backend:** A robust API supports JWT authentication, a 5-tier RBAC system, and full CRUD for the CMS. A comprehensive email system is integrated with bilingual templates for registration, contact forms, and bookings. The backend now includes the necessary models and API endpoint stubs for the new patient portal.
+-   **CMS:** Admins can edit the Home, Medical Care, Transport, and About pages. Super Admins can additionally edit the Header and Footer. An image upload feature has been added, allowing admins to upload images directly instead of using URLs.
 
 **Last working item**:
-- **Last item agent was working:** The agent was in the process of implementing a new, user-specified Operations Dashboard to replace the previous simple dashboard overview. This new dashboard has two tabs: Transportation and Medical Care. The agent successfully rendered the Transportation tab and was about to display and verify the Medical Care tab.
-- **Status:** IN PROGRESS
-- **Agent Testing Done:** N
-- **Which testing method agent to use?** screenshot tool (to visually verify the Medical Care tab renders correctly), followed by the frontend testing agent to confirm the functionality of the new dashboard component.
-- **User Testing Done:** N
+-   **Last item agent was working:** The agent was laying the groundwork for the new patient portal. This involved creating the necessary backend models (, , etc.) and API endpoints (e.g., ), and then creating the corresponding placeholder React components on the frontend (, , etc.).
+-   **Status:** IN PROGRESS
+-   **Agent Testing Done:** N
+-   **Which testing method agent to use?** Frontend testing agent. Once the patient portal is built, a comprehensive test should be run to verify the entire user flow from login to booking and viewing invoices.
+-   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-- **Issue 1: (P0)** The Made with Emergent badge removal is fragile. It was hidden using an aggressive CSS rule (). This might break if the badge's loading mechanism changes.
-
-  - **Issues Detail:**
-    - **Issue 1: Fragile Badge Removal**
-        - **Attempted fixes:** The agent first tried removing the HTML element from , then added a standard CSS class to hide it, and finally used an attribute selector with  to force it to be hidden.
-        - **Next debug checklist:** The current fix is working but is a hack. A more robust solution would be to identify if the  script that injects the badge can be disabled or configured not to show the badge. For now, we can leave it, but it's a potential point of failure.
-        - **Why fix this issue and what will be achieved with the fix?** To remove third-party branding cleanly and permanently without relying on CSS hacks.
-        - **Status:** RESOLVED (with a hack)
-        - **Is recurring issue?** Y
-        - **Should Test frontend/backend/both after fix?** Frontend
-        - **Blocked on other issue:** None
+-   **Issue 1: (P2) Fragile Made with Emergent Badge Removal**
+    -   **Description:** The badge is hidden with a CSS attribute selector (), which is brittle and could break with platform updates.
+    -   **Status:** RESOLVED (with a hack)
+    -   **Is recurring issue?** Y
 
 **In progress Task List**:
-- **Task 1: (P0) Complete and Verify the New Operations Dashboard**
-    - **Where to resume:** The agent has created the  component and integrated it into the main . The last step was to verify the Medical Care view. The next agent should switch to the Medical Care tab in the new Operations Dashboard and take a screenshot to confirm it renders correctly.
-    - **What will be achieved with this?** This will complete the UI implementation of the new operational dashboard as requested by the user, providing a modern interface for dispatch and medical monitoring.
-    - **Status:** IN PROGRESS
-    - **Should Test frontend/backend/both after fix?** Frontend
-    - **Blocked on something:** None
+-   **Task 1: (P0) Implement the Patient Portal UI**
+    -   **Where to resume:** The skeleton files for the patient portal are created (, , , , ). The next step is to start building out the UI for the , connecting it to the new backend endpoint () to display the welcome message, active booking status, and primary action buttons. After that, proceed to implement the other patient portal pages.
+    -   **What will be achieved with this?** A fully functional patient portal as specified by the user, allowing patients to manage their bookings and view their history.
+    -   **Status:** IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?** Both
+    -   **Blocked on something:** None
 
 **Upcoming and Future Tasks**
-- **Upcoming Tasks:**
-  - **(P0) Integrate Backend Data into Operations Dashboard:** Replace the static mock data in  with live data from the backend API (e.g., active bookings, user statuses).
-  - **(P1) Implement Document Upload on Booking Page:** The PRD requires an option for users to upload documents when making a booking. This functionality needs to be added to  and supported by the backend.
-  - **(P1) Implement Booking Email Notification:** The backend  function in  should be updated to send an email notification to  upon successful booking creation.
-- **Future Tasks:**
-  - **(P2) Implement Role-Specific Dashboards:** Develop dedicated views for Doctors, Nurses, and Drivers to see their assigned tasks and update their status, as outlined in the PRD.
-  - **(P2) Enhance Map Integration:** The  component is basic. It should be fully integrated into the booking form to allow users to select start and end points on a map.
+-   **Upcoming Tasks:**
+    -   **(P0) Patient Dashboard UI:** Implement the main patient dashboard UI.
+    -   **(P0) New Booking Flow Wizard:** Build the multi-step booking form for patients.
+    -   **(P1) My Bookings Page:** Implement the list of past and active bookings.
+    -   **(P1) Invoices & Billing Page:** Implement the invoice list with PDF download functionality.
+    -   **(P1) Profile & Settings Page:** Implement the user profile management page.
+    -   **(P1) Integrate Backend Data into Operations Dashboard:** Replace mock data in  with live API data.
+    -   **(P2) Implement Document Upload on Public Booking Page:** Add the missing file upload feature to the public booking form.
+-   **Future Tasks:**
+    -   **(P2) Implement Role-Specific Dashboards:** Develop dedicated views for Doctors, Nurses, and Drivers.
+    -   **(P2) Enhance Map Integration:** Fully integrate the map picker into the public booking form.
+    -   **(P2) Image Gallery for CMS:** Add a feature to reuse previously uploaded images.
+    -   **(P2) Email Status Tracking:** Add a dashboard to monitor sent/failed emails.
 
 **Completed work in this session**
-- **Recently completed:**
-  - Initial application setup (React/FastAPI/MongoDB) (DONE)
-  - 5-Tier User Role & Authentication System (DONE)
-  - Multilingual Public Pages (Home, About, Contact, etc.) (DONE)
-  - Booking system (form and backend endpoint) (DONE)
-  - Comprehensive Admin CMS for page content management (DONE)
-  - User management dashboard for Admins (role changes, deactivation) (DONE)
-  - Branding: Added logo, corrected emails, and configured social meta tags (DONE)
-  - Contact form with intelligent email routing based on inquiry type (DONE)
-  - Added Demo Access credentials to the Login page for easy testing (DONE)
-  - Implemented the UI structure for the new Operations Dashboard (IN PROGRESS)
+-   **Operations Dashboard UI:** Implemented UI enhancements, including a larger map, narrower timeline, and a fullscreen toggle. Fixed the logo in the sidebar.
+-   **Email System:** Integrated new SMTP credentials and implemented bilingual email templates for registration, contact form auto-replies, and booking confirmations.
+-   **CMS Enhancements:**
+    -   Extended CMS with role-based access for the Home page (Admin) and Header/Footer (Super Admin).
+    -   Added a direct image upload feature to the CMS.
+    -   Made the Home page gallery images editable through the CMS.
+-   **CMS Content Wiring:** Connected the CMS to all public-facing pages (Home, Header, Footer, Medical Care, Transport), making their content fully dynamic.
+-   **Bug Fixes:**
+    -   Fixed gallery image alignment on the Home page.
+    -   Corrected the URL path for uploaded images to work with the ingress ().
+-   **Patient Portal Foundation:** Created backend models, API endpoints, and frontend placeholder pages for the new patient portal.
 
 **Earlier issues found/mentioned but not fixed**
-- **Issue 1: Document Upload Feature Missing**
-   - **Debug checklist:**
-     1. Add a file input component to the booking form in .
-     2. Create a backend endpoint to handle file uploads, storing the file and linking it to the booking record.
-     3. Update the  API call on the frontend to send the file data.
-   - **Why to solve this issue and what will be achieved with this?** It's a mandatory requirement from the initial problem statement.
-   - **Should Test frontend/backend/both after fix:** Both.
-   - **Is recurring issue?** N
-- **Issue 2: Booking Email Notification Missing**
-   - **Debug checklist:**
-     1. In , within the  function, call the  utility after successfully saving the booking to the database.
-     2. Format the email content to include all relevant booking details.
-   - **Why to solve this issue and what will be achieved with this?** To ensure the operations team is immediately notified of new transport requests, as per the PRD.
-   - **Should Test frontend/backend/both after fix:** Backend (verify email is sent).
-   - **Is recurring issue?** N
+-   **Issue 1: Document Upload Feature Missing (Public Booking)**
+    -   **Debug checklist:** Add a file input to , create a backend endpoint for file uploads, and update the frontend API call.
+    -   **Why to solve this issue and what will be achieved with this?** It's a mandatory requirement from the initial PRD.
+    -   **Should Test frontend/backend/both after fix:** Both.
+    -   **Is recurring issue?** N
 
 **Known issue recurrence from previous fork**
-- None.
+-   None.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Frontend:** React, Tailwind CSS, Shadcn UI components, React Router, Axios,  for icons.
-- **Backend:** FastAPI, MongoDB (using ), Pydantic, JWT for authentication,  for forms,  for email.
-- **Architecture:** Full-stack monolithic repository, Role-Based Access Control (RBAC), multilingual content handling via a context provider.
+-   **Frontend:** React, Tailwind CSS, Shadcn UI, React Router, Axios, .
+-   **Backend:** FastAPI, MongoDB (using ), Pydantic, JWT, , .
+-   **Architecture:** Full-stack monolithic repo, Role-Based Access Control (RBAC), multilingual content handling.
 
 **key DB schema**
-- **users:** Stores user information, including , , ,  (superadmin, admin, doctor, nurse, driver, user), and .
-- **bookings:** Stores booking requests with fields like , , , ,  (pending, confirmed, etc.).
-- **content:** A flexible collection for the CMS, storing page content with fields like  (e.g., 'about-us'), , , , , .
-- **services:** Seeded data for medical/transport services.
-- **contacts:** Stores messages submitted through the contact form.
+-   **users:** , , , , , , , , .
+-   **bookings:** , , , , , , , , , .
+-   **content:** , , , , , , .
+-   **invoices:** uid=0(root) gid=0(root) groups=0(root), , , , , ,  (pending, paid).
+-   **notifications:** uid=0(root) gid=0(root) groups=0(root), , , , .
 
 **changes in tech stack**
-- None.
+-   None.
 
 **All files of reference**
-- : The entire backend logic, including all API endpoints, models, and DB interactions.
-- : The main dashboard component that now acts as a container for the Administration and Operations views.
-- : The new, user-specified dashboard UI for operational monitoring.
-- : The component handling the content management interface for admins.
-- : Modified to add meta tags and a CSS snippet to hide the Emergent badge.
-- : Manages user authentication state globally.
-- : Manages the language state (SR/EN).
-- : The detailed project requirements document.
+-   **/app/backend/server.py**: Heavily modified to add the email system, extended CMS seeding, image upload endpoint, and patient portal APIs.
+-   **/app/frontend/src/components/CMSManager.jsx**: Updated with role-based logic and the new image upload feature.
+-   **/app/frontend/src/pages/Home.jsx**: Updated to fetch all content from the CMS and fix gallery alignment.
+-   **/app/frontend/src/pages/MedicalCare.jsx**: Rewritten to fetch content from the CMS.
+-   **/app/frontend/src/pages/Transport.jsx**: Rewritten to fetch content from the CMS.
+-   **/app/frontend/src/components/Header.jsx**: Updated to fetch content from the CMS.
+-   **/app/frontend/src/components/Footer.jsx**: Updated to fetch content from the CMS.
+-   **/app/frontend/src/pages/PatientDashboard.jsx**: New file for the patient portal.
+-   **/app/frontend/src/pages/PatientBookingWizard.jsx**: New file for the patient portal.
+-   **/app/frontend/src/App.js**: Updated to include the new patient portal routes.
+-   **/app/memory/PRD.md**: Contains the full product requirements.
 
 **Areas that need refactoring**:
-- The  file is becoming overly complex. It contains logic for both the Admin and Operations views, multiple API calls, and extensive state management. It should be broken down into smaller, more focused components. The main view logic () could be abstracted.
+-   The  file is now over 1400 lines long and contains models, API routes for auth, users, CMS, bookings, contacts, and the new patient portal. It should be broken down into a more modular structure (e.g., using FastAPI's  in separate files for each domain).
+-    still manages logic for both the Operations and Administration views and could be simplified.
 
 **key api endpoints**
-- , : User registration and login.
-- , : Manage users (get, update role, delete).
-- : Create and retrieve bookings.
-- , : Manage and initialize CMS content.
-- : Submit contact form inquiries.
+-   : (POST) Uploads an image to the server.
+-   : (GET) Gets all CMS content.
+-   : (POST) Seeds the database with default CMS content.
+-   **/api/patient/dashboard**: (GET) Retrieves data for the patient dashboard.
+-   **/api/patient/bookings**: (GET/POST) Manages patient-specific bookings.
+-   **/api/patient/bookings/{booking_id}/cancel**: (POST) Cancels a booking.
+-   **/api/patient/invoices**: (GET) Retrieves a patient's invoices.
+-   **/api/patient/profile**: (GET/PUT) Manages a patient's profile.
 
 **Critical Info for New Agent**
-- The user has approved a significant UI change for the dashboard, providing the exact code for a new Operations Dashboard. The current task is to finish implementing this view.
-- The dashboard is now split into two main sections, switched via a new top-level menu in the sidebar:
-    1.  **Operations:** The new MedRoute-style dashboard ().
-    2.  **Administration:** The original dashboard with User Management and the CMS ().
-- The new Operations Dashboard currently uses **static data**. A key upcoming task is to connect it to the backend.
+-   The immediate priority is to build the **Patient Portal** based on the new, detailed requirements provided by the user. The backend models and API stubs, as well as frontend placeholder files, are already in place.
+-   Start by implementing the UI for  and connecting it to the backend. Then, move on to the other patient portal features.
+-   The application's content for all public pages is now fully managed via the CMS. Any changes to public-facing text or images should be done through CMS seeding in  or via the admin UI.
+-   The email system is fully configured and functional. Use the  utility for any new email notifications.
 
 **documents and test reports created in this job**
-- 
-- 
+-   
+-   
+-   
+-   
+-   
+-   
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Requests demo access credentials on the login page and removal of the Made with Emergent sticker.
-2.  **Agent:** Implements demo access boxes on the login page and hides the Emergent badge using CSS.
-3.  **User:** Shares a screenshot of a much-improved MedRoute dashboard and asks for the agent's opinion.
-4.  **Agent:** Analyzes the new design, agrees it's better for operations, and recommends creating two separate dashboard views (Operations and Admin). Asks for confirmation to proceed.
-5.  **User:** Agrees with the two-view approach, provides the full React code for the new dashboard, and asks the agent to implement it for Transportation and Medical Care categories.
-6.  **Agent:** Acknowledges the request and begins implementation.
-7.  **Agent:** Creates  with the user's code.
-8.  **Agent:** Updates  to include a top-level switcher between Operations and Administration and renders the new component.
-9.  **Agent:** Takes a screenshot of the new Operations Dashboard (Transportation view).
-10. **Agent (Last action):** States that the new dashboard is working and that it will now show the Medical Care view.
+1.  **User:** Asks for image upload capability in the CMS.
+2.  **Agent:** Implements image upload endpoint and frontend UI in the CMS.
+3.  **User:** Asks to wire the CMS content to the public pages (Home, Header, Footer).
+4.  **Agent:** Connects Home, Header, and Footer components to the CMS API. Fixes image URL pathing issue found by testing agent.
+5.  **User:** Reports that gallery images on the Home page are not editable from the Admin panel.
+6.  **Agent:** Implements a new gallery section in the CMS for the Home page, seeds the data, and makes the gallery images editable.
+7.  **User:** Reports seeing harmless PostHog errors in the browser console.
+8.  **Agent:** Explains that the errors are from a third-party analytics tool and do not affect the application, confirming the app is healthy.
+9.  **User:** Asks to wire the CMS to the Medical Care & Transport pages and to fix the image alignment in the Home page gallery.
+10. **User:** Provides a comprehensive and detailed prompt to build a new **Patient/End-User Portal** with a dashboard, booking management, invoices, and profile settings. (This is the current high-priority task).
 
 **Project Health Check:**
-- **Broken:** None.
-- **Mocked:**
-    - The new **Operations Dashboard** () is entirely populated with static, hardcoded data.
-    - The map functionality on the booking page () is a placeholder and not fully integrated.
+-   **Broken:** None.
+-   **Mocked:**
+    -   The **Operations Dashboard** () is entirely populated with static, hardcoded data.
+    -   The **Patient Portal pages** () are all placeholder components with no real UI or logic yet.
+    -   The map functionality on the public booking page () is a placeholder.
 
 **3rd Party Integrations**
-- **Leaflet:** Used for the map placeholder in . No API key required.
+-   **Leaflet:** Used for the map placeholder. No API key required.
 
 **Testing status**
-- **Testing agent used after significant changes:** YES (once, early in the session for the booking API).
-- **Troubleshoot agent used after agent stuck in loop:** NO
-- **Test files created:** None.
-- **Known regressions:** None.
+-   **Testing agent used after significant changes:** YES. The agent was used successfully multiple times to validate the Operations Dashboard UI, the email system, the role-based CMS, the image upload feature, and the CMS content wiring.
+-   **Troubleshoot agent used after agent stuck in loop:** NO
+-   **Test files created:** None.
+-   **Known regressions:** None.
 
 **Credentials to test flow:**
-- **Super Admin:**  / 
-- **Admin:**  / 
+-   **Super Admin:**  / 
+-   **Admin:**  / 
 
 **What agent forgot to execute**
-- The requirement to add a **document upload** feature to the booking page was missed.
-- The requirement to send an **email notification** upon new booking creation was not implemented.</analysis>
+-   The original requirement to add a **document upload** feature to the *public* booking page is still pending. The user's focus has shifted to the new patient portal, making that the higher priority.</analysis>
