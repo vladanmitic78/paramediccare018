@@ -361,143 +361,123 @@ const Dashboard = () => {
     );
   }
 
-  const sidebarItems = [
-    { id: 'overview', icon: LayoutDashboard, label: language === 'sr' ? 'Pregled' : 'Overview' },
-    { id: 'bookings', icon: Calendar, label: t('dashboard_bookings') },
-    ...(isAdmin() ? [
-      { id: 'livemap', icon: Map, label: language === 'sr' ? 'Praćenje Vozila' : 'Live Map' },
-      { id: 'invoices', icon: FileText, label: language === 'sr' ? 'Fakture' : 'Invoices' },
-      { id: 'cms', icon: Globe, label: language === 'sr' ? 'Upravljanje Stranicama' : 'Page Management' },
-      { id: 'users', icon: Users, label: t('dashboard_users') },
-      { id: 'contacts', icon: MessageSquare, label: t('dashboard_contacts') },
-    ] : []),
+  // Navigation structure with groups
+  const navigationGroups = [
+    {
+      label: language === 'sr' ? 'OPERACIJE' : 'OPERATIONS',
+      items: [
+        { id: 'overview', icon: LayoutDashboard, label: language === 'sr' ? 'Kontrolna tabla' : 'Dashboard' },
+        { id: 'bookings', icon: Calendar, label: t('dashboard_bookings') },
+      ]
+    },
+    ...(isAdmin() ? [{
+      label: language === 'sr' ? 'MEDICINSKI CENTAR' : 'MEDICAL CENTER',
+      items: [
+        { id: 'patients', icon: Users, label: language === 'sr' ? 'Pacijenti' : 'Patients', badge: language === 'sr' ? 'Uskoro' : 'Soon' },
+        { id: 'statistics', icon: Activity, label: language === 'sr' ? 'Statistika' : 'Statistics', badge: language === 'sr' ? 'Uskoro' : 'Soon' },
+      ]
+    }] : []),
+    ...(isAdmin() ? [{
+      label: language === 'sr' ? 'TIM' : 'TEAM',
+      items: [
+        { id: 'drivers', icon: Truck, label: language === 'sr' ? 'Vozači' : 'Drivers' },
+        { id: 'availability', icon: Calendar, label: language === 'sr' ? 'Dostupnost' : 'Availability', badge: language === 'sr' ? 'Uskoro' : 'Soon' },
+      ]
+    }] : []),
+    ...(isAdmin() ? [{
+      label: language === 'sr' ? 'FLOTA' : 'FLEET',
+      items: [
+        { id: 'livemap', icon: Map, label: language === 'sr' ? 'Praćenje Vozila' : 'Live Tracking' },
+      ]
+    }] : []),
+    ...(isAdmin() ? [{
+      label: language === 'sr' ? 'FINANSIJE' : 'FINANCE',
+      items: [
+        { id: 'invoices', icon: FileText, label: language === 'sr' ? 'Fakture' : 'Invoices' },
+      ]
+    }] : []),
+    ...(isAdmin() ? [{
+      label: language === 'sr' ? 'PODEŠAVANJA' : 'SETTINGS',
+      items: [
+        { id: 'users', icon: Users, label: t('dashboard_users') },
+        { id: 'cms', icon: Globe, label: language === 'sr' ? 'Web stranica' : 'Website' },
+        { id: 'contacts', icon: MessageSquare, label: language === 'sr' ? 'Poruke' : 'Messages' },
+      ]
+    }] : []),
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50" data-testid="dashboard-page">
+    <div className="min-h-screen bg-slate-100" data-testid="dashboard-page">
       {/* Admin Booking Notifications */}
       {isAdmin() && (
         <AdminBookingNotifications onViewBooking={handleViewPatientBooking} />
       )}
       
       <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-64 bg-white border-r border-slate-200 min-h-screen p-4 hidden lg:flex lg:flex-col">
-          {/* Logo and User */}
-          <div className="mb-6">
-            <div className="flex items-center gap-3 mb-4">
-              <img 
-                src="https://customer-assets.emergentagent.com/job_433955cc-2ea1-4976-bce7-1cf9f8ad9654/artifacts/j7ye45w5_Paramedic%20Care%20018%20Logo.jpg"
-                alt="Paramedic Care 018"
-                className="h-12 w-auto object-contain"
-              />
+        {/* Sidebar - New Professional Design */}
+        <aside className="w-72 bg-slate-900 min-h-screen hidden lg:flex lg:flex-col" style={{ fontFamily: 'Inter, sans-serif' }}>
+          {/* Logo Header */}
+          <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-800">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center flex-shrink-0">
+              <HeartPulse className="w-6 h-6 text-white" />
             </div>
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-              <p className="text-sm font-semibold text-slate-900">{user?.full_name}</p>
-              <div className="flex items-center gap-2 mt-1">
-                {getRoleBadge(user?.role)}
-              </div>
+            <div>
+              <h1 className="font-bold text-white text-lg leading-tight" style={{ fontFamily: 'Manrope, sans-serif' }}>
+                Paramedic Care
+              </h1>
+              <p className="text-xs text-slate-500">018</p>
             </div>
           </div>
 
-          {/* Main View Switcher */}
-          <div className="mb-6">
-            <p className="px-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-              {language === 'sr' ? 'Glavni Prikaz' : 'Main View'}
-            </p>
-            <div className="space-y-1">
-              <button 
-                onClick={() => setMainView('operations')}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-                  mainView === 'operations' 
-                    ? 'bg-sky-600 text-white shadow-md' 
-                    : 'text-slate-500 hover:bg-slate-50'
-                }`}
-                data-testid="main-view-operations"
-              >
-                <Navigation size={20} />
-                {language === 'sr' ? 'Operacije' : 'Operations'}
-              </button>
-              <button 
-                onClick={() => { setMainView('admin'); setActiveTab('overview'); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-                  mainView === 'admin' 
-                    ? 'bg-sky-600 text-white shadow-md' 
-                    : 'text-slate-500 hover:bg-slate-50'
-                }`}
-                data-testid="main-view-admin"
-              >
-                <Settings size={20} />
-                {language === 'sr' ? 'Administracija' : 'Administration'}
-              </button>
-            </div>
-          </div>
-
-          {/* Admin Navigation - only show when in admin view */}
-          {mainView === 'admin' && (
-            <>
-              <p className="px-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-                {language === 'sr' ? 'Admin Meni' : 'Admin Menu'}
-              </p>
-              <nav className="space-y-1 flex-1">
-                {sidebarItems.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveTab(item.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                      activeTab === item.id 
-                        ? 'bg-slate-100 text-slate-900' 
-                        : 'text-slate-600 hover:bg-slate-50'
-                    }`}
-                    data-testid={`sidebar-${item.id}`}
-                  >
-                    <item.icon className="w-5 h-5" />
-                    {item.label}
-                  </button>
-                ))}
-              </nav>
-            </>
-          )}
-
-          {/* Operations Quick Stats - only show when in operations view */}
-          {mainView === 'operations' && (
-            <div className="flex-1">
-              <p className="px-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-                {language === 'sr' ? 'Brzi Status' : 'Quick Status'}
-              </p>
-              <div className="space-y-2">
-                <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-100">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <span className="text-xs font-bold text-emerald-700">
-                      {language === 'sr' ? 'Sistem Aktivan' : 'System Active'}
-                    </span>
-                  </div>
-                </div>
-                <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase">
-                    {language === 'sr' ? 'Aktivni Transporti' : 'Active Transports'}
-                  </p>
-                  <p className="text-lg font-black text-slate-900">{bookings.filter(b => b.status === 'in_progress').length}</p>
-                </div>
-                <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase">
-                    {language === 'sr' ? 'Na Čekanju' : 'Pending'}
-                  </p>
-                  <p className="text-lg font-black text-slate-900">{bookings.filter(b => b.status === 'pending').length}</p>
+          {/* Navigation */}
+          <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+            {navigationGroups.map((group, groupIndex) => (
+              <div key={groupIndex}>
+                <h2 className="px-3 mb-2 text-[11px] font-bold uppercase tracking-widest text-slate-500" style={{ fontFamily: 'Manrope, sans-serif' }}>
+                  {group.label}
+                </h2>
+                <div className="space-y-1">
+                  {group.items.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => setActiveTab(item.id)}
+                      data-testid={`sidebar-${item.id}`}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
+                        activeTab === item.id 
+                          ? 'bg-white/10 text-white font-semibold' 
+                          : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                      }`}
+                    >
+                      <item.icon className="w-5 h-5 flex-shrink-0" />
+                      <span className="flex-1 text-left">{item.label}</span>
+                      {item.badge && (
+                        <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-sky-500/20 text-sky-400">
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+                  ))}
                 </div>
               </div>
-            </div>
-          )}
+            ))}
+          </nav>
 
-          {/* Logout Button */}
-          <div className="mt-auto pt-6 border-t border-slate-200">
+          {/* User Info & Logout */}
+          <div className="border-t border-slate-800 p-4">
+            <div className="flex items-center gap-3 mb-3 px-2">
+              <div className="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center">
+                <span className="text-sm font-semibold text-white">
+                  {user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-white truncate">{user?.full_name}</p>
+                <p className="text-xs text-slate-500 capitalize">{user?.role}</p>
+              </div>
+            </div>
             <button
-              onClick={() => {
-                logout();
-                navigate('/');
-              }}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+              onClick={() => { logout(); navigate('/'); }}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
               data-testid="logout-btn"
             >
               <LogOut className="w-5 h-5" />
