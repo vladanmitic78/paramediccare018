@@ -944,6 +944,8 @@ const Dashboard = () => {
               </div>
             </div>
           )}
+        </div>
+      )}
 
           {/* Users (Admin only) */}
           {activeTab === 'users' && isAdmin() && (
