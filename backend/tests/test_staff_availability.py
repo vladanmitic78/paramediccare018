@@ -290,6 +290,125 @@ class TestStaffAvailabilityAPI:
         )
         assert response.status_code == 403, f"Expected 403, got {response.status_code}"
     
+    # ============ Admin Create Availability for Staff Tests ============
+    
+    def test_admin_create_availability_requires_auth(self):
+        """POST /api/admin/staff-availability/create requires authentication"""
+        response = requests.post(f"{BASE_URL}/api/admin/staff-availability/create", json={
+            "user_id": "some-user-id",
+            "date": "2026-02-01",
+            "start_time": "08:00",
+            "end_time": "16:00",
+            "status": "available"
+        })
+        assert response.status_code == 403, f"Expected 403, got {response.status_code}"
+    
+    def test_admin_create_availability_requires_admin_role(self, driver_token):
+        """POST /api/admin/staff-availability/create requires admin role"""
+        response = requests.post(
+            f"{BASE_URL}/api/admin/staff-availability/create",
+            headers={"Authorization": f"Bearer {driver_token}"},
+            json={
+                "user_id": "some-user-id",
+                "date": "2026-02-01",
+                "start_time": "08:00",
+                "end_time": "16:00",
+                "status": "available"
+            }
+        )
+        assert response.status_code == 403, f"Expected 403, got {response.status_code}"
+    
+    def test_admin_create_availability_user_not_found(self, admin_token):
+        """POST /api/admin/staff-availability/create returns 404 for non-existent user"""
+        response = requests.post(
+            f"{BASE_URL}/api/admin/staff-availability/create",
+            headers={"Authorization": f"Bearer {admin_token}"},
+            json={
+                "user_id": "non-existent-user-id",
+                "date": "2026-02-01",
+                "start_time": "08:00",
+                "end_time": "16:00",
+                "status": "available"
+            }
+        )
+        assert response.status_code == 404, f"Expected 404, got {response.status_code}"
+    
+    def test_admin_create_availability_for_staff_success(self, admin_token):
+        """POST /api/admin/staff-availability/create - admin can create availability for staff"""
+        # First get a staff member ID
+        staff_response = requests.get(
+            f"{BASE_URL}/api/admin/staff-list",
+            headers={"Authorization": f"Bearer {admin_token}"}
+        )
+        assert staff_response.status_code == 200
+        staff_list = staff_response.json()
+        
+        if len(staff_list) == 0:
+            pytest.skip("No staff members available for testing")
+        
+        # Find a driver to create availability for
+        target_staff = None
+        for staff in staff_list:
+            if staff.get("role") == "driver":
+                target_staff = staff
+                break
+        
+        if not target_staff:
+            target_staff = staff_list[0]
+        
+        test_date = (datetime.now() + timedelta(days=120)).strftime("%Y-%m-%d")
+        
+        response = requests.post(
+            f"{BASE_URL}/api/admin/staff-availability/create",
+            headers={"Authorization": f"Bearer {admin_token}"},
+            json={
+                "user_id": target_staff["id"],
+                "date": test_date,
+                "start_time": "09:00",
+                "end_time": "17:00",
+                "status": "available",
+                "notes": "TEST_admin_created_slot"
+            }
+        )
+        assert response.status_code == 200, f"Expected 200, got {response.status_code} - {response.text}"
+        data = response.json()
+        assert data.get("success") == True, "Response should indicate success"
+        assert data.get("slots_created") == 1, "Should create 1 slot"
+        assert data.get("for_user") == target_staff.get("full_name"), "Should return target user name"
+    
+    def test_admin_create_availability_with_repeat_weekly(self, admin_token):
+        """POST /api/admin/staff-availability/create - repeat_weekly creates 5 slots"""
+        # Get a staff member ID
+        staff_response = requests.get(
+            f"{BASE_URL}/api/admin/staff-list",
+            headers={"Authorization": f"Bearer {admin_token}"}
+        )
+        staff_list = staff_response.json()
+        
+        if len(staff_list) == 0:
+            pytest.skip("No staff members available for testing")
+        
+        target_staff = staff_list[0]
+        test_date = (datetime.now() + timedelta(days=150)).strftime("%Y-%m-%d")
+        
+        response = requests.post(
+            f"{BASE_URL}/api/admin/staff-availability/create",
+            headers={"Authorization": f"Bearer {admin_token}"},
+            json={
+                "user_id": target_staff["id"],
+                "date": test_date,
+                "start_time": "08:00",
+                "end_time": "16:00",
+                "status": "available",
+                "notes": "TEST_admin_repeat_weekly",
+                "repeat_weekly": True
+            }
+        )
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}"
+        data = response.json()
+        assert data.get("success") == True
+        assert data.get("slots_created") == 5, "Should create 5 slots (1 + 4 weeks)"
+    
     # ============ Data Structure Validation Tests ============
     
     def test_availability_slot_structure(self, admin_token):
