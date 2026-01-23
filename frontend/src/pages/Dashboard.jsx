@@ -169,13 +169,22 @@ const Dashboard = () => {
     }
   };
 
-  // Assign driver to booking
-  const assignDriverToBooking = async (bookingId, driverId) => {
+  // Assign driver to booking (patient portal or public)
+  const assignDriverToBooking = async (bookingId, driverId, isPublicBooking = false) => {
     setAssigningDriver(bookingId);
     try {
-      await axios.post(`${API}/admin/assign-driver?booking_id=${bookingId}&driver_id=${driverId}`);
+      const endpoint = isPublicBooking 
+        ? `${API}/admin/assign-driver-public?booking_id=${bookingId}&driver_id=${driverId}`
+        : `${API}/admin/assign-driver?booking_id=${bookingId}&driver_id=${driverId}`;
+      
+      await axios.post(endpoint);
       toast.success(language === 'sr' ? 'Vozač dodeljen!' : 'Driver assigned!');
-      fetchPatientBookings();
+      
+      if (isPublicBooking) {
+        fetchData(); // Refresh public bookings
+      } else {
+        fetchPatientBookings();
+      }
       fetchAvailableDrivers();
     } catch (error) {
       toast.error(error.response?.data?.detail || (language === 'sr' ? 'Greška pri dodeli' : 'Assignment error'));
