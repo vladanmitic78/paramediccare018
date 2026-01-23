@@ -85,7 +85,7 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 
 const Dashboard = () => {
   const { user, logout, isAdmin } = useAuth();
-  const { language, t } = useLanguage();
+  const { language, t, toggleLanguage } = useLanguage();
   const navigate = useNavigate();
   
   const [activeTab, setActiveTab] = useState('overview');
