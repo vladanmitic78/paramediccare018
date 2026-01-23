@@ -255,6 +255,7 @@ const Dashboard = () => {
     { id: 'overview', icon: LayoutDashboard, label: language === 'sr' ? 'Pregled' : 'Overview' },
     { id: 'bookings', icon: Calendar, label: t('dashboard_bookings') },
     ...(isAdmin() ? [
+      { id: 'livemap', icon: Map, label: language === 'sr' ? 'Praćenje Vozila' : 'Live Map' },
       { id: 'invoices', icon: FileText, label: language === 'sr' ? 'Fakture' : 'Invoices' },
       { id: 'cms', icon: Globe, label: language === 'sr' ? 'Upravljanje Stranicama' : 'Page Management' },
       { id: 'users', icon: Users, label: t('dashboard_users') },
