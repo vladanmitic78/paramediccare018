@@ -1811,6 +1811,201 @@ async def create_invoice(
     
     return {k: v for k, v in invoice.items() if k != "_id"}
 
+# Admin endpoint to get all invoices
+@api_router.get("/admin/invoices")
+async def get_all_invoices(
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN])),
+    status: Optional[str] = None,
+    limit: int = 100
+):
+    """Get all invoices for admin"""
+    query = {}
+    if status:
+        query["payment_status"] = status
+    
+    invoices = await db.invoices.find(query, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
+    return invoices
+
+# Admin endpoint to update invoice status
+@api_router.put("/admin/invoices/{invoice_id}/status")
+async def update_invoice_status(
+    invoice_id: str,
+    payment_status: str,
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Update invoice payment status"""
+    if payment_status not in ["pending", "paid", "cancelled", "overdue"]:
+        raise HTTPException(status_code=400, detail="Invalid status")
+    
+    result = await db.invoices.update_one(
+        {"id": invoice_id},
+        {"$set": {
+            "payment_status": payment_status,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "paid_at": datetime.now(timezone.utc).isoformat() if payment_status == "paid" else None
+        }}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    
+    return {"success": True, "status": payment_status}
+
+# PDF Generation function
+def generate_invoice_pdf(invoice: dict) -> io.BytesIO:
+    """Generate PDF for an invoice"""
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=20*mm, bottomMargin=20*mm, leftMargin=20*mm, rightMargin=20*mm)
+    
+    styles = getSampleStyleSheet()
+    
+    # Custom styles
+    title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=24, textColor=colors.HexColor('#0f172a'), alignment=TA_CENTER)
+    header_style = ParagraphStyle('Header', parent=styles['Normal'], fontSize=10, textColor=colors.HexColor('#64748b'))
+    normal_style = ParagraphStyle('Normal', parent=styles['Normal'], fontSize=10, textColor=colors.HexColor('#334155'))
+    bold_style = ParagraphStyle('Bold', parent=styles['Normal'], fontSize=10, textColor=colors.HexColor('#0f172a'), fontName='Helvetica-Bold')
+    
+    elements = []
+    
+    # Header with company info
+    company_info = """
+    <b>PARAMEDIC CARE 018</b><br/>
+    Žarka Zrenjanina 50A, 18103 Niš, Serbia<br/>
+    PIB: 115243796 | MB: 68211557<br/>
+    Tel: +381 18 123 456 | Email: info@paramedic-care018.rs
+    """
+    elements.append(Paragraph(company_info, header_style))
+    elements.append(Spacer(1, 10*mm))
+    
+    # Invoice title
+    elements.append(Paragraph(f"FAKTURA / INVOICE", title_style))
+    elements.append(Spacer(1, 5*mm))
+    
+    # Invoice number and dates
+    invoice_date = invoice.get('created_at', '')[:10] if invoice.get('created_at') else ''
+    due_date = invoice.get('due_date', '')[:10] if invoice.get('due_date') else ''
+    
+    invoice_info = f"""
+    <b>Broj fakture / Invoice No:</b> {invoice.get('invoice_number', 'N/A')}<br/>
+    <b>Datum izdavanja / Issue Date:</b> {invoice_date}<br/>
+    <b>Datum dospeća / Due Date:</b> {due_date}<br/>
+    <b>Status:</b> {invoice.get('payment_status', 'pending').upper()}
+    """
+    elements.append(Paragraph(invoice_info, normal_style))
+    elements.append(Spacer(1, 10*mm))
+    
+    # Customer info
+    customer_info = f"""
+    <b>Kupac / Customer:</b><br/>
+    {invoice.get('patient_name', 'N/A')}<br/>
+    {invoice.get('patient_email', 'N/A')}
+    """
+    elements.append(Paragraph(customer_info, normal_style))
+    elements.append(Spacer(1, 10*mm))
+    
+    # Service details table
+    service_data = [
+        ['Opis usluge / Service Description', 'Datum / Date', 'Iznos / Amount'],
+        [
+            invoice.get('service_description', 'Medical Transport'),
+            invoice.get('service_date', 'N/A'),
+            f"{invoice.get('amount', 0):.2f} RSD"
+        ]
+    ]
+    
+    # Route info
+    route_info = f"Od / From: {invoice.get('pickup_address', 'N/A')}\nDo / To: {invoice.get('destination_address', 'N/A')}"
+    
+    service_table = Table(service_data, colWidths=[90*mm, 40*mm, 40*mm])
+    service_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0ea5e9')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('ALIGN', (2, 0), (2, -1), 'RIGHT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 9),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f8fafc')),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
+    ]))
+    elements.append(service_table)
+    elements.append(Spacer(1, 3*mm))
+    
+    # Route details
+    elements.append(Paragraph(f"<i>{route_info}</i>", ParagraphStyle('Route', parent=normal_style, fontSize=8, textColor=colors.HexColor('#64748b'))))
+    elements.append(Spacer(1, 10*mm))
+    
+    # Totals table
+    totals_data = [
+        ['', 'Osnovica / Subtotal:', f"{invoice.get('amount', 0):.2f} RSD"],
+        ['', 'PDV / VAT (20%):', f"{invoice.get('tax', 0):.2f} RSD"],
+        ['', 'UKUPNO / TOTAL:', f"{invoice.get('total', 0):.2f} RSD"],
+    ]
+    
+    totals_table = Table(totals_data, colWidths=[90*mm, 40*mm, 40*mm])
+    totals_table.setStyle(TableStyle([
+        ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
+        ('ALIGN', (2, 0), (2, -1), 'RIGHT'),
+        ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('LINEABOVE', (1, -1), (-1, -1), 1, colors.HexColor('#0f172a')),
+        ('BACKGROUND', (1, -1), (-1, -1), colors.HexColor('#f0f9ff')),
+    ]))
+    elements.append(totals_table)
+    elements.append(Spacer(1, 15*mm))
+    
+    # Payment info
+    payment_info = """
+    <b>Instrukcije za plaćanje / Payment Instructions:</b><br/>
+    Banka / Bank: Erste Bank a.d. Novi Sad<br/>
+    Račun / Account: 340-11012345-67<br/>
+    Poziv na broj / Reference: {}<br/><br/>
+    <i>Hvala vam na poverenju! / Thank you for your trust!</i>
+    """.format(invoice.get('invoice_number', ''))
+    elements.append(Paragraph(payment_info, normal_style))
+    
+    # Build PDF
+    doc.build(elements)
+    buffer.seek(0)
+    return buffer
+
+# Endpoint to download invoice PDF
+@api_router.get("/invoices/{invoice_id}/pdf")
+async def download_invoice_pdf(invoice_id: str, user: dict = Depends(get_current_user)):
+    """Download invoice as PDF"""
+    # Check if user owns the invoice or is admin
+    invoice = await db.invoices.find_one({"id": invoice_id}, {"_id": 0})
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    
+    if invoice["user_id"] != user["id"] and user["role"] not in ["admin", "superadmin"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Generate PDF
+    pdf_buffer = generate_invoice_pdf(invoice)
+    
+    return StreamingResponse(
+        pdf_buffer,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"attachment; filename=Invoice_{invoice['invoice_number']}.pdf"
+        }
+    )
+
+# Admin endpoint to get completed bookings without invoices
+@api_router.get("/admin/bookings-for-invoice")
+async def get_bookings_for_invoice(
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Get completed bookings that don't have invoices yet"""
+    bookings = await db.patient_bookings.find(
+        {"status": "completed", "invoice_id": {"$in": [None, ""]}},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    return bookings
+
 # ============ CONTACT ROUTES ============
 
 @api_router.post("/contact", response_model=ContactResponse)
