@@ -75,6 +75,30 @@ const DriverRoute = ({ children }) => {
   return children;
 };
 
+// Protected Route for Medical Staff (Doctor/Nurse)
+const MedicalRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-600"></div>
+      </div>
+    );
+  }
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  // Check if user is medical staff (doctor, nurse, admin, superadmin)
+  if (!['doctor', 'nurse', 'admin', 'superadmin'].includes(user.role)) {
+    return <Navigate to="/" replace />;
+  }
+  
+  return children;
+};
+
 function App() {
   return (
     <LanguageProvider>
