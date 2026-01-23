@@ -45,7 +45,7 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
    - Services management
    - Company logo in sidebar
 
-5. **Operations Dashboard (NEW - Jan 22, 2026)**
+6. **Operations Dashboard (NEW - Jan 22, 2026)**
    - Transportation Command view with:
      - Large fleet map (3 columns) with fullscreen toggle
      - Compact mission timeline (1 column)
