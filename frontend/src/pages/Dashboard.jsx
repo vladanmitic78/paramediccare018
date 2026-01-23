@@ -486,34 +486,18 @@ const Dashboard = () => {
           </div>
         </aside>
 
-        {/* Mobile Tabs */}
+        {/* Mobile Navigation */}
         <div className="lg:hidden w-full">
-          <div className="bg-white border-b p-2 flex gap-2">
-            <button 
-              onClick={() => setMainView('operations')}
-              className={`flex-1 py-2 rounded-lg text-xs font-bold ${mainView === 'operations' ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-600'}`}
-            >
-              {language === 'sr' ? 'Operacije' : 'Operations'}
-            </button>
-            <button 
-              onClick={() => setMainView('admin')}
-              className={`flex-1 py-2 rounded-lg text-xs font-bold ${mainView === 'admin' ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-600'}`}
-            >
-              {language === 'sr' ? 'Admin' : 'Admin'}
-            </button>
-          </div>
-          {mainView === 'admin' && (
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="w-full overflow-x-auto flex justify-start p-2 bg-white border-b">
-                {sidebarItems.map((item) => (
-                  <TabsTrigger key={item.id} value={item.id} className="flex-shrink-0">
-                    <item.icon className="w-4 h-4 mr-2" />
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="w-full overflow-x-auto flex justify-start p-2 bg-slate-900 border-b">
+              {navigationGroups.flatMap(group => group.items).map((item) => (
+                <TabsTrigger key={item.id} value={item.id} className="flex-shrink-0 text-white data-[state=active]:bg-white/10">
+                  <item.icon className="w-4 h-4 mr-2" />
                   {item.label}
                 </TabsTrigger>
               ))}
             </TabsList>
           </Tabs>
-          )}
         </div>
 
         {/* Main Content */}
