@@ -60,6 +60,7 @@ import axios from 'axios';
 import CMSManager from '../components/CMSManager';
 import OperationsDashboard from '../components/OperationsDashboard';
 import AdminBookingNotifications from '../components/AdminBookingNotifications';
+import StaffAvailabilityCalendar from '../components/StaffAvailabilityCalendar';
 import InvoiceManager from '../components/InvoiceManager';
 import AdminLiveMap from '../components/AdminLiveMap';
 
