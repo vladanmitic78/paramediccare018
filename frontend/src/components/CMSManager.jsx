@@ -32,7 +32,8 @@ import {
   Home,
   PanelTop,
   PanelBottom,
-  Lock
+  Lock,
+  Upload
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
