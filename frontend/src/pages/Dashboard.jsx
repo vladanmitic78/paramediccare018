@@ -378,20 +378,8 @@ const Dashboard = () => {
     );
   }
 
-  const sidebarItems = [
-    { id: 'overview', icon: LayoutDashboard, label: language === 'sr' ? 'Pregled' : 'Overview' },
-    { id: 'bookings', icon: Calendar, label: t('dashboard_bookings') },
-    ...(isAdmin() ? [
-      { id: 'livemap', icon: Map, label: language === 'sr' ? 'Praćenje Vozila' : 'Live Map' },
-      { id: 'invoices', icon: FileText, label: language === 'sr' ? 'Fakture' : 'Invoices' },
-      { id: 'cms', icon: Globe, label: language === 'sr' ? 'Upravljanje Stranicama' : 'Page Management' },
-      { id: 'users', icon: Users, label: t('dashboard_users') },
-      { id: 'contacts', icon: MessageSquare, label: t('dashboard_contacts') },
-    ] : []),
-  ];
-
   return (
-    <div className="min-h-screen bg-slate-50" data-testid="dashboard-page">
+    <DashboardLayout activeTab={activeTab} onTabChange={handleTabChange}>
       {/* Admin Booking Notifications */}
       {isAdmin() && (
         <AdminBookingNotifications onViewBooking={handleViewPatientBooking} />
