@@ -245,12 +245,14 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
 - [x] **Admin Live Map** (NEW - Jan 23, 2026) ✅
 - [x] **Driver Assignment System** (NEW - Jan 23, 2026) ✅
 - [x] **Professional Sidebar Redesign** (NEW - Jan 23, 2026) ✅
+- [x] **Staff Availability Calendar** (NEW - Jan 23, 2026) ✅
 
 ### P1 (Next Up)
+- [ ] Admin View for Staff Calendar (aggregated view for all staff)
 - [ ] Implement Patients database (MEDICINSKI CENTAR)
 - [ ] Implement Statistics & Analytics dashboard
-- [ ] Implement Staff Availability calendar
 - [ ] Integrate live data into Operations Dashboard
+- [ ] Role-Specific Dashboards for Doctors and Nurses
 
 ### P2 (Future)
 - [ ] Electronic Medical Records (EMR)
