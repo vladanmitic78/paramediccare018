@@ -184,29 +184,38 @@ const PatientDashboard = () => {
 
         {/* Active Booking Status */}
         {activeBooking && (
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-8" data-testid="active-booking">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 mb-8" data-testid="active-booking">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+              <h2 className="text-base sm:text-lg font-semibold text-slate-900 flex items-center gap-2">
                 <Truck className="w-5 h-5 text-sky-600" />
                 {language === 'sr' ? 'Aktivna rezervacija' : 'Active Booking'}
               </h2>
-              <Badge className={`${getStatusColor(activeBooking.status)} border px-3 py-1`}>
+              <Badge className={`${getStatusColor(activeBooking.status)} border px-3 py-1 self-start sm:self-auto`}>
                 {getStatusIcon(activeBooking.status)}
                 <span className="ml-2">{getStatusLabel(activeBooking.status)}</span>
               </Badge>
             </div>
 
-            {/* Status Progress */}
+            {/* Status Progress - Mobile optimized */}
             <div className="mb-6">
-              <div className="flex items-center justify-between mb-2">
+              {/* Progress bar first on mobile for better visual hierarchy */}
+              <div className="h-2 bg-slate-200 rounded-full mb-4 relative">
+                <div 
+                  className="h-full bg-sky-600 rounded-full transition-all duration-500"
+                  style={{ width: `${(getStepIndex(activeBooking.status) / (statusSteps.length - 1)) * 100}%` }}
+                />
+              </div>
+              
+              {/* Step indicators */}
+              <div className="flex items-start justify-between">
                 {statusSteps.map((step, index) => {
                   const currentIndex = getStepIndex(activeBooking.status);
                   const isActive = index <= currentIndex;
                   const isCurrent = index === currentIndex;
                   
                   return (
-                    <div key={step.key} className="flex flex-col items-center flex-1">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
+                    <div key={step.key} className="flex flex-col items-center flex-1 min-w-0">
+                      <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium transition-colors flex-shrink-0 ${
                         isActive 
                           ? isCurrent 
                             ? 'bg-sky-600 text-white ring-4 ring-sky-100' 
@@ -215,43 +224,37 @@ const PatientDashboard = () => {
                       }`}>
                         {index + 1}
                       </div>
-                      <span className={`text-xs mt-2 text-center ${isActive ? 'text-sky-600 font-medium' : 'text-slate-400'}`}>
+                      <span className={`text-[10px] sm:text-xs mt-1 sm:mt-2 text-center leading-tight px-0.5 ${isActive ? 'text-sky-600 font-medium' : 'text-slate-400'}`}>
                         {step.label}
                       </span>
                     </div>
                   );
                 })}
               </div>
-              <div className="h-1 bg-slate-200 rounded-full mt-4 relative">
-                <div 
-                  className="h-full bg-sky-600 rounded-full transition-all duration-500"
-                  style={{ width: `${(getStepIndex(activeBooking.status) / (statusSteps.length - 1)) * 100}%` }}
-                />
-              </div>
             </div>
 
             {/* Booking Details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-50 rounded-xl">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 p-3 sm:p-4 bg-slate-50 rounded-xl">
               <div className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-green-600 mt-0.5" />
-                <div>
+                <MapPin className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                <div className="min-w-0">
                   <p className="text-xs text-slate-500 uppercase tracking-wide">
                     {language === 'sr' ? 'Polazište' : 'Pickup'}
                   </p>
-                  <p className="text-sm font-medium text-slate-900">{activeBooking.pickup_address}</p>
+                  <p className="text-sm font-medium text-slate-900 break-words">{activeBooking.pickup_address}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-red-600 mt-0.5" />
-                <div>
+                <MapPin className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                <div className="min-w-0">
                   <p className="text-xs text-slate-500 uppercase tracking-wide">
                     {language === 'sr' ? 'Odredište' : 'Destination'}
                   </p>
-                  <p className="text-sm font-medium text-slate-900">{activeBooking.destination_address}</p>
+                  <p className="text-sm font-medium text-slate-900 break-words">{activeBooking.destination_address}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <Calendar className="w-5 h-5 text-sky-600 mt-0.5" />
+                <Calendar className="w-5 h-5 text-sky-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-xs text-slate-500 uppercase tracking-wide">
                     {language === 'sr' ? 'Datum' : 'Date'}
@@ -260,7 +263,7 @@ const PatientDashboard = () => {
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <Clock className="w-5 h-5 text-sky-600 mt-0.5" />
+                <Clock className="w-5 h-5 text-sky-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-xs text-slate-500 uppercase tracking-wide">
                     {language === 'sr' ? 'Vreme' : 'Time'}
