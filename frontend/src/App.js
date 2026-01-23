@@ -29,6 +29,9 @@ import PatientNotifications from "./pages/PatientNotifications";
 // Driver App
 import DriverDashboard from "./pages/DriverDashboard";
 
+// Medical Dashboard
+import MedicalDashboard from "./pages/MedicalDashboard";
+
 // Protected Route for Patient Portal
 const PatientRoute = ({ children }) => {
   const { user, loading } = useAuth();
