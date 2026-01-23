@@ -72,9 +72,9 @@ const Dashboard = () => {
   const { user, logout, isAdmin } = useAuth();
   const { language, t } = useLanguage();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   
-  const [mainView, setMainView] = useState('operations'); // 'operations' or 'admin'
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'dashboard');
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
   const [bookings, setBookings] = useState([]);
@@ -92,6 +92,16 @@ const Dashboard = () => {
   const [publicBookingSearch, setPublicBookingSearch] = useState('');
 
   const isSuperAdmin = () => user?.role === 'superadmin';
+
+  // Handle tab change
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    if (tab === 'dashboard') {
+      setSearchParams({});
+    } else {
+      setSearchParams({ tab });
+    }
+  };
 
   // Get drivers sorted by distance to a pickup location
   const getDriversSortedByDistance = (pickupLat, pickupLng) => {
