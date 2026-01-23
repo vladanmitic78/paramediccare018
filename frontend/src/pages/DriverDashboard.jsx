@@ -16,7 +16,10 @@ import {
   Wifi,
   WifiOff,
   Battery,
-  Compass
+  Compass,
+  XCircle,
+  ThumbsUp,
+  ThumbsDown
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { toast } from 'sonner';
