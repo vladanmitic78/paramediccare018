@@ -1265,8 +1265,12 @@ async def verify_email(token: str):
 
 @api_router.post("/auth/login", response_model=TokenResponse)
 async def login(credentials: UserLogin):
-    user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
-    if not user or not verify_password(credentials.password, user["password"]):
+    # Trim whitespace from email and password (helps with mobile keyboard issues)
+    email = credentials.email.strip().lower()
+    password = credentials.password.strip() if credentials.password else ""
+    
+    user = await db.users.find_one({"email": email}, {"_id": 0})
+    if not user or not verify_password(password, user["password"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     if not user.get("is_active", True):
         raise HTTPException(status_code=401, detail="Account deactivated")
