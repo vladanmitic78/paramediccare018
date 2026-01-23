@@ -237,6 +237,11 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-slate-50" data-testid="dashboard-page">
+      {/* Admin Booking Notifications */}
+      {isAdmin() && (
+        <AdminBookingNotifications onViewBooking={handleViewPatientBooking} />
+      )}
+      
       <div className="flex">
         {/* Sidebar */}
         <aside className="w-64 bg-white border-r border-slate-200 min-h-screen p-4 hidden lg:flex lg:flex-col">
