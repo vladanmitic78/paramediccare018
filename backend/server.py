@@ -1048,17 +1048,6 @@ async def get_staff(user: dict = Depends(require_roles([UserRole.ADMIN, UserRole
 
 # ============ BOOKING ROUTES ============
 
-async def get_optional_user(credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer(auto_error=False))):
-    """Get user if authenticated, otherwise return None"""
-    if not credentials:
-        return None
-    try:
-        payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        user = await db.users.find_one({"id": payload["user_id"]}, {"_id": 0})
-        return user
-    except:
-        return None
-
 @api_router.post("/bookings", response_model=BookingResponse)
 async def create_booking(booking: BookingCreate, user: dict = Depends(get_optional_user)):
     booking_id = str(uuid.uuid4())
