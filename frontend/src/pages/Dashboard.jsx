@@ -41,7 +41,15 @@ import {
   CalendarClock,
   Users,
   TrendingUp,
-  FileText
+  FileText,
+  Navigation,
+  Settings,
+  LayoutDashboard,
+  Map,
+  Globe,
+  MessageSquare,
+  LogOut,
+  Calendar
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
