@@ -571,6 +571,14 @@ const Dashboard = () => {
               {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               {darkMode ? (language === 'sr' ? 'Svetli režim' : 'Light Mode') : (language === 'sr' ? 'Tamni režim' : 'Dark Mode')}
             </button>
+            <button
+              onClick={toggleLanguage}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all mt-1"
+              data-testid="language-toggle"
+            >
+              <Globe className="w-5 h-5" />
+              {language === 'sr' ? 'English' : 'Srpski'}
+            </button>
           </div>
         </aside>
 
