@@ -492,16 +492,17 @@ const MedicalStaffPWA = () => {
 
       {/* Fixed Save Button - Only when transport selected */}
       {selectedTransport && (
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-slate-900 border-t border-slate-700">
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-slate-900 via-slate-900 to-transparent pt-8" data-testid="save-button-container">
           <Button
             onClick={handleSave}
             disabled={saving}
-            className={`w-full ${bigButtonClass} bg-red-600 hover:bg-red-700 active:bg-red-800`}
+            className={`w-full ${bigButtonClass} bg-red-600 hover:bg-red-700 active:bg-red-800 active:scale-[0.98] transition-all`}
+            data-testid="save-vitals-btn"
           >
             {saving ? (
-              <Loader2 className="w-6 h-6 animate-spin mr-2" />
+              <Loader2 className="w-8 h-8 animate-spin mr-3" />
             ) : (
-              <Save className="w-6 h-6 mr-2" />
+              <Save className="w-8 h-8 mr-3" />
             )}
             {language === 'sr' ? 'SAČUVAJ VITALNE PARAMETRE' : 'SAVE VITAL SIGNS'}
           </Button>
