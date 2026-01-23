@@ -318,21 +318,36 @@ const MedicalStaffPWA = () => {
         notes: vitals.notes || null
       };
 
-      const response = await axios.post(`${API}/transport/vitals`, payload);
-      
-      setLastSaved(new Date());
-      
-      if (response.data.is_critical) {
-        toast.error(
-          language === 'sr' 
-            ? '⚠️ KRITIČNI PARAMETRI - Upozorenje poslato!' 
-            : '⚠️ CRITICAL VALUES - Alert sent!',
-          { duration: 5000 }
-        );
+      if (isOnline) {
+        // Online - save directly to server
+        const response = await axios.post(`${API}/transport/vitals`, payload);
+        
+        setLastSaved(new Date());
+        
+        if (response.data.is_critical) {
+          toast.error(
+            language === 'sr' 
+              ? '⚠️ KRITIČNI PARAMETRI - Upozorenje poslato!' 
+              : '⚠️ CRITICAL VALUES - Alert sent!',
+            { duration: 5000 }
+          );
+        } else {
+          toast.success(
+            language === 'sr' ? '✓ Sačuvano na server' : '✓ Saved to server',
+            { duration: 2000 }
+          );
+        }
       } else {
-        toast.success(
-          language === 'sr' ? '✓ Sačuvano' : '✓ Saved',
-          { duration: 2000 }
+        // Offline - save to IndexedDB
+        await saveToIndexedDB({ payload, transportName: selectedTransport.patient_name });
+        setLastSaved(new Date());
+        setPendingCount(prev => prev + 1);
+        
+        toast.warning(
+          language === 'sr' 
+            ? '📴 Sačuvano offline - sinhronizuje se kad se povežete' 
+            : '📴 Saved offline - will sync when connected',
+          { duration: 3000 }
         );
       }
       
@@ -340,7 +355,38 @@ const MedicalStaffPWA = () => {
       applyPreset('clear');
       
     } catch (error) {
-      toast.error(language === 'sr' ? 'Greška pri čuvanju' : 'Error saving');
+      // Try to save offline if online save fails
+      if (!isOnline || error.message.includes('Network')) {
+        try {
+          const payload = {
+            booking_id: selectedTransport.id,
+            patient_name: selectedTransport.patient_name,
+            systolic_bp: vitals.systolic_bp ? parseInt(vitals.systolic_bp) : null,
+            diastolic_bp: vitals.diastolic_bp ? parseInt(vitals.diastolic_bp) : null,
+            heart_rate: vitals.heart_rate ? parseInt(vitals.heart_rate) : null,
+            oxygen_saturation: vitals.oxygen_saturation ? parseInt(vitals.oxygen_saturation) : null,
+            respiratory_rate: vitals.respiratory_rate ? parseInt(vitals.respiratory_rate) : null,
+            temperature: vitals.temperature ? parseFloat(vitals.temperature) : null,
+            gcs_score: vitals.gcs_score ? parseInt(vitals.gcs_score) : null,
+            consciousness_level: vitals.consciousness || null,
+            notes: vitals.notes || null
+          };
+          await saveToIndexedDB({ payload, transportName: selectedTransport.patient_name });
+          setLastSaved(new Date());
+          setPendingCount(prev => prev + 1);
+          toast.warning(
+            language === 'sr' 
+              ? '📴 Sačuvano offline' 
+              : '📴 Saved offline',
+            { duration: 3000 }
+          );
+          applyPreset('clear');
+        } catch (e) {
+          toast.error(language === 'sr' ? 'Greška pri čuvanju' : 'Error saving');
+        }
+      } else {
+        toast.error(language === 'sr' ? 'Greška pri čuvanju' : 'Error saving');
+      }
     } finally {
       setSaving(false);
     }
