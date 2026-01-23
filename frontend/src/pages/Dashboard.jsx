@@ -1111,6 +1111,74 @@ const Dashboard = () => {
               </div>
             </div>
           )}
+
+          {/* Drivers (Admin only) */}
+          {activeTab === 'drivers' && isAdmin() && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-slate-900">
+                {language === 'sr' ? 'Vozači' : 'Drivers'}
+              </h1>
+              <div className="card-base">
+                <p className="text-slate-600">
+                  {language === 'sr' ? 'Upravljanje vozačima i njihovim statusom.' : 'Manage drivers and their status.'}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Patients (Admin only) - Coming Soon */}
+          {activeTab === 'patients' && isAdmin() && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-slate-900">
+                {language === 'sr' ? 'Pacijenti' : 'Patients'}
+              </h1>
+              <div className="card-base text-center py-12">
+                <Users className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                  {language === 'sr' ? 'Uskoro dostupno' : 'Coming Soon'}
+                </h3>
+                <p className="text-slate-600">
+                  {language === 'sr' ? 'Upravljanje pacijentima će biti dostupno u sledećoj verziji.' : 'Patient management will be available in the next version.'}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Statistics (Admin only) - Coming Soon */}
+          {activeTab === 'statistics' && isAdmin() && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-slate-900">
+                {language === 'sr' ? 'Statistika' : 'Statistics'}
+              </h1>
+              <div className="card-base text-center py-12">
+                <Activity className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                  {language === 'sr' ? 'Uskoro dostupno' : 'Coming Soon'}
+                </h3>
+                <p className="text-slate-600">
+                  {language === 'sr' ? 'Detaljne statistike će biti dostupne u sledećoj verziji.' : 'Detailed statistics will be available in the next version.'}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Availability (Admin only) - Coming Soon */}
+          {activeTab === 'availability' && isAdmin() && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-slate-900">
+                {language === 'sr' ? 'Dostupnost' : 'Availability'}
+              </h1>
+              <div className="card-base text-center py-12">
+                <Calendar className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                  {language === 'sr' ? 'Uskoro dostupno' : 'Coming Soon'}
+                </h3>
+                <p className="text-slate-600">
+                  {language === 'sr' ? 'Upravljanje dostupnošću tima će biti dostupno u sledećoj verziji.' : 'Team availability management will be available in the next version.'}
+                </p>
+              </div>
+            </div>
+          )}
         </main>
       </div>
     </div>
