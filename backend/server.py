@@ -132,6 +132,122 @@ class BookingStatusUpdate(BaseModel):
     assigned_driver: Optional[str] = None
     assigned_medical: Optional[str] = None
 
+# ============ PATIENT PORTAL MODELS ============
+
+class BookingStatus:
+    REQUESTED = "requested"
+    CONFIRMED = "confirmed"
+    EN_ROUTE = "en_route"
+    PICKED_UP = "picked_up"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+
+class MobilityStatus:
+    WALKING = "walking"
+    WHEELCHAIR = "wheelchair"
+    STRETCHER = "stretcher"
+
+class PatientBookingCreate(BaseModel):
+    # Patient Information
+    patient_name: str
+    patient_age: int
+    contact_phone: str
+    contact_email: EmailStr
+    
+    # Transport Need
+    transport_reason: str  # dropdown value
+    transport_reason_details: Optional[str] = None
+    mobility_status: str = MobilityStatus.WALKING
+    
+    # Transport Details
+    pickup_address: str
+    pickup_lat: Optional[float] = None
+    pickup_lng: Optional[float] = None
+    destination_address: str
+    destination_lat: Optional[float] = None
+    destination_lng: Optional[float] = None
+    preferred_date: str
+    preferred_time: str
+    
+    # Consent
+    consent_given: bool = False
+    language: str = "sr"
+
+class PatientBookingResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    patient_name: str
+    patient_age: int
+    contact_phone: str
+    contact_email: str
+    transport_reason: str
+    transport_reason_details: Optional[str] = None
+    mobility_status: str
+    pickup_address: str
+    pickup_lat: Optional[float] = None
+    pickup_lng: Optional[float] = None
+    destination_address: str
+    destination_lat: Optional[float] = None
+    destination_lng: Optional[float] = None
+    preferred_date: str
+    preferred_time: str
+    status: str
+    assigned_driver: Optional[str] = None
+    assigned_vehicle: Optional[str] = None
+    created_at: str
+    updated_at: Optional[str] = None
+    user_id: str
+    invoice_id: Optional[str] = None
+
+class SavedAddress(BaseModel):
+    label: str  # "Home", "Work", etc.
+    address: str
+    lat: Optional[float] = None
+    lng: Optional[float] = None
+
+class EmergencyContact(BaseModel):
+    name: str
+    phone: str
+    relationship: str
+
+class PatientProfileUpdate(BaseModel):
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    date_of_birth: Optional[str] = None
+    saved_addresses: Optional[List[SavedAddress]] = None
+    emergency_contact: Optional[EmergencyContact] = None
+    preferred_language: Optional[str] = None
+
+class InvoiceResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    invoice_number: str
+    booking_id: str
+    patient_name: str
+    patient_email: str
+    service_type: str
+    service_date: str
+    service_description: str
+    amount: float
+    tax: float
+    total: float
+    payment_status: str  # pending, paid
+    created_at: str
+    due_date: str
+
+class NotificationResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    user_id: str
+    title_sr: str
+    title_en: str
+    message_sr: str
+    message_en: str
+    notification_type: str  # booking_confirmation, status_update, admin_message
+    is_read: bool
+    created_at: str
+    booking_id: Optional[str] = None
+
 class ContactCreate(BaseModel):
     name: str
     email: EmailStr
