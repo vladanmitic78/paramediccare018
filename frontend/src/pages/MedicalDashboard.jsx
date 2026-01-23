@@ -375,6 +375,18 @@ const MedicalDashboard = () => {
           </div>
           
           <div className="flex items-center gap-3">
+            {/* Language toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleLanguage}
+              className={darkMode ? 'text-slate-300 hover:text-white' : ''}
+              data-testid="language-toggle"
+              title={language === 'sr' ? 'Switch to English' : 'Prebaci na srpski'}
+            >
+              <Globe className="w-5 h-5" />
+            </Button>
+            
             {/* Dark mode toggle */}
             <Button
               variant="ghost"
