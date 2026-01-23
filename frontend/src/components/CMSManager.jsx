@@ -193,6 +193,60 @@ const CMSManager = () => {
     }
   };
 
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error(language === 'sr' 
+        ? 'Nedozvoljen tip fajla. Dozvoljeni: JPG, PNG, GIF, WEBP, SVG' 
+        : 'Invalid file type. Allowed: JPG, PNG, GIF, WEBP, SVG');
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(language === 'sr' 
+        ? 'Fajl je prevelik. Maksimalna veličina je 5MB' 
+        : 'File too large. Maximum size is 5MB');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+
+      const response = await axios.post(`${API}/upload/image`, formDataUpload, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if (response.data.success) {
+        // Build the full URL for the uploaded image
+        const baseUrl = process.env.REACT_APP_BACKEND_URL;
+        const fullUrl = `${baseUrl}${response.data.url}`;
+        
+        setFormData(prev => ({ ...prev, image_url: fullUrl }));
+        toast.success(language === 'sr' ? 'Slika uspešno otpremljena' : 'Image uploaded successfully');
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error(language === 'sr' 
+        ? 'Greška pri otpremanju slike' 
+        : 'Error uploading image');
+    } finally {
+      setUploading(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   const filteredContent = content.filter(c => c.page === selectedPage);
 
   // Admin pages: Home, Medical Care, Transport, About
