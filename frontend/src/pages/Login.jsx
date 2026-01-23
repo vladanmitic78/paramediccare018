@@ -45,7 +45,9 @@ const Login = () => {
         // Redirect based on role
         if (user.role === 'driver') {
           navigate('/driver');
-        } else if (['admin', 'superadmin', 'doctor', 'nurse'].includes(user.role)) {
+        } else if (['doctor', 'nurse'].includes(user.role)) {
+          navigate('/medical');
+        } else if (['admin', 'superadmin'].includes(user.role)) {
           navigate('/dashboard');
         } else {
           // Regular users go to patient portal
