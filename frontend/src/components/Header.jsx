@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X, ChevronDown, Phone } from 'lucide-react';
 import { Button } from './ui/button';
 import {
   DropdownMenu,
@@ -10,12 +10,40 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
+import axios from 'axios';
+
+const API = process.env.REACT_APP_BACKEND_URL;
 
 export const Header = () => {
   const { language, setLanguage, t } = useLanguage();
   const { user, logout, isAdmin, isStaff } = useAuth();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [headerContent, setHeaderContent] = useState(null);
+
+  // Fetch header content from CMS
+  useEffect(() => {
+    const fetchHeaderContent = async () => {
+      try {
+        const response = await axios.get(`${API}/api/pages/header`);
+        const content = {};
+        response.data.forEach(item => {
+          content[item.section] = item;
+        });
+        setHeaderContent(content);
+      } catch (error) {
+        console.log('Using default header content');
+      }
+    };
+    fetchHeaderContent();
+  }, []);
+
+  // Get logo URL from CMS or use default
+  const logoUrl = headerContent?.logo?.image_url || 
+    'https://customer-assets.emergentagent.com/job_433955cc-2ea1-4976-bce7-1cf9f8ad9654/artifacts/j7ye45w5_Paramedic%20Care%20018%20Logo.jpg';
+  
+  // Get emergency phone from CMS or use default
+  const emergencyPhone = headerContent?.['emergency-banner']?.[language === 'sr' ? 'content_sr' : 'content_en'] || '+381 18 123 456';
 
   const navItems = [
     { path: '/', label: t('nav_home') },
