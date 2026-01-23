@@ -236,7 +236,7 @@ const CMSManager = () => {
       </div>
 
       {/* Page Tabs */}
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {pages.map((page) => (
           <button
             key={page.id}
@@ -250,9 +250,24 @@ const CMSManager = () => {
           >
             <page.icon className={`w-4 h-4 ${selectedPage === page.id ? 'text-white' : page.color}`} />
             {page.label}
+            {page.superAdminOnly && (
+              <Lock className="w-3 h-3 text-purple-400" />
+            )}
           </button>
         ))}
       </div>
+
+      {/* Super Admin Notice for Header/Footer */}
+      {(selectedPage === 'header' || selectedPage === 'footer') && (
+        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 flex items-center gap-3">
+          <Lock className="w-5 h-5 text-purple-600" />
+          <p className="text-sm text-purple-800">
+            {language === 'sr' 
+              ? 'Ova sekcija je dostupna samo Super Administratorima. Promene će uticati na sve stranice.' 
+              : 'This section is only available to Super Admins. Changes will affect all pages.'}
+          </p>
+        </div>
+      )}
 
       {/* Content List */}
       <div className="space-y-4">
