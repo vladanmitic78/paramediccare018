@@ -791,9 +791,21 @@ const Dashboard = () => {
 
               {/* Original Public Bookings */}
               <div className="card-base overflow-x-auto">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">
-                  {language === 'sr' ? 'Javne Rezervacije' : 'Public Bookings'}
-                </h3>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+                  <h3 className="text-lg font-semibold text-slate-900">
+                    {language === 'sr' ? 'Javne Rezervacije' : 'Public Bookings'}
+                  </h3>
+                  <div className="relative w-full sm:w-72">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Input
+                      placeholder={language === 'sr' ? 'Pretraži rezervacije...' : 'Search bookings...'}
+                      value={publicBookingSearch}
+                      onChange={(e) => setPublicBookingSearch(e.target.value)}
+                      className="pl-9"
+                      data-testid="public-booking-search"
+                    />
+                  </div>
+                </div>
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -802,11 +814,12 @@ const Dashboard = () => {
                       <TableHead>{language === 'sr' ? 'Kontakt' : 'Contact'}</TableHead>
                       <TableHead>{language === 'sr' ? 'Ruta' : 'Route'}</TableHead>
                       <TableHead>{t('status')}</TableHead>
+                      <TableHead>{language === 'sr' ? 'Vozač' : 'Driver'}</TableHead>
                       <TableHead>{t('actions')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {bookings.map((booking) => (
+                    {filteredPublicBookings.map((booking) => (
                       <TableRow key={booking.id}>
                         <TableCell className="font-medium">{booking.patient_name}</TableCell>
                         <TableCell>{booking.booking_date}</TableCell>
