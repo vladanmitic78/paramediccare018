@@ -376,43 +376,55 @@ const Dashboard = () => {
     );
   }
 
-  // Navigation structure with groups
+  // Navigation structure with groups - each group has id, icon, label, and items
   const navigationGroups = [
     {
-      label: language === 'sr' ? 'OPERACIJE' : 'OPERATIONS',
+      id: 'operations',
+      icon: LayoutDashboard,
+      label: language === 'sr' ? 'Operacije' : 'Operations',
       items: [
         { id: 'overview', icon: LayoutDashboard, label: language === 'sr' ? 'Kontrolna tabla' : 'Dashboard' },
         { id: 'bookings', icon: Calendar, label: t('dashboard_bookings') },
       ]
     },
     ...(isAdmin() ? [{
-      label: language === 'sr' ? 'MEDICINSKI CENTAR' : 'MEDICAL CENTER',
+      id: 'medical',
+      icon: Stethoscope,
+      label: language === 'sr' ? 'Medicinski centar' : 'Medical Center',
       items: [
         { id: 'patients', icon: Users, label: language === 'sr' ? 'Pacijenti' : 'Patients', badge: language === 'sr' ? 'Uskoro' : 'Soon' },
-        { id: 'statistics', icon: Activity, label: language === 'sr' ? 'Statistika' : 'Statistics', badge: language === 'sr' ? 'Uskoro' : 'Soon' },
+        { id: 'statistics', icon: BarChart3, label: language === 'sr' ? 'Statistika' : 'Statistics', badge: language === 'sr' ? 'Uskoro' : 'Soon' },
       ]
     }] : []),
     ...(isAdmin() ? [{
-      label: language === 'sr' ? 'TIM' : 'TEAM',
+      id: 'team',
+      icon: Users,
+      label: language === 'sr' ? 'Tim' : 'Team',
       items: [
         { id: 'drivers', icon: Truck, label: language === 'sr' ? 'Vozači' : 'Drivers' },
         { id: 'availability', icon: Calendar, label: language === 'sr' ? 'Dostupnost' : 'Availability', badge: language === 'sr' ? 'Uskoro' : 'Soon' },
       ]
     }] : []),
     ...(isAdmin() ? [{
-      label: language === 'sr' ? 'FLOTA' : 'FLEET',
+      id: 'fleet',
+      icon: Ambulance,
+      label: language === 'sr' ? 'Flota' : 'Fleet',
       items: [
-        { id: 'livemap', icon: Map, label: language === 'sr' ? 'Praćenje Vozila' : 'Live Tracking' },
+        { id: 'livemap', icon: Map, label: language === 'sr' ? 'Praćenje vozila' : 'Live Tracking' },
       ]
     }] : []),
     ...(isAdmin() ? [{
-      label: language === 'sr' ? 'FINANSIJE' : 'FINANCE',
+      id: 'finance',
+      icon: Receipt,
+      label: language === 'sr' ? 'Finansije' : 'Finance',
       items: [
         { id: 'invoices', icon: FileText, label: language === 'sr' ? 'Fakture' : 'Invoices' },
       ]
     }] : []),
     ...(isAdmin() ? [{
-      label: language === 'sr' ? 'PODEŠAVANJA' : 'SETTINGS',
+      id: 'settings',
+      icon: Settings,
+      label: language === 'sr' ? 'Podešavanja' : 'Settings',
       items: [
         { id: 'users', icon: Users, label: t('dashboard_users') },
         { id: 'cms', icon: Globe, label: language === 'sr' ? 'Web stranica' : 'Website' },
