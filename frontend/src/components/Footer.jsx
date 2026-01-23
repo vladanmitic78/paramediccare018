@@ -70,7 +70,7 @@ export const Footer = () => {
           <div className="lg:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
               <img 
-                src="https://customer-assets.emergentagent.com/job_433955cc-2ea1-4976-bce7-1cf9f8ad9654/artifacts/j7ye45w5_Paramedic%20Care%20018%20Logo.jpg"
+                src={logoUrl}
                 alt="Paramedic Care 018"
                 className="h-16 w-auto object-contain bg-white rounded-lg p-1"
               />
@@ -105,17 +105,16 @@ export const Footer = () => {
               <div className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-sky-400 flex-shrink-0 mt-0.5" />
                 <div className="text-slate-400 text-sm">
-                  <p>Žarka Zrenjanina 50A</p>
-                  <p>18103 Niš (Pantelej), Serbia</p>
+                  <p>{companyAddress}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-sky-400 flex-shrink-0" />
                 <a 
-                  href="tel:+38118123456" 
+                  href={`tel:${phoneNumber.replace(/\s/g, '')}`}
                   className="text-slate-400 hover:text-white text-sm transition-colors"
                 >
-                  +381 18 123 456
+                  {phoneNumber}
                 </a>
               </div>
               <div className="flex items-center gap-3">
