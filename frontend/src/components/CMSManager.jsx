@@ -192,11 +192,21 @@ const CMSManager = () => {
 
   const filteredContent = content.filter(c => c.page === selectedPage);
 
-  const pages = [
+  // Admin pages: Home, Medical Care, Transport, About
+  // Super Admin pages: All admin pages + Header, Footer
+  const adminPages = [
+    { id: 'home', label: language === 'sr' ? 'Početna' : 'Home', icon: Home, color: 'text-emerald-600' },
     { id: 'medical-care', label: language === 'sr' ? 'Medicinska Nega' : 'Medical Care', icon: Stethoscope, color: 'text-sky-600' },
     { id: 'transport', label: 'Transport', icon: Ambulance, color: 'text-red-600' },
     { id: 'about', label: language === 'sr' ? 'O Nama' : 'About Us', icon: Info, color: 'text-slate-600' },
   ];
+
+  const superAdminOnlyPages = [
+    { id: 'header', label: 'Header', icon: PanelTop, color: 'text-purple-600', superAdminOnly: true },
+    { id: 'footer', label: 'Footer', icon: PanelBottom, color: 'text-purple-600', superAdminOnly: true },
+  ];
+
+  const pages = isSuperAdmin ? [...adminPages, ...superAdminOnlyPages] : adminPages;
 
   if (loading) {
     return (
