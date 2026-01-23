@@ -58,7 +58,7 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
      - Doctor consultation feature
    - Tab switching between Transportation and Medical Care
 
-6. **Booking System**
+7. **Booking System**
    - Start/End point with map selection
    - Date picker
    - Patient details
