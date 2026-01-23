@@ -156,13 +156,13 @@ const PatientDashboard = () => {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Welcome Message */}
-        <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">
             {language === 'sr' ? `Dobrodošli, ${user?.full_name?.split(' ')[0]}` : `Welcome, ${user?.full_name?.split(' ')[0]}`}
           </h1>
-          <p className="text-slate-600">
+          <p className="text-sm sm:text-base text-slate-600">
             {language === 'sr' 
               ? 'Upravljajte svojim rezervacijama i pratite status transporta'
               : 'Manage your bookings and track transport status'}
@@ -170,13 +170,13 @@ const PatientDashboard = () => {
         </div>
 
         {/* Primary Action - Book Transport */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <Link to="/patient/book">
             <Button 
-              className="w-full sm:w-auto btn-urgent text-lg px-8 py-6 gap-3 shadow-lg hover:shadow-xl transition-shadow"
+              className="w-full sm:w-auto btn-urgent text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 gap-2 sm:gap-3 shadow-lg hover:shadow-xl transition-shadow"
               data-testid="book-transport-btn"
             >
-              <Ambulance className="w-6 h-6" />
+              <Ambulance className="w-5 h-5 sm:w-6 sm:h-6" />
               {language === 'sr' ? 'Zakažite Medicinski Transport' : 'Book Medical Transport'}
             </Button>
           </Link>
