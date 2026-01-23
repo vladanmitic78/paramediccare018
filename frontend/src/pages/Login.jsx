@@ -39,7 +39,9 @@ const Login = () => {
         toast.success(language === 'sr' ? 'Uspešna prijava!' : 'Login successful!');
         
         // Redirect based on role
-        if (['admin', 'superadmin', 'doctor', 'nurse', 'driver'].includes(user.role)) {
+        if (user.role === 'driver') {
+          navigate('/driver');
+        } else if (['admin', 'superadmin', 'doctor', 'nurse'].includes(user.role)) {
           navigate('/dashboard');
         } else {
           // Regular users go to patient portal
