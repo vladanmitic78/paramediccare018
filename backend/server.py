@@ -537,66 +537,188 @@ def get_verification_email_template(full_name: str, verification_link: str, lang
     return subject, body
 
 def get_registration_email_template(full_name: str, email: str, language: str = "sr"):
-    """Email template for successful registration"""
+    """Email template for successful registration - sent after email verification"""
     if language == "en":
-        subject = "Welcome to Paramedic Care 018"
+        subject = "🎉 Welcome to Paramedic Care 018!"
         body = f"""
         <html>
-        <body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f8fafc;">
+        <body style="font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background-color: #f0f4f8;">
             {get_email_header()}
-            <div style="padding: 30px; max-width: 600px; margin: 0 auto;">
-                <h2 style="color: #0f172a; margin-bottom: 20px;">Welcome to Paramedic Care 018!</h2>
-                <p style="color: #334155; line-height: 1.6;">Dear <strong>{full_name}</strong>,</p>
-                <p style="color: #334155; line-height: 1.6;">Thank you for registering with Paramedic Care 018. Your account has been successfully created.</p>
-                
-                <div style="background-color: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 15px; margin: 20px 0;">
-                    <p style="margin: 0; color: #0369a1;"><strong>Account Details:</strong></p>
-                    <p style="margin: 10px 0 0 0; color: #334155;">Email: {email}</p>
+            <div style="padding: 40px 30px; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+                <!-- Success Icon -->
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 50%; padding: 25px; box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3);">
+                        <span style="font-size: 50px;">🎉</span>
+                    </div>
                 </div>
                 
-                <p style="color: #334155; line-height: 1.6;">With your account, you can:</p>
-                <ul style="color: #334155; line-height: 1.8;">
-                    <li>Book medical transport services</li>
-                    <li>Track your booking status</li>
-                    <li>Access your booking history</li>
-                    <li>Contact our support team directly</li>
-                </ul>
+                <!-- Title -->
+                <h1 style="color: #0f172a; margin-bottom: 10px; text-align: center; font-size: 32px; font-weight: 700;">Welcome to the Family!</h1>
+                <p style="color: #10b981; text-align: center; font-size: 18px; font-weight: 600; margin-bottom: 30px;">Your account is now verified and ready to use</p>
                 
-                <p style="color: #334155; line-height: 1.6;">If you have any questions, please don't hesitate to contact us.</p>
+                <!-- Greeting -->
+                <p style="color: #334155; line-height: 1.8; font-size: 16px;">Dear <strong style="color: #0ea5e9;">{full_name}</strong>,</p>
+                <p style="color: #334155; line-height: 1.8; font-size: 16px;">Congratulations! Your email has been verified and your Paramedic Care 018 account is now fully activated.</p>
                 
-                <p style="color: #334155; line-height: 1.6; margin-top: 30px;">Best regards,<br><strong>Paramedic Care 018 Team</strong></p>
+                <!-- Account Info Card -->
+                <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 16px; padding: 25px; margin: 30px 0; border: 1px solid #bae6fd;">
+                    <h3 style="color: #0284c7; margin: 0 0 15px 0; font-size: 16px;">📋 Account Details</h3>
+                    <table style="width: 100%;">
+                        <tr>
+                            <td style="color: #64748b; padding: 8px 0; font-size: 14px;">Email:</td>
+                            <td style="color: #0f172a; padding: 8px 0; font-size: 14px; font-weight: 600;">{email}</td>
+                        </tr>
+                        <tr>
+                            <td style="color: #64748b; padding: 8px 0; font-size: 14px;">Status:</td>
+                            <td style="padding: 8px 0;"><span style="background-color: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">✓ Verified</span></td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <!-- Features -->
+                <h3 style="color: #0f172a; font-size: 18px; margin-bottom: 20px;">What you can do now:</h3>
+                <div style="display: table; width: 100%;">
+                    <div style="display: table-row;">
+                        <div style="display: table-cell; padding: 15px; background-color: #fef3c7; border-radius: 12px; text-align: center; width: 48%;">
+                            <span style="font-size: 30px;">🚑</span>
+                            <p style="color: #92400e; font-weight: 600; margin: 10px 0 5px 0; font-size: 14px;">Book Transport</p>
+                            <p style="color: #a16207; margin: 0; font-size: 12px;">Schedule medical transport</p>
+                        </div>
+                        <div style="display: table-cell; width: 4%;"></div>
+                        <div style="display: table-cell; padding: 15px; background-color: #dbeafe; border-radius: 12px; text-align: center; width: 48%;">
+                            <span style="font-size: 30px;">📊</span>
+                            <p style="color: #1e40af; font-weight: 600; margin: 10px 0 5px 0; font-size: 14px;">Track Status</p>
+                            <p style="color: #3b82f6; margin: 0; font-size: 12px;">Real-time updates</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: table; width: 100%; margin-top: 15px;">
+                    <div style="display: table-row;">
+                        <div style="display: table-cell; padding: 15px; background-color: #f3e8ff; border-radius: 12px; text-align: center; width: 48%;">
+                            <span style="font-size: 30px;">📜</span>
+                            <p style="color: #7c3aed; font-weight: 600; margin: 10px 0 5px 0; font-size: 14px;">View History</p>
+                            <p style="color: #8b5cf6; margin: 0; font-size: 12px;">Access past bookings</p>
+                        </div>
+                        <div style="display: table-cell; width: 4%;"></div>
+                        <div style="display: table-cell; padding: 15px; background-color: #dcfce7; border-radius: 12px; text-align: center; width: 48%;">
+                            <span style="font-size: 30px;">💬</span>
+                            <p style="color: #166534; font-weight: 600; margin: 10px 0 5px 0; font-size: 14px;">Get Support</p>
+                            <p style="color: #22c55e; margin: 0; font-size: 12px;">24/7 assistance</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- CTA Button -->
+                <div style="text-align: center; margin: 40px 0;">
+                    <a href="https://paramedic-care018.rs/login" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 50px; font-size: 18px; font-weight: 600; box-shadow: 0 4px 20px rgba(14, 165, 233, 0.4);">
+                        Go to My Dashboard →
+                    </a>
+                </div>
+                
+                <!-- Emergency Contact -->
+                <div style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-radius: 12px; padding: 20px; margin: 20px 0; text-align: center;">
+                    <p style="margin: 0 0 10px 0; color: #991b1b; font-weight: 600;">🚨 Emergency Contact</p>
+                    <p style="margin: 0; color: #dc2626; font-size: 24px; font-weight: 700;">+381 18 123 456</p>
+                    <p style="margin: 5px 0 0 0; color: #7f1d1d; font-size: 12px;">Available 24/7</p>
+                </div>
+                
+                <p style="color: #334155; line-height: 1.8; margin-top: 30px; font-size: 16px;">Thank you for choosing Paramedic Care 018. We're here to help you whenever you need us.</p>
+                
+                <p style="color: #334155; line-height: 1.6; margin-top: 20px;">Warm regards,<br><strong style="color: #0ea5e9;">The Paramedic Care 018 Team</strong></p>
             </div>
             {get_email_footer("en")}
         </body>
         </html>
         """
     else:
-        subject = "Dobrodošli u Paramedic Care 018"
+        subject = "🎉 Dobrodošli u Paramedic Care 018!"
         body = f"""
         <html>
-        <body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f8fafc;">
+        <body style="font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background-color: #f0f4f8;">
             {get_email_header()}
-            <div style="padding: 30px; max-width: 600px; margin: 0 auto;">
-                <h2 style="color: #0f172a; margin-bottom: 20px;">Dobrodošli u Paramedic Care 018!</h2>
-                <p style="color: #334155; line-height: 1.6;">Poštovani/a <strong>{full_name}</strong>,</p>
-                <p style="color: #334155; line-height: 1.6;">Hvala vam što ste se registrovali na Paramedic Care 018. Vaš nalog je uspešno kreiran.</p>
-                
-                <div style="background-color: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 15px; margin: 20px 0;">
-                    <p style="margin: 0; color: #0369a1;"><strong>Podaci o nalogu:</strong></p>
-                    <p style="margin: 10px 0 0 0; color: #334155;">Email: {email}</p>
+            <div style="padding: 40px 30px; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+                <!-- Success Icon -->
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 50%; padding: 25px; box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3);">
+                        <span style="font-size: 50px;">🎉</span>
+                    </div>
                 </div>
                 
-                <p style="color: #334155; line-height: 1.6;">Sa vašim nalogom možete:</p>
-                <ul style="color: #334155; line-height: 1.8;">
-                    <li>Rezervisati usluge medicinskog transporta</li>
-                    <li>Pratiti status vaše rezervacije</li>
-                    <li>Pristupiti istoriji rezervacija</li>
-                    <li>Kontaktirati naš tim za podršku direktno</li>
-                </ul>
+                <!-- Title -->
+                <h1 style="color: #0f172a; margin-bottom: 10px; text-align: center; font-size: 32px; font-weight: 700;">Dobrodošli u našu porodicu!</h1>
+                <p style="color: #10b981; text-align: center; font-size: 18px; font-weight: 600; margin-bottom: 30px;">Vaš nalog je verifikovan i spreman za korišćenje</p>
                 
-                <p style="color: #334155; line-height: 1.6;">Ako imate bilo kakvih pitanja, slobodno nas kontaktirajte.</p>
+                <!-- Greeting -->
+                <p style="color: #334155; line-height: 1.8; font-size: 16px;">Poštovani/a <strong style="color: #0ea5e9;">{full_name}</strong>,</p>
+                <p style="color: #334155; line-height: 1.8; font-size: 16px;">Čestitamo! Vaš email je verifikovan i vaš Paramedic Care 018 nalog je sada potpuno aktiviran.</p>
                 
-                <p style="color: #334155; line-height: 1.6; margin-top: 30px;">Srdačan pozdrav,<br><strong>Tim Paramedic Care 018</strong></p>
+                <!-- Account Info Card -->
+                <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 16px; padding: 25px; margin: 30px 0; border: 1px solid #bae6fd;">
+                    <h3 style="color: #0284c7; margin: 0 0 15px 0; font-size: 16px;">📋 Podaci o nalogu</h3>
+                    <table style="width: 100%;">
+                        <tr>
+                            <td style="color: #64748b; padding: 8px 0; font-size: 14px;">Email:</td>
+                            <td style="color: #0f172a; padding: 8px 0; font-size: 14px; font-weight: 600;">{email}</td>
+                        </tr>
+                        <tr>
+                            <td style="color: #64748b; padding: 8px 0; font-size: 14px;">Status:</td>
+                            <td style="padding: 8px 0;"><span style="background-color: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">✓ Verifikovan</span></td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <!-- Features -->
+                <h3 style="color: #0f172a; font-size: 18px; margin-bottom: 20px;">Šta sada možete da radite:</h3>
+                <div style="display: table; width: 100%;">
+                    <div style="display: table-row;">
+                        <div style="display: table-cell; padding: 15px; background-color: #fef3c7; border-radius: 12px; text-align: center; width: 48%;">
+                            <span style="font-size: 30px;">🚑</span>
+                            <p style="color: #92400e; font-weight: 600; margin: 10px 0 5px 0; font-size: 14px;">Rezervišite Transport</p>
+                            <p style="color: #a16207; margin: 0; font-size: 12px;">Zakažite medicinski prevoz</p>
+                        </div>
+                        <div style="display: table-cell; width: 4%;"></div>
+                        <div style="display: table-cell; padding: 15px; background-color: #dbeafe; border-radius: 12px; text-align: center; width: 48%;">
+                            <span style="font-size: 30px;">📊</span>
+                            <p style="color: #1e40af; font-weight: 600; margin: 10px 0 5px 0; font-size: 14px;">Pratite Status</p>
+                            <p style="color: #3b82f6; margin: 0; font-size: 12px;">Ažuriranja u realnom vremenu</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: table; width: 100%; margin-top: 15px;">
+                    <div style="display: table-row;">
+                        <div style="display: table-cell; padding: 15px; background-color: #f3e8ff; border-radius: 12px; text-align: center; width: 48%;">
+                            <span style="font-size: 30px;">📜</span>
+                            <p style="color: #7c3aed; font-weight: 600; margin: 10px 0 5px 0; font-size: 14px;">Pregledajte Istoriju</p>
+                            <p style="color: #8b5cf6; margin: 0; font-size: 12px;">Pristupite prošlim rezervacijama</p>
+                        </div>
+                        <div style="display: table-cell; width: 4%;"></div>
+                        <div style="display: table-cell; padding: 15px; background-color: #dcfce7; border-radius: 12px; text-align: center; width: 48%;">
+                            <span style="font-size: 30px;">💬</span>
+                            <p style="color: #166534; font-weight: 600; margin: 10px 0 5px 0; font-size: 14px;">Dobijte Podršku</p>
+                            <p style="color: #22c55e; margin: 0; font-size: 12px;">24/7 pomoć</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- CTA Button -->
+                <div style="text-align: center; margin: 40px 0;">
+                    <a href="https://paramedic-care018.rs/login" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 50px; font-size: 18px; font-weight: 600; box-shadow: 0 4px 20px rgba(14, 165, 233, 0.4);">
+                        Idi na Moj Panel →
+                    </a>
+                </div>
+                
+                <!-- Emergency Contact -->
+                <div style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-radius: 12px; padding: 20px; margin: 20px 0; text-align: center;">
+                    <p style="margin: 0 0 10px 0; color: #991b1b; font-weight: 600;">🚨 Hitna linija</p>
+                    <p style="margin: 0; color: #dc2626; font-size: 24px; font-weight: 700;">+381 18 123 456</p>
+                    <p style="margin: 5px 0 0 0; color: #7f1d1d; font-size: 12px;">Dostupno 24/7</p>
+                </div>
+                
+                <p style="color: #334155; line-height: 1.8; margin-top: 30px; font-size: 16px;">Hvala vam što ste izabrali Paramedic Care 018. Tu smo za vas kad god vam zatrebamo.</p>
+                
+                <p style="color: #334155; line-height: 1.6; margin-top: 20px;">Srdačan pozdrav,<br><strong style="color: #0ea5e9;">Tim Paramedic Care 018</strong></p>
             </div>
             {get_email_footer("sr")}
         </body>
