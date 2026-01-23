@@ -21,6 +21,7 @@ import {
   TableRow,
 } from '../components/ui/table';
 import { Badge } from '../components/ui/badge';
+import { Tabs, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { 
   Loader2,
