@@ -430,6 +430,112 @@ def get_email_footer(language: str = "sr"):
         </div>
         """
 
+def get_verification_email_template(full_name: str, verification_link: str, language: str = "sr"):
+    """Email template for email verification"""
+    if language == "en":
+        subject = "Verify Your Email - Paramedic Care 018"
+        body = f"""
+        <html>
+        <body style="font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background-color: #f0f4f8;">
+            {get_email_header()}
+            <div style="padding: 40px 30px; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+                <!-- Icon -->
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); border-radius: 50%; padding: 20px; box-shadow: 0 10px 40px rgba(14, 165, 233, 0.3);">
+                        <span style="font-size: 40px;">✉️</span>
+                    </div>
+                </div>
+                
+                <!-- Title -->
+                <h1 style="color: #0f172a; margin-bottom: 10px; text-align: center; font-size: 28px; font-weight: 700;">Verify Your Email</h1>
+                <p style="color: #64748b; text-align: center; font-size: 16px; margin-bottom: 30px;">One more step to complete your registration</p>
+                
+                <!-- Greeting -->
+                <p style="color: #334155; line-height: 1.8; font-size: 16px;">Hello <strong style="color: #0ea5e9;">{full_name}</strong>,</p>
+                <p style="color: #334155; line-height: 1.8; font-size: 16px;">Thank you for registering with Paramedic Care 018! To complete your registration and access all features, please verify your email address by clicking the button below:</p>
+                
+                <!-- CTA Button -->
+                <div style="text-align: center; margin: 40px 0;">
+                    <a href="{verification_link}" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 50px; font-size: 18px; font-weight: 600; box-shadow: 0 4px 20px rgba(14, 165, 233, 0.4); transition: all 0.3s;">
+                        ✓ Verify My Email
+                    </a>
+                </div>
+                
+                <!-- Alternative Link -->
+                <div style="background-color: #f8fafc; border-radius: 12px; padding: 20px; margin: 30px 0;">
+                    <p style="color: #64748b; font-size: 14px; margin: 0 0 10px 0;">If the button doesn't work, copy and paste this link into your browser:</p>
+                    <p style="color: #0ea5e9; font-size: 12px; word-break: break-all; margin: 0; background-color: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">{verification_link}</p>
+                </div>
+                
+                <!-- Security Note -->
+                <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 20px; margin: 20px 0;">
+                    <p style="margin: 0; color: #92400e; font-size: 14px;">
+                        <strong>⚠️ Security Note:</strong> This verification link will expire in 24 hours. If you didn't create an account with us, please ignore this email.
+                    </p>
+                </div>
+                
+                <!-- Footer Message -->
+                <p style="color: #64748b; font-size: 14px; text-align: center; margin-top: 30px;">
+                    Need help? Contact us at <a href="mailto:info@paramedic-care018.rs" style="color: #0ea5e9;">info@paramedic-care018.rs</a>
+                </p>
+            </div>
+            {get_email_footer("en")}
+        </body>
+        </html>
+        """
+    else:
+        subject = "Potvrdite Vašu Email Adresu - Paramedic Care 018"
+        body = f"""
+        <html>
+        <body style="font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background-color: #f0f4f8;">
+            {get_email_header()}
+            <div style="padding: 40px 30px; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+                <!-- Icon -->
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); border-radius: 50%; padding: 20px; box-shadow: 0 10px 40px rgba(14, 165, 233, 0.3);">
+                        <span style="font-size: 40px;">✉️</span>
+                    </div>
+                </div>
+                
+                <!-- Title -->
+                <h1 style="color: #0f172a; margin-bottom: 10px; text-align: center; font-size: 28px; font-weight: 700;">Potvrdite Vašu Email Adresu</h1>
+                <p style="color: #64748b; text-align: center; font-size: 16px; margin-bottom: 30px;">Još jedan korak do završetka registracije</p>
+                
+                <!-- Greeting -->
+                <p style="color: #334155; line-height: 1.8; font-size: 16px;">Poštovani/a <strong style="color: #0ea5e9;">{full_name}</strong>,</p>
+                <p style="color: #334155; line-height: 1.8; font-size: 16px;">Hvala vam što ste se registrovali na Paramedic Care 018! Da biste završili registraciju i pristupili svim funkcijama, molimo vas da potvrdite vašu email adresu klikom na dugme ispod:</p>
+                
+                <!-- CTA Button -->
+                <div style="text-align: center; margin: 40px 0;">
+                    <a href="{verification_link}" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 50px; font-size: 18px; font-weight: 600; box-shadow: 0 4px 20px rgba(14, 165, 233, 0.4); transition: all 0.3s;">
+                        ✓ Potvrdi Email
+                    </a>
+                </div>
+                
+                <!-- Alternative Link -->
+                <div style="background-color: #f8fafc; border-radius: 12px; padding: 20px; margin: 30px 0;">
+                    <p style="color: #64748b; font-size: 14px; margin: 0 0 10px 0;">Ako dugme ne radi, kopirajte i nalepite ovaj link u vaš pretraživač:</p>
+                    <p style="color: #0ea5e9; font-size: 12px; word-break: break-all; margin: 0; background-color: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">{verification_link}</p>
+                </div>
+                
+                <!-- Security Note -->
+                <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 20px; margin: 20px 0;">
+                    <p style="margin: 0; color: #92400e; font-size: 14px;">
+                        <strong>⚠️ Bezbednosna napomena:</strong> Ovaj link za verifikaciju ističe za 24 sata. Ako niste kreirali nalog kod nas, molimo vas da ignorišete ovaj email.
+                    </p>
+                </div>
+                
+                <!-- Footer Message -->
+                <p style="color: #64748b; font-size: 14px; text-align: center; margin-top: 30px;">
+                    Potrebna vam je pomoć? Kontaktirajte nas na <a href="mailto:info@paramedic-care018.rs" style="color: #0ea5e9;">info@paramedic-care018.rs</a>
+                </p>
+            </div>
+            {get_email_footer("sr")}
+        </body>
+        </html>
+        """
+    return subject, body
+
 def get_registration_email_template(full_name: str, email: str, language: str = "sr"):
     """Email template for successful registration"""
     if language == "en":
