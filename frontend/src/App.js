@@ -130,6 +130,9 @@ function App() {
               {/* Medical Dashboard without header/footer */}
               <Route path="/medical" element={<MedicalRoute><MedicalDashboard /></MedicalRoute>} />
               
+              {/* Medical Staff PWA without header/footer */}
+              <Route path="/medical-pwa" element={<MedicalRoute><MedicalStaffPWA /></MedicalRoute>} />
+              
               {/* Public pages with header/footer */}
               <Route
                 path="*"
