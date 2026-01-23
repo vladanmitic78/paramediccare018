@@ -219,6 +219,53 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
    - Completed/cancelled bookings show "—" instead of dropdown
    - Status dots (green=available, gray=offline) in dropdown
 
+### Phase 6 - Staff Availability Calendar (NEW - Jan 23, 2026) ✅
+
+#### Staff Availability Features (COMPLETE)
+1. **Calendar Views**
+   - Week view with 7-day grid showing all availability slots
+   - Month view with full calendar grid
+   - "Today" button for quick navigation
+   - Previous/Next navigation for weeks and months
+
+2. **Availability Management**
+   - Add availability slots via dialog (date, time range, status, notes)
+   - Edit existing slots (change time, status, notes)
+   - Delete slots with confirmation
+   - **Repeat weekly** feature - create same slot for 5 weeks (1 + 4)
+
+3. **Status Types**
+   - Available (green) - Staff is available for work
+   - Unavailable (red) - Staff cannot work
+   - On Leave (amber) - Staff is on scheduled leave
+   - Sick Leave (purple) - Staff is on sick leave
+
+4. **Role-Based Access**
+   - Staff (drivers, doctors, nurses, admins) can create/edit their own availability
+   - Patients cannot access availability features (returns 403)
+   - Admin can view ALL staff availability with filters
+
+5. **Admin Features**
+   - Filter by staff member (dropdown with all staff)
+   - Filter by role (driver, doctor, nurse, admin)
+   - View aggregated team availability
+   - Color-coded slots by status
+
+6. **Visual Design**
+   - Color-coded status indicators with legend
+   - Role icons on slots (truck for drivers, stethoscope for doctors, etc.)
+   - Time display on each slot
+   - Click on date to add new slot
+   - Click on slot to edit
+
+7. **API Endpoints**
+   - `POST /api/staff/availability` - Create availability slot(s)
+   - `GET /api/staff/availability` - Get user's own availability
+   - `PUT /api/staff/availability/{slot_id}` - Update availability slot
+   - `DELETE /api/staff/availability/{slot_id}` - Delete availability slot
+   - `GET /api/admin/staff-availability` - Get all staff availability (admin only)
+   - `GET /api/admin/staff-list` - Get list of all staff members
+
 ### Technology Stack
 - Frontend: React with Tailwind CSS, Shadcn UI, react-leaflet
 - Backend: FastAPI with MongoDB
