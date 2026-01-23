@@ -243,11 +243,11 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
 - [x] **Patient Portal (Dashboard, Bookings, Invoices, Profile, Notifications)**
 - [x] **Driver App PWA** (NEW - Jan 23, 2026) ✅
 - [x] **Admin Live Map** (NEW - Jan 23, 2026) ✅
+- [x] **Driver Assignment System** (NEW - Jan 23, 2026) ✅
 
 ### P1 (Next Up)
 - [ ] Integrate live data into Operations Dashboard (replace mocked data)
 - [ ] Push notifications (browser)
-- [ ] Driver assignment from Admin Live Map
 
 ### P2 (Future)
 - [ ] Electronic Medical Records (EMR)
