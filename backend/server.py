@@ -1346,6 +1346,77 @@ async def seed_page_content(user: dict = Depends(require_roles([UserRole.ADMIN, 
     await db.page_content.insert_many(default_content)
     return {"message": "Content seeded successfully", "count": len(default_content)}
 
+# ============ FILE UPLOAD ============
+
+ALLOWED_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'}
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+
+@api_router.post("/upload/image")
+async def upload_image(
+    file: UploadFile = File(...),
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Upload an image file and return the URL"""
+    # Validate file extension
+    file_ext = Path(file.filename).suffix.lower()
+    if file_ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"File type not allowed. Allowed types: {', '.join(ALLOWED_EXTENSIONS)}"
+        )
+    
+    # Read file content to check size
+    content = await file.read()
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=400,
+            detail=f"File too large. Maximum size is {MAX_FILE_SIZE // (1024*1024)}MB"
+        )
+    
+    # Generate unique filename
+    unique_id = str(uuid.uuid4())[:8]
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    safe_filename = f"{timestamp}_{unique_id}{file_ext}"
+    
+    # Save file
+    file_path = UPLOADS_DIR / safe_filename
+    with open(file_path, "wb") as f:
+        f.write(content)
+    
+    # Return the URL (relative to API)
+    # The URL will be accessible via /uploads/filename
+    image_url = f"/uploads/{safe_filename}"
+    
+    logger.info(f"Image uploaded: {safe_filename} by {user.get('email', 'unknown')}")
+    
+    return {
+        "success": True,
+        "filename": safe_filename,
+        "url": image_url,
+        "size": len(content),
+        "type": file.content_type
+    }
+
+@api_router.delete("/upload/image/{filename}")
+async def delete_image(
+    filename: str,
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Delete an uploaded image"""
+    file_path = UPLOADS_DIR / filename
+    
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Image not found")
+    
+    # Security check - ensure the file is in the uploads directory
+    if not str(file_path.resolve()).startswith(str(UPLOADS_DIR.resolve())):
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    file_path.unlink()
+    logger.info(f"Image deleted: {filename} by {user.get('email', 'unknown')}")
+    
+    return {"success": True, "message": "Image deleted"}
+
 # ============ SERVICES MANAGEMENT ============
 
 @api_router.get("/services")
