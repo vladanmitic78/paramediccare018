@@ -1314,6 +1314,23 @@ const MedicalDashboard = () => {
           </div>
         </DialogContent>
       </Dialog>
+      
+      {/* Transport Vitals Dialog */}
+      <TransportVitalsDialog
+        isOpen={transportVitalsOpen}
+        onClose={() => {
+          setTransportVitalsOpen(false);
+          setSelectedTransport(null);
+        }}
+        bookingId={selectedTransport?.id}
+        patientName={selectedTransport?.patient_name}
+        language={language}
+        darkMode={darkMode}
+        onSuccess={() => fetchDashboard()}
+      />
+      
+      {/* Critical Alerts Panel */}
+      <CriticalAlertsPanel language={language} darkMode={darkMode} />
     </div>
   );
 };
