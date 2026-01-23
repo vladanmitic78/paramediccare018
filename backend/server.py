@@ -846,6 +846,7 @@ async def register(user_data: UserCreate):
         raise HTTPException(status_code=400, detail="Email already registered")
     
     user_id = str(uuid.uuid4())
+    registration_time = datetime.now(timezone.utc)
     user_doc = {
         "id": user_id,
         "email": user_data.email,
@@ -855,13 +856,27 @@ async def register(user_data: UserCreate):
         "role": user_data.role if user_data.role in [UserRole.REGULAR] else UserRole.REGULAR,
         "language": user_data.language,
         "is_active": True,
-        "created_at": datetime.now(timezone.utc).isoformat()
+        "created_at": registration_time.isoformat()
     }
     await db.users.insert_one(user_doc)
     
-    # Send welcome email
+    # Send welcome email to user
     subject, body = get_registration_email_template(user_data.full_name, user_data.email, user_data.language)
     await send_email(user_data.email, subject, body)
+    
+    # Send notification email to admin (info@paramedic-care018.rs)
+    # Use Serbian as default admin language, but can be configured
+    admin_email = "info@paramedic-care018.rs"
+    admin_language = "sr"  # Admin notification in Serbian by default
+    formatted_time = registration_time.strftime("%d.%m.%Y %H:%M")
+    admin_subject, admin_body = get_admin_new_user_notification_template(
+        user_data.full_name, 
+        user_data.email, 
+        user_data.phone or "N/A",
+        formatted_time,
+        admin_language
+    )
+    await send_email(admin_email, admin_subject, admin_body)
     
     token = create_token(user_id, user_doc["role"])
     user_response = {k: v for k, v in user_doc.items() if k != "password" and k != "_id"}
