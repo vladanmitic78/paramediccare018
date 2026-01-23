@@ -2767,7 +2767,7 @@ async def update_driver_status(
                 })
     
     # Broadcast to admins
-    await ws_manager.broadcast_to_admins({
+    await manager.broadcast_to_admins({
         "type": "driver_status_update",
         "driver_id": user["id"],
         "driver_name": user.get("full_name"),
@@ -2812,7 +2812,7 @@ async def update_driver_location(
         })
     
     # Broadcast to admins for live map
-    await ws_manager.broadcast_to_admins({
+    await manager.broadcast_to_admins({
         "type": "location_update",
         "driver_id": user["id"],
         "driver_name": user.get("full_name"),
@@ -2906,7 +2906,7 @@ async def accept_assignment(
         })
     
     # Broadcast to admins
-    await ws_manager.broadcast_to_admins({
+    await manager.broadcast_to_admins({
         "type": "driver_accepted",
         "driver_id": user["id"],
         "driver_name": user.get("full_name"),
@@ -2965,7 +2965,7 @@ async def reject_assignment(
     )
     
     # Broadcast to admins so they can reassign
-    await ws_manager.broadcast_to_admins({
+    await manager.broadcast_to_admins({
         "type": "driver_rejected",
         "driver_id": user["id"],
         "driver_name": user.get("full_name"),
@@ -3016,7 +3016,7 @@ async def complete_transport(
         })
     
     # Broadcast to admins
-    await ws_manager.broadcast_to_admins({
+    await manager.broadcast_to_admins({
         "type": "transport_completed",
         "driver_id": user["id"],
         "driver_name": user.get("full_name"),
@@ -3066,7 +3066,7 @@ async def assign_driver_to_booking(
     
     # Notify driver via WebSocket
     booking = await db.patient_bookings.find_one({"id": booking_id}, {"_id": 0})
-    await ws_manager.send_to_driver(driver_id, {
+    await manager.send_to_driver(driver_id, {
         "type": "new_assignment",
         "booking": booking
     })
@@ -3119,7 +3119,7 @@ async def assign_driver_to_public_booking(
     booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
     
     # Notify driver via WebSocket
-    await ws_manager.send_to_driver(driver_id, {
+    await manager.send_to_driver(driver_id, {
         "type": "new_assignment",
         "booking": booking
     })
@@ -3149,7 +3149,7 @@ async def get_all_drivers(user: dict = Depends(require_roles([UserRole.ADMIN, Us
 @app.websocket("/ws/driver/{driver_id}")
 async def websocket_driver(websocket: WebSocket, driver_id: str):
     """WebSocket connection for driver app"""
-    await ws_manager.connect_driver(websocket, driver_id)
+    await manager.connect_driver(websocket, driver_id)
     try:
         while True:
             data = await websocket.receive_json()
@@ -3175,7 +3175,7 @@ async def websocket_driver(websocket: WebSocket, driver_id: str):
                 driver = await db.users.find_one({"id": driver_id})
                 driver_status = await db.driver_status.find_one({"driver_id": driver_id})
                 
-                await ws_manager.broadcast_to_admins({
+                await manager.broadcast_to_admins({
                     "type": "location_update",
                     "driver_id": driver_id,
                     "driver_name": driver.get("full_name") if driver else "Unknown",
@@ -3185,7 +3185,7 @@ async def websocket_driver(websocket: WebSocket, driver_id: str):
                 })
                 
     except WebSocketDisconnect:
-        ws_manager.disconnect_driver(driver_id)
+        manager.disconnect_driver(driver_id)
         # Set driver offline
         await db.driver_status.update_one(
             {"driver_id": driver_id},
@@ -3196,7 +3196,7 @@ async def websocket_driver(websocket: WebSocket, driver_id: str):
 @app.websocket("/ws/admin/live-map")
 async def websocket_admin_live_map(websocket: WebSocket):
     """WebSocket connection for admin live map"""
-    await ws_manager.connect_admin(websocket)
+    await manager.connect_admin(websocket)
     try:
         # Send current state of all drivers
         drivers = await db.users.find({"role": UserRole.DRIVER}, {"_id": 0, "password": 0}).to_list(100)
@@ -3216,7 +3216,7 @@ async def websocket_admin_live_map(websocket: WebSocket):
             # Keep connection alive
             await websocket.receive_text()
     except WebSocketDisconnect:
-        ws_manager.disconnect_admin(websocket)
+        manager.disconnect_admin(websocket)
 
 # ============ CONTACT ROUTES ============
 
