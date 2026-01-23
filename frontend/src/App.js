@@ -26,6 +26,9 @@ import PatientInvoices from "./pages/PatientInvoices";
 import PatientProfile from "./pages/PatientProfile";
 import PatientNotifications from "./pages/PatientNotifications";
 
+// Driver App
+import DriverDashboard from "./pages/DriverDashboard";
+
 // Protected Route for Patient Portal
 const PatientRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -40,6 +43,30 @@ const PatientRoute = ({ children }) => {
   
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+  
+  return children;
+};
+
+// Protected Route for Driver App
+const DriverRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-400"></div>
+      </div>
+    );
+  }
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  // Check if user is a driver
+  if (user.role !== 'driver') {
+    return <Navigate to="/" replace />;
   }
   
   return children;
@@ -66,6 +93,9 @@ function App() {
               <Route path="/patient/invoices" element={<PatientRoute><PatientInvoices /></PatientRoute>} />
               <Route path="/patient/profile" element={<PatientRoute><PatientProfile /></PatientRoute>} />
               <Route path="/patient/notifications" element={<PatientRoute><PatientNotifications /></PatientRoute>} />
+              
+              {/* Driver App without header/footer */}
+              <Route path="/driver" element={<DriverRoute><DriverDashboard /></DriverRoute>} />
               
               {/* Public pages with header/footer */}
               <Route
