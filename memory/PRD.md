@@ -322,6 +322,33 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
 - `GET /api/medical/checks` - List medical checks
 - `POST /api/medical/checks/{id}/sign` - Doctor sign check
 
+### Phase 8 - Medical Staff PWA (NEW - Jan 23, 2026) ✅
+
+#### Mobile-First PWA for Medical Staff
+1. **Access** - `/medical-pwa` route, accessible by doctor, nurse, admin, superadmin
+2. **Transport Selection**
+   - Displays list of active transports
+   - Shows patient name, address, phone, status
+   - Touch-friendly transport cards
+3. **Vital Signs Entry Form**
+   - Extra large inputs (h-16) designed for gloved hands in shaking ambulance
+   - Fields: BP (systolic/diastolic), Heart Rate, SpO₂, Respiratory Rate, Temperature, GCS, AVPU consciousness level
+   - Critical value detection with red highlight and pulse animation
+   - Quick preset buttons: "Normal Values" (fills 120/80, 75, 98, 16, 36.6, 15, alert), "Clear All"
+   - Notes field for additional observations
+4. **Save & Alert System**
+   - Big red SAVE button (h-20) fixed at bottom
+   - Saves via `POST /api/transport/vitals`
+   - Critical values automatically trigger alerts for admin dashboard
+   - "Last saved" timestamp indicator
+
+### Bug Fixes - Jan 23, 2026
+
+1. **User Registration Role Bug (FIXED)** ✅
+   - **Issue:** `POST /api/auth/register` ignored the `role` field, defaulting all users to "regular"
+   - **Fix:** Updated line 1447 in server.py to allow roles: doctor, nurse, driver during registration
+   - **Verification:** Tested registration with all allowed roles - now correctly assigned
+
 ### Technology Stack
 - Frontend: React with Tailwind CSS, Shadcn UI, react-leaflet
 - Backend: FastAPI with MongoDB
