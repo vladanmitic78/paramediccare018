@@ -41,6 +41,7 @@ import {
   LogOut,
   Moon,
   Sun,
+  Globe,
   ChevronRight,
   AlertCircle,
   Loader2,
