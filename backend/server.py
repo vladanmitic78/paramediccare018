@@ -1003,12 +1003,6 @@ async def update_user(user_id: str, role: str = None, is_active: bool = None, ad
         await db.users.update_one({"id": user_id}, {"$set": update_doc})
     return {"success": True}
 
-class RoleUpdate(BaseModel):
-    role: str
-
-class StatusUpdate(BaseModel):
-    is_active: bool
-
 @api_router.put("/users/{user_id}/role")
 async def update_user_role(user_id: str, data: RoleUpdate, admin: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))):
     # Check if trying to set superadmin role - only superadmin can do that
