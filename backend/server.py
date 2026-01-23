@@ -626,10 +626,15 @@ async def register(user_data: UserCreate):
         "full_name": user_data.full_name,
         "phone": user_data.phone,
         "role": user_data.role if user_data.role in [UserRole.REGULAR] else UserRole.REGULAR,
+        "language": user_data.language,
         "is_active": True,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.users.insert_one(user_doc)
+    
+    # Send welcome email
+    subject, body = get_registration_email_template(user_data.full_name, user_data.email, user_data.language)
+    await send_email(user_data.email, subject, body)
     
     token = create_token(user_id, user_doc["role"])
     user_response = {k: v for k, v in user_doc.items() if k != "password" and k != "_id"}
