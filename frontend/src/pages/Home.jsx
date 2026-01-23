@@ -305,37 +305,23 @@ const Home = () => {
       </section>
 
       {/* Image Gallery */}
-      <section className="section-spacing bg-slate-50">
+      <section className="section-spacing bg-slate-50" data-testid="gallery-section">
         <div className="section-container">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
+              {galleryTitle}
+            </h2>
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="rounded-xl overflow-hidden col-span-2 row-span-2">
-              <img
-                src="https://images.pexels.com/photos/6519910/pexels-photo-6519910.jpeg"
-                alt="Paramedic team"
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-              />
-            </div>
-            <div className="rounded-xl overflow-hidden">
-              <img
-                src="https://images.pexels.com/photos/4173251/pexels-photo-4173251.jpeg"
-                alt="Doctor"
-                className="w-full h-48 object-cover hover:scale-105 transition-transform duration-500"
-              />
-            </div>
-            <div className="rounded-xl overflow-hidden">
-              <img
-                src="https://images.pexels.com/photos/9893525/pexels-photo-9893525.jpeg"
-                alt="Nurse"
-                className="w-full h-48 object-cover hover:scale-105 transition-transform duration-500"
-              />
-            </div>
-            <div className="rounded-xl overflow-hidden col-span-2">
-              <img
-                src="https://images.pexels.com/photos/263402/pexels-photo-263402.jpeg"
-                alt="Hospital"
-                className="w-full h-48 object-cover hover:scale-105 transition-transform duration-500"
-              />
-            </div>
+            {galleryImages.map((img, index) => (
+              <div key={index} className={`rounded-xl overflow-hidden ${img.className}`}>
+                <img
+                  src={img.src}
+                  alt={img.alt}
+                  className={`${img.imgClassName} hover:scale-105 transition-transform duration-500`}
+                />
+              </div>
+            ))}
           </div>
         </div>
       </section>
