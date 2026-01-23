@@ -31,7 +31,8 @@ def admin_token():
         "password": ADMIN_PASSWORD
     })
     assert response.status_code == 200, f"Admin login failed: {response.text}"
-    return response.json().get("token")
+    data = response.json()
+    return data.get("access_token") or data.get("token")
 
 
 @pytest.fixture(scope="module")
@@ -43,7 +44,8 @@ def doctor_token(admin_token):
         "password": DOCTOR_PASSWORD
     })
     if response.status_code == 200:
-        return response.json().get("token")
+        data = response.json()
+        return data.get("access_token") or data.get("token")
     
     # If doctor doesn't exist, create via admin
     create_response = requests.post(
@@ -64,7 +66,8 @@ def doctor_token(admin_token):
         "password": DOCTOR_PASSWORD
     })
     assert response.status_code == 200, f"Doctor login failed: {response.text}"
-    return response.json().get("token")
+    data = response.json()
+    return data.get("access_token") or data.get("token")
 
 
 @pytest.fixture(scope="module")
@@ -75,7 +78,8 @@ def driver_token():
         "password": DRIVER_PASSWORD
     })
     if response.status_code == 200:
-        return response.json().get("token")
+        data = response.json()
+        return data.get("access_token") or data.get("token")
     pytest.skip("Driver account not available")
 
 
