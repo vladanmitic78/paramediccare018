@@ -626,6 +626,47 @@ const Dashboard = () => {
                               </Badge>
                             </TableCell>
                             <TableCell>
+                              {booking.assigned_driver_name ? (
+                                <div className="flex items-center gap-2">
+                                  <Truck className="w-4 h-4 text-green-600" />
+                                  <span className="text-sm font-medium text-green-700">{booking.assigned_driver_name}</span>
+                                </div>
+                              ) : booking.status === 'completed' || booking.status === 'cancelled' ? (
+                                <span className="text-sm text-slate-400">—</span>
+                              ) : (
+                                <Select
+                                  onValueChange={(driverId) => assignDriverToBooking(booking.id, driverId)}
+                                  disabled={assigningDriver === booking.id}
+                                >
+                                  <SelectTrigger className="w-36" data-testid={`assign-driver-${booking.id}`}>
+                                    <SelectValue placeholder={
+                                      assigningDriver === booking.id 
+                                        ? (language === 'sr' ? 'Dodeljujem...' : 'Assigning...') 
+                                        : (language === 'sr' ? 'Dodeli vozača' : 'Assign Driver')
+                                    } />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {availableDrivers.length === 0 ? (
+                                      <SelectItem value="none" disabled>
+                                        {language === 'sr' ? 'Nema dostupnih vozača' : 'No available drivers'}
+                                      </SelectItem>
+                                    ) : (
+                                      availableDrivers.map((driver) => (
+                                        <SelectItem key={driver.id} value={driver.id}>
+                                          <div className="flex items-center gap-2">
+                                            <span className={`w-2 h-2 rounded-full ${
+                                              driver.driver_status === 'available' ? 'bg-green-500' : 'bg-slate-400'
+                                            }`} />
+                                            {driver.full_name}
+                                          </div>
+                                        </SelectItem>
+                                      ))
+                                    )}
+                                  </SelectContent>
+                                </Select>
+                              )}
+                            </TableCell>
+                            <TableCell>
                               <Select
                                 value={booking.status}
                                 onValueChange={(value) => updatePatientBookingStatus(booking.id, value)}
