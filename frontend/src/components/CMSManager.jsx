@@ -389,9 +389,16 @@ const CMSManager = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="home">{language === 'sr' ? 'Početna' : 'Home'}</SelectItem>
                     <SelectItem value="medical-care">{language === 'sr' ? 'Medicinska Nega' : 'Medical Care'}</SelectItem>
                     <SelectItem value="transport">Transport</SelectItem>
                     <SelectItem value="about">{language === 'sr' ? 'O Nama' : 'About Us'}</SelectItem>
+                    {isSuperAdmin && (
+                      <>
+                        <SelectItem value="header">Header</SelectItem>
+                        <SelectItem value="footer">Footer</SelectItem>
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
