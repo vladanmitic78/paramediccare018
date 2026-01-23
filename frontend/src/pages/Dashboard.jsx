@@ -636,14 +636,24 @@ const Dashboard = () => {
               {/* Patient Portal Bookings Section */}
               {patientBookings.length > 0 && (
                 <div className="card-base">
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
                     <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                       <Ambulance className="w-5 h-5 text-red-500" />
                       {language === 'sr' ? 'Rezervacije iz Patient Portala' : 'Patient Portal Bookings'}
+                      <Badge className="bg-red-100 text-red-700 ml-2">
+                        {patientBookings.filter(b => b.status === 'requested').length} {language === 'sr' ? 'novih' : 'new'}
+                      </Badge>
                     </h3>
-                    <Badge className="bg-red-100 text-red-700">
-                      {patientBookings.filter(b => b.status === 'requested').length} {language === 'sr' ? 'novih' : 'new'}
-                    </Badge>
+                    <div className="relative w-full sm:w-72">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <Input
+                        placeholder={language === 'sr' ? 'Pretraži rezervacije...' : 'Search bookings...'}
+                        value={patientBookingSearch}
+                        onChange={(e) => setPatientBookingSearch(e.target.value)}
+                        className="pl-9"
+                        data-testid="patient-booking-search"
+                      />
+                    </div>
                   </div>
                   <div className="overflow-x-auto">
                     <Table>
@@ -660,7 +670,7 @@ const Dashboard = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {patientBookings.map((booking) => (
+                        {filteredPatientBookings.map((booking) => (
                           <TableRow key={booking.id} className={booking.status === 'requested' ? 'bg-amber-50' : ''}>
                             <TableCell>
                               <div>
