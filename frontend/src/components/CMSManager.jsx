@@ -51,6 +51,7 @@ const CMSManager = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [content, setContent] = useState([]);
   const [selectedPage, setSelectedPage] = useState('home');
   const [editingItem, setEditingItem] = useState(null);
@@ -71,6 +72,7 @@ const CMSManager = () => {
   });
 
   const isSuperAdmin = user?.role === 'superadmin';
+  const fileInputRef = React.useRef(null);
 
   useEffect(() => {
     fetchContent();
