@@ -15,7 +15,11 @@ import {
   Phone,
   Mail,
   User,
-  FileText
+  FileText,
+  X,
+  File,
+  Image,
+  FileCheck
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -23,9 +27,21 @@ import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
+// Allowed file types
+const ALLOWED_TYPES = [
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
 const Booking = () => {
   const { language, t } = useLanguage();
   const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [success, setSuccess] = useState(false);
   const [date, setDate] = useState(null);
   const [startLocation, setStartLocation] = useState({ address: '', lat: null, lng: null });
@@ -37,13 +53,64 @@ const Booking = () => {
     notes: ''
   });
   const [files, setFiles] = useState([]);
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const validateFile = (file) => {
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      toast.error(language === 'sr' 
+        ? `Tip fajla ${file.name} nije podržan` 
+        : `File type ${file.name} is not supported`);
+      return false;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error(language === 'sr' 
+        ? `Fajl ${file.name} je prevelik (max 10MB)` 
+        : `File ${file.name} is too large (max 10MB)`);
+      return false;
+    }
+    return true;
+  };
+
   const handleFileChange = (e) => {
-    setFiles([...e.target.files]);
+    const newFiles = Array.from(e.target.files).filter(validateFile);
+    setFiles(prev => [...prev, ...newFiles]);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const newFiles = Array.from(e.dataTransfer.files).filter(validateFile);
+    setFiles(prev => [...prev, ...newFiles]);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const removeFile = (index) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const getFileIcon = (file) => {
+    if (file.type.startsWith('image/')) return <Image className="w-5 h-5 text-blue-500" />;
+    if (file.type === 'application/pdf') return <FileText className="w-5 h-5 text-red-500" />;
+    return <File className="w-5 h-5 text-slate-500" />;
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
 
   const handleSubmit = async (e) => {
@@ -55,15 +122,29 @@ const Booking = () => {
     }
 
     setLoading(true);
+    setUploadProgress(0);
+    
     try {
       // Upload files first if any
       const uploadedFileIds = [];
-      for (const file of files) {
+      const totalFiles = files.length;
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
         const formDataFile = new FormData();
         formDataFile.append('file', file);
-        const uploadRes = await axios.post(`${API}/upload`, formDataFile);
+        
+        const uploadRes = await axios.post(`${API}/upload`, formDataFile, {
+          onUploadProgress: (progressEvent) => {
+            const fileProgress = (progressEvent.loaded / progressEvent.total) * 100;
+            const overallProgress = ((i / totalFiles) * 100) + (fileProgress / totalFiles);
+            setUploadProgress(Math.round(overallProgress));
+          }
+        });
         uploadedFileIds.push(uploadRes.data.file_id);
       }
+      
+      setUploadProgress(100);
 
       // Create booking
       const bookingData = {
@@ -79,8 +160,8 @@ const Booking = () => {
         patient_name: formData.patient_name,
         notes: formData.notes,
         documents: uploadedFileIds,
-        booking_type: 'transport',  // Default to transport
-        language: language  // Pass current language for email template
+        booking_type: 'transport',
+        language: language
       };
 
       await axios.post(`${API}/bookings`, bookingData);
@@ -92,6 +173,7 @@ const Booking = () => {
       toast.error(language === 'sr' ? 'Greška pri slanju rezervacije' : 'Error submitting booking');
     } finally {
       setLoading(false);
+      setUploadProgress(0);
     }
   };
 
