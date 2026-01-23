@@ -325,7 +325,7 @@ const DriverDashboard = () => {
             {isTracking && (
               <Compass className="w-5 h-5 text-blue-400 animate-pulse" />
             )}
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-slate-400">
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-slate-400" data-testid="driver-logout-btn">
               <LogOut className="w-5 h-5" />
             </Button>
           </div>
@@ -343,6 +343,7 @@ const DriverDashboard = () => {
                 ? 'bg-green-600 hover:bg-green-700' 
                 : 'bg-slate-600 hover:bg-slate-700'
             }`}
+            data-testid={driverStatus === 'offline' ? 'driver-go-online-btn' : 'driver-go-offline-btn'}
           >
             {driverStatus === 'offline' 
               ? (language === 'sr' ? 'PRIJAVI SE NA POSAO' : 'GO ONLINE')
