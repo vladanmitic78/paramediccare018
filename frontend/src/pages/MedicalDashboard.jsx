@@ -133,6 +133,10 @@ const MedicalDashboard = () => {
   // Patient vitals history
   const [patientVitals, setPatientVitals] = useState([]);
   
+  // Transport vitals dialog
+  const [transportVitalsOpen, setTransportVitalsOpen] = useState(false);
+  const [selectedTransport, setSelectedTransport] = useState(null);
+  
   // Save dark mode preference
   useEffect(() => {
     localStorage.setItem('medicalDarkMode', darkMode.toString());
