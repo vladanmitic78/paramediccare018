@@ -275,6 +275,53 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
    - `GET /api/admin/staff-list` - Get list of all staff members
    - `POST /api/admin/staff-availability/create` - Admin create availability for any staff
 
+### Phase 7 - Medical Dashboard (NEW - Jan 23, 2026) ✅
+
+#### Phase 1: Foundation (COMPLETE)
+1. **Patient Medical Database**
+   - Full patient profiles with: name, DOB, gender, contact, address, blood type
+   - Height, weight, auto-calculated BMI
+   - Allergies (with severity: mild/moderate/severe)
+   - Chronic conditions (with diagnosis date)
+   - Current medications (dosage, frequency)
+   - Emergency contacts (with relationship)
+   - Optional photo upload
+   - Auto-generated Patient ID (PC018-P-XXXXX)
+
+2. **Doctor/Nurse Dashboard** (`/medical` route)
+   - Role-based access (doctor, nurse, admin, superadmin)
+   - Dashboard overview with stats (total patients, recent, active transports, critical alerts)
+   - Patient list with search functionality
+   - Patient detail view with all medical information
+   - Quick actions (new patient, record vitals)
+
+3. **Vital Signs Tracking**
+   - Record vitals: BP, HR, SpO₂, Temp, Respiratory Rate, Blood Glucose, Pain Score
+   - Auto-flagging of abnormal values: HIGH_BP, LOW_BP, TACHYCARDIA, BRADYCARDIA, LOW_SPO2, FEVER, HYPOTHERMIA
+   - Vitals history with color-coded status
+   - Measurement types: routine, emergency, transport
+
+4. **Dark Mode Toggle**
+   - Available for Medical Dashboard (stored in localStorage as medicalDarkMode)
+   - Available for Admin Dashboard (stored in localStorage as adminDarkMode)
+   - Persistent preference across sessions
+
+#### Medical API Endpoints
+- `GET /api/medical/dashboard` - Dashboard stats and data
+- `POST /api/medical/patients` - Create patient profile
+- `GET /api/medical/patients` - List patients with search/filters
+- `GET /api/medical/patients/{id}` - Get patient by ID
+- `PUT /api/medical/patients/{id}` - Update patient profile
+- `DELETE /api/medical/patients/{id}` - Delete patient (admin only)
+- `POST /api/medical/patients/{id}/photo` - Upload patient photo
+- `POST /api/medical/vitals` - Record vital signs
+- `GET /api/medical/vitals/{patient_id}` - Get vitals history
+- `GET /api/medical/vitals/{patient_id}/latest` - Get latest vitals
+- `GET /api/medical/alerts` - Get critical vitals alerts
+- `POST /api/medical/checks` - Create medical examination
+- `GET /api/medical/checks` - List medical checks
+- `POST /api/medical/checks/{id}/sign` - Doctor sign check
+
 ### Technology Stack
 - Frontend: React with Tailwind CSS, Shadcn UI, react-leaflet
 - Backend: FastAPI with MongoDB
