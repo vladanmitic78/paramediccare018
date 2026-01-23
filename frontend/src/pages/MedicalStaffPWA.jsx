@@ -286,52 +286,55 @@ const MedicalStaffPWA = () => {
           </div>
         ) : (
           /* Vital Signs Entry */
-          <div className="space-y-4">
+          <div className="space-y-5" data-testid="vitals-entry-view">
             {/* Back & Patient Info */}
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-3 mb-4 bg-slate-800 p-4 rounded-2xl" data-testid="patient-info-header">
               <Button 
                 variant="ghost" 
                 size="icon"
                 onClick={() => setSelectedTransport(null)}
-                className="text-slate-400"
+                className="text-slate-400 h-12 w-12"
+                data-testid="back-to-transports-btn"
               >
-                <ChevronLeft className="w-6 h-6" />
+                <ChevronLeft className="w-8 h-8" />
               </Button>
               <div className="flex-1">
-                <h2 className="font-bold text-lg">{selectedTransport.patient_name}</h2>
+                <h2 className="font-bold text-xl">{selectedTransport.patient_name}</h2>
                 <p className="text-sm text-slate-400">{selectedTransport.contact_phone}</p>
               </div>
-              <Badge className="bg-red-600 animate-pulse">
+              <Badge className="bg-red-600 animate-pulse text-base px-4 py-2">
                 {language === 'sr' ? 'TRANSPORT' : 'IN TRANSIT'}
               </Badge>
             </div>
 
-            {/* Quick Presets */}
-            <div className="grid grid-cols-2 gap-3 mb-4">
+            {/* Quick Presets - Big touch targets */}
+            <div className="grid grid-cols-2 gap-4 mb-4" data-testid="preset-buttons">
               <Button 
                 onClick={() => applyPreset('normal')}
-                className="h-12 bg-green-600 hover:bg-green-700 text-white font-semibold"
+                className="h-16 bg-green-600 hover:bg-green-700 text-white font-bold text-lg rounded-2xl shadow-lg"
+                data-testid="preset-normal-btn"
               >
                 {language === 'sr' ? 'Normalni parametri' : 'Normal Values'}
               </Button>
               <Button 
                 onClick={() => applyPreset('clear')}
                 variant="outline"
-                className="h-12 border-slate-600 text-slate-300"
+                className="h-16 border-2 border-slate-600 text-slate-300 text-lg font-bold rounded-2xl"
+                data-testid="preset-clear-btn"
               >
                 {language === 'sr' ? 'Obriši sve' : 'Clear All'}
               </Button>
             </div>
 
-            {/* Vital Signs Grid - Large Inputs */}
-            <div className="grid grid-cols-2 gap-4">
+            {/* Vital Signs Grid - Extra Large Inputs */}
+            <div className="grid grid-cols-2 gap-4" data-testid="vitals-grid">
               {/* Blood Pressure */}
-              <div className="col-span-2 bg-slate-800 rounded-xl p-4">
-                <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2">
-                  <Activity className="w-5 h-5 text-red-500" />
+              <div className="col-span-2 bg-slate-800 rounded-2xl p-5 shadow-lg" data-testid="bp-input-group">
+                <label className="flex items-center gap-2 text-base font-semibold text-slate-300 mb-3">
+                  <Activity className="w-6 h-6 text-red-500" />
                   {language === 'sr' ? 'Krvni pritisak' : 'Blood Pressure'} (mmHg)
                 </label>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4">
                   <Input
                     type="number"
                     inputMode="numeric"
@@ -339,8 +342,9 @@ const MedicalStaffPWA = () => {
                     onChange={(e) => setVitals({...vitals, systolic_bp: e.target.value})}
                     placeholder="120"
                     className={`${inputBigClass} flex-1 ${getInputStyle('systolic_bp', vitals.systolic_bp)}`}
+                    data-testid="systolic-bp-input"
                   />
-                  <span className="text-2xl text-slate-500">/</span>
+                  <span className="text-3xl text-slate-500 font-bold">/</span>
                   <Input
                     type="number"
                     inputMode="numeric"
@@ -348,14 +352,15 @@ const MedicalStaffPWA = () => {
                     onChange={(e) => setVitals({...vitals, diastolic_bp: e.target.value})}
                     placeholder="80"
                     className={`${inputBigClass} flex-1 ${getInputStyle('diastolic_bp', vitals.diastolic_bp)}`}
+                    data-testid="diastolic-bp-input"
                   />
                 </div>
               </div>
 
               {/* Heart Rate */}
-              <div className="bg-slate-800 rounded-xl p-4">
-                <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2">
-                  <Heart className="w-5 h-5 text-pink-500" />
+              <div className="bg-slate-800 rounded-2xl p-5 shadow-lg" data-testid="hr-input-group">
+                <label className="flex items-center gap-2 text-base font-semibold text-slate-300 mb-3">
+                  <Heart className="w-6 h-6 text-pink-500" />
                   {language === 'sr' ? 'Puls' : 'HR'} (bpm)
                 </label>
                 <Input
@@ -365,13 +370,14 @@ const MedicalStaffPWA = () => {
                   onChange={(e) => setVitals({...vitals, heart_rate: e.target.value})}
                   placeholder="75"
                   className={`${inputBigClass} ${getInputStyle('heart_rate', vitals.heart_rate)}`}
+                  data-testid="heart-rate-input"
                 />
               </div>
 
               {/* SpO2 */}
-              <div className="bg-slate-800 rounded-xl p-4">
-                <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2">
-                  <Wind className="w-5 h-5 text-blue-500" />
+              <div className="bg-slate-800 rounded-2xl p-5 shadow-lg" data-testid="spo2-input-group">
+                <label className="flex items-center gap-2 text-base font-semibold text-slate-300 mb-3">
+                  <Wind className="w-6 h-6 text-blue-500" />
                   SpO₂ (%)
                 </label>
                 <Input
@@ -381,13 +387,14 @@ const MedicalStaffPWA = () => {
                   onChange={(e) => setVitals({...vitals, oxygen_saturation: e.target.value})}
                   placeholder="98"
                   className={`${inputBigClass} ${getInputStyle('oxygen_saturation', vitals.oxygen_saturation)}`}
+                  data-testid="spo2-input"
                 />
               </div>
 
               {/* Respiratory Rate */}
-              <div className="bg-slate-800 rounded-xl p-4">
-                <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2">
-                  <Wind className="w-5 h-5 text-green-500" />
+              <div className="bg-slate-800 rounded-2xl p-5 shadow-lg" data-testid="rr-input-group">
+                <label className="flex items-center gap-2 text-base font-semibold text-slate-300 mb-3">
+                  <Wind className="w-6 h-6 text-green-500" />
                   {language === 'sr' ? 'Disanje' : 'RR'} (/min)
                 </label>
                 <Input
@@ -397,13 +404,14 @@ const MedicalStaffPWA = () => {
                   onChange={(e) => setVitals({...vitals, respiratory_rate: e.target.value})}
                   placeholder="16"
                   className={`${inputBigClass} ${getInputStyle('respiratory_rate', vitals.respiratory_rate)}`}
+                  data-testid="respiratory-rate-input"
                 />
               </div>
 
               {/* Temperature */}
-              <div className="bg-slate-800 rounded-xl p-4">
-                <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2">
-                  <Thermometer className="w-5 h-5 text-orange-500" />
+              <div className="bg-slate-800 rounded-2xl p-5 shadow-lg" data-testid="temp-input-group">
+                <label className="flex items-center gap-2 text-base font-semibold text-slate-300 mb-3">
+                  <Thermometer className="w-6 h-6 text-orange-500" />
                   {language === 'sr' ? 'Temp' : 'Temp'} (°C)
                 </label>
                 <Input
@@ -414,13 +422,14 @@ const MedicalStaffPWA = () => {
                   onChange={(e) => setVitals({...vitals, temperature: e.target.value})}
                   placeholder="36.6"
                   className={`${inputBigClass} ${getInputStyle('temperature', vitals.temperature)}`}
+                  data-testid="temperature-input"
                 />
               </div>
 
               {/* GCS */}
-              <div className="bg-slate-800 rounded-xl p-4">
-                <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2">
-                  <Brain className="w-5 h-5 text-purple-500" />
+              <div className="bg-slate-800 rounded-2xl p-5 shadow-lg" data-testid="gcs-input-group">
+                <label className="flex items-center gap-2 text-base font-semibold text-slate-300 mb-3">
+                  <Brain className="w-6 h-6 text-purple-500" />
                   GCS (3-15)
                 </label>
                 <Input
@@ -432,17 +441,18 @@ const MedicalStaffPWA = () => {
                   onChange={(e) => setVitals({...vitals, gcs_score: e.target.value})}
                   placeholder="15"
                   className={`${inputBigClass} ${getInputStyle('gcs_score', vitals.gcs_score)}`}
+                  data-testid="gcs-input"
                 />
               </div>
 
               {/* Consciousness - AVPU */}
-              <div className="bg-slate-800 rounded-xl p-4">
-                <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2">
-                  <User className="w-5 h-5 text-sky-500" />
+              <div className="bg-slate-800 rounded-2xl p-5 shadow-lg" data-testid="avpu-input-group">
+                <label className="flex items-center gap-2 text-base font-semibold text-slate-300 mb-3">
+                  <User className="w-6 h-6 text-sky-500" />
                   AVPU
                 </label>
                 <Select value={vitals.consciousness} onValueChange={(v) => setVitals({...vitals, consciousness: v})}>
-                  <SelectTrigger className="h-14 text-lg bg-slate-700 border-slate-600 text-white">
+                  <SelectTrigger className="h-16 text-xl bg-slate-700 border-2 border-slate-600 text-white rounded-2xl" data-testid="avpu-select">
                     <SelectValue placeholder="?" />
                   </SelectTrigger>
                   <SelectContent>
@@ -456,22 +466,23 @@ const MedicalStaffPWA = () => {
             </div>
 
             {/* Notes */}
-            <div className="bg-slate-800 rounded-xl p-4">
-              <label className="text-sm font-medium text-slate-300 mb-2 block">
+            <div className="bg-slate-800 rounded-2xl p-5 shadow-lg" data-testid="notes-input-group">
+              <label className="text-base font-semibold text-slate-300 mb-3 block">
                 {language === 'sr' ? 'Napomena' : 'Notes'}
               </label>
               <Input
                 value={vitals.notes}
                 onChange={(e) => setVitals({...vitals, notes: e.target.value})}
                 placeholder={language === 'sr' ? 'Dodatne napomene...' : 'Additional notes...'}
-                className="h-12 bg-slate-700 border-slate-600 text-white"
+                className="h-14 text-lg bg-slate-700 border-2 border-slate-600 text-white rounded-2xl"
+                data-testid="notes-input"
               />
             </div>
 
             {/* Last Saved Indicator */}
             {lastSaved && (
-              <div className="flex items-center justify-center gap-2 text-green-400 text-sm">
-                <CheckCircle className="w-4 h-4" />
+              <div className="flex items-center justify-center gap-2 text-green-400 text-base font-semibold" data-testid="last-saved-indicator">
+                <CheckCircle className="w-5 h-5" />
                 {language === 'sr' ? 'Poslednje čuvanje' : 'Last saved'}: {lastSaved.toLocaleTimeString()}
               </div>
             )}
