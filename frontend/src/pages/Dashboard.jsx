@@ -55,6 +55,7 @@ import {
 import { toast } from 'sonner';
 import axios from 'axios';
 import DashboardLayout from '../components/layout/DashboardLayout';
+import OperationsDashboard from '../components/OperationsDashboard';
 import CMSManager from '../components/CMSManager';
 import AdminBookingNotifications from '../components/AdminBookingNotifications';
 import InvoiceManager from '../components/InvoiceManager';
