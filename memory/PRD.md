@@ -104,7 +104,8 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
 - [x] Admin CMS (Home, Medical Care, Transport, About)
 - [x] Super Admin CMS extension (Header, Footer editing)
 - [x] CMS image upload feature (jpeg, png, gif, webp, svg, max 5MB)
-- [x] **CMS content wired to public pages (Home, Header, Footer)**
+- [x] **CMS wired to all public pages (Home, Header, Footer, Medical Care, Transport)**
+- [x] **Gallery images aligned with consistent sizing**
 - [x] Operations Dashboard with Transportation/Medical Care views
 - [x] Fullscreen map toggle
 - [x] Company logo integration in dashboard
