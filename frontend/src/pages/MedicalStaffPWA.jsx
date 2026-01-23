@@ -420,6 +420,29 @@ const MedicalStaffPWA = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {/* Online/Offline Status */}
+          <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium ${
+            isOnline ? 'bg-green-900/50 text-green-400' : 'bg-red-900/50 text-red-400'
+          }`} data-testid="online-status">
+            {isOnline ? <Wifi className="w-4 h-4" /> : <WifiOff className="w-4 h-4" />}
+            {isOnline ? 'Online' : 'Offline'}
+          </div>
+          
+          {/* Pending Sync Count */}
+          {pendingCount > 0 && (
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={syncPendingVitals}
+              disabled={!isOnline || syncing}
+              className="text-amber-400 gap-1 px-2"
+              data-testid="sync-pending-btn"
+            >
+              {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <CloudOff className="w-4 h-4" />}
+              <span className="text-xs">{pendingCount}</span>
+            </Button>
+          )}
+          
           <Button variant="ghost" size="icon" onClick={toggleLanguage} className="text-slate-400" data-testid="language-toggle-btn">
             <Globe className="w-5 h-5" />
           </Button>
@@ -431,6 +454,16 @@ const MedicalStaffPWA = () => {
           </Button>
         </div>
       </header>
+
+      {/* Offline Banner */}
+      {!isOnline && (
+        <div className="bg-amber-600 px-4 py-2 flex items-center justify-center gap-2 text-white text-sm font-medium" data-testid="offline-banner">
+          <WifiOff className="w-4 h-4" />
+          {language === 'sr' 
+            ? 'Offline režim - podaci se čuvaju lokalno i sinhronizuju automatski' 
+            : 'Offline mode - data saved locally and syncs automatically'}
+        </div>
+      )}
 
       <main className="p-4 pb-28" data-testid="pwa-main-content">
         {/* Transport Selection */}
