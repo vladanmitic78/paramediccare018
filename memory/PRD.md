@@ -3,9 +3,11 @@
 ## Original Problem Statement
 Build a medical platform called "Paramedic Care 018" for urgent medical care and patient transportation services in Serbia.
 
-## What's Been Implemented (Phase 1) - January 2026
+## What's Been Implemented
 
-### Core Features
+### Phase 1 - January 2026 (Complete)
+
+#### Core Features
 1. **Multilingual Website (SR/EN)**
    - Serbian as default language
    - English translation
@@ -31,12 +33,9 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
    - Super Admin can edit: All Admin pages + Header and Footer
    - Bilingual content editing (Serbian/English)
    - Section-based organization with ordering
-   - **Image Upload Feature:** Upload images from local computer (jpeg, png, gif, webp, svg, max 5MB)
-   - Image URL input for external images
+   - Image Upload Feature (jpeg, png, gif, webp, svg, max 5MB)
    - Icon support for sections
    - Active/Inactive toggle for content visibility
-   - Lock icon indicator for Super Admin only sections
-   - Purple banner warning for global sections (Header/Footer)
 
 5. **Admin Dashboard**
    - Two main views: Operations and Administration
@@ -44,43 +43,68 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
    - Booking management
    - User management
    - Contact messages
-   - Services management
-   - Company logo in sidebar
 
-6. **Operations Dashboard (NEW - Jan 22, 2026)**
-   - Transportation Command view with:
-     - Large fleet map (3 columns) with fullscreen toggle
-     - Compact mission timeline (1 column)
-     - Live booking status from API
-     - Fleet statistics
-   - Medical Care view with:
-     - Patient vital signs monitoring (HR, BP, SpO2, Temp)
-     - Critical/Stable patient status indicators
-     - Medical protocols quick access
-     - Doctor consultation feature
-   - Tab switching between Transportation and Medical Care
+6. **Operations Dashboard**
+   - Transportation Command view with fleet map
+   - Medical Care view with patient monitoring
+   - Note: Still uses MOCKED data
 
-7. **Booking System**
-   - Start/End point with map selection
-   - Date picker
-   - Patient details
-   - Document upload feature
-   - Bilingual email confirmation to customer (SR/EN)
-   - Internal notification to staff
-
-8. **Email System (NEW - Jan 23, 2026)**
-   - All emails sent from: info@paramedic-care018.rs
+7. **Email System**
    - SMTP: mailcluster.loopia.se:465 (SSL)
-   - **Email Templates (Bilingual SR/EN):**
-     - Welcome email on successful registration
-     - Auto-reply on contact form submission
-     - Booking confirmation for Medical Care
-     - Booking confirmation for Transportation
-   - **Email Routing:**
-     - General Inquiry → info@paramedic-care018.rs
-     - Medical Care Inquiry → ambulanta@paramedic-care018.rs
-     - Transport Inquiry → transport@paramedic-care018.rs
-   - Templates automatically use user's selected language (SR/EN)
+   - Bilingual email templates (SR/EN)
+   - Email routing to appropriate departments
+
+### Phase 2 - Patient Portal (NEW - Jan 23, 2026) ✅
+
+#### Patient Portal Features (COMPLETE)
+1. **Authentication**
+   - Secure login/logout for patients
+   - Auto-redirect to /patient portal after login
+
+2. **Patient Dashboard** (`/patient`)
+   - Welcome message with user name
+   - "Book Medical Transport" primary action button
+   - Active booking status with progress tracker
+   - Quick action cards: My Bookings, Invoices, Notifications, Settings
+   - Emergency contact banner with click-to-call
+
+3. **New Booking Wizard** (`/patient/book`)
+   - 4-step wizard form:
+     - Step 1: Patient Information (name, age, phone, email)
+     - Step 2: Transport Need (reason dropdown, mobility status)
+     - Step 3: Transport Details (addresses, date, time)
+     - Step 4: Confirmation summary with consent
+   - Validation at each step
+   - Email notification to transport team
+   - In-app notification created
+
+4. **My Bookings** (`/patient/bookings`)
+   - List of all bookings with filter by status
+   - Booking cards with status, date, addresses
+   - Status: Requested → Confirmed → En Route → Picked Up → Completed
+
+5. **Booking Detail** (`/patient/bookings/:id`)
+   - Visual status progress tracker
+   - Location details (pickup/destination)
+   - Patient information summary
+   - Cancel booking functionality (if not dispatched)
+
+6. **Invoices & Billing** (`/patient/invoices`)
+   - List of invoices with payment status
+   - PDF download/print functionality
+   - Note: Invoices are created by Admin/Super Admin
+
+7. **Profile & Settings** (`/patient/profile`)
+   - Personal information management
+   - Saved addresses for quick booking
+   - Emergency contact configuration
+   - Language preference (SR/EN)
+
+8. **Notifications** (`/patient/notifications`)
+   - In-app notifications list
+   - Booking confirmations
+   - Status updates
+   - Mark as read functionality
 
 ### Technology Stack
 - Frontend: React with Tailwind CSS, Shadcn UI, react-leaflet
@@ -88,7 +112,7 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
 - Maps: OpenStreetMap via Leaflet
 
 ### User Personas
-1. **Patients/Families** - Need medical transport booking
+1. **Patients/Families** - Book and manage medical transport
 2. **Medical Staff** - View/manage assigned cases
 3. **Drivers** - View transport assignments
 4. **Admin** - Daily operations management
@@ -96,32 +120,21 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
 
 ## Prioritized Backlog
 
-### P0 (Phase 1 - Done)
+### P0 (Complete) ✅
 - [x] Multilingual website
-- [x] Public pages
+- [x] Public pages with CMS integration
 - [x] Booking form with maps
 - [x] Role-based auth
-- [x] Admin CMS (Home, Medical Care, Transport, About)
-- [x] Super Admin CMS extension (Header, Footer editing)
-- [x] CMS image upload feature (jpeg, png, gif, webp, svg, max 5MB)
-- [x] **CMS wired to all public pages (Home, Header, Footer, Medical Care, Transport)**
-- [x] **Gallery images aligned with consistent sizing**
-- [x] Operations Dashboard with Transportation/Medical Care views
-- [x] Fullscreen map toggle
-- [x] Company logo integration in dashboard
-- [x] Email system with bilingual templates (SR/EN)
-- [x] Email routing (General→info@, Medical→ambulanta@, Transport→transport@)
-- [x] Registration welcome email
-- [x] Contact form auto-reply
-- [x] Booking confirmation emails
+- [x] Admin CMS
+- [x] Email system with bilingual templates
+- [x] **Patient Portal (Dashboard, Bookings, Invoices, Profile, Notifications)**
 
-### P1 (Phase 2 - In Progress)
-- [ ] Document upload on booking page (file upload UI exists, needs enhancement)
+### P1 (Next Up)
+- [ ] Document upload on public booking page
 - [ ] Integrate live data into Operations Dashboard (replace mocked data)
+- [ ] Admin panel for creating/managing invoices with PDF generation
 - [ ] GPS real-time tracking
-- [ ] Push notifications
-- [ ] Mobile responsive improvements
-- [ ] Booking status tracking for patients
+- [ ] Push notifications (browser)
 
 ### P2 (Future)
 - [ ] Electronic Medical Records (EMR)
@@ -130,6 +143,31 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
 - [ ] Mobile applications
 - [ ] Advanced analytics
 - [ ] Role-specific dashboards for Doctors/Nurses/Drivers
+
+## API Endpoints
+
+### Patient Portal APIs
+- `GET /api/patient/dashboard` - Dashboard data with active booking and stats
+- `GET /api/patient/transport-reasons` - Transport reason options
+- `POST /api/patient/bookings` - Create new booking
+- `GET /api/patient/bookings` - List patient's bookings
+- `GET /api/patient/bookings/:id` - Get booking details
+- `POST /api/patient/bookings/:id/cancel` - Cancel booking
+- `GET /api/patient/invoices` - List patient's invoices
+- `GET /api/patient/profile` - Get profile
+- `PUT /api/patient/profile` - Update profile
+- `GET /api/patient/notifications` - List notifications
+- `POST /api/patient/notifications/:id/read` - Mark notification read
+- `POST /api/patient/notifications/read-all` - Mark all read
+
+### Admin APIs
+- `PUT /api/admin/patient-bookings/:id/status` - Update booking status
+- `POST /api/admin/invoices` - Create invoice for completed booking
+
+## Test Credentials
+- **Super Admin:** admin@paramedic-care018.rs / Admin123!
+- **Admin:** office@paramedic-care018.rs / Office123!
+- **Test Patient:** patient@test.com / Test123!
 
 ## Company Details
 - Address: Žarka Zrenjanina 50A, 18103 Niš, Serbia
