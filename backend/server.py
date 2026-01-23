@@ -2089,6 +2089,362 @@ async def get_bookings_for_invoice(
     ).sort("created_at", -1).to_list(100)
     return bookings
 
+# ============ DRIVER APP ROUTES ============
+
+@api_router.get("/driver/profile")
+async def get_driver_profile(user: dict = Depends(require_roles([UserRole.DRIVER]))):
+    """Get driver profile with current status"""
+    driver_status = await db.driver_status.find_one({"driver_id": user["id"]}, {"_id": 0})
+    if not driver_status:
+        # Create default status
+        driver_status = {
+            "driver_id": user["id"],
+            "status": DriverStatus.OFFLINE,
+            "vehicle_id": None,
+            "current_booking_id": None,
+            "last_location": None,
+            "last_updated": datetime.now(timezone.utc).isoformat()
+        }
+        await db.driver_status.insert_one(driver_status)
+    
+    return {
+        "driver": {k: v for k, v in user.items() if k != "password"},
+        "status": driver_status
+    }
+
+@api_router.put("/driver/status")
+async def update_driver_status(
+    status_update: DriverStatusUpdate,
+    user: dict = Depends(require_roles([UserRole.DRIVER]))
+):
+    """Update driver status"""
+    valid_statuses = [DriverStatus.OFFLINE, DriverStatus.AVAILABLE, DriverStatus.ASSIGNED, 
+                      DriverStatus.EN_ROUTE, DriverStatus.ON_SITE, DriverStatus.TRANSPORTING]
+    
+    if status_update.status not in valid_statuses:
+        raise HTTPException(status_code=400, detail="Invalid status")
+    
+    update_data = {
+        "status": status_update.status,
+        "last_updated": datetime.now(timezone.utc).isoformat()
+    }
+    
+    if status_update.booking_id:
+        update_data["current_booking_id"] = status_update.booking_id
+    
+    # If completing, clear current booking
+    if status_update.status == DriverStatus.AVAILABLE:
+        update_data["current_booking_id"] = None
+    
+    await db.driver_status.update_one(
+        {"driver_id": user["id"]},
+        {"$set": update_data},
+        upsert=True
+    )
+    
+    # Also update booking status if applicable
+    if status_update.booking_id and status_update.status in [DriverStatus.EN_ROUTE, DriverStatus.ON_SITE, DriverStatus.TRANSPORTING]:
+        booking_status_map = {
+            DriverStatus.EN_ROUTE: BookingStatus.EN_ROUTE,
+            DriverStatus.ON_SITE: BookingStatus.EN_ROUTE,  # Still en route until picked up
+            DriverStatus.TRANSPORTING: BookingStatus.PICKED_UP
+        }
+        if status_update.status in booking_status_map:
+            await db.patient_bookings.update_one(
+                {"id": status_update.booking_id},
+                {"$set": {"status": booking_status_map[status_update.status], "updated_at": datetime.now(timezone.utc).isoformat()}}
+            )
+            
+            # Create notification for patient
+            booking = await db.patient_bookings.find_one({"id": status_update.booking_id})
+            if booking:
+                notification_messages = {
+                    DriverStatus.EN_ROUTE: {"sr": "Vozač je krenuo ka vama", "en": "Driver is on the way"},
+                    DriverStatus.ON_SITE: {"sr": "Vozač je stigao na lokaciju preuzimanja", "en": "Driver arrived at pickup location"},
+                    DriverStatus.TRANSPORTING: {"sr": "Transport je započet", "en": "Transport has started"}
+                }
+                msg = notification_messages.get(status_update.status, {})
+                await db.notifications.insert_one({
+                    "id": str(uuid.uuid4()),
+                    "user_id": booking["user_id"],
+                    "type": "booking_update",
+                    "message_sr": msg.get("sr", "Status ažuriran"),
+                    "message_en": msg.get("en", "Status updated"),
+                    "booking_id": status_update.booking_id,
+                    "is_read": False,
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                })
+    
+    # Broadcast to admins
+    await ws_manager.broadcast_to_admins({
+        "type": "driver_status_update",
+        "driver_id": user["id"],
+        "driver_name": user.get("full_name"),
+        "status": status_update.status,
+        "booking_id": status_update.booking_id
+    })
+    
+    return {"success": True, "status": status_update.status}
+
+@api_router.post("/driver/location")
+async def update_driver_location(
+    location: DriverLocationUpdate,
+    user: dict = Depends(require_roles([UserRole.DRIVER]))
+):
+    """Update driver's current location"""
+    location_data = {
+        "latitude": location.latitude,
+        "longitude": location.longitude,
+        "speed": location.speed,
+        "heading": location.heading,
+        "accuracy": location.accuracy,
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+    
+    # Update driver status with location
+    await db.driver_status.update_one(
+        {"driver_id": user["id"]},
+        {"$set": {
+            "last_location": location_data,
+            "last_updated": datetime.now(timezone.utc).isoformat()
+        }},
+        upsert=True
+    )
+    
+    # Store location history (for tracking during active transport)
+    driver_status = await db.driver_status.find_one({"driver_id": user["id"]})
+    if driver_status and driver_status.get("current_booking_id"):
+        await db.location_history.insert_one({
+            "driver_id": user["id"],
+            "booking_id": driver_status["current_booking_id"],
+            **location_data
+        })
+    
+    # Broadcast to admins for live map
+    await ws_manager.broadcast_to_admins({
+        "type": "location_update",
+        "driver_id": user["id"],
+        "driver_name": user.get("full_name"),
+        "location": location_data,
+        "status": driver_status.get("status") if driver_status else DriverStatus.AVAILABLE,
+        "booking_id": driver_status.get("current_booking_id") if driver_status else None
+    })
+    
+    return {"success": True}
+
+@api_router.get("/driver/assignment")
+async def get_driver_assignment(user: dict = Depends(require_roles([UserRole.DRIVER]))):
+    """Get driver's current assignment"""
+    driver_status = await db.driver_status.find_one({"driver_id": user["id"]})
+    
+    if not driver_status or not driver_status.get("current_booking_id"):
+        # Check for any assigned bookings
+        assigned_booking = await db.patient_bookings.find_one({
+            "assigned_driver_id": user["id"],
+            "status": {"$in": [BookingStatus.CONFIRMED, BookingStatus.EN_ROUTE, BookingStatus.PICKED_UP]}
+        }, {"_id": 0})
+        
+        if assigned_booking:
+            return {"assignment": assigned_booking, "has_assignment": True}
+        return {"assignment": None, "has_assignment": False}
+    
+    booking = await db.patient_bookings.find_one(
+        {"id": driver_status["current_booking_id"]},
+        {"_id": 0}
+    )
+    
+    return {"assignment": booking, "has_assignment": booking is not None}
+
+@api_router.post("/driver/complete-transport/{booking_id}")
+async def complete_transport(
+    booking_id: str,
+    user: dict = Depends(require_roles([UserRole.DRIVER]))
+):
+    """Mark transport as completed"""
+    # Update booking status
+    await db.patient_bookings.update_one(
+        {"id": booking_id},
+        {"$set": {
+            "status": BookingStatus.COMPLETED,
+            "completed_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Update driver status
+    await db.driver_status.update_one(
+        {"driver_id": user["id"]},
+        {"$set": {
+            "status": DriverStatus.AVAILABLE,
+            "current_booking_id": None,
+            "last_updated": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Create notification for patient
+    booking = await db.patient_bookings.find_one({"id": booking_id})
+    if booking:
+        await db.notifications.insert_one({
+            "id": str(uuid.uuid4()),
+            "user_id": booking["user_id"],
+            "type": "booking_completed",
+            "message_sr": "Transport je uspešno završen. Hvala vam!",
+            "message_en": "Transport completed successfully. Thank you!",
+            "booking_id": booking_id,
+            "is_read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        })
+    
+    # Broadcast to admins
+    await ws_manager.broadcast_to_admins({
+        "type": "transport_completed",
+        "driver_id": user["id"],
+        "driver_name": user.get("full_name"),
+        "booking_id": booking_id
+    })
+    
+    return {"success": True, "message": "Transport completed"}
+
+# Admin endpoint to assign driver to booking
+@api_router.post("/admin/assign-driver")
+async def assign_driver_to_booking(
+    booking_id: str,
+    driver_id: str,
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Assign a driver to a booking"""
+    # Verify driver exists and is available
+    driver = await db.users.find_one({"id": driver_id, "role": UserRole.DRIVER})
+    if not driver:
+        raise HTTPException(status_code=404, detail="Driver not found")
+    
+    driver_status = await db.driver_status.find_one({"driver_id": driver_id})
+    if driver_status and driver_status.get("status") not in [DriverStatus.OFFLINE, DriverStatus.AVAILABLE]:
+        raise HTTPException(status_code=400, detail="Driver is not available")
+    
+    # Update booking
+    await db.patient_bookings.update_one(
+        {"id": booking_id},
+        {"$set": {
+            "assigned_driver_id": driver_id,
+            "assigned_driver_name": driver.get("full_name"),
+            "status": BookingStatus.CONFIRMED,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Update driver status
+    await db.driver_status.update_one(
+        {"driver_id": driver_id},
+        {"$set": {
+            "status": DriverStatus.ASSIGNED,
+            "current_booking_id": booking_id,
+            "last_updated": datetime.now(timezone.utc).isoformat()
+        }},
+        upsert=True
+    )
+    
+    # Notify driver via WebSocket
+    booking = await db.patient_bookings.find_one({"id": booking_id}, {"_id": 0})
+    await ws_manager.send_to_driver(driver_id, {
+        "type": "new_assignment",
+        "booking": booking
+    })
+    
+    return {"success": True, "message": "Driver assigned"}
+
+# Admin endpoint to get all drivers with their status
+@api_router.get("/admin/drivers")
+async def get_all_drivers(user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))):
+    """Get all drivers with their current status and location"""
+    drivers = await db.users.find({"role": UserRole.DRIVER}, {"_id": 0, "password": 0}).to_list(100)
+    
+    result = []
+    for driver in drivers:
+        status = await db.driver_status.find_one({"driver_id": driver["id"]}, {"_id": 0})
+        result.append({
+            **driver,
+            "driver_status": status.get("status") if status else DriverStatus.OFFLINE,
+            "last_location": status.get("last_location") if status else None,
+            "current_booking_id": status.get("current_booking_id") if status else None,
+            "last_updated": status.get("last_updated") if status else None
+        })
+    
+    return result
+
+# WebSocket endpoint for driver real-time connection
+@app.websocket("/ws/driver/{driver_id}")
+async def websocket_driver(websocket: WebSocket, driver_id: str):
+    """WebSocket connection for driver app"""
+    await ws_manager.connect_driver(websocket, driver_id)
+    try:
+        while True:
+            data = await websocket.receive_json()
+            
+            # Handle location updates via WebSocket
+            if data.get("type") == "location":
+                location_data = {
+                    "latitude": data.get("latitude"),
+                    "longitude": data.get("longitude"),
+                    "speed": data.get("speed"),
+                    "heading": data.get("heading"),
+                    "accuracy": data.get("accuracy"),
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                }
+                
+                await db.driver_status.update_one(
+                    {"driver_id": driver_id},
+                    {"$set": {"last_location": location_data, "last_updated": datetime.now(timezone.utc).isoformat()}},
+                    upsert=True
+                )
+                
+                # Get driver info
+                driver = await db.users.find_one({"id": driver_id})
+                driver_status = await db.driver_status.find_one({"driver_id": driver_id})
+                
+                await ws_manager.broadcast_to_admins({
+                    "type": "location_update",
+                    "driver_id": driver_id,
+                    "driver_name": driver.get("full_name") if driver else "Unknown",
+                    "location": location_data,
+                    "status": driver_status.get("status") if driver_status else DriverStatus.AVAILABLE,
+                    "booking_id": driver_status.get("current_booking_id") if driver_status else None
+                })
+                
+    except WebSocketDisconnect:
+        ws_manager.disconnect_driver(driver_id)
+        # Set driver offline
+        await db.driver_status.update_one(
+            {"driver_id": driver_id},
+            {"$set": {"status": DriverStatus.OFFLINE, "last_updated": datetime.now(timezone.utc).isoformat()}}
+        )
+
+# WebSocket endpoint for admin live map
+@app.websocket("/ws/admin/live-map")
+async def websocket_admin_live_map(websocket: WebSocket):
+    """WebSocket connection for admin live map"""
+    await ws_manager.connect_admin(websocket)
+    try:
+        # Send current state of all drivers
+        drivers = await db.users.find({"role": UserRole.DRIVER}, {"_id": 0, "password": 0}).to_list(100)
+        for driver in drivers:
+            status = await db.driver_status.find_one({"driver_id": driver["id"]}, {"_id": 0})
+            if status and status.get("last_location"):
+                await websocket.send_json({
+                    "type": "location_update",
+                    "driver_id": driver["id"],
+                    "driver_name": driver.get("full_name"),
+                    "location": status.get("last_location"),
+                    "status": status.get("status"),
+                    "booking_id": status.get("current_booking_id")
+                })
+        
+        while True:
+            # Keep connection alive
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        ws_manager.disconnect_admin(websocket)
+
 # ============ CONTACT ROUTES ============
 
 @api_router.post("/contact", response_model=ContactResponse)
