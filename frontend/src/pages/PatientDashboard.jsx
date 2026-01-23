@@ -349,23 +349,23 @@ const PatientDashboard = () => {
         </div>
 
         {/* Emergency Contact Banner */}
-        <div className="bg-gradient-to-r from-red-500 to-red-600 rounded-2xl p-6 text-white">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center">
-                <Phone className="w-7 h-7 text-white" />
+        <div className="bg-gradient-to-r from-red-500 to-red-600 rounded-2xl p-4 sm:p-6 text-white">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/20 rounded-full flex items-center justify-center">
+                <Phone className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg">
+                <h3 className="font-semibold text-base sm:text-lg">
                   {language === 'sr' ? 'Hitna pomoć?' : 'Emergency?'}
                 </h3>
-                <p className="text-red-100">
+                <p className="text-red-100 text-sm sm:text-base">
                   {language === 'sr' ? 'Pozovite nas odmah' : 'Call us immediately'}
                 </p>
               </div>
             </div>
-            <a href="tel:+381181234567">
-              <Button className="bg-white text-red-600 hover:bg-red-50 text-lg px-8 py-3 font-bold">
+            <a href="tel:+381181234567" className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto bg-white text-red-600 hover:bg-red-50 text-base sm:text-lg px-6 sm:px-8 py-2.5 sm:py-3 font-bold">
                 +381 18 123 456
               </Button>
             </a>
