@@ -52,6 +52,7 @@ import axios from 'axios';
 import CMSManager from '../components/CMSManager';
 import OperationsDashboard from '../components/OperationsDashboard';
 import AdminBookingNotifications from '../components/AdminBookingNotifications';
+import InvoiceManager from '../components/InvoiceManager';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
