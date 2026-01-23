@@ -2260,6 +2260,135 @@ async def get_driver_assignment(user: dict = Depends(require_roles([UserRole.DRI
     
     return {"assignment": booking, "has_assignment": booking is not None}
 
+# Driver accepts assignment
+@api_router.post("/driver/accept-assignment/{booking_id}")
+async def accept_assignment(
+    booking_id: str,
+    user: dict = Depends(require_roles([UserRole.DRIVER]))
+):
+    """Driver accepts an assignment"""
+    # Verify this assignment belongs to this driver
+    driver_status = await db.driver_status.find_one({"driver_id": user["id"]})
+    if not driver_status or driver_status.get("current_booking_id") != booking_id:
+        raise HTTPException(status_code=400, detail="No matching assignment found")
+    
+    # Update driver status to indicate acceptance
+    await db.driver_status.update_one(
+        {"driver_id": user["id"]},
+        {"$set": {
+            "status": DriverStatus.EN_ROUTE,
+            "last_updated": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Update booking status
+    await db.patient_bookings.update_one(
+        {"id": booking_id},
+        {"$set": {
+            "status": "en_route",
+            "driver_accepted_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Also check public bookings
+    await db.bookings.update_one(
+        {"id": booking_id},
+        {"$set": {
+            "status": "in_progress",
+            "driver_accepted_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Get booking info for notification
+    booking = await db.patient_bookings.find_one({"id": booking_id}, {"_id": 0})
+    if not booking:
+        booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
+    
+    # Notify patient
+    if booking and booking.get("user_id"):
+        await db.notifications.insert_one({
+            "id": str(uuid.uuid4()),
+            "user_id": booking["user_id"],
+            "type": "driver_accepted",
+            "message_sr": f"Vozač {user.get('full_name')} je prihvatio vaš zahtev i kreće ka vama.",
+            "message_en": f"Driver {user.get('full_name')} accepted your request and is on the way.",
+            "booking_id": booking_id,
+            "is_read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        })
+    
+    # Broadcast to admins
+    await ws_manager.broadcast_to_admins({
+        "type": "driver_accepted",
+        "driver_id": user["id"],
+        "driver_name": user.get("full_name"),
+        "booking_id": booking_id
+    })
+    
+    return {"success": True, "message": "Assignment accepted", "new_status": "en_route"}
+
+# Driver rejects assignment
+@api_router.post("/driver/reject-assignment/{booking_id}")
+async def reject_assignment(
+    booking_id: str,
+    reason: str = None,
+    user: dict = Depends(require_roles([UserRole.DRIVER]))
+):
+    """Driver rejects an assignment"""
+    # Verify this assignment belongs to this driver
+    driver_status = await db.driver_status.find_one({"driver_id": user["id"]})
+    if not driver_status or driver_status.get("current_booking_id") != booking_id:
+        raise HTTPException(status_code=400, detail="No matching assignment found")
+    
+    # Update driver status back to available
+    await db.driver_status.update_one(
+        {"driver_id": user["id"]},
+        {"$set": {
+            "status": DriverStatus.AVAILABLE,
+            "current_booking_id": None,
+            "last_updated": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Update booking - remove driver assignment
+    await db.patient_bookings.update_one(
+        {"id": booking_id},
+        {"$set": {
+            "status": "requested",
+            "assigned_driver_id": None,
+            "assigned_driver_name": None,
+            "driver_rejected_at": datetime.now(timezone.utc).isoformat(),
+            "rejection_reason": reason,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Also check public bookings
+    await db.bookings.update_one(
+        {"id": booking_id},
+        {"$set": {
+            "status": "pending",
+            "assigned_driver": None,
+            "assigned_driver_name": None,
+            "driver_rejected_at": datetime.now(timezone.utc).isoformat(),
+            "rejection_reason": reason,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Broadcast to admins so they can reassign
+    await ws_manager.broadcast_to_admins({
+        "type": "driver_rejected",
+        "driver_id": user["id"],
+        "driver_name": user.get("full_name"),
+        "booking_id": booking_id,
+        "reason": reason
+    })
+    
+    return {"success": True, "message": "Assignment rejected"}
+
 @api_router.post("/driver/complete-transport/{booking_id}")
 async def complete_transport(
     booking_id: str,
