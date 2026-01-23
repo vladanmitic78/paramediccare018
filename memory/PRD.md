@@ -199,6 +199,26 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
    - Admin/Superadmin only
    - Protected by role-based authentication
 
+### Phase 5 - Driver Assignment System (NEW - Jan 23, 2026) ✅
+
+#### Driver Assignment Features (COMPLETE)
+1. **Assign Driver Functionality**
+   - Available in both Patient Portal Bookings AND Public Bookings tables
+   - Dropdown shows only available/offline drivers
+   - **Drivers sorted by distance** to pickup location (closest first)
+   - Distance displayed in km next to driver name (e.g., "Marko Vozač (2.5 km)")
+   - Haversine formula for accurate distance calculation
+
+2. **Search Functionality**
+   - Search bar on Patient Portal Bookings table
+   - Search bar on Public Bookings table
+   - Searches across: patient name, phone, email, address, status, driver name
+
+3. **Visual Indicators**
+   - Assigned driver shown with truck icon + green text
+   - Completed/cancelled bookings show "—" instead of dropdown
+   - Status dots (green=available, gray=offline) in dropdown
+
 ### Technology Stack
 - Frontend: React with Tailwind CSS, Shadcn UI, react-leaflet
 - Backend: FastAPI with MongoDB
