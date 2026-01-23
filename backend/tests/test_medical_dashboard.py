@@ -22,71 +22,68 @@ DRIVER_EMAIL = "driver@test.com"
 DRIVER_PASSWORD = "Test123!"
 
 
-class TestAuthSetup:
-    """Setup authentication tokens for testing"""
-    
-    @pytest.fixture(scope="class")
-    def admin_token(self):
-        """Get admin authentication token"""
-        response = requests.post(f"{BASE_URL}/api/auth/login", json={
-            "email": ADMIN_EMAIL,
-            "password": ADMIN_PASSWORD
-        })
-        assert response.status_code == 200, f"Admin login failed: {response.text}"
-        return response.json().get("token")
-    
-    @pytest.fixture(scope="class")
-    def doctor_token(self):
-        """Get doctor authentication token - create if doesn't exist"""
-        # Try to login first
-        response = requests.post(f"{BASE_URL}/api/auth/login", json={
-            "email": DOCTOR_EMAIL,
-            "password": DOCTOR_PASSWORD
-        })
-        if response.status_code == 200:
-            return response.json().get("token")
-        
-        # If doctor doesn't exist, create via admin
-        admin_response = requests.post(f"{BASE_URL}/api/auth/login", json={
-            "email": ADMIN_EMAIL,
-            "password": ADMIN_PASSWORD
-        })
-        admin_token = admin_response.json().get("token")
-        
-        # Create doctor user
-        create_response = requests.post(
-            f"{BASE_URL}/api/users",
-            json={
-                "email": DOCTOR_EMAIL,
-                "password": DOCTOR_PASSWORD,
-                "full_name": "Test Doctor",
-                "role": "doctor",
-                "phone": "+381601234567"
-            },
-            headers={"Authorization": f"Bearer {admin_token}"}
-        )
-        
-        # Login as doctor
-        response = requests.post(f"{BASE_URL}/api/auth/login", json={
-            "email": DOCTOR_EMAIL,
-            "password": DOCTOR_PASSWORD
-        })
-        assert response.status_code == 200, f"Doctor login failed: {response.text}"
-        return response.json().get("token")
-    
-    @pytest.fixture(scope="class")
-    def driver_token(self):
-        """Get driver authentication token"""
-        response = requests.post(f"{BASE_URL}/api/auth/login", json={
-            "email": DRIVER_EMAIL,
-            "password": DRIVER_PASSWORD
-        })
-        if response.status_code == 200:
-            return response.json().get("token")
-        pytest.skip("Driver account not available")
+# Module-level fixtures
+@pytest.fixture(scope="module")
+def admin_token():
+    """Get admin authentication token"""
+    response = requests.post(f"{BASE_URL}/api/auth/login", json={
+        "email": ADMIN_EMAIL,
+        "password": ADMIN_PASSWORD
+    })
+    assert response.status_code == 200, f"Admin login failed: {response.text}"
+    return response.json().get("token")
 
 
-class TestMedicalDashboard(TestAuthSetup):
+@pytest.fixture(scope="module")
+def doctor_token(admin_token):
+    """Get doctor authentication token - create if doesn't exist"""
+    # Try to login first
+    response = requests.post(f"{BASE_URL}/api/auth/login", json={
+        "email": DOCTOR_EMAIL,
+        "password": DOCTOR_PASSWORD
+    })
+    if response.status_code == 200:
+        return response.json().get("token")
+    
+    # If doctor doesn't exist, create via admin
+    create_response = requests.post(
+        f"{BASE_URL}/api/users",
+        json={
+            "email": DOCTOR_EMAIL,
+            "password": DOCTOR_PASSWORD,
+            "full_name": "Test Doctor",
+            "role": "doctor",
+            "phone": "+381601234567"
+        },
+        headers={"Authorization": f"Bearer {admin_token}"}
+    )
+    
+    # Login as doctor
+    response = requests.post(f"{BASE_URL}/api/auth/login", json={
+        "email": DOCTOR_EMAIL,
+        "password": DOCTOR_PASSWORD
+    })
+    assert response.status_code == 200, f"Doctor login failed: {response.text}"
+    return response.json().get("token")
+
+
+@pytest.fixture(scope="module")
+def driver_token():
+    """Get driver authentication token"""
+    response = requests.post(f"{BASE_URL}/api/auth/login", json={
+        "email": DRIVER_EMAIL,
+        "password": DRIVER_PASSWORD
+    })
+    if response.status_code == 200:
+        return response.json().get("token")
+    pytest.skip("Driver account not available")
+
+
+# Store created patient ID for tests
+created_patient = {}
+
+
+class TestMedicalDashboard:
     """Test Medical Dashboard endpoint"""
     
     def test_dashboard_requires_auth(self):
@@ -100,7 +97,7 @@ class TestMedicalDashboard(TestAuthSetup):
             f"{BASE_URL}/api/medical/dashboard",
             headers={"Authorization": f"Bearer {admin_token}"}
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Dashboard failed: {response.text}"
         data = response.json()
         
         # Verify stats structure
@@ -113,6 +110,7 @@ class TestMedicalDashboard(TestAuthSetup):
         # Verify other sections
         assert "active_transports" in data
         assert isinstance(data["active_transports"], list)
+        print(f"Dashboard stats: {data['stats']}")
     
     def test_dashboard_accessible_by_doctor(self, doctor_token):
         """Dashboard is accessible by doctor role"""
@@ -120,7 +118,7 @@ class TestMedicalDashboard(TestAuthSetup):
             f"{BASE_URL}/api/medical/dashboard",
             headers={"Authorization": f"Bearer {doctor_token}"}
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Doctor access failed: {response.text}"
     
     def test_dashboard_not_accessible_by_driver(self, driver_token):
         """Dashboard is NOT accessible by driver role"""
@@ -128,16 +126,39 @@ class TestMedicalDashboard(TestAuthSetup):
             f"{BASE_URL}/api/medical/dashboard",
             headers={"Authorization": f"Bearer {driver_token}"}
         )
-        assert response.status_code == 403, "Driver should not access medical dashboard"
+        assert response.status_code == 403, f"Driver should not access medical dashboard, got {response.status_code}"
 
 
-class TestPatientCRUD(TestAuthSetup):
+class TestPatientCRUD:
     """Test Patient Medical Profile CRUD operations"""
     
-    @pytest.fixture(scope="class")
-    def test_patient_data(self):
-        """Test patient data"""
-        return {
+    def test_create_patient_requires_auth(self):
+        """Creating patient requires authentication"""
+        response = requests.post(f"{BASE_URL}/api/medical/patients", json={
+            "full_name": "Test",
+            "date_of_birth": "1990-01-01",
+            "gender": "male",
+            "phone": "+381601234567"
+        })
+        assert response.status_code == 403
+    
+    def test_create_patient_not_allowed_for_driver(self, driver_token):
+        """Driver cannot create patients"""
+        response = requests.post(
+            f"{BASE_URL}/api/medical/patients",
+            json={
+                "full_name": "Test",
+                "date_of_birth": "1990-01-01",
+                "gender": "male",
+                "phone": "+381601234567"
+            },
+            headers={"Authorization": f"Bearer {driver_token}"}
+        )
+        assert response.status_code == 403, f"Driver should not create patients, got {response.status_code}"
+    
+    def test_create_patient_success(self, admin_token):
+        """Admin can create patient with all fields"""
+        test_patient_data = {
             "full_name": f"TEST_Patient_{uuid.uuid4().hex[:8]}",
             "date_of_birth": "1985-06-15",
             "gender": "male",
@@ -165,23 +186,7 @@ class TestPatientCRUD(TestAuthSetup):
             ],
             "notes": "Test patient for automated testing"
         }
-    
-    def test_create_patient_requires_auth(self, test_patient_data):
-        """Creating patient requires authentication"""
-        response = requests.post(f"{BASE_URL}/api/medical/patients", json=test_patient_data)
-        assert response.status_code == 403
-    
-    def test_create_patient_not_allowed_for_driver(self, driver_token, test_patient_data):
-        """Driver cannot create patients"""
-        response = requests.post(
-            f"{BASE_URL}/api/medical/patients",
-            json=test_patient_data,
-            headers={"Authorization": f"Bearer {driver_token}"}
-        )
-        assert response.status_code == 403
-    
-    def test_create_patient_success(self, admin_token, test_patient_data):
-        """Admin can create patient with all fields"""
+        
         response = requests.post(
             f"{BASE_URL}/api/medical/patients",
             json=test_patient_data,
@@ -208,8 +213,9 @@ class TestPatientCRUD(TestAuthSetup):
         assert data["bmi"] is not None
         
         # Store for later tests
-        TestPatientCRUD.created_patient_id = data["id"]
-        TestPatientCRUD.created_patient_code = data["patient_id"]
+        created_patient["id"] = data["id"]
+        created_patient["patient_id"] = data["patient_id"]
+        print(f"Created patient: {data['patient_id']}")
     
     def test_list_patients(self, admin_token):
         """List patients returns correct structure"""
@@ -217,13 +223,14 @@ class TestPatientCRUD(TestAuthSetup):
             f"{BASE_URL}/api/medical/patients",
             headers={"Authorization": f"Bearer {admin_token}"}
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"List patients failed: {response.text}"
         data = response.json()
         
         assert "total" in data
         assert "patients" in data
         assert isinstance(data["patients"], list)
         assert data["total"] >= 1  # At least the test patient
+        print(f"Total patients: {data['total']}")
     
     def test_search_patients(self, admin_token):
         """Search patients by name"""
@@ -231,13 +238,13 @@ class TestPatientCRUD(TestAuthSetup):
             f"{BASE_URL}/api/medical/patients?search=TEST_Patient",
             headers={"Authorization": f"Bearer {admin_token}"}
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Search patients failed: {response.text}"
         data = response.json()
         assert data["total"] >= 1
     
     def test_get_patient_by_id(self, admin_token):
         """Get patient by internal ID"""
-        patient_id = getattr(TestPatientCRUD, 'created_patient_id', None)
+        patient_id = created_patient.get("id")
         if not patient_id:
             pytest.skip("No patient created")
         
@@ -245,13 +252,13 @@ class TestPatientCRUD(TestAuthSetup):
             f"{BASE_URL}/api/medical/patients/{patient_id}",
             headers={"Authorization": f"Bearer {admin_token}"}
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Get patient failed: {response.text}"
         data = response.json()
         assert data["id"] == patient_id
     
     def test_get_patient_by_patient_code(self, admin_token):
         """Get patient by patient code (PC018-P-XXXXX)"""
-        patient_code = getattr(TestPatientCRUD, 'created_patient_code', None)
+        patient_code = created_patient.get("patient_id")
         if not patient_code:
             pytest.skip("No patient created")
         
@@ -259,13 +266,13 @@ class TestPatientCRUD(TestAuthSetup):
             f"{BASE_URL}/api/medical/patients/{patient_code}",
             headers={"Authorization": f"Bearer {admin_token}"}
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Get patient by code failed: {response.text}"
         data = response.json()
         assert data["patient_id"] == patient_code
     
     def test_update_patient(self, admin_token):
         """Update patient profile"""
-        patient_id = getattr(TestPatientCRUD, 'created_patient_id', None)
+        patient_id = created_patient.get("id")
         if not patient_id:
             pytest.skip("No patient created")
         
@@ -274,7 +281,7 @@ class TestPatientCRUD(TestAuthSetup):
             json={"weight_kg": 78.0, "notes": "Updated notes"},
             headers={"Authorization": f"Bearer {admin_token}"}
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Update patient failed: {response.text}"
         
         # Verify update persisted
         get_response = requests.get(
@@ -288,7 +295,7 @@ class TestPatientCRUD(TestAuthSetup):
         assert "updated_at" in data
 
 
-class TestVitalSigns(TestAuthSetup):
+class TestVitalSigns:
     """Test Vital Signs recording and retrieval"""
     
     def test_record_vitals_requires_auth(self):
@@ -309,11 +316,11 @@ class TestVitalSigns(TestAuthSetup):
             },
             headers={"Authorization": f"Bearer {admin_token}"}
         )
-        assert response.status_code == 404
+        assert response.status_code == 404, f"Expected 404, got {response.status_code}: {response.text}"
     
     def test_record_normal_vitals(self, admin_token):
         """Record normal vital signs - no flags"""
-        patient_id = getattr(TestPatientCRUD, 'created_patient_id', None)
+        patient_id = created_patient.get("id")
         if not patient_id:
             pytest.skip("No patient created")
         
@@ -348,10 +355,11 @@ class TestVitalSigns(TestAuthSetup):
         # Normal vitals should have no flags
         assert "flags" in data
         assert len(data["flags"]) == 0, f"Normal vitals should have no flags, got: {data['flags']}"
+        print("Normal vitals recorded successfully with no flags")
     
     def test_record_abnormal_vitals_high_bp(self, admin_token):
         """Record high BP - should flag HIGH_BP"""
-        patient_id = getattr(TestPatientCRUD, 'created_patient_id', None)
+        patient_id = created_patient.get("id")
         if not patient_id:
             pytest.skip("No patient created")
         
@@ -371,10 +379,11 @@ class TestVitalSigns(TestAuthSetup):
         
         assert "flags" in data
         assert "HIGH_BP" in data["flags"], f"Expected HIGH_BP flag, got: {data['flags']}"
+        print(f"High BP vitals flagged correctly: {data['flags']}")
     
     def test_record_abnormal_vitals_low_spo2(self, admin_token):
         """Record low SpO2 - should flag LOW_SPO2"""
-        patient_id = getattr(TestPatientCRUD, 'created_patient_id', None)
+        patient_id = created_patient.get("id")
         if not patient_id:
             pytest.skip("No patient created")
         
@@ -392,10 +401,11 @@ class TestVitalSigns(TestAuthSetup):
         
         assert "flags" in data
         assert "LOW_SPO2" in data["flags"], f"Expected LOW_SPO2 flag, got: {data['flags']}"
+        print(f"Low SpO2 vitals flagged correctly: {data['flags']}")
     
     def test_record_abnormal_vitals_fever(self, admin_token):
         """Record fever - should flag FEVER"""
-        patient_id = getattr(TestPatientCRUD, 'created_patient_id', None)
+        patient_id = created_patient.get("id")
         if not patient_id:
             pytest.skip("No patient created")
         
@@ -413,10 +423,11 @@ class TestVitalSigns(TestAuthSetup):
         
         assert "flags" in data
         assert "FEVER" in data["flags"], f"Expected FEVER flag, got: {data['flags']}"
+        print(f"Fever vitals flagged correctly: {data['flags']}")
     
     def test_record_abnormal_vitals_tachycardia(self, admin_token):
         """Record high heart rate - should flag TACHYCARDIA"""
-        patient_id = getattr(TestPatientCRUD, 'created_patient_id', None)
+        patient_id = created_patient.get("id")
         if not patient_id:
             pytest.skip("No patient created")
         
@@ -434,10 +445,11 @@ class TestVitalSigns(TestAuthSetup):
         
         assert "flags" in data
         assert "TACHYCARDIA" in data["flags"], f"Expected TACHYCARDIA flag, got: {data['flags']}"
+        print(f"Tachycardia vitals flagged correctly: {data['flags']}")
     
     def test_get_patient_vitals_history(self, admin_token):
         """Get vitals history for patient"""
-        patient_id = getattr(TestPatientCRUD, 'created_patient_id', None)
+        patient_id = created_patient.get("id")
         if not patient_id:
             pytest.skip("No patient created")
         
@@ -445,16 +457,17 @@ class TestVitalSigns(TestAuthSetup):
             f"{BASE_URL}/api/medical/vitals/{patient_id}",
             headers={"Authorization": f"Bearer {admin_token}"}
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Get vitals history failed: {response.text}"
         data = response.json()
         
         assert "vitals" in data
         assert isinstance(data["vitals"], list)
         assert len(data["vitals"]) >= 5  # We recorded 5 vitals above
+        print(f"Vitals history count: {len(data['vitals'])}")
     
     def test_get_latest_vitals(self, admin_token):
         """Get latest vitals for patient"""
-        patient_id = getattr(TestPatientCRUD, 'created_patient_id', None)
+        patient_id = created_patient.get("id")
         if not patient_id:
             pytest.skip("No patient created")
         
@@ -462,14 +475,15 @@ class TestVitalSigns(TestAuthSetup):
             f"{BASE_URL}/api/medical/vitals/{patient_id}/latest",
             headers={"Authorization": f"Bearer {admin_token}"}
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Get latest vitals failed: {response.text}"
         data = response.json()
         
-        # Should return the most recent vitals (tachycardia test)
+        # Should return the most recent vitals
         assert "heart_rate" in data or "temperature" in data or "oxygen_saturation" in data
+        print(f"Latest vitals retrieved: {data}")
 
 
-class TestMedicalAlerts(TestAuthSetup):
+class TestMedicalAlerts:
     """Test Medical Alerts endpoint"""
     
     def test_alerts_requires_auth(self):
@@ -483,15 +497,15 @@ class TestMedicalAlerts(TestAuthSetup):
             f"{BASE_URL}/api/medical/alerts",
             headers={"Authorization": f"Bearer {admin_token}"}
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Alerts failed: {response.text}"
 
 
-class TestCleanup(TestAuthSetup):
+class TestCleanup:
     """Cleanup test data"""
     
     def test_delete_test_patient(self, admin_token):
         """Delete test patient"""
-        patient_id = getattr(TestPatientCRUD, 'created_patient_id', None)
+        patient_id = created_patient.get("id")
         if not patient_id:
             pytest.skip("No patient to delete")
         
@@ -499,7 +513,7 @@ class TestCleanup(TestAuthSetup):
             f"{BASE_URL}/api/medical/patients/{patient_id}",
             headers={"Authorization": f"Bearer {admin_token}"}
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Delete patient failed: {response.text}"
         
         # Verify deletion
         get_response = requests.get(
@@ -507,6 +521,7 @@ class TestCleanup(TestAuthSetup):
             headers={"Authorization": f"Bearer {admin_token}"}
         )
         assert get_response.status_code == 404
+        print(f"Test patient {patient_id} deleted successfully")
 
 
 if __name__ == "__main__":
