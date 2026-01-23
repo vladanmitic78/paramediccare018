@@ -17,7 +17,7 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
    - Transport - Red urgent theme, ambulance services
    - Booking - OpenStreetMap integration for location selection
    - About Us - Company info, values, team
-   - Contact - Contact form with email notification
+   - Contact - Contact form with email notification and auto-reply
 
 3. **Role-Based User System**
    - Regular Users (patients)
@@ -52,8 +52,23 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
    - Start/End point with map selection
    - Date picker
    - Patient details
-   - Document upload (PENDING)
-   - Email notifications to transport@paramedic-care018.rs (PENDING)
+   - Document upload feature
+   - Bilingual email confirmation to customer (SR/EN)
+   - Internal notification to staff
+
+7. **Email System (NEW - Jan 23, 2026)**
+   - All emails sent from: info@paramedic-care018.rs
+   - SMTP: mailcluster.loopia.se:465 (SSL)
+   - **Email Templates (Bilingual SR/EN):**
+     - Welcome email on successful registration
+     - Auto-reply on contact form submission
+     - Booking confirmation for Medical Care
+     - Booking confirmation for Transportation
+   - **Email Routing:**
+     - General Inquiry → info@paramedic-care018.rs
+     - Medical Care Inquiry → ambulanta@paramedic-care018.rs
+     - Transport Inquiry → transport@paramedic-care018.rs
+   - Templates automatically use user's selected language (SR/EN)
 
 ### Technology Stack
 - Frontend: React with Tailwind CSS, Shadcn UI, react-leaflet
