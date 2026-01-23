@@ -52,7 +52,11 @@ const Contact = () => {
     setLoading(true);
     
     try {
-      await axios.post(`${API}/contact`, formData);
+      // Include language in the form data
+      await axios.post(`${API}/contact`, {
+        ...formData,
+        language: language  // Pass current language for email template
+      });
       setSuccess(true);
       toast.success(t('contact_success'));
       setFormData({ name: '', email: '', phone: '', message: '', inquiry_type: 'general' });
