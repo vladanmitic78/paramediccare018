@@ -302,12 +302,15 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
 - [ ] Role-Specific Dashboards for Doctors and Nurses
 
 ### P2 (Future)
+- [ ] Persist collapsible sidebar state in localStorage
+- [ ] Driver rejection reason modal/text field
 - [ ] Electronic Medical Records (EMR)
+- [ ] Fleet Management Module (Vehicles, Equipment)
+- [ ] Calendar View for Bookings (OPERACIJE -> Kalendar)
 - [ ] Payment processing
 - [ ] Insurance integration
 - [ ] Mobile applications
 - [ ] Advanced analytics
-- [ ] Role-specific dashboards for Doctors/Nurses
 
 ## API Endpoints
 
