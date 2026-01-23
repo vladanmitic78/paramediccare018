@@ -508,7 +508,106 @@ const Dashboard = () => {
                 <h1 className="text-2xl font-bold text-slate-900">{t('dashboard_bookings')}</h1>
               </div>
 
+              {/* Patient Portal Bookings Section */}
+              {patientBookings.length > 0 && (
+                <div className="card-base">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                      <Ambulance className="w-5 h-5 text-red-500" />
+                      {language === 'sr' ? 'Rezervacije iz Patient Portala' : 'Patient Portal Bookings'}
+                    </h3>
+                    <Badge className="bg-red-100 text-red-700">
+                      {patientBookings.filter(b => b.status === 'requested').length} {language === 'sr' ? 'novih' : 'new'}
+                    </Badge>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>{language === 'sr' ? 'Pacijent' : 'Patient'}</TableHead>
+                          <TableHead>{language === 'sr' ? 'Datum/Vreme' : 'Date/Time'}</TableHead>
+                          <TableHead>{language === 'sr' ? 'Razlog' : 'Reason'}</TableHead>
+                          <TableHead>{language === 'sr' ? 'Ruta' : 'Route'}</TableHead>
+                          <TableHead>{language === 'sr' ? 'Mobilnost' : 'Mobility'}</TableHead>
+                          <TableHead>{t('status')}</TableHead>
+                          <TableHead>{t('actions')}</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {patientBookings.map((booking) => (
+                          <TableRow key={booking.id} className={booking.status === 'requested' ? 'bg-amber-50' : ''}>
+                            <TableCell>
+                              <div>
+                                <p className="font-medium">{booking.patient_name}</p>
+                                <p className="text-xs text-slate-500">{booking.patient_age} {language === 'sr' ? 'god.' : 'y.o.'}</p>
+                                <p className="text-xs text-slate-500">{booking.contact_phone}</p>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <p className="font-medium">{booking.preferred_date}</p>
+                              <p className="text-sm text-slate-500">{booking.preferred_time}</p>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="text-xs">
+                                {booking.transport_reason?.replace(/_/g, ' ')}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="max-w-xs">
+                              <p className="truncate text-sm text-green-700">📍 {booking.pickup_address}</p>
+                              <p className="truncate text-sm text-red-700">📍 {booking.destination_address}</p>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className={
+                                booking.mobility_status === 'stretcher' ? 'bg-red-100 text-red-700' :
+                                booking.mobility_status === 'wheelchair' ? 'bg-amber-100 text-amber-700' :
+                                'bg-green-100 text-green-700'
+                              }>
+                                {booking.mobility_status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge className={
+                                booking.status === 'requested' ? 'bg-amber-100 text-amber-700' :
+                                booking.status === 'confirmed' ? 'bg-blue-100 text-blue-700' :
+                                booking.status === 'en_route' ? 'bg-purple-100 text-purple-700' :
+                                booking.status === 'picked_up' ? 'bg-indigo-100 text-indigo-700' :
+                                booking.status === 'completed' ? 'bg-green-100 text-green-700' :
+                                'bg-slate-100 text-slate-700'
+                              }>
+                                {booking.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Select
+                                value={booking.status}
+                                onValueChange={(value) => updatePatientBookingStatus(booking.id, value)}
+                              >
+                                <SelectTrigger className="w-32">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="requested">{language === 'sr' ? 'Zahtev' : 'Requested'}</SelectItem>
+                                  <SelectItem value="confirmed">{language === 'sr' ? 'Potvrđeno' : 'Confirmed'}</SelectItem>
+                                  <SelectItem value="en_route">{language === 'sr' ? 'Na putu' : 'En Route'}</SelectItem>
+                                  <SelectItem value="picked_up">{language === 'sr' ? 'Preuzeto' : 'Picked Up'}</SelectItem>
+                                  <SelectItem value="completed">{language === 'sr' ? 'Završeno' : 'Completed'}</SelectItem>
+                                  <SelectItem value="cancelled">{language === 'sr' ? 'Otkazano' : 'Cancelled'}</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              )}
+
+              {/* Original Public Bookings */}
               <div className="card-base overflow-x-auto">
+                <h3 className="text-lg font-semibold text-slate-900 mb-4">
+                  {language === 'sr' ? 'Javne Rezervacije' : 'Public Bookings'}
+                </h3>
                 <Table>
                   <TableHeader>
                     <TableRow>
