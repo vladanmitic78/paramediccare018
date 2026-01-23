@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
@@ -27,7 +28,11 @@ import {
   Ambulance,
   Info,
   CheckCircle,
-  X
+  X,
+  Home,
+  PanelTop,
+  PanelBottom,
+  Lock
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
