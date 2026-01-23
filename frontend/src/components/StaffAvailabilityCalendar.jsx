@@ -931,12 +931,12 @@ const StaffAvailabilityCalendar = () => {
                 <label className="block text-sm font-medium text-slate-700 mb-1">
                   {language === 'sr' ? 'Zaposleni' : 'Staff Member'}
                 </label>
-                <Select value={selectedStaffForAdd} onValueChange={setSelectedStaffForAdd}>
+                <Select value={selectedStaffForAdd || 'self'} onValueChange={(v) => setSelectedStaffForAdd(v === 'self' ? '' : v)}>
                   <SelectTrigger data-testid="staff-select-dialog">
                     <SelectValue placeholder={language === 'sr' ? 'Izaberite ili ostavite prazno za sebe' : 'Select or leave empty for yourself'} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">{language === 'sr' ? 'Za sebe' : 'For myself'}</SelectItem>
+                    <SelectItem value="self">{language === 'sr' ? 'Za sebe' : 'For myself'}</SelectItem>
                     {staffList.map(staff => (
                       <SelectItem key={staff.id} value={staff.id}>
                         {staff.full_name} ({ROLE_CONFIG[staff.role]?.[language === 'sr' ? 'label_sr' : 'label_en'] || staff.role})
