@@ -1254,6 +1254,87 @@ async def seed_page_content(user: dict = Depends(require_roles([UserRole.ADMIN, 
             "updated_at": datetime.now(timezone.utc).isoformat(),
             "updated_by": "System"
         },
+        # Header (Super Admin Only)
+        {
+            "id": str(uuid.uuid4()),
+            "page": "header",
+            "section": "logo",
+            "title_sr": "Paramedic Care 018",
+            "title_en": "Paramedic Care 018",
+            "content_sr": "Logo i brend identitet u zaglavlju sajta",
+            "content_en": "Logo and brand identity in the site header",
+            "image_url": "https://customer-assets.emergentagent.com/job_433955cc-2ea1-4976-bce7-1cf9f8ad9654/artifacts/j7ye45w5_Paramedic%20Care%20018%20Logo.jpg",
+            "order": 1,
+            "is_active": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": "System"
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "page": "header",
+            "section": "emergency-banner",
+            "title_sr": "Hitna pomoć",
+            "title_en": "Emergency Help",
+            "content_sr": "+381 18 123 456",
+            "content_en": "+381 18 123 456",
+            "order": 2,
+            "is_active": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": "System"
+        },
+        # Footer (Super Admin Only)
+        {
+            "id": str(uuid.uuid4()),
+            "page": "footer",
+            "section": "company-info",
+            "title_sr": "Kontakt Informacije",
+            "title_en": "Contact Information",
+            "content_sr": "Žarka Zrenjanina 50A, 18103 Niš (Pantelej), Srbija",
+            "content_en": "Žarka Zrenjanina 50A, 18103 Niš (Pantelej), Serbia",
+            "order": 1,
+            "is_active": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": "System"
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "page": "footer",
+            "section": "phone",
+            "title_sr": "Telefon",
+            "title_en": "Phone",
+            "content_sr": "+381 18 123 456",
+            "content_en": "+381 18 123 456",
+            "order": 2,
+            "is_active": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": "System"
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "page": "footer",
+            "section": "legal",
+            "title_sr": "Pravne informacije",
+            "title_en": "Legal Information",
+            "content_sr": "PIB: 115243796 | MB: 68211557",
+            "content_en": "PIB: 115243796 | MB: 68211557",
+            "order": 3,
+            "is_active": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": "System"
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "page": "footer",
+            "section": "copyright",
+            "title_sr": "Autorska prava",
+            "title_en": "Copyright",
+            "content_sr": "© 2026 Paramedic Care 018. Sva prava zadržana.",
+            "content_en": "© 2026 Paramedic Care 018. All rights reserved.",
+            "order": 4,
+            "is_active": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": "System"
+        },
     ]
     
     await db.page_content.insert_many(default_content)
