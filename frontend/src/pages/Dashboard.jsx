@@ -403,7 +403,16 @@ const Dashboard = () => {
       label: language === 'sr' ? 'Tim' : 'Team',
       items: [
         { id: 'drivers', icon: Truck, label: language === 'sr' ? 'Vozači' : 'Drivers' },
-        { id: 'availability', icon: Calendar, label: language === 'sr' ? 'Dostupnost' : 'Availability', badge: language === 'sr' ? 'Uskoro' : 'Soon' },
+        { id: 'availability', icon: Calendar, label: language === 'sr' ? 'Dostupnost' : 'Availability' },
+      ]
+    }] : []),
+    // Non-admin staff get their own availability section
+    ...(!isAdmin() && user?.role !== 'regular' ? [{
+      id: 'my-schedule',
+      icon: Calendar,
+      label: language === 'sr' ? 'Moj raspored' : 'My Schedule',
+      items: [
+        { id: 'availability', icon: Calendar, label: language === 'sr' ? 'Dostupnost' : 'Availability' },
       ]
     }] : []),
     ...(isAdmin() ? [{
