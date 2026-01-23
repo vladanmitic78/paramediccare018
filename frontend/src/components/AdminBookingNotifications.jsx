@@ -118,16 +118,32 @@ const AdminBookingNotifications = ({ onViewBooking }) => {
     }
   }, [language, seenBookingIds]);
 
-  // Initial load of seen booking IDs
+  // Initial load - show popup immediately if there are pending bookings
   useEffect(() => {
     const loadInitialBookings = async () => {
       try {
         const response = await axios.get(`${API}/admin/patient-bookings?status=requested`);
-        const initialIds = new Set(response.data.map(b => b.id));
-        setSeenBookingIds(initialIds);
-        setNewBookings(response.data);
+        const requestedBookings = response.data;
+        
+        setNewBookings(requestedBookings);
         setLastCheckTime(new Date().toISOString());
+        
+        // If there are pending bookings on login, show popup for the first one
+        if (requestedBookings.length > 0) {
+          setCurrentBooking(requestedBookings[0]);
+          setShowPopup(true);
+          playNotificationSound();
+          
+          // Mark all as seen after showing
+          const initialIds = new Set(requestedBookings.map(b => b.id));
+          setSeenBookingIds(initialIds);
+        }
       } catch (error) {
+        console.error('Error loading initial bookings:', error);
+      }
+    };
+    loadInitialBookings();
+  }, []);
         console.error('Error loading initial bookings:', error);
       }
     };
