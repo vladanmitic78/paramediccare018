@@ -975,6 +975,18 @@ const MedicalDashboard = () => {
                           <p className="mt-2">🚑 {language === 'sr' ? 'Vozač' : 'Driver'}: {transport.assigned_driver_name}</p>
                         )}
                       </div>
+                      {/* Record Vitals Button */}
+                      <Button 
+                        size="sm" 
+                        className="mt-3 w-full bg-red-600 hover:bg-red-700"
+                        onClick={() => {
+                          setSelectedTransport(transport);
+                          setTransportVitalsOpen(true);
+                        }}
+                      >
+                        <HeartPulse className="w-4 h-4 mr-2" />
+                        {language === 'sr' ? 'Unesi vitalne parametre' : 'Record Vital Signs'}
+                      </Button>
                     </div>
                   ))}
                 </div>
