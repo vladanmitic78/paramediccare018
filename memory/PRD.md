@@ -31,7 +31,9 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
    - Super Admin can edit: All Admin pages + Header and Footer
    - Bilingual content editing (Serbian/English)
    - Section-based organization with ordering
-   - Image URL and icon support
+   - **Image Upload Feature:** Upload images from local computer (jpeg, png, gif, webp, svg, max 5MB)
+   - Image URL input for external images
+   - Icon support for sections
    - Active/Inactive toggle for content visibility
    - Lock icon indicator for Super Admin only sections
    - Purple banner warning for global sections (Header/Footer)
