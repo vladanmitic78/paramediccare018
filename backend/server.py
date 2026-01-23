@@ -476,6 +476,207 @@ class ServiceResponse(BaseModel):
     order: int
     is_active: bool
 
+# ============ MEDICAL PATIENT PROFILE MODELS ============
+
+class MedicalCondition(BaseModel):
+    name: str
+    diagnosed_date: Optional[str] = None
+    notes: Optional[str] = None
+    is_active: bool = True
+
+class Medication(BaseModel):
+    name: str
+    dosage: str
+    frequency: str
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    prescribed_by: Optional[str] = None
+    notes: Optional[str] = None
+
+class Allergy(BaseModel):
+    allergen: str
+    reaction: Optional[str] = None
+    severity: str = "moderate"  # mild, moderate, severe
+    notes: Optional[str] = None
+
+class MedicalEmergencyContact(BaseModel):
+    name: str
+    relationship: str
+    phone: str
+    is_primary: bool = False
+
+class PatientMedicalProfileCreate(BaseModel):
+    # Basic Info
+    full_name: str
+    date_of_birth: str
+    gender: str  # male, female, other
+    phone: str
+    email: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    
+    # Medical Info
+    blood_type: Optional[str] = None  # A+, A-, B+, B-, AB+, AB-, O+, O-
+    height_cm: Optional[int] = None
+    weight_kg: Optional[float] = None
+    
+    # Medical History
+    allergies: List[Allergy] = []
+    chronic_conditions: List[MedicalCondition] = []
+    current_medications: List[Medication] = []
+    
+    # Emergency Contacts
+    emergency_contacts: List[MedicalEmergencyContact] = []
+    
+    # Additional
+    insurance_provider: Optional[str] = None
+    insurance_number: Optional[str] = None
+    notes: Optional[str] = None
+    photo_url: Optional[str] = None
+
+class PatientMedicalProfileUpdate(BaseModel):
+    full_name: Optional[str] = None
+    date_of_birth: Optional[str] = None
+    gender: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    blood_type: Optional[str] = None
+    height_cm: Optional[int] = None
+    weight_kg: Optional[float] = None
+    allergies: Optional[List[Allergy]] = None
+    chronic_conditions: Optional[List[MedicalCondition]] = None
+    current_medications: Optional[List[Medication]] = None
+    emergency_contacts: Optional[List[MedicalEmergencyContact]] = None
+    insurance_provider: Optional[str] = None
+    insurance_number: Optional[str] = None
+    notes: Optional[str] = None
+    photo_url: Optional[str] = None
+
+class PatientMedicalProfileResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    patient_id: str  # Unique patient identifier like "PC018-P-00001"
+    full_name: str
+    date_of_birth: str
+    gender: str
+    age: Optional[int] = None
+    phone: str
+    email: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    blood_type: Optional[str] = None
+    height_cm: Optional[int] = None
+    weight_kg: Optional[float] = None
+    bmi: Optional[float] = None
+    allergies: List[dict] = []
+    chronic_conditions: List[dict] = []
+    current_medications: List[dict] = []
+    emergency_contacts: List[dict] = []
+    insurance_provider: Optional[str] = None
+    insurance_number: Optional[str] = None
+    notes: Optional[str] = None
+    photo_url: Optional[str] = None
+    created_at: str
+    created_by: str
+    updated_at: Optional[str] = None
+    updated_by: Optional[str] = None
+
+# ============ VITAL SIGNS MODELS ============
+
+class VitalSignsEntry(BaseModel):
+    patient_id: str
+    # Core Vitals
+    systolic_bp: Optional[int] = None  # mmHg
+    diastolic_bp: Optional[int] = None  # mmHg
+    heart_rate: Optional[int] = None  # bpm
+    oxygen_saturation: Optional[int] = None  # SpO2 %
+    respiratory_rate: Optional[int] = None  # breaths/min
+    temperature: Optional[float] = None  # Celsius
+    blood_glucose: Optional[float] = None  # mg/dL or mmol/L
+    
+    # Advanced
+    pain_score: Optional[int] = None  # 1-10
+    gcs_score: Optional[int] = None  # Glasgow Coma Scale 3-15
+    
+    # Context
+    measurement_type: str = "routine"  # routine, emergency, transport
+    notes: Optional[str] = None
+    recorded_by: Optional[str] = None  # Will be set from auth
+    recorded_at: Optional[str] = None  # Will be auto-set
+
+class VitalSignsResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    patient_id: str
+    systolic_bp: Optional[int] = None
+    diastolic_bp: Optional[int] = None
+    heart_rate: Optional[int] = None
+    oxygen_saturation: Optional[int] = None
+    respiratory_rate: Optional[int] = None
+    temperature: Optional[float] = None
+    blood_glucose: Optional[float] = None
+    pain_score: Optional[int] = None
+    gcs_score: Optional[int] = None
+    measurement_type: str
+    notes: Optional[str] = None
+    recorded_by: str
+    recorded_by_name: Optional[str] = None
+    recorded_at: str
+    # Flags for abnormal values
+    flags: Optional[List[str]] = []
+
+# ============ MEDICAL CHECK / EXAMINATION MODELS ============
+
+class MedicalCheckCreate(BaseModel):
+    patient_id: str
+    check_type: str = "routine"  # routine, follow_up, emergency, pre_transport
+    location: Optional[str] = None
+    
+    # Vitals (can be auto-filled)
+    vitals: Optional[VitalSignsEntry] = None
+    
+    # Examination
+    symptoms: Optional[str] = None
+    physical_findings: Optional[str] = None
+    provisional_diagnosis: Optional[str] = None
+    recommendations: Optional[str] = None
+    
+    # Medications Prescribed
+    prescriptions: List[Medication] = []
+    
+    # Lifestyle
+    smoking_status: Optional[str] = None  # never, former, current
+    alcohol_use: Optional[str] = None  # none, occasional, regular
+    physical_activity: Optional[str] = None  # sedentary, light, moderate, active
+    
+    # Attachments
+    attachments: List[str] = []  # File URLs
+
+class MedicalCheckResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    patient_id: str
+    patient_name: Optional[str] = None
+    check_type: str
+    location: Optional[str] = None
+    vitals: Optional[dict] = None
+    symptoms: Optional[str] = None
+    physical_findings: Optional[str] = None
+    provisional_diagnosis: Optional[str] = None
+    recommendations: Optional[str] = None
+    prescriptions: List[dict] = []
+    smoking_status: Optional[str] = None
+    alcohol_use: Optional[str] = None
+    physical_activity: Optional[str] = None
+    attachments: List[str] = []
+    performed_by: str
+    performed_by_name: Optional[str] = None
+    performed_at: str
+    signed_by: Optional[str] = None
+    signed_at: Optional[str] = None
+
 # ============ HELPERS ============
 
 def hash_password(password: str) -> str:
