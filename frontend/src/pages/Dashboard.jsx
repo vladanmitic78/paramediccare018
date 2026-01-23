@@ -723,10 +723,10 @@ const Dashboard = () => {
                                 <span className="text-sm text-slate-400">—</span>
                               ) : (
                                 <Select
-                                  onValueChange={(driverId) => assignDriverToBooking(booking.id, driverId)}
+                                  onValueChange={(driverId) => assignDriverToBooking(booking.id, driverId, false)}
                                   disabled={assigningDriver === booking.id}
                                 >
-                                  <SelectTrigger className="w-36" data-testid={`assign-driver-${booking.id}`}>
+                                  <SelectTrigger className="w-44" data-testid={`assign-driver-${booking.id}`}>
                                     <SelectValue placeholder={
                                       assigningDriver === booking.id 
                                         ? (language === 'sr' ? 'Dodeljujem...' : 'Assigning...') 
@@ -734,22 +734,31 @@ const Dashboard = () => {
                                     } />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    {availableDrivers.length === 0 ? (
-                                      <SelectItem value="none" disabled>
-                                        {language === 'sr' ? 'Nema dostupnih vozača' : 'No available drivers'}
-                                      </SelectItem>
-                                    ) : (
-                                      availableDrivers.map((driver) => (
+                                    {(() => {
+                                      const sortedDrivers = getDriversSortedByDistance(booking.pickup_lat, booking.pickup_lng);
+                                      if (sortedDrivers.length === 0) {
+                                        return (
+                                          <SelectItem value="none" disabled>
+                                            {language === 'sr' ? 'Nema dostupnih vozača' : 'No available drivers'}
+                                          </SelectItem>
+                                        );
+                                      }
+                                      return sortedDrivers.map((driver) => (
                                         <SelectItem key={driver.id} value={driver.id}>
                                           <div className="flex items-center gap-2">
                                             <span className={`w-2 h-2 rounded-full ${
                                               driver.driver_status === 'available' ? 'bg-green-500' : 'bg-slate-400'
                                             }`} />
-                                            {driver.full_name}
+                                            <span>{driver.full_name}</span>
+                                            {driver.distance !== Infinity && (
+                                              <span className="text-xs text-slate-400 ml-1">
+                                                ({driver.distance.toFixed(1)} km)
+                                              </span>
+                                            )}
                                           </div>
                                         </SelectItem>
-                                      ))
-                                    )}
+                                      ));
+                                    })()}
                                   </SelectContent>
                                 </Select>
                               )}
