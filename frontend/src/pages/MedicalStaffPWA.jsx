@@ -231,48 +231,51 @@ const MedicalStaffPWA = () => {
         </div>
       </header>
 
-      <main className="p-4 pb-24">
+      <main className="p-4 pb-28" data-testid="pwa-main-content">
         {/* Transport Selection */}
         {!selectedTransport ? (
-          <div className="space-y-4">
+          <div className="space-y-4" data-testid="transport-selection-view">
             <h1 className="text-2xl font-bold text-center mb-6">
               {language === 'sr' ? 'Aktivni Transporti' : 'Active Transports'}
             </h1>
             
             {activeTransports.length === 0 ? (
-              <div className="text-center py-12">
+              <div className="text-center py-12" data-testid="no-transports-message">
                 <Ambulance className="w-16 h-16 mx-auto text-slate-600 mb-4" />
                 <p className="text-slate-400 text-lg">
                   {language === 'sr' ? 'Nema aktivnih transporta' : 'No active transports'}
                 </p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-4" data-testid="transports-list">
                 {activeTransports.map((transport, idx) => (
                   <button
                     key={idx}
                     onClick={() => setSelectedTransport(transport)}
-                    className="w-full bg-slate-800 rounded-xl p-4 text-left active:bg-slate-700 transition-colors border-2 border-transparent hover:border-red-500"
+                    className="w-full bg-slate-800 rounded-2xl p-5 text-left active:bg-slate-700 transition-all duration-200 border-2 border-transparent hover:border-red-500 shadow-lg"
+                    data-testid={`transport-card-${idx}`}
                   >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <Ambulance className="w-6 h-6 text-red-500" />
-                        <span className="font-bold text-lg">{transport.patient_name}</span>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-red-600/20 flex items-center justify-center">
+                          <Ambulance className="w-7 h-7 text-red-500" />
+                        </div>
+                        <span className="font-bold text-xl">{transport.patient_name}</span>
                       </div>
-                      <Badge className={
+                      <Badge className={`text-sm px-3 py-1 ${
                         transport.status === 'en_route' ? 'bg-amber-500' : 
                         transport.status === 'picked_up' ? 'bg-sky-500' : 'bg-green-500'
-                      }>
+                      }`}>
                         {transport.status}
                       </Badge>
                     </div>
-                    <div className="text-sm text-slate-400 space-y-1">
+                    <div className="text-sm text-slate-400 space-y-2 ml-15">
                       <p className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4" />
-                        {transport.pickup_address || transport.start_point}
+                        <MapPin className="w-4 h-4 flex-shrink-0" />
+                        <span className="truncate">{transport.pickup_address || transport.start_point}</span>
                       </p>
                       <p className="flex items-center gap-2">
-                        <Phone className="w-4 h-4" />
+                        <Phone className="w-4 h-4 flex-shrink-0" />
                         {transport.contact_phone}
                       </p>
                     </div>
