@@ -258,12 +258,10 @@ const Home = () => {
       <section className="py-16 md:py-24 bg-slate-900">
         <div className="section-container text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            {language === 'sr' ? 'Potreban vam je transport?' : 'Need Transport?'}
+            {ctaTitle}
           </h2>
           <p className="text-lg text-slate-300 mb-8 max-w-xl mx-auto">
-            {language === 'sr' 
-              ? 'Zakažite medicinski transport brzo i jednostavno. Naš tim je spreman da vam pomogne.'
-              : 'Book medical transport quickly and easily. Our team is ready to help you.'}
+            {ctaText}
           </p>
           <Link to="/booking">
             <Button className="btn-urgent text-lg px-8 py-6" data-testid="cta-booking-btn">
