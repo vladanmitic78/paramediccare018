@@ -55,6 +55,9 @@ function App() {
               {/* Admin Dashboard without header/footer */}
               <Route path="/dashboard" element={<Dashboard />} />
               
+              {/* Email Verification without header/footer */}
+              <Route path="/verify-email" element={<VerifyEmail />} />
+              
               {/* Patient Portal without header/footer */}
               <Route path="/patient" element={<PatientRoute><PatientDashboard /></PatientRoute>} />
               <Route path="/patient/book" element={<PatientRoute><PatientBookingWizard /></PatientRoute>} />
