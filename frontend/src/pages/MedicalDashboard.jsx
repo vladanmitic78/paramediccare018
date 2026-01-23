@@ -71,7 +71,7 @@ const VITAL_STATUS = {
 
 const MedicalDashboard = () => {
   const navigate = useNavigate();
-  const { language } = useLanguage();
+  const { language, toggleLanguage } = useLanguage();
   const { user, logout } = useAuth();
   
   // Theme state
