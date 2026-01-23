@@ -111,11 +111,11 @@ const Home = () => {
               </div>
               
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight mb-6">
-                {t('hero_title')}
+                {heroTitle}
               </h1>
               
               <p className="text-lg text-slate-600 leading-relaxed mb-8 max-w-xl">
-                {t('hero_subtitle')}
+                {heroSubtitle}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
@@ -148,7 +148,7 @@ const Home = () => {
             <div className="relative animate-slide-up" style={{ animationDelay: '0.2s' }}>
               <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                 <img
-                  src="https://images.pexels.com/photos/6520105/pexels-photo-6520105.jpeg"
+                  src={heroImage}
                   alt="Ambulance"
                   className="w-full h-[400px] lg:h-[500px] object-cover"
                 />
@@ -165,7 +165,7 @@ const Home = () => {
                     <p className="text-xs text-slate-500 uppercase tracking-wide">
                       {language === 'sr' ? 'Hitna linija' : 'Emergency Line'}
                     </p>
-                    <p className="font-bold text-slate-900">+381 18 123 456</p>
+                    <p className="font-bold text-slate-900">{emergencyPhone}</p>
                   </div>
                 </div>
               </div>
@@ -179,10 +179,10 @@ const Home = () => {
         <div className="section-container">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-              {t('services_title')}
+              {servicesTitle}
             </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              {t('services_subtitle')}
+              {servicesSubtitle}
             </p>
           </div>
 
