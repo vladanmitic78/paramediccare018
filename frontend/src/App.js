@@ -124,6 +124,9 @@ function App() {
               {/* Driver App without header/footer */}
               <Route path="/driver" element={<DriverRoute><DriverDashboard /></DriverRoute>} />
               
+              {/* Medical Dashboard without header/footer */}
+              <Route path="/medical" element={<MedicalRoute><MedicalDashboard /></MedicalRoute>} />
+              
               {/* Public pages with header/footer */}
               <Route
                 path="*"
