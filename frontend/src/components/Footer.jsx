@@ -154,10 +154,10 @@ export const Footer = () => {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
             <div>
               <p className="text-slate-500 text-xs">
-                © 2026 Paramedics Care 018. {t('footer_rights')}.
+                {copyright}
               </p>
               <p className="text-slate-500 text-xs mt-1">
-                PIB: 115243796 | MB: 68211557
+                {legalInfo}
               </p>
             </div>
             <div className="text-slate-500 text-xs">
