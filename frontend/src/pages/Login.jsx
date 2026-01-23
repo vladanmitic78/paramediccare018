@@ -38,12 +38,14 @@ const Login = () => {
         if (['admin', 'superadmin', 'doctor', 'nurse', 'driver'].includes(user.role)) {
           navigate('/dashboard');
         } else {
-          navigate('/');
+          // Regular users go to patient portal
+          navigate('/patient');
         }
       } else {
         await register(formData.email, formData.password, formData.full_name, formData.phone, language);
         toast.success(language === 'sr' ? 'Uspešna registracija!' : 'Registration successful!');
-        navigate('/');
+        // New users go to patient portal
+        navigate('/patient');
       }
     } catch (error) {
       console.error('Auth error:', error);
