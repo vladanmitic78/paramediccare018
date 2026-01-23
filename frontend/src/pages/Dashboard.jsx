@@ -101,8 +101,20 @@ const Dashboard = () => {
   // Search states
   const [patientBookingSearch, setPatientBookingSearch] = useState('');
   const [publicBookingSearch, setPublicBookingSearch] = useState('');
+  
+  // Sidebar expanded groups state
+  const [expandedGroups, setExpandedGroups] = useState(['operations']); // Default: operations expanded
 
   const isSuperAdmin = () => user?.role === 'superadmin';
+  
+  // Toggle group expansion
+  const toggleGroup = (groupId) => {
+    setExpandedGroups(prev => 
+      prev.includes(groupId) 
+        ? prev.filter(id => id !== groupId)
+        : [...prev, groupId]
+    );
+  };
 
   // Get drivers sorted by distance to a pickup location
   const getDriversSortedByDistance = (pickupLat, pickupLng) => {
