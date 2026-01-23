@@ -60,6 +60,21 @@ import AdminLiveMap from '../components/AdminLiveMap';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
+// Calculate distance between two coordinates using Haversine formula
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  if (!lat1 || !lon1 || !lat2 || !lon2) return Infinity;
+  
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+};
+
 const Dashboard = () => {
   const { user, logout, isAdmin } = useAuth();
   const { language, t } = useLanguage();
@@ -78,8 +93,60 @@ const Dashboard = () => {
   const [selectedPatientBooking, setSelectedPatientBooking] = useState(null);
   const [availableDrivers, setAvailableDrivers] = useState([]);
   const [assigningDriver, setAssigningDriver] = useState(null);
+  
+  // Search states
+  const [patientBookingSearch, setPatientBookingSearch] = useState('');
+  const [publicBookingSearch, setPublicBookingSearch] = useState('');
 
   const isSuperAdmin = () => user?.role === 'superadmin';
+
+  // Get drivers sorted by distance to a pickup location
+  const getDriversSortedByDistance = (pickupLat, pickupLng) => {
+    return availableDrivers
+      .filter(d => d.driver_status === 'available' || d.driver_status === 'offline')
+      .map(driver => {
+        const loc = driver.last_location;
+        const distance = loc 
+          ? calculateDistance(loc.latitude, loc.longitude, pickupLat, pickupLng)
+          : Infinity;
+        return { ...driver, distance };
+      })
+      .sort((a, b) => a.distance - b.distance);
+  };
+
+  // Filter patient bookings based on search
+  const filteredPatientBookings = patientBookings.filter(booking => {
+    if (!patientBookingSearch.trim()) return true;
+    const search = patientBookingSearch.toLowerCase();
+    return (
+      booking.patient_name?.toLowerCase().includes(search) ||
+      booking.contact_phone?.toLowerCase().includes(search) ||
+      booking.contact_email?.toLowerCase().includes(search) ||
+      booking.pickup_address?.toLowerCase().includes(search) ||
+      booking.destination_address?.toLowerCase().includes(search) ||
+      booking.transport_reason?.toLowerCase().includes(search) ||
+      booking.status?.toLowerCase().includes(search) ||
+      booking.mobility_status?.toLowerCase().includes(search) ||
+      booking.assigned_driver_name?.toLowerCase().includes(search) ||
+      booking.preferred_date?.includes(search)
+    );
+  });
+
+  // Filter public bookings based on search
+  const filteredPublicBookings = bookings.filter(booking => {
+    if (!publicBookingSearch.trim()) return true;
+    const search = publicBookingSearch.toLowerCase();
+    return (
+      booking.patient_name?.toLowerCase().includes(search) ||
+      booking.contact_phone?.toLowerCase().includes(search) ||
+      booking.contact_email?.toLowerCase().includes(search) ||
+      booking.start_point?.toLowerCase().includes(search) ||
+      booking.end_point?.toLowerCase().includes(search) ||
+      booking.status?.toLowerCase().includes(search) ||
+      booking.booking_date?.includes(search) ||
+      booking.assigned_driver_name?.toLowerCase().includes(search)
+    );
+  });
 
   // Handle viewing a patient booking from notification
   const handleViewPatientBooking = (booking) => {
