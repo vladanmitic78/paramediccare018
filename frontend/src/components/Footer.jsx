@@ -1,9 +1,57 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { MapPin, Phone, Ambulance, Stethoscope } from 'lucide-react';
+import axios from 'axios';
+
+const API = process.env.REACT_APP_BACKEND_URL;
 
 export const Footer = () => {
   const { t, language } = useLanguage();
+  const [footerContent, setFooterContent] = useState(null);
+  const [headerContent, setHeaderContent] = useState(null);
+
+  // Fetch footer and header content from CMS
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const [footerRes, headerRes] = await Promise.all([
+          axios.get(`${API}/api/pages/footer`),
+          axios.get(`${API}/api/pages/header`)
+        ]);
+        
+        // Convert arrays to objects keyed by section
+        const footer = {};
+        footerRes.data.forEach(item => {
+          footer[item.section] = item;
+        });
+        setFooterContent(footer);
+
+        const header = {};
+        headerRes.data.forEach(item => {
+          header[item.section] = item;
+        });
+        setHeaderContent(header);
+      } catch (error) {
+        console.log('Using default footer content');
+      }
+    };
+    fetchContent();
+  }, []);
+
+  // Get content from CMS or use defaults
+  const logoUrl = headerContent?.logo?.image_url || 
+    'https://customer-assets.emergentagent.com/job_433955cc-2ea1-4976-bce7-1cf9f8ad9654/artifacts/j7ye45w5_Paramedic%20Care%20018%20Logo.jpg';
+  
+  const companyAddress = footerContent?.['company-info']?.[language === 'sr' ? 'content_sr' : 'content_en'] || 
+    (language === 'sr' ? 'Žarka Zrenjanina 50A, 18103 Niš (Pantelej), Srbija' : 'Žarka Zrenjanina 50A, 18103 Niš (Pantelej), Serbia');
+  
+  const phoneNumber = footerContent?.phone?.[language === 'sr' ? 'content_sr' : 'content_en'] || '+381 18 123 456';
+  
+  const legalInfo = footerContent?.legal?.[language === 'sr' ? 'content_sr' : 'content_en'] || 'PIB: 115243796 | MB: 68211557';
+  
+  const copyright = footerContent?.copyright?.[language === 'sr' ? 'content_sr' : 'content_en'] || 
+    (language === 'sr' ? '© 2026 Paramedic Care 018. Sva prava zadržana.' : '© 2026 Paramedic Care 018. All rights reserved.');
 
   const navItems = [
     { path: '/', label: t('nav_home') },
