@@ -41,7 +41,7 @@ const Login = () => {
           navigate('/');
         }
       } else {
-        await register(formData.email, formData.password, formData.full_name, formData.phone);
+        await register(formData.email, formData.password, formData.full_name, formData.phone, language);
         toast.success(language === 'sr' ? 'Uspešna registracija!' : 'Registration successful!');
         navigate('/');
       }
