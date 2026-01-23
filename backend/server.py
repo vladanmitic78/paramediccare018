@@ -2230,6 +2230,68 @@ async def delete_availability(
         raise HTTPException(status_code=404, detail="Availability slot not found")
     return {"success": True, "message": "Availability deleted"}
 
+# Admin endpoint to create availability on behalf of staff
+class AdminAvailabilityCreate(BaseModel):
+    user_id: str
+    date: str
+    start_time: str
+    end_time: str
+    status: str = "available"
+    notes: str = None
+    repeat_weekly: bool = False
+
+@api_router.post("/admin/staff-availability/create")
+async def admin_create_availability(
+    availability: AdminAvailabilityCreate,
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Admin can create availability for any staff member"""
+    # Get the target user info
+    target_user = await db.users.find_one({"id": availability.user_id})
+    if not target_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if target_user["role"] == "regular":
+        raise HTTPException(status_code=400, detail="Cannot create availability for patients")
+    
+    slots_to_create = []
+    base_slot = {
+        "user_id": availability.user_id,
+        "user_name": target_user.get("full_name", "Unknown"),
+        "user_role": target_user["role"],
+        "start_time": availability.start_time,
+        "end_time": availability.end_time,
+        "status": availability.status,
+        "notes": availability.notes,
+        "created_by": user["id"],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    # Create the main slot
+    main_slot = {
+        "id": str(uuid.uuid4()),
+        "date": availability.date,
+        **base_slot
+    }
+    slots_to_create.append(main_slot)
+    
+    # If repeat_weekly, create slots for next 4 weeks
+    if availability.repeat_weekly:
+        from datetime import timedelta
+        base_date = datetime.strptime(availability.date, "%Y-%m-%d")
+        for week in range(1, 5):
+            next_date = base_date + timedelta(weeks=week)
+            repeat_slot = {
+                "id": str(uuid.uuid4()),
+                "date": next_date.strftime("%Y-%m-%d"),
+                **base_slot
+            }
+            slots_to_create.append(repeat_slot)
+    
+    await db.staff_availability.insert_many([{**slot} for slot in slots_to_create])
+    
+    return {"success": True, "slots_created": len(slots_to_create), "for_user": target_user.get("full_name")}
+
 # Admin endpoints for viewing all staff availability
 @api_router.get("/admin/staff-availability")
 async def get_all_staff_availability(
