@@ -334,6 +334,40 @@ class InvoiceResponse(BaseModel):
     created_at: str
     due_date: str
 
+# ============ STAFF AVAILABILITY MODELS ============
+class AvailabilityStatus:
+    AVAILABLE = "available"
+    UNAVAILABLE = "unavailable"
+    ON_LEAVE = "on_leave"
+    SICK = "sick"
+
+class AvailabilityCreate(BaseModel):
+    date: str  # YYYY-MM-DD
+    start_time: str  # HH:MM
+    end_time: str  # HH:MM
+    status: str = AvailabilityStatus.AVAILABLE
+    notes: Optional[str] = None
+    repeat_weekly: bool = False  # If true, repeat for next 4 weeks
+
+class AvailabilityUpdate(BaseModel):
+    start_time: Optional[str] = None
+    end_time: Optional[str] = None
+    status: Optional[str] = None
+    notes: Optional[str] = None
+
+class AvailabilityResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    user_id: str
+    user_name: str
+    user_role: str
+    date: str
+    start_time: str
+    end_time: str
+    status: str
+    notes: Optional[str] = None
+    created_at: str
+
 class NotificationResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str
