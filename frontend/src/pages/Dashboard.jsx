@@ -506,6 +506,11 @@ const Dashboard = () => {
             <InvoiceManager />
           )}
 
+          {/* Live Map - Vehicle Tracking */}
+          {activeTab === 'livemap' && isAdmin() && (
+            <AdminLiveMap />
+          )}
+
           {/* CMS - Page Management */}
           {activeTab === 'cms' && isAdmin() && (
             <CMSManager />
