@@ -341,6 +341,13 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
    - Saves via `POST /api/transport/vitals`
    - Critical values automatically trigger alerts for admin dashboard
    - "Last saved" timestamp indicator
+5. **Offline Support** (NEW - Jan 23, 2026) ✅
+   - Service Worker for caching static assets
+   - IndexedDB for storing vitals when offline
+   - Online/Offline status indicator in header
+   - Automatic sync when connection restored
+   - Pending sync count with manual sync button
+   - Offline banner notification
 
 ### Bug Fixes - Jan 23, 2026
 
@@ -348,6 +355,11 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
    - **Issue:** `POST /api/auth/register` ignored the `role` field, defaulting all users to "regular"
    - **Fix:** Updated line 1447 in server.py to allow roles: doctor, nurse, driver during registration
    - **Verification:** Tested registration with all allowed roles - now correctly assigned
+
+2. **Critical Alerts Panel Position (FIXED)** ✅
+   - **Issue:** Floating alerts panel overlapped with header, blocking logout button and role display
+   - **Fix:** Moved critical alerts to dedicated "Alerts" tab in Medical Dashboard with embedded mode
+   - **Result:** Full-width alert management with active alerts grid and acknowledged alerts history
 
 ### Technology Stack
 - Frontend: React with Tailwind CSS, Shadcn UI, react-leaflet
