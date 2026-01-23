@@ -53,7 +53,9 @@ import {
   ChevronRight,
   Stethoscope,
   Receipt,
-  BarChart3
+  BarChart3,
+  Moon,
+  Sun
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
