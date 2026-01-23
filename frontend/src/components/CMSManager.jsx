@@ -47,14 +47,15 @@ const iconOptions = [
 
 const CMSManager = () => {
   const { language } = useLanguage();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [content, setContent] = useState([]);
-  const [selectedPage, setSelectedPage] = useState('medical-care');
+  const [selectedPage, setSelectedPage] = useState('home');
   const [editingItem, setEditingItem] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
-    page: 'medical-care',
+    page: 'home',
     section: '',
     title_sr: '',
     title_en: '',
@@ -67,6 +68,8 @@ const CMSManager = () => {
     order: 0,
     is_active: true
   });
+
+  const isSuperAdmin = user?.role === 'superadmin';
 
   useEffect(() => {
     fetchContent();
