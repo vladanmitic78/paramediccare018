@@ -2358,6 +2358,59 @@ async def assign_driver_to_booking(
     
     return {"success": True, "message": "Driver assigned"}
 
+# Admin endpoint to assign driver to public booking
+@api_router.post("/admin/assign-driver-public")
+async def assign_driver_to_public_booking(
+    booking_id: str,
+    driver_id: str,
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Assign a driver to a public booking"""
+    # Verify driver exists and is available
+    driver = await db.users.find_one({"id": driver_id, "role": UserRole.DRIVER})
+    if not driver:
+        raise HTTPException(status_code=404, detail="Driver not found")
+    
+    driver_status = await db.driver_status.find_one({"driver_id": driver_id})
+    if driver_status and driver_status.get("status") not in [DriverStatus.OFFLINE, DriverStatus.AVAILABLE]:
+        raise HTTPException(status_code=400, detail="Driver is not available")
+    
+    # Update public booking
+    result = await db.bookings.update_one(
+        {"id": booking_id},
+        {"$set": {
+            "assigned_driver": driver_id,
+            "assigned_driver_name": driver.get("full_name"),
+            "status": "confirmed",
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    # Update driver status
+    await db.driver_status.update_one(
+        {"driver_id": driver_id},
+        {"$set": {
+            "status": DriverStatus.ASSIGNED,
+            "current_booking_id": booking_id,
+            "last_updated": datetime.now(timezone.utc).isoformat()
+        }},
+        upsert=True
+    )
+    
+    # Get booking for WebSocket notification
+    booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
+    
+    # Notify driver via WebSocket
+    await ws_manager.send_to_driver(driver_id, {
+        "type": "new_assignment",
+        "booking": booking
+    })
+    
+    return {"success": True, "message": "Driver assigned to public booking"}
+
 # Admin endpoint to get all drivers with their status
 @api_router.get("/admin/drivers")
 async def get_all_drivers(user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))):
