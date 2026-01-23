@@ -78,7 +78,9 @@ const Booking = () => {
         contact_email: formData.contact_email,
         patient_name: formData.patient_name,
         notes: formData.notes,
-        documents: uploadedFileIds
+        documents: uploadedFileIds,
+        booking_type: 'transport',  // Default to transport
+        language: language  // Pass current language for email template
       };
 
       await axios.post(`${API}/bookings`, bookingData);
