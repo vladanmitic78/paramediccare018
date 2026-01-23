@@ -363,6 +363,7 @@ const CriticalAlertsPanel = ({ language = 'sr', darkMode = false, embedded = fal
           animation: pulse-slow 2s ease-in-out infinite;
         }
       `}</style>
+    </div>
   );
 };
 
