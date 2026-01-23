@@ -63,6 +63,7 @@ class UserCreate(BaseModel):
     full_name: str
     phone: Optional[str] = None
     role: str = UserRole.REGULAR
+    language: str = "sr"  # User's preferred language for emails
 
 class UserLogin(BaseModel):
     email: EmailStr
