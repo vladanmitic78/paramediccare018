@@ -377,6 +377,16 @@ const DriverDashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {/* Language toggle */}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={toggleLanguage} 
+              className="text-slate-400 hover:text-emerald-400"
+              data-testid="language-toggle"
+            >
+              <Globe className="w-5 h-5" />
+            </Button>
             {/* Connection indicator */}
             {connectionStatus === 'connected' ? (
               <Wifi className="w-5 h-5 text-green-400" />
