@@ -351,10 +351,14 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
 - [x] **Staff Availability Calendar** (NEW - Jan 23, 2026) ✅
 - [x] **Enhanced Staff Calendar Views** (Timeline + Grouped) (NEW - Jan 23, 2026) ✅
 - [x] **Medical Dashboard Phase 1** (Doctor/Nurse Dashboard with Patient Database) (NEW - Jan 23, 2026) ✅
+- [x] **Vital Signs Graphs** (Interactive historical charts with recharts) (NEW - Jan 23, 2026) ✅
+- [x] **Emergency Transport Vitals & Alerts** (Real-time critical value detection) (NEW - Jan 23, 2026) ✅
+- [x] **Medical Staff PWA** (Mobile-first vitals input for ambulance use) (NEW - Jan 23, 2026) ✅
+- [x] **User Registration Role Bug Fix** (Roles doctor/nurse/driver now correctly assigned) (NEW - Jan 23, 2026) ✅
 
 ### P1 (Next Up)
-- [ ] Medical Dashboard Phase 2: Vital Signs Graphs & Medical Check Forms
-- [ ] Medical Dashboard Phase 3: Emergency Transport Timeline
+- [ ] Emergency Transport Timeline (chronological event log)
+- [ ] Doctor Decision Panel (live instructions, medication approval, hospital selection)
 - [ ] Implement Statistics & Analytics dashboard
 - [ ] Integrate live data into Operations Dashboard
 
