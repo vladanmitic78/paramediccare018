@@ -1072,6 +1072,84 @@ const Dashboard = () => {
             </div>
           )}
 
+          {/* Drivers Section (Admin only) */}
+          {activeTab === 'drivers' && isAdmin() && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: 'Manrope, sans-serif' }}>
+                  {language === 'sr' ? 'Upravljanje vozačima' : 'Driver Management'}
+                </h1>
+              </div>
+              <AdminLiveMap />
+            </div>
+          )}
+
+          {/* Patients Section - Coming Soon */}
+          {activeTab === 'patients' && isAdmin() && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: 'Manrope, sans-serif' }}>
+                {language === 'sr' ? 'Baza pacijenata' : 'Patient Database'}
+              </h1>
+              <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
+                <div className="w-16 h-16 rounded-full bg-sky-100 flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-8 h-8 text-sky-600" />
+                </div>
+                <h2 className="text-xl font-semibold text-slate-900 mb-2">
+                  {language === 'sr' ? 'Uskoro dostupno' : 'Coming Soon'}
+                </h2>
+                <p className="text-slate-500 max-w-md mx-auto">
+                  {language === 'sr' 
+                    ? 'Baza pacijenata sa kompletnom istorijom transporta, medicinskom dokumentacijom i kontakt informacijama.'
+                    : 'Patient database with complete transport history, medical documentation, and contact information.'}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Statistics Section - Coming Soon */}
+          {activeTab === 'statistics' && isAdmin() && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: 'Manrope, sans-serif' }}>
+                {language === 'sr' ? 'Statistika i analitika' : 'Statistics & Analytics'}
+              </h1>
+              <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
+                <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center mx-auto mb-4">
+                  <Activity className="w-8 h-8 text-purple-600" />
+                </div>
+                <h2 className="text-xl font-semibold text-slate-900 mb-2">
+                  {language === 'sr' ? 'Uskoro dostupno' : 'Coming Soon'}
+                </h2>
+                <p className="text-slate-500 max-w-md mx-auto">
+                  {language === 'sr' 
+                    ? 'Detaljni izveštaji, grafikoni performansi, analiza vremena odziva i trendovi transporta.'
+                    : 'Detailed reports, performance charts, response time analysis, and transport trends.'}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Availability Section - Coming Soon */}
+          {activeTab === 'availability' && isAdmin() && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: 'Manrope, sans-serif' }}>
+                {language === 'sr' ? 'Raspored dostupnosti' : 'Availability Schedule'}
+              </h1>
+              <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
+                <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
+                  <Calendar className="w-8 h-8 text-amber-600" />
+                </div>
+                <h2 className="text-xl font-semibold text-slate-900 mb-2">
+                  {language === 'sr' ? 'Uskoro dostupno' : 'Coming Soon'}
+                </h2>
+                <p className="text-slate-500 max-w-md mx-auto">
+                  {language === 'sr' 
+                    ? 'Kalendar za vozače, doktore i medicinske sestre da prijave svoju dostupnost. Admin pregled svih rasporeda.'
+                    : 'Calendar for drivers, doctors, and nurses to submit availability. Admin overview of all schedules.'}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Services (Admin only) */}
           {activeTab === 'services' && isAdmin() && (
             <div className="space-y-6">
