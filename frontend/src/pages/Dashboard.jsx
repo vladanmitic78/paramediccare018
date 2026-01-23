@@ -498,6 +498,11 @@ const Dashboard = () => {
             </div>
           )}
 
+          {/* Invoices */}
+          {activeTab === 'invoices' && isAdmin() && (
+            <InvoiceManager />
+          )}
+
           {/* CMS - Page Management */}
           {activeTab === 'cms' && isAdmin() && (
             <CMSManager />
