@@ -303,19 +303,22 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
 - [x] **Professional Sidebar Redesign** (NEW - Jan 23, 2026) ✅
 - [x] **Staff Availability Calendar** (NEW - Jan 23, 2026) ✅
 - [x] **Enhanced Staff Calendar Views** (Timeline + Grouped) (NEW - Jan 23, 2026) ✅
+- [x] **Medical Dashboard Phase 1** (Doctor/Nurse Dashboard with Patient Database) (NEW - Jan 23, 2026) ✅
 
 ### P1 (Next Up)
-- [ ] Implement Patients database (MEDICINSKI CENTAR) - Full medical profile
+- [ ] Medical Dashboard Phase 2: Vital Signs Graphs & Medical Check Forms
+- [ ] Medical Dashboard Phase 3: Emergency Transport Timeline
 - [ ] Implement Statistics & Analytics dashboard
 - [ ] Integrate live data into Operations Dashboard
-- [ ] Role-Specific Dashboards for Doctors and Nurses
 
 ### P2 (Future)
 - [ ] Persist collapsible sidebar state in localStorage
 - [ ] Driver rejection reason modal/text field
-- [ ] Electronic Medical Records (EMR)
+- [ ] Doctor Decision Panel (live instructions, medication approval)
+- [ ] Medical Reports & PDF Export
 - [ ] Fleet Management Module (Vehicles, Equipment)
 - [ ] Calendar View for Bookings (OPERACIJE -> Kalendar)
+- [ ] Offline mode for Medical Dashboard (PWA)
 - [ ] Payment processing
 - [ ] Insurance integration
 - [ ] Mobile applications
