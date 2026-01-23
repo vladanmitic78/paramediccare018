@@ -93,10 +93,14 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
 - [x] Operations Dashboard with Transportation/Medical Care views
 - [x] Fullscreen map toggle
 - [x] Company logo integration in dashboard
+- [x] Email system with bilingual templates (SR/EN)
+- [x] Email routing (General→info@, Medical→ambulanta@, Transport→transport@)
+- [x] Registration welcome email
+- [x] Contact form auto-reply
+- [x] Booking confirmation emails
 
 ### P1 (Phase 2 - In Progress)
-- [ ] Document upload on booking page
-- [ ] Email notification on new booking
+- [ ] Document upload on booking page (file upload UI exists, needs enhancement)
 - [ ] Integrate live data into Operations Dashboard (replace mocked data)
 - [ ] GPS real-time tracking
 - [ ] Push notifications
