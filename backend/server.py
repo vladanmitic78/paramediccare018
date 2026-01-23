@@ -992,6 +992,62 @@ async def seed_page_content(user: dict = Depends(require_roles([UserRole.ADMIN, 
         return {"message": "Content already exists", "count": count}
     
     default_content = [
+        # Home Page
+        {
+            "id": str(uuid.uuid4()),
+            "page": "home",
+            "section": "hero",
+            "title_sr": "Medicinski Transport i Hitna Pomoć",
+            "title_en": "Medical Transport and Emergency Care",
+            "subtitle_sr": "Dostupni 24/7",
+            "subtitle_en": "Available 24/7",
+            "content_sr": "Profesionalna medicinska pomoć i transport sanitetskim vozilom. Brza, sigurna i pouzdana usluga za vaše zdravlje.",
+            "content_en": "Professional medical assistance and ambulance transport. Fast, safe, and reliable service for your health.",
+            "image_url": "https://images.pexels.com/photos/6520105/pexels-photo-6520105.jpeg",
+            "order": 1,
+            "is_active": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": "System"
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "page": "home",
+            "section": "services-title",
+            "title_sr": "Naše Usluge",
+            "title_en": "Our Services",
+            "content_sr": "Pružamo širok spektar medicinskih usluga prilagođenih vašim potrebama",
+            "content_en": "We provide a wide range of medical services tailored to your needs",
+            "order": 2,
+            "is_active": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": "System"
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "page": "home",
+            "section": "cta",
+            "title_sr": "Potreban vam je transport?",
+            "title_en": "Need Transport?",
+            "content_sr": "Zakažite medicinski transport brzo i jednostavno. Naš tim je spreman da vam pomogne.",
+            "content_en": "Book medical transport quickly and easily. Our team is ready to help you.",
+            "order": 3,
+            "is_active": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": "System"
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "page": "home",
+            "section": "emergency-phone",
+            "title_sr": "Hitna linija",
+            "title_en": "Emergency Line",
+            "content_sr": "+381 18 123 456",
+            "content_en": "+381 18 123 456",
+            "order": 4,
+            "is_active": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": "System"
+        },
         # Medical Care Page
         {
             "id": str(uuid.uuid4()),
