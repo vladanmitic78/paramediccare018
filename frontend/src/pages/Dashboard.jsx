@@ -50,6 +50,7 @@ import { toast } from 'sonner';
 import axios from 'axios';
 import CMSManager from '../components/CMSManager';
 import OperationsDashboard from '../components/OperationsDashboard';
+import AdminBookingNotifications from '../components/AdminBookingNotifications';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -67,8 +68,16 @@ const Dashboard = () => {
   const [contacts, setContacts] = useState([]);
   const [services, setServices] = useState([]);
   const [staff, setStaff] = useState([]);
+  const [selectedPatientBooking, setSelectedPatientBooking] = useState(null);
 
   const isSuperAdmin = () => user?.role === 'superadmin';
+
+  // Handle viewing a patient booking from notification
+  const handleViewPatientBooking = (booking) => {
+    setSelectedPatientBooking(booking);
+    setMainView('admin');
+    setActiveTab('bookings');
+  };
 
   useEffect(() => {
     if (!user) {
