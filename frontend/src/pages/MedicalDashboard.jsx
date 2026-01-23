@@ -6,6 +6,8 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
 import VitalSignsGraph from '../components/VitalSignsGraph';
+import TransportVitalsDialog from '../components/TransportVitalsDialog';
+import CriticalAlertsPanel from '../components/CriticalAlertsPanel';
 import {
   Select,
   SelectContent,
