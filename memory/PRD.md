@@ -54,6 +54,18 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
    - Bilingual email templates (SR/EN)
    - Email routing to appropriate departments
 
+8. **Real-Time Notifications System** (NEW - Jan 23, 2026) ✅
+   - **Admin Popup Notifications**: When a patient creates a booking, admins get an instant popup with:
+     - Patient details (name, age, mobility status)
+     - Transport reason and locations
+     - Date/time
+     - Quick action buttons: Confirm / Reject
+     - Audio notification beep
+   - **Patient Real-Time Status Updates**: Patient dashboard polls every 10 seconds
+     - Toast notifications when booking status changes
+     - Status progress bar updates automatically
+     - Refresh button for manual updates
+
 ### Phase 2 - Patient Portal (NEW - Jan 23, 2026) ✅
 
 #### Patient Portal Features (COMPLETE)
