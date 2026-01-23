@@ -1,177 +1,183 @@
 <analysis>**original_problem_statement:**
-The user wants to build a medical system called Paramedic Care 018. The initial MVP included a public website, a booking system, a 5-tier RBAC system, and a full CMS.
+The user wants to build a medical system called Paramedic Care 018. The initial MVP included a public website, a booking system, and a 5-tier RBAC system. The scope has since expanded significantly.
 
-Recently, the user provided a detailed specification for a new **Patient/End-User Portal**.
-
-**PRODUCT REQUIREMENTS (Patient Portal - Phase 1):**
--   **Authentication:** Secure login/logout for patients.
--   **Dashboard:** Welcome message, a Book Medical Transport button, status of the current active booking, and an emergency contact button.
--   **Booking Management:** A My Bookings section listing all past and active bookings with details (ID, date, locations, status). Patients can cancel bookings if not yet dispatched.
--   **New Booking Flow:** A step-by-step wizard for new bookings, collecting patient info, transport needs, and transport details, ending with a confirmation summary.
--   **Invoices & Billing:** A section to view and download PDF invoices for completed bookings. No online payments in Phase 1.
--   **Profile & Settings:** Manage personal info, saved addresses, emergency contacts, and preferred language.
--   **Notifications:** Web and email notifications for booking confirmations and status updates.
--   **Design:** A clean, calm, mobile-first, multilingual (Serbian/English) UI suitable for users in stressful situations.
+**Recent PRODUCT REQUIREMENTS:**
+1.  **Patient Portal (Phase 1 - COMPLETE):** A secure portal for patients to manage bookings, view invoices, and update their profiles.
+2.  **Real-Time Updates (COMPLETE):** Patients see booking status changes in real-time, and admins receive immediate pop-up notifications for new bookings.
+3.  **Email Verification (COMPLETE):** A full email verification flow for new user registrations.
+4.  **Public Booking Document Upload (COMPLETE):** Users can upload documents on the public booking form.
+5.  **Admin Invoice Management (COMPLETE):** Admins can create invoices from completed bookings and generate PDFs.
+6.  **Driver App (PWA - IN PROGRESS):** A very simple, mobile-first Progressive Web App for drivers to see assignments, update their status, and share their live location during active transports.
 
 The full, original PRD is in .
 
 **User's preferred language**: The user communicates in English. The application's default language is Serbian, with an English translation option. The next agent should communicate in **English**.
 
 **what currently exists?**
-A full-stack application with a React frontend and FastAPI backend using a MongoDB database.
--   **Frontend:** All public pages (Home, Medical Care, Transport, etc.) are implemented and fully wired to a CMS. There is a sophisticated admin dashboard with two views: Operations (a modern UI for monitoring activities, currently with static data) and Administration (for user management and a full-fledged CMS). The image gallery alignment on the home page has been fixed. Placeholder files for the new patient portal have been created.
--   **Backend:** A robust API supports JWT authentication, a 5-tier RBAC system, and full CRUD for the CMS. A comprehensive email system is integrated with bilingual templates for registration, contact forms, and bookings. The backend now includes the necessary models and API endpoint stubs for the new patient portal.
--   **CMS:** Admins can edit the Home, Medical Care, Transport, and About pages. Super Admins can additionally edit the Header and Footer. An image upload feature has been added, allowing admins to upload images directly instead of using URLs.
+A full-stack application with a React frontend and FastAPI backend using MongoDB.
+-   **Frontend:** The public site is fully CMS-driven. A sophisticated admin dashboard allows for user management, CMS editing, and now includes a full invoice management system. A complete, functional patient portal allows patients to manage their entire journey. Placeholder files and backend stubs for the new Driver App have been created.
+-   **Backend:** The API supports JWT authentication, a 5-tier RBAC system, and full CRUD for the CMS. It features a comprehensive email system (registration, verification, admin notifications), handles image and document uploads, and generates PDF invoices. The backend now includes models, API endpoints, and WebSocket support for the Driver App.
+-   **Key Features Implemented:**
+    -   Patient Portal (Dashboard, Booking, Profile, Invoices).
+    -   Real-time admin pop-up notifications for new bookings.
+    -   Real-time patient-side status updates (via polling).
+    -   Secure email verification flow for new registrations.
+    -   Admin email notifications for new user sign-ups.
+    -   Document upload on the public booking page.
+    -   Full invoice management for admins with PDF generation.
 
 **Last working item**:
--   **Last item agent was working:** The agent was laying the groundwork for the new patient portal. This involved creating the necessary backend models (, , etc.) and API endpoints (e.g., ), and then creating the corresponding placeholder React components on the frontend (, , etc.).
+-   **Last item agent was working:** The agent began implementing the **Driver App**. This involved setting up the backend foundation:
+    1.  Added WebSocket dependencies and a connection manager.
+    2.  Created Pydantic models for driver status and location (, , ).
+    3.  Created API stubs for driver actions () and a WebSocket endpoint ().
+    4.  Created the placeholder frontend component at .
 -   **Status:** IN PROGRESS
 -   **Agent Testing Done:** N
--   **Which testing method agent to use?** Frontend testing agent. Once the patient portal is built, a comprehensive test should be run to verify the entire user flow from login to booking and viewing invoices.
+-   **Which testing method agent to use?** Both. Use the backend testing agent to verify the WebSocket and location update endpoints. Use the frontend testing agent to test the driver PWA flow.
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: (P2) Fragile Made with Emergent Badge Removal**
-    -   **Description:** The badge is hidden with a CSS attribute selector (), which is brittle and could break with platform updates.
-    -   **Status:** RESOLVED (with a hack)
+-   **Issue 1: (P2) Ephemeral Image Storage**
+    -   **Description:** Images uploaded by users are stored on the preview environment's local filesystem (), which is lost when a new fork is created. This caused all CMS images to appear broken. They were replaced with stock photos as a temporary fix.
+    -   **Next debug checklist:** The long-term solution is to use a persistent, external storage service (like AWS S3). This requires significant changes. For now, the user must re-upload images via the CMS after a fork.
+    -   **Why fix this issue and what will be achieved with the fix?** To ensure data persistence and prevent data loss between development sessions.
+    -   **Status:** NOT STARTED
     -   **Is recurring issue?** Y
+    -   **Should Test frontend/backend/both after fix?** Both.
 
 **In progress Task List**:
--   **Task 1: (P0) Implement the Patient Portal UI**
-    -   **Where to resume:** The skeleton files for the patient portal are created (, , , , ). The next step is to start building out the UI for the , connecting it to the new backend endpoint () to display the welcome message, active booking status, and primary action buttons. After that, proceed to implement the other patient portal pages.
-    -   **What will be achieved with this?** A fully functional patient portal as specified by the user, allowing patients to manage their bookings and view their history.
+-   **Task 1: (P0) Implement the Driver App PWA**
+    -   **Where to resume:** The backend foundation is ready. The agent just created the file . The immediate next steps are:
+        1.  Add a route for  in  that points to a  wrapping .
+        2.  Implement the UI in  as per the user's spec (current task, status buttons).
+        3.  Implement the client-side logic for GPS location tracking using the browser's Geolocation API.
+        4.  Connect the PWA to the backend WebSocket to send location updates.
+    -   **What will be achieved with this?** A functional PWA for drivers to manage their assignments and share their location.
     -   **Status:** IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?** Both
-    -   **Blocked on something:** None
+    -   **Should Test frontend/backend/both after fix?** Both.
+    -   **Blocked on something:** None.
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks:**
-    -   **(P0) Patient Dashboard UI:** Implement the main patient dashboard UI.
-    -   **(P0) New Booking Flow Wizard:** Build the multi-step booking form for patients.
-    -   **(P1) My Bookings Page:** Implement the list of past and active bookings.
-    -   **(P1) Invoices & Billing Page:** Implement the invoice list with PDF download functionality.
-    -   **(P1) Profile & Settings Page:** Implement the user profile management page.
+    -   **(P0) Admin Live Map View:** Implement a new section in the admin dashboard to display drivers' locations in real-time on a map, consuming data from the WebSocket.
     -   **(P1) Integrate Backend Data into Operations Dashboard:** Replace mock data in  with live API data.
-    -   **(P2) Implement Document Upload on Public Booking Page:** Add the missing file upload feature to the public booking form.
 -   **Future Tasks:**
-    -   **(P2) Implement Role-Specific Dashboards:** Develop dedicated views for Doctors, Nurses, and Drivers.
-    -   **(P2) Enhance Map Integration:** Fully integrate the map picker into the public booking form.
-    -   **(P2) Image Gallery for CMS:** Add a feature to reuse previously uploaded images.
+    -   **(P2) Implement Role-Specific Dashboards:** Develop dedicated views for Doctors and Nurses.
+    -   **(P2) Image Gallery for CMS:** Add a feature to reuse previously uploaded images (a media library).
     -   **(P2) Email Status Tracking:** Add a dashboard to monitor sent/failed emails.
 
 **Completed work in this session**
--   **Operations Dashboard UI:** Implemented UI enhancements, including a larger map, narrower timeline, and a fullscreen toggle. Fixed the logo in the sidebar.
--   **Email System:** Integrated new SMTP credentials and implemented bilingual email templates for registration, contact form auto-replies, and booking confirmations.
--   **CMS Enhancements:**
-    -   Extended CMS with role-based access for the Home page (Admin) and Header/Footer (Super Admin).
-    -   Added a direct image upload feature to the CMS.
-    -   Made the Home page gallery images editable through the CMS.
--   **CMS Content Wiring:** Connected the CMS to all public-facing pages (Home, Header, Footer, Medical Care, Transport), making their content fully dynamic.
--   **Bug Fixes:**
-    -   Fixed gallery image alignment on the Home page.
-    -   Corrected the URL path for uploaded images to work with the ingress ().
--   **Patient Portal Foundation:** Created backend models, API endpoints, and frontend placeholder pages for the new patient portal.
+-   **Patient Portal:** Fully implemented a secure, functional patient portal with a dashboard, booking wizard, booking history, invoice viewer, and profile management.
+-   **Real-Time Functionality:**
+    -   Implemented real-time pop-up notifications with audio alerts for admins when new bookings are created.
+    -   Implemented real-time status updates on the patient dashboard via polling.
+-   **Mobile Responsiveness:** Fixed all layout issues on the Patient Portal for a clean mobile experience.
+-   **Registration & Security:**
+    -   Implemented a full email verification flow for new users. Users cannot log in until they verify their email.
+    -   Added admin email notifications for every new user registration.
+-   **Admin & Booking Features:**
+    -   Implemented document uploads on the public booking page.
+    -   Built a complete invoice management system for admins, allowing creation of invoices from completed bookings and PDF generation/download.
+-   **Bug Fixes & Maintenance:**
+    -   Fixed an issue where the admin new-booking pop-up was not showing on initial login.
+    -   Resolved an issue with broken images on the home page by replacing ephemeral URLs with stock photos and identifying the root cause.
+-   **Driver App Foundation:** Laid the backend groundwork by adding models, API endpoints, and WebSocket support.
 
 **Earlier issues found/mentioned but not fixed**
--   **Issue 1: Document Upload Feature Missing (Public Booking)**
-    -   **Debug checklist:** Add a file input to , create a backend endpoint for file uploads, and update the frontend API call.
-    -   **Why to solve this issue and what will be achieved with this?** It's a mandatory requirement from the initial PRD.
-    -   **Should Test frontend/backend/both after fix:** Both.
-    -   **Is recurring issue?** N
+-   None. All previously mentioned issues have been addressed.
 
 **Known issue recurrence from previous fork**
--   None.
+-   **Issue recurrence in previous fork:** Fragile Made with Emergent Badge Removal.
+-   **Recurrence count:** 2
+-   **Status:** RESOLVED (with a brittle CSS hack). This might break again with platform updates.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
 -   **Frontend:** React, Tailwind CSS, Shadcn UI, React Router, Axios, .
--   **Backend:** FastAPI, MongoDB (using ), Pydantic, JWT, , .
--   **Architecture:** Full-stack monolithic repo, Role-Based Access Control (RBAC), multilingual content handling.
+-   **Backend:** FastAPI, MongoDB (using ), Pydantic, JWT, WebSockets,  (for PDF generation).
+-   **Architecture:** Full-stack monolithic repo, Role-Based Access Control (RBAC), real-time updates via WebSockets and polling.
 
 **key DB schema**
--   **users:** , , , , , , , , .
--   **bookings:** , , , , , , , , , .
--   **content:** , , , , , , .
--   **invoices:** uid=0(root) gid=0(root) groups=0(root), , , , , ,  (pending, paid).
--   **notifications:** uid=0(root) gid=0(root) groups=0(root), , , , .
+-   **users:** Added  (bool),  (str),  (datetime).
+-   **bookings:** No major changes.
+-   **invoices:** No major changes.
+-   **driver_locations:** (New Collection) , , , , .
 
 **changes in tech stack**
--   None.
+-   : Added to the backend for PDF generation.
+-   FastAPI : Added for real-time communication.
 
 **All files of reference**
--   **/app/backend/server.py**: Heavily modified to add the email system, extended CMS seeding, image upload endpoint, and patient portal APIs.
--   **/app/frontend/src/components/CMSManager.jsx**: Updated with role-based logic and the new image upload feature.
--   **/app/frontend/src/pages/Home.jsx**: Updated to fetch all content from the CMS and fix gallery alignment.
--   **/app/frontend/src/pages/MedicalCare.jsx**: Rewritten to fetch content from the CMS.
--   **/app/frontend/src/pages/Transport.jsx**: Rewritten to fetch content from the CMS.
--   **/app/frontend/src/components/Header.jsx**: Updated to fetch content from the CMS.
--   **/app/frontend/src/components/Footer.jsx**: Updated to fetch content from the CMS.
--   **/app/frontend/src/pages/PatientDashboard.jsx**: New file for the patient portal.
--   **/app/frontend/src/pages/PatientBookingWizard.jsx**: New file for the patient portal.
--   **/app/frontend/src/App.js**: Updated to include the new patient portal routes.
--   **/app/memory/PRD.md**: Contains the full product requirements.
+-   **/app/backend/server.py**: Heavily modified to add email verification, admin notifications, PDF generation, invoice management, document upload logic, and the entire backend for the Driver App (models, APIs, WebSocket).
+-   **/app/frontend/src/App.js**: Updated with routes for the patient portal and email verification. Needs a route for .
+-   **/app/frontend/src/pages/Login.jsx**: Modified to handle the new email verification flow.
+-   **/app/frontend/src/pages/Dashboard.jsx**: Heavily modified to integrate the admin booking notifications and the new  component.
+-   **/app/frontend/src/pages/PatientDashboard.jsx**: Modified to implement real-time status polling and mobile responsiveness fixes.
+-   **/app/frontend/src/pages/Booking.jsx**: Updated to improve the document upload UI.
+-   **/app/frontend/src/components/AdminBookingNotifications.jsx**: New file for the admin pop-up.
+-   **/app/frontend/src/components/InvoiceManager.jsx**: New file for admin invoice management.
+-   **/app/frontend/src/pages/VerifyEmail.jsx**: New file for the email verification page.
+-   **/app/frontend/src/pages/DriverDashboard.jsx**: New placeholder file for the driver PWA.
 
 **Areas that need refactoring**:
--   The  file is now over 1400 lines long and contains models, API routes for auth, users, CMS, bookings, contacts, and the new patient portal. It should be broken down into a more modular structure (e.g., using FastAPI's  in separate files for each domain).
--    still manages logic for both the Operations and Administration views and could be simplified.
+-   **CRITICAL:**  is now extremely large (over 3000 lines). It urgently needs to be broken down into a modular structure using FastAPI's . Create separate files in a  directory for , , , , , etc.
+-    has also become very large and complex. Consider breaking down its logic into smaller, more focused child components or custom hooks.
 
 **key api endpoints**
--   : (POST) Uploads an image to the server.
--   : (GET) Gets all CMS content.
--   : (POST) Seeds the database with default CMS content.
--   **/api/patient/dashboard**: (GET) Retrieves data for the patient dashboard.
--   **/api/patient/bookings**: (GET/POST) Manages patient-specific bookings.
--   **/api/patient/bookings/{booking_id}/cancel**: (POST) Cancels a booking.
--   **/api/patient/invoices**: (GET) Retrieves a patient's invoices.
--   **/api/patient/profile**: (GET/PUT) Manages a patient's profile.
+-   : (POST) Now initiates email verification.
+-   : (GET) New endpoint to verify a user's email via a token.
+-   : (GET/POST) Manage invoices.
+-   : (GET) Download an invoice as a PDF.
+-   : (POST) Handles document uploads from the public booking form.
+-   : (POST) For drivers to update their status.
+-   : (POST) For drivers to post their location.
+-   : (WebSocket) Real-time location channel for drivers.
 
 **Critical Info for New Agent**
--   The immediate priority is to build the **Patient Portal** based on the new, detailed requirements provided by the user. The backend models and API stubs, as well as frontend placeholder files, are already in place.
--   Start by implementing the UI for  and connecting it to the backend. Then, move on to the other patient portal features.
--   The application's content for all public pages is now fully managed via the CMS. Any changes to public-facing text or images should be done through CMS seeding in  or via the admin UI.
--   The email system is fully configured and functional. Use the  utility for any new email notifications.
+-   The highest priority is to continue building the **Driver App**. The backend setup is complete. Your next steps are on the frontend: add the route in , build the UI in , and implement the GPS tracking logic.
+-   After the driver PWA is functional, the next step is to build the corresponding **Admin Live Map** to display the driver's location in real-time.
+-   **Refactoring  is now a high-priority technical debt item.** Please consider addressing this after completing the driver app feature to improve maintainability.
+-   The issue with uploaded images disappearing is due to the ephemeral nature of the preview environment's storage. Inform the user they must re-upload images via the CMS if they are lost after a fork.
 
 **documents and test reports created in this job**
--   
--   
--   
--   
--   
+-    (updated)
 -   
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Asks for image upload capability in the CMS.
-2.  **Agent:** Implements image upload endpoint and frontend UI in the CMS.
-3.  **User:** Asks to wire the CMS content to the public pages (Home, Header, Footer).
-4.  **Agent:** Connects Home, Header, and Footer components to the CMS API. Fixes image URL pathing issue found by testing agent.
-5.  **User:** Reports that gallery images on the Home page are not editable from the Admin panel.
-6.  **Agent:** Implements a new gallery section in the CMS for the Home page, seeds the data, and makes the gallery images editable.
-7.  **User:** Reports seeing harmless PostHog errors in the browser console.
-8.  **Agent:** Explains that the errors are from a third-party analytics tool and do not affect the application, confirming the app is healthy.
-9.  **User:** Asks to wire the CMS to the Medical Care & Transport pages and to fix the image alignment in the Home page gallery.
-10. **User:** Provides a comprehensive and detailed prompt to build a new **Patient/End-User Portal** with a dashboard, booking management, invoices, and profile settings. (This is the current high-priority task).
+1.  **User:** Asks for new user registration to trigger an admin email notification. **Status:** COMPLETED.
+2.  **User:** Requests an email verification flow for new users instead of instant login. **Status:** COMPLETED.
+3.  **User:** Asks for document upload on the public booking page and an invoice creation panel for admins. **Status:** COMPLETED.
+4.  **User:** Reports that images on the home page are broken/missing. **Status:** TEMPORARILY FIXED (by replacing with stock photos).
+5.  **Agent:** Explains the root cause of the broken images (ephemeral storage) and proposes GPS tracking options for drivers.
+6.  **User:** Confirms the home page images are broken and asks for a fix. **Status:** COMPLETED.
+7.  **Agent:** Fixes the images by replacing them with stock photos via the CMS and informs the user they can upload their own.
+8.  **User:** Provides a detailed specification for a simple Driver PWA with live location sharing. **Status:** IN PROGRESS.
+9.  **Agent:** Acknowledges the driver app spec and begins implementation.
+10. **Agent:** Continues implementation of the driver app backend.
 
 **Project Health Check:**
 -   **Broken:** None.
 -   **Mocked:**
-    -   The **Operations Dashboard** () is entirely populated with static, hardcoded data.
-    -   The **Patient Portal pages** () are all placeholder components with no real UI or logic yet.
-    -   The map functionality on the public booking page () is a placeholder.
+    -   The **Operations Dashboard** () is still populated with static data.
+    -   The **Admin Live Map** for driver tracking has not been built yet.
 
 **3rd Party Integrations**
--   **Leaflet:** Used for the map placeholder. No API key required.
+-   **Leaflet:** Used for map placeholders. No API key required.
+-   **reportlab:** Used for generating PDF invoices on the backend.
 
 **Testing status**
--   **Testing agent used after significant changes:** YES. The agent was used successfully multiple times to validate the Operations Dashboard UI, the email system, the role-based CMS, the image upload feature, and the CMS content wiring.
+-   **Testing agent used after significant changes:** YES, for the initial patient portal.
 -   **Troubleshoot agent used after agent stuck in loop:** NO
--   **Test files created:** None.
+-   **Test files created:** 
 -   **Known regressions:** None.
 
 **Credentials to test flow:**
 -   **Super Admin:**  / 
 -   **Admin:**  / 
+-   **Patient:**  / 
 
 **What agent forgot to execute**
--   The original requirement to add a **document upload** feature to the *public* booking page is still pending. The user's focus has shifted to the new patient portal, making that the higher priority.</analysis>
+-   The agent created the  file but did not add the corresponding route () to . This should be the immediate next step.</analysis>
