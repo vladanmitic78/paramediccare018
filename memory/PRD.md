@@ -66,7 +66,7 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
    - Bilingual email confirmation to customer (SR/EN)
    - Internal notification to staff
 
-7. **Email System (NEW - Jan 23, 2026)**
+8. **Email System (NEW - Jan 23, 2026)**
    - All emails sent from: info@paramedic-care018.rs
    - SMTP: mailcluster.loopia.se:465 (SSL)
    - **Email Templates (Bilingual SR/EN):**
