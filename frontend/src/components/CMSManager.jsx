@@ -580,15 +580,54 @@ const CMSManager = () => {
               <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
                   <Image className="w-4 h-4" />
-                  {language === 'sr' ? 'URL Slike' : 'Image URL'}
+                  {language === 'sr' ? 'Slika' : 'Image'}
                 </label>
-                <Input
-                  name="image_url"
-                  value={formData.image_url}
-                  onChange={handleInputChange}
-                  placeholder="https://..."
-                  data-testid="image-url-input"
-                />
+                <div className="flex gap-2">
+                  <Input
+                    name="image_url"
+                    value={formData.image_url}
+                    onChange={handleInputChange}
+                    placeholder={language === 'sr' ? 'URL slike ili otpremi...' : 'Image URL or upload...'}
+                    className="flex-1"
+                    data-testid="image-url-input"
+                  />
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageUpload}
+                    accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml"
+                    className="hidden"
+                    data-testid="image-file-input"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="shrink-0 gap-2"
+                    data-testid="upload-image-btn"
+                  >
+                    {uploading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4" />
+                    )}
+                    {language === 'sr' ? 'Otpremi' : 'Upload'}
+                  </Button>
+                </div>
+                {formData.image_url && (
+                  <div className="mt-2 p-2 border border-slate-200 rounded-lg bg-slate-50">
+                    <img 
+                      src={formData.image_url} 
+                      alt="Preview" 
+                      className="h-20 w-auto object-cover rounded"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                    <p className="text-xs text-slate-500 mt-1 truncate max-w-xs">{formData.image_url}</p>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
