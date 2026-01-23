@@ -366,6 +366,9 @@ const DriverDashboard = () => {
       <header className="bg-slate-800 border-b border-slate-700 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg overflow-hidden">
+              <img src="/logo.jpg" alt="Paramedic Care 018" className="w-full h-full object-cover" />
+            </div>
             <div className={`w-3 h-3 rounded-full ${statusLabels[driverStatus]?.color || 'bg-slate-500'}`} />
             <div>
               <p className="font-semibold">{user?.full_name}</p>
