@@ -99,7 +99,8 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
 - [x] Public pages
 - [x] Booking form with maps
 - [x] Role-based auth
-- [x] Admin CMS
+- [x] Admin CMS (Home, Medical Care, Transport, About)
+- [x] Super Admin CMS extension (Header, Footer editing)
 - [x] Operations Dashboard with Transportation/Medical Care views
 - [x] Fullscreen map toggle
 - [x] Company logo integration in dashboard
