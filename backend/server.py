@@ -2128,6 +2128,167 @@ async def get_bookings_for_invoice(
     ).sort("created_at", -1).to_list(100)
     return bookings
 
+# ============ STAFF AVAILABILITY ROUTES ============
+
+@api_router.get("/staff/availability")
+async def get_my_availability(
+    start_date: str = None,
+    end_date: str = None,
+    user: dict = Depends(get_current_user)
+):
+    """Get current user's availability schedule"""
+    query = {"user_id": user["id"]}
+    
+    if start_date:
+        query["date"] = {"$gte": start_date}
+    if end_date:
+        if "date" in query:
+            query["date"]["$lte"] = end_date
+        else:
+            query["date"] = {"$lte": end_date}
+    
+    slots = await db.staff_availability.find(query, {"_id": 0}).sort("date", 1).to_list(100)
+    return slots
+
+@api_router.post("/staff/availability")
+async def create_availability(
+    availability: AvailabilityCreate,
+    user: dict = Depends(get_current_user)
+):
+    """Create a new availability slot"""
+    # Validate user is staff (not regular/patient)
+    if user["role"] == "regular":
+        raise HTTPException(status_code=403, detail="Patients cannot create availability")
+    
+    slots_to_create = []
+    base_slot = {
+        "user_id": user["id"],
+        "user_name": user.get("full_name", "Unknown"),
+        "user_role": user["role"],
+        "start_time": availability.start_time,
+        "end_time": availability.end_time,
+        "status": availability.status,
+        "notes": availability.notes,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    # Create the main slot
+    main_slot = {
+        "id": str(uuid.uuid4()),
+        "date": availability.date,
+        **base_slot
+    }
+    slots_to_create.append(main_slot)
+    
+    # If repeat_weekly, create slots for next 4 weeks
+    if availability.repeat_weekly:
+        from datetime import timedelta
+        base_date = datetime.strptime(availability.date, "%Y-%m-%d")
+        for week in range(1, 5):
+            next_date = base_date + timedelta(weeks=week)
+            repeat_slot = {
+                "id": str(uuid.uuid4()),
+                "date": next_date.strftime("%Y-%m-%d"),
+                **base_slot
+            }
+            slots_to_create.append(repeat_slot)
+    
+    await db.staff_availability.insert_many(slots_to_create)
+    return {"success": True, "slots_created": len(slots_to_create), "slots": slots_to_create}
+
+@api_router.put("/staff/availability/{slot_id}")
+async def update_availability(
+    slot_id: str,
+    update: AvailabilityUpdate,
+    user: dict = Depends(get_current_user)
+):
+    """Update an availability slot"""
+    # Verify ownership
+    slot = await db.staff_availability.find_one({"id": slot_id, "user_id": user["id"]})
+    if not slot:
+        raise HTTPException(status_code=404, detail="Availability slot not found")
+    
+    update_data = {k: v for k, v in update.model_dump().items() if v is not None}
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.staff_availability.update_one(
+        {"id": slot_id},
+        {"$set": update_data}
+    )
+    return {"success": True, "message": "Availability updated"}
+
+@api_router.delete("/staff/availability/{slot_id}")
+async def delete_availability(
+    slot_id: str,
+    user: dict = Depends(get_current_user)
+):
+    """Delete an availability slot"""
+    result = await db.staff_availability.delete_one({"id": slot_id, "user_id": user["id"]})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Availability slot not found")
+    return {"success": True, "message": "Availability deleted"}
+
+# Admin endpoints for viewing all staff availability
+@api_router.get("/admin/staff-availability")
+async def get_all_staff_availability(
+    start_date: str = None,
+    end_date: str = None,
+    role: str = None,
+    user_id: str = None,
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Get all staff availability (admin only)"""
+    query = {}
+    
+    if start_date:
+        query["date"] = {"$gte": start_date}
+    if end_date:
+        if "date" in query:
+            query["date"]["$lte"] = end_date
+        else:
+            query["date"] = {"$lte": end_date}
+    if role:
+        query["user_role"] = role
+    if user_id:
+        query["user_id"] = user_id
+    
+    slots = await db.staff_availability.find(query, {"_id": 0}).sort("date", 1).to_list(500)
+    return slots
+
+@api_router.get("/admin/staff-availability/date/{date}")
+async def get_staff_availability_by_date(
+    date: str,
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Get all staff availability for a specific date"""
+    slots = await db.staff_availability.find({"date": date}, {"_id": 0}).to_list(100)
+    
+    # Group by user
+    by_user = {}
+    for slot in slots:
+        uid = slot["user_id"]
+        if uid not in by_user:
+            by_user[uid] = {
+                "user_id": uid,
+                "user_name": slot["user_name"],
+                "user_role": slot["user_role"],
+                "slots": []
+            }
+        by_user[uid]["slots"].append(slot)
+    
+    return {"date": date, "staff": list(by_user.values())}
+
+@api_router.get("/admin/staff-list")
+async def get_staff_list(
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Get list of all staff members (non-patients)"""
+    staff = await db.users.find(
+        {"role": {"$ne": "regular"}, "is_active": True},
+        {"_id": 0, "password": 0, "verification_token": 0}
+    ).to_list(100)
+    return staff
+
 # ============ DRIVER APP ROUTES ============
 
 @api_router.get("/driver/profile")
