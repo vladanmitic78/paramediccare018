@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { CheckCircle, XCircle, Loader2, Mail, ArrowRight } from 'lucide-react';
@@ -16,16 +16,7 @@ const VerifyEmail = () => {
   const [status, setStatus] = useState('verifying'); // verifying, success, error, already_verified
   const [message, setMessage] = useState('');
 
-  useEffect(() => {
-    if (token) {
-      verifyEmail();
-    } else {
-      setStatus('error');
-      setMessage(language === 'sr' ? 'Neispravan link za verifikaciju' : 'Invalid verification link');
-    }
-  }, [token]);
-
-  const verifyEmail = async () => {
+  const verifyEmail = useCallback(async () => {
     try {
       const response = await axios.get(`${API}/api/auth/verify-email?token=${token}`);
       
@@ -44,7 +35,16 @@ const VerifyEmail = () => {
         (language === 'sr' ? 'Greška pri verifikaciji emaila' : 'Error verifying email');
       setMessage(errorMsg);
     }
-  };
+  }, [token, language]);
+
+  useEffect(() => {
+    if (token) {
+      verifyEmail();
+    } else {
+      setStatus('error');
+      setMessage(language === 'sr' ? 'Neispravan link za verifikaciju' : 'Invalid verification link');
+    }
+  }, [token, language, verifyEmail]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-blue-50 flex items-center justify-center p-4">
