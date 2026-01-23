@@ -74,6 +74,8 @@ const Dashboard = () => {
   const [services, setServices] = useState([]);
   const [staff, setStaff] = useState([]);
   const [selectedPatientBooking, setSelectedPatientBooking] = useState(null);
+  const [availableDrivers, setAvailableDrivers] = useState([]);
+  const [assigningDriver, setAssigningDriver] = useState(null);
 
   const isSuperAdmin = () => user?.role === 'superadmin';
 
@@ -82,6 +84,35 @@ const Dashboard = () => {
     setSelectedPatientBooking(booking);
     setMainView('admin');
     setActiveTab('bookings');
+  };
+
+  // Fetch available drivers for assignment
+  const fetchAvailableDrivers = async () => {
+    try {
+      const response = await axios.get(`${API}/admin/drivers`);
+      // Filter to only show available or offline drivers (not currently assigned)
+      const available = response.data.filter(d => 
+        d.driver_status === 'offline' || d.driver_status === 'available'
+      );
+      setAvailableDrivers(available);
+    } catch (error) {
+      console.error('Error fetching drivers:', error);
+    }
+  };
+
+  // Assign driver to booking
+  const assignDriverToBooking = async (bookingId, driverId) => {
+    setAssigningDriver(bookingId);
+    try {
+      await axios.post(`${API}/admin/assign-driver?booking_id=${bookingId}&driver_id=${driverId}`);
+      toast.success(language === 'sr' ? 'Vozač dodeljen!' : 'Driver assigned!');
+      fetchPatientBookings();
+      fetchAvailableDrivers();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || (language === 'sr' ? 'Greška pri dodeli' : 'Assignment error'));
+    } finally {
+      setAssigningDriver(null);
+    }
   };
 
   // Fetch patient bookings
@@ -112,6 +143,7 @@ const Dashboard = () => {
     }
     fetchData();
     fetchPatientBookings();
+    fetchAvailableDrivers();
   }, [user, navigate]);
 
   const fetchData = async () => {
