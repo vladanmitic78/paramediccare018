@@ -965,6 +965,395 @@ async def delete_booking(booking_id: str, user: dict = Depends(require_roles([Us
     await db.bookings.delete_one({"id": booking_id})
     return {"success": True}
 
+# ============ PATIENT PORTAL ROUTES ============
+
+# Transport reasons for dropdown
+TRANSPORT_REASONS = {
+    "sr": [
+        {"value": "hospital_appointment", "label": "Pregled u bolnici"},
+        {"value": "dialysis", "label": "Dijaliza"},
+        {"value": "rehabilitation", "label": "Rehabilitacija"},
+        {"value": "discharge", "label": "Otpust iz bolnice"},
+        {"value": "transfer", "label": "Premeštaj u drugu ustanovu"},
+        {"value": "emergency", "label": "Hitna pomoć"},
+        {"value": "other", "label": "Ostalo"}
+    ],
+    "en": [
+        {"value": "hospital_appointment", "label": "Hospital Appointment"},
+        {"value": "dialysis", "label": "Dialysis"},
+        {"value": "rehabilitation", "label": "Rehabilitation"},
+        {"value": "discharge", "label": "Hospital Discharge"},
+        {"value": "transfer", "label": "Facility Transfer"},
+        {"value": "emergency", "label": "Emergency"},
+        {"value": "other", "label": "Other"}
+    ]
+}
+
+@api_router.get("/patient/transport-reasons")
+async def get_transport_reasons(language: str = "sr"):
+    """Get transport reasons for booking form dropdown"""
+    return TRANSPORT_REASONS.get(language, TRANSPORT_REASONS["sr"])
+
+@api_router.get("/patient/dashboard")
+async def get_patient_dashboard(user: dict = Depends(get_current_user)):
+    """Get patient dashboard data"""
+    user_id = user["id"]
+    
+    # Get user profile
+    profile = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
+    
+    # Get active booking (most recent non-completed/cancelled)
+    active_booking = await db.patient_bookings.find_one(
+        {"user_id": user_id, "status": {"$nin": ["completed", "cancelled"]}},
+        {"_id": 0},
+        sort=[("created_at", -1)]
+    )
+    
+    # Get recent bookings count
+    total_bookings = await db.patient_bookings.count_documents({"user_id": user_id})
+    
+    # Get unread notifications count
+    unread_notifications = await db.notifications.count_documents({"user_id": user_id, "is_read": False})
+    
+    # Get pending invoices count
+    pending_invoices = await db.invoices.count_documents({"user_id": user_id, "payment_status": "pending"})
+    
+    return {
+        "profile": profile,
+        "active_booking": active_booking,
+        "stats": {
+            "total_bookings": total_bookings,
+            "unread_notifications": unread_notifications,
+            "pending_invoices": pending_invoices
+        }
+    }
+
+@api_router.post("/patient/bookings", response_model=PatientBookingResponse)
+async def create_patient_booking(booking: PatientBookingCreate, user: dict = Depends(get_current_user)):
+    """Create a new patient booking"""
+    if not booking.consent_given:
+        raise HTTPException(status_code=400, detail="Consent must be given to proceed")
+    
+    booking_id = str(uuid.uuid4())
+    now = datetime.now(timezone.utc).isoformat()
+    
+    booking_doc = {
+        "id": booking_id,
+        "patient_name": booking.patient_name,
+        "patient_age": booking.patient_age,
+        "contact_phone": booking.contact_phone,
+        "contact_email": booking.contact_email,
+        "transport_reason": booking.transport_reason,
+        "transport_reason_details": booking.transport_reason_details,
+        "mobility_status": booking.mobility_status,
+        "pickup_address": booking.pickup_address,
+        "pickup_lat": booking.pickup_lat,
+        "pickup_lng": booking.pickup_lng,
+        "destination_address": booking.destination_address,
+        "destination_lat": booking.destination_lat,
+        "destination_lng": booking.destination_lng,
+        "preferred_date": booking.preferred_date,
+        "preferred_time": booking.preferred_time,
+        "status": BookingStatus.REQUESTED,
+        "assigned_driver": None,
+        "assigned_vehicle": None,
+        "created_at": now,
+        "updated_at": now,
+        "user_id": user["id"],
+        "invoice_id": None
+    }
+    
+    await db.patient_bookings.insert_one(booking_doc)
+    
+    # Create notification for patient
+    await create_notification(
+        user["id"],
+        "booking_confirmation",
+        "Rezervacija primljena",
+        "Booking Received",
+        f"Vaša rezervacija transporta za {booking.preferred_date} je primljena i čeka potvrdu.",
+        f"Your transport booking for {booking.preferred_date} has been received and is pending confirmation.",
+        booking_id
+    )
+    
+    # Send confirmation email
+    subject, body = get_booking_confirmation_template(
+        booking.patient_name,
+        f"{booking.preferred_date} {booking.preferred_time}",
+        booking.pickup_address,
+        booking.destination_address,
+        booking_id,
+        "transport",
+        booking.language
+    )
+    await send_email(booking.contact_email, subject, body)
+    
+    # Send notification to transport team
+    internal_body = get_internal_notification_template("new_booking", {
+        "patient_name": booking.patient_name,
+        "start_point": booking.pickup_address,
+        "end_point": booking.destination_address,
+        "booking_date": f"{booking.preferred_date} {booking.preferred_time}",
+        "contact_phone": booking.contact_phone,
+        "contact_email": booking.contact_email,
+        "notes": f"Razlog: {booking.transport_reason}. Mobilnost: {booking.mobility_status}",
+        "booking_id": booking_id
+    })
+    await send_email(TRANSPORT_EMAIL, f"Nova Rezervacija - {booking.patient_name}", internal_body)
+    
+    return PatientBookingResponse(**{k: v for k, v in booking_doc.items() if k != "_id"})
+
+@api_router.get("/patient/bookings")
+async def get_patient_bookings(
+    user: dict = Depends(get_current_user),
+    status: Optional[str] = None,
+    limit: int = 50
+):
+    """Get patient's bookings"""
+    query = {"user_id": user["id"]}
+    if status:
+        query["status"] = status
+    
+    bookings = await db.patient_bookings.find(query, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
+    return bookings
+
+@api_router.get("/patient/bookings/{booking_id}")
+async def get_patient_booking(booking_id: str, user: dict = Depends(get_current_user)):
+    """Get a specific patient booking"""
+    booking = await db.patient_bookings.find_one(
+        {"id": booking_id, "user_id": user["id"]},
+        {"_id": 0}
+    )
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    return booking
+
+@api_router.post("/patient/bookings/{booking_id}/cancel")
+async def cancel_patient_booking(booking_id: str, user: dict = Depends(get_current_user)):
+    """Cancel a patient booking (only if not yet dispatched)"""
+    booking = await db.patient_bookings.find_one({"id": booking_id, "user_id": user["id"]})
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    # Can only cancel if status is requested or confirmed
+    if booking["status"] not in [BookingStatus.REQUESTED, BookingStatus.CONFIRMED]:
+        raise HTTPException(status_code=400, detail="Cannot cancel booking that is already in progress")
+    
+    await db.patient_bookings.update_one(
+        {"id": booking_id},
+        {"$set": {"status": BookingStatus.CANCELLED, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    # Create notification
+    await create_notification(
+        user["id"],
+        "status_update",
+        "Rezervacija otkazana",
+        "Booking Cancelled",
+        "Vaša rezervacija je uspešno otkazana.",
+        "Your booking has been successfully cancelled.",
+        booking_id
+    )
+    
+    return {"success": True, "message": "Booking cancelled"}
+
+@api_router.get("/patient/invoices")
+async def get_patient_invoices(user: dict = Depends(get_current_user)):
+    """Get patient's invoices"""
+    invoices = await db.invoices.find(
+        {"user_id": user["id"]},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    return invoices
+
+@api_router.get("/patient/invoices/{invoice_id}")
+async def get_patient_invoice(invoice_id: str, user: dict = Depends(get_current_user)):
+    """Get a specific invoice"""
+    invoice = await db.invoices.find_one(
+        {"id": invoice_id, "user_id": user["id"]},
+        {"_id": 0}
+    )
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    return invoice
+
+@api_router.get("/patient/profile")
+async def get_patient_profile(user: dict = Depends(get_current_user)):
+    """Get patient profile"""
+    profile = await db.users.find_one({"id": user["id"]}, {"_id": 0, "password": 0})
+    return profile
+
+@api_router.put("/patient/profile")
+async def update_patient_profile(profile_data: PatientProfileUpdate, user: dict = Depends(get_current_user)):
+    """Update patient profile"""
+    update_data = {k: v for k, v in profile_data.model_dump().items() if v is not None}
+    
+    if profile_data.saved_addresses is not None:
+        update_data["saved_addresses"] = [addr.model_dump() for addr in profile_data.saved_addresses]
+    
+    if profile_data.emergency_contact is not None:
+        update_data["emergency_contact"] = profile_data.emergency_contact.model_dump()
+    
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": update_data}
+    )
+    
+    profile = await db.users.find_one({"id": user["id"]}, {"_id": 0, "password": 0})
+    return profile
+
+@api_router.get("/patient/notifications")
+async def get_patient_notifications(user: dict = Depends(get_current_user), limit: int = 50):
+    """Get patient's notifications"""
+    notifications = await db.notifications.find(
+        {"user_id": user["id"]},
+        {"_id": 0}
+    ).sort("created_at", -1).limit(limit).to_list(limit)
+    return notifications
+
+@api_router.post("/patient/notifications/{notification_id}/read")
+async def mark_notification_read(notification_id: str, user: dict = Depends(get_current_user)):
+    """Mark a notification as read"""
+    await db.notifications.update_one(
+        {"id": notification_id, "user_id": user["id"]},
+        {"$set": {"is_read": True}}
+    )
+    return {"success": True}
+
+@api_router.post("/patient/notifications/read-all")
+async def mark_all_notifications_read(user: dict = Depends(get_current_user)):
+    """Mark all notifications as read"""
+    await db.notifications.update_many(
+        {"user_id": user["id"]},
+        {"$set": {"is_read": True}}
+    )
+    return {"success": True}
+
+# Helper function to create notifications
+async def create_notification(user_id: str, notification_type: str, title_sr: str, title_en: str, message_sr: str, message_en: str, booking_id: str = None):
+    """Create a notification for a user"""
+    notification = {
+        "id": str(uuid.uuid4()),
+        "user_id": user_id,
+        "title_sr": title_sr,
+        "title_en": title_en,
+        "message_sr": message_sr,
+        "message_en": message_en,
+        "notification_type": notification_type,
+        "is_read": False,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "booking_id": booking_id
+    }
+    await db.notifications.insert_one(notification)
+    return notification
+
+# Admin endpoint to update booking status (triggers patient notification)
+@api_router.put("/admin/patient-bookings/{booking_id}/status")
+async def update_patient_booking_status(
+    booking_id: str,
+    status: str,
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.DRIVER]))
+):
+    """Update patient booking status (admin/driver)"""
+    booking = await db.patient_bookings.find_one({"id": booking_id})
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    valid_statuses = [BookingStatus.REQUESTED, BookingStatus.CONFIRMED, BookingStatus.EN_ROUTE, 
+                      BookingStatus.PICKED_UP, BookingStatus.COMPLETED, BookingStatus.CANCELLED]
+    if status not in valid_statuses:
+        raise HTTPException(status_code=400, detail="Invalid status")
+    
+    await db.patient_bookings.update_one(
+        {"id": booking_id},
+        {"$set": {"status": status, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    # Create notification for patient
+    status_messages = {
+        BookingStatus.CONFIRMED: ("Rezervacija potvrđena", "Booking Confirmed", 
+                                   "Vaša rezervacija je potvrđena. Vozilo će doći u zakazano vreme.",
+                                   "Your booking has been confirmed. The vehicle will arrive at the scheduled time."),
+        BookingStatus.EN_ROUTE: ("Vozilo je na putu", "Vehicle En Route",
+                                  "Sanitetsko vozilo je krenulo ka vašoj lokaciji.",
+                                  "The ambulance is on its way to your location."),
+        BookingStatus.PICKED_UP: ("Pacijent preuzet", "Patient Picked Up",
+                                   "Transport je u toku.",
+                                   "Transport is in progress."),
+        BookingStatus.COMPLETED: ("Transport završen", "Transport Completed",
+                                   "Vaš transport je uspešno završen. Hvala vam.",
+                                   "Your transport has been successfully completed. Thank you.")
+    }
+    
+    if status in status_messages:
+        msg = status_messages[status]
+        await create_notification(booking["user_id"], "status_update", msg[0], msg[1], msg[2], msg[3], booking_id)
+    
+    return {"success": True, "status": status}
+
+# Admin endpoint to create invoice for completed booking
+@api_router.post("/admin/invoices")
+async def create_invoice(
+    booking_id: str,
+    amount: float,
+    service_description: str,
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Create invoice for a completed booking"""
+    booking = await db.patient_bookings.find_one({"id": booking_id})
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    # Generate invoice number
+    invoice_count = await db.invoices.count_documents({})
+    invoice_number = f"PC018-{datetime.now().year}-{str(invoice_count + 1).zfill(5)}"
+    
+    tax = round(amount * 0.20, 2)  # 20% VAT
+    total = round(amount + tax, 2)
+    
+    invoice = {
+        "id": str(uuid.uuid4()),
+        "invoice_number": invoice_number,
+        "booking_id": booking_id,
+        "user_id": booking["user_id"],
+        "patient_name": booking["patient_name"],
+        "patient_email": booking["contact_email"],
+        "service_type": "medical_transport",
+        "service_date": booking["preferred_date"],
+        "service_description": service_description,
+        "pickup_address": booking["pickup_address"],
+        "destination_address": booking["destination_address"],
+        "amount": amount,
+        "tax": tax,
+        "total": total,
+        "payment_status": "pending",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "due_date": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
+    }
+    
+    await db.invoices.insert_one(invoice)
+    
+    # Update booking with invoice ID
+    await db.patient_bookings.update_one(
+        {"id": booking_id},
+        {"$set": {"invoice_id": invoice["id"]}}
+    )
+    
+    # Notify patient
+    await create_notification(
+        booking["user_id"],
+        "admin_message",
+        "Nova faktura",
+        "New Invoice",
+        f"Faktura {invoice_number} za vaš transport je kreirana.",
+        f"Invoice {invoice_number} for your transport has been created.",
+        booking_id
+    )
+    
+    return {k: v for k, v in invoice.items() if k != "_id"}
+
 # ============ CONTACT ROUTES ============
 
 @api_router.post("/contact", response_model=ContactResponse)
