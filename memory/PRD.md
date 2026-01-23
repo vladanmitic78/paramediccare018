@@ -157,12 +157,11 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
 - [x] Admin CMS
 - [x] Email system with bilingual templates
 - [x] **Patient Portal (Dashboard, Bookings, Invoices, Profile, Notifications)**
+- [x] **Driver App PWA** (NEW - Jan 23, 2026) ✅
 
 ### P1 (Next Up)
-- [ ] Document upload on public booking page
+- [ ] **Admin Live Map** - Display driver locations in real-time on admin dashboard
 - [ ] Integrate live data into Operations Dashboard (replace mocked data)
-- [ ] Admin panel for creating/managing invoices with PDF generation
-- [ ] GPS real-time tracking
 - [ ] Push notifications (browser)
 
 ### P2 (Future)
@@ -171,7 +170,7 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
 - [ ] Insurance integration
 - [ ] Mobile applications
 - [ ] Advanced analytics
-- [ ] Role-specific dashboards for Doctors/Nurses/Drivers
+- [ ] Role-specific dashboards for Doctors/Nurses
 
 ## API Endpoints
 
@@ -192,11 +191,21 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
 ### Admin APIs
 - `PUT /api/admin/patient-bookings/:id/status` - Update booking status
 - `POST /api/admin/invoices` - Create invoice for completed booking
+- `POST /api/admin/assign-driver` - Assign driver to booking
+
+### Driver APIs (NEW - Jan 23, 2026)
+- `GET /api/driver/profile` - Get driver profile with current status
+- `PUT /api/driver/status` - Update driver status (offline/available/assigned/en_route/on_site/transporting)
+- `POST /api/driver/location` - Update driver GPS location
+- `GET /api/driver/assignment` - Get current assignment
+- `POST /api/driver/complete-transport/:id` - Mark transport as complete
+- `WS /api/ws/driver/:driver_id` - WebSocket for real-time updates
 
 ## Test Credentials
 - **Super Admin:** admin@paramedic-care018.rs / Admin123!
 - **Admin:** office@paramedic-care018.rs / Office123!
 - **Test Patient:** patient@test.com / Test123!
+- **Test Driver:** driver@test.com / Test123!
 
 ## Company Details
 - Address: Žarka Zrenjanina 50A, 18103 Niš, Serbia
