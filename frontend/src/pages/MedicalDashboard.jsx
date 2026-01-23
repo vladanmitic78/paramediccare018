@@ -1294,9 +1294,6 @@ const MedicalDashboard = () => {
         darkMode={darkMode}
         onSuccess={() => fetchDashboard()}
       />
-      
-      {/* Critical Alerts Panel */}
-      <CriticalAlertsPanel language={language} darkMode={darkMode} />
     </div>
   );
 };
