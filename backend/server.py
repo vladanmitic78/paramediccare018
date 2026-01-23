@@ -44,6 +44,12 @@ INFO_PASS = os.environ.get('INFO_PASS', 'Ambulanta!SSSS2026')
 TRANSPORT_EMAIL = os.environ.get('TRANSPORT_EMAIL', 'transport@paramedic-care018.rs')
 MEDICAL_EMAIL = os.environ.get('MEDICAL_EMAIL', 'ambulanta@paramedic-care018.rs')
 
+# Frontend URL for verification links
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://bookings-hub-8.preview.emergentagent.com')
+
+# Verification token expiration (24 hours)
+VERIFICATION_TOKEN_HOURS = 24
+
 # Create the main app
 app = FastAPI(title="Paramedic Care 018 API")
 api_router = APIRouter(prefix="/api")
