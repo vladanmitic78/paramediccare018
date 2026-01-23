@@ -25,20 +25,71 @@
   @apply bg-slate-700 border-slate-600;
 }
 
+/* Dark mode text colors */
 .dark .text-slate-900 {
-  @apply text-slate-100;
+  color: rgb(241 245 249) !important; /* slate-100 */
+}
+
+.dark .text-slate-800 {
+  color: rgb(226 232 240) !important; /* slate-200 */
+}
+
+.dark .text-slate-700 {
+  color: rgb(203 213 225) !important; /* slate-300 */
+}
+
+.dark .text-slate-600 {
+  color: rgb(148 163 184) !important; /* slate-400 */
 }
 
 .dark .text-slate-500 {
-  @apply text-slate-400;
+  color: rgb(148 163 184) !important; /* slate-400 */
 }
 
+/* Dark mode backgrounds */
 .dark .bg-white {
-  background-color: rgb(51 65 85) !important;
+  background-color: rgb(51 65 85) !important; /* slate-700 */
 }
 
+.dark .bg-slate-50 {
+  background-color: rgb(71 85 105) !important; /* slate-600 */
+}
+
+.dark .bg-slate-100 {
+  background-color: rgb(51 65 85) !important; /* slate-700 */
+}
+
+/* Dark mode borders */
 .dark .border-slate-200 {
+  border-color: rgb(71 85 105) !important; /* slate-600 */
+}
+
+.dark .border-slate-300 {
+  border-color: rgb(71 85 105) !important; /* slate-600 */
+}
+
+/* Dark mode table */
+.dark table th {
+  color: rgb(203 213 225) !important; /* slate-300 */
+}
+
+.dark table td {
+  color: rgb(226 232 240) !important; /* slate-200 */
+}
+
+.dark table tr {
+  border-color: rgb(71 85 105) !important; /* slate-600 */
+}
+
+/* Dark mode inputs */
+.dark input, .dark select, .dark textarea {
+  background-color: rgb(51 65 85) !important;
   border-color: rgb(71 85 105) !important;
+  color: rgb(241 245 249) !important;
+}
+
+.dark input::placeholder {
+  color: rgb(148 163 184) !important;
 }
 
 .card-interactive {
