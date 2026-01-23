@@ -248,18 +248,11 @@ def require_roles(allowed_roles: List[str]):
         return user
     return role_checker
 
-async def send_email(to_email: str, subject: str, body_html: str, email_type: str = "transport"):
-    """Send email using appropriate account based on type (transport or medical)"""
+async def send_email(to_email: str, subject: str, body_html: str):
+    """Send email from info@paramedic-care018.rs"""
     try:
-        if email_type == "medical":
-            from_email = MEDICAL_EMAIL
-            password = MEDICAL_PASS
-        else:
-            from_email = SMTP_USER
-            password = SMTP_PASS
-        
         message = MIMEMultipart("alternative")
-        message["From"] = from_email
+        message["From"] = INFO_EMAIL
         message["To"] = to_email
         message["Subject"] = subject
         message.attach(MIMEText(body_html, "html"))
@@ -268,15 +261,346 @@ async def send_email(to_email: str, subject: str, body_html: str, email_type: st
             message,
             hostname=SMTP_HOST,
             port=SMTP_PORT,
-            username=from_email,
-            password=password,
+            username=INFO_EMAIL,
+            password=INFO_PASS,
             use_tls=True
         )
-        logger.info(f"Email sent to {to_email} from {from_email}")
+        logger.info(f"Email sent to {to_email} from {INFO_EMAIL}")
         return True
     except Exception as e:
         logger.error(f"Email failed: {e}")
         return False
+
+# ============ EMAIL TEMPLATES ============
+
+def get_email_header():
+    """Common email header with company logo and branding"""
+    return """
+    <div style="background-color: #0ea5e9; padding: 20px; text-align: center;">
+        <img src="https://customer-assets.emergentagent.com/job_433955cc-2ea1-4976-bce7-1cf9f8ad9654/artifacts/j7ye45w5_Paramedic%20Care%20018%20Logo.jpg" alt="Paramedic Care 018" style="height: 60px; width: auto;">
+    </div>
+    """
+
+def get_email_footer(language: str = "sr"):
+    """Common email footer with company details"""
+    if language == "en":
+        return """
+        <div style="background-color: #f1f5f9; padding: 20px; text-align: center; font-size: 12px; color: #64748b; margin-top: 30px;">
+            <p style="margin: 5px 0;"><strong>Paramedic Care 018</strong></p>
+            <p style="margin: 5px 0;">Žarka Zrenjanina 50A, 18103 Niš, Serbia</p>
+            <p style="margin: 5px 0;">Phone: +381 18 123 456 | Email: info@paramedic-care018.rs</p>
+            <p style="margin: 5px 0;">PIB: 115243796 | MB: 68211557</p>
+            <p style="margin: 15px 0 5px 0; font-size: 11px;">© 2026 Paramedic Care 018. All rights reserved.</p>
+        </div>
+        """
+    else:
+        return """
+        <div style="background-color: #f1f5f9; padding: 20px; text-align: center; font-size: 12px; color: #64748b; margin-top: 30px;">
+            <p style="margin: 5px 0;"><strong>Paramedic Care 018</strong></p>
+            <p style="margin: 5px 0;">Žarka Zrenjanina 50A, 18103 Niš, Srbija</p>
+            <p style="margin: 5px 0;">Telefon: +381 18 123 456 | Email: info@paramedic-care018.rs</p>
+            <p style="margin: 5px 0;">PIB: 115243796 | MB: 68211557</p>
+            <p style="margin: 15px 0 5px 0; font-size: 11px;">© 2026 Paramedic Care 018. Sva prava zadržana.</p>
+        </div>
+        """
+
+def get_registration_email_template(full_name: str, email: str, language: str = "sr"):
+    """Email template for successful registration"""
+    if language == "en":
+        subject = "Welcome to Paramedic Care 018"
+        body = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f8fafc;">
+            {get_email_header()}
+            <div style="padding: 30px; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #0f172a; margin-bottom: 20px;">Welcome to Paramedic Care 018!</h2>
+                <p style="color: #334155; line-height: 1.6;">Dear <strong>{full_name}</strong>,</p>
+                <p style="color: #334155; line-height: 1.6;">Thank you for registering with Paramedic Care 018. Your account has been successfully created.</p>
+                
+                <div style="background-color: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 15px; margin: 20px 0;">
+                    <p style="margin: 0; color: #0369a1;"><strong>Account Details:</strong></p>
+                    <p style="margin: 10px 0 0 0; color: #334155;">Email: {email}</p>
+                </div>
+                
+                <p style="color: #334155; line-height: 1.6;">With your account, you can:</p>
+                <ul style="color: #334155; line-height: 1.8;">
+                    <li>Book medical transport services</li>
+                    <li>Track your booking status</li>
+                    <li>Access your booking history</li>
+                    <li>Contact our support team directly</li>
+                </ul>
+                
+                <p style="color: #334155; line-height: 1.6;">If you have any questions, please don't hesitate to contact us.</p>
+                
+                <p style="color: #334155; line-height: 1.6; margin-top: 30px;">Best regards,<br><strong>Paramedic Care 018 Team</strong></p>
+            </div>
+            {get_email_footer("en")}
+        </body>
+        </html>
+        """
+    else:
+        subject = "Dobrodošli u Paramedic Care 018"
+        body = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f8fafc;">
+            {get_email_header()}
+            <div style="padding: 30px; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #0f172a; margin-bottom: 20px;">Dobrodošli u Paramedic Care 018!</h2>
+                <p style="color: #334155; line-height: 1.6;">Poštovani/a <strong>{full_name}</strong>,</p>
+                <p style="color: #334155; line-height: 1.6;">Hvala vam što ste se registrovali na Paramedic Care 018. Vaš nalog je uspešno kreiran.</p>
+                
+                <div style="background-color: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 15px; margin: 20px 0;">
+                    <p style="margin: 0; color: #0369a1;"><strong>Podaci o nalogu:</strong></p>
+                    <p style="margin: 10px 0 0 0; color: #334155;">Email: {email}</p>
+                </div>
+                
+                <p style="color: #334155; line-height: 1.6;">Sa vašim nalogom možete:</p>
+                <ul style="color: #334155; line-height: 1.8;">
+                    <li>Rezervisati usluge medicinskog transporta</li>
+                    <li>Pratiti status vaše rezervacije</li>
+                    <li>Pristupiti istoriji rezervacija</li>
+                    <li>Kontaktirati naš tim za podršku direktno</li>
+                </ul>
+                
+                <p style="color: #334155; line-height: 1.6;">Ako imate bilo kakvih pitanja, slobodno nas kontaktirajte.</p>
+                
+                <p style="color: #334155; line-height: 1.6; margin-top: 30px;">Srdačan pozdrav,<br><strong>Tim Paramedic Care 018</strong></p>
+            </div>
+            {get_email_footer("sr")}
+        </body>
+        </html>
+        """
+    return subject, body
+
+def get_contact_autoreply_template(name: str, inquiry_type: str, language: str = "sr"):
+    """Email template for contact form auto-reply"""
+    inquiry_labels = {
+        "general": {"sr": "Opšti upit", "en": "General Inquiry"},
+        "transport": {"sr": "Transport", "en": "Transport"},
+        "medical": {"sr": "Medicinska nega", "en": "Medical Care"}
+    }
+    inquiry_label = inquiry_labels.get(inquiry_type, inquiry_labels["general"])
+    
+    if language == "en":
+        subject = "We received your message - Paramedic Care 018"
+        body = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f8fafc;">
+            {get_email_header()}
+            <div style="padding: 30px; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #0f172a; margin-bottom: 20px;">Thank you for contacting us!</h2>
+                <p style="color: #334155; line-height: 1.6;">Dear <strong>{name}</strong>,</p>
+                <p style="color: #334155; line-height: 1.6;">We have received your message regarding <strong>{inquiry_label["en"]}</strong>.</p>
+                
+                <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
+                    <p style="margin: 0; color: #92400e;"><strong>What happens next?</strong></p>
+                    <p style="margin: 10px 0 0 0; color: #334155;">Our team will review your message and respond within 24 hours during business days.</p>
+                </div>
+                
+                <p style="color: #334155; line-height: 1.6;">For urgent medical transport needs, please call us directly:</p>
+                <p style="color: #0ea5e9; font-size: 20px; font-weight: bold; margin: 15px 0;">+381 18 123 456</p>
+                
+                <p style="color: #334155; line-height: 1.6; margin-top: 30px;">Best regards,<br><strong>Paramedic Care 018 Team</strong></p>
+            </div>
+            {get_email_footer("en")}
+        </body>
+        </html>
+        """
+    else:
+        subject = "Primili smo vašu poruku - Paramedic Care 018"
+        body = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f8fafc;">
+            {get_email_header()}
+            <div style="padding: 30px; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #0f172a; margin-bottom: 20px;">Hvala vam što ste nas kontaktirali!</h2>
+                <p style="color: #334155; line-height: 1.6;">Poštovani/a <strong>{name}</strong>,</p>
+                <p style="color: #334155; line-height: 1.6;">Primili smo vašu poruku u vezi sa: <strong>{inquiry_label["sr"]}</strong>.</p>
+                
+                <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
+                    <p style="margin: 0; color: #92400e;"><strong>Šta sledi?</strong></p>
+                    <p style="margin: 10px 0 0 0; color: #334155;">Naš tim će pregledati vašu poruku i odgovoriti u roku od 24 sata tokom radnih dana.</p>
+                </div>
+                
+                <p style="color: #334155; line-height: 1.6;">Za hitne potrebe medicinskog transporta, pozovite nas direktno:</p>
+                <p style="color: #0ea5e9; font-size: 20px; font-weight: bold; margin: 15px 0;">+381 18 123 456</p>
+                
+                <p style="color: #334155; line-height: 1.6; margin-top: 30px;">Srdačan pozdrav,<br><strong>Tim Paramedic Care 018</strong></p>
+            </div>
+            {get_email_footer("sr")}
+        </body>
+        </html>
+        """
+    return subject, body
+
+def get_booking_confirmation_template(patient_name: str, booking_date: str, start_point: str, end_point: str, booking_id: str, booking_type: str = "transport", language: str = "sr"):
+    """Email template for booking confirmation (transport or medical care)"""
+    
+    if booking_type == "medical":
+        icon_color = "#0ea5e9"
+        type_label = {"sr": "Medicinska Nega", "en": "Medical Care"}
+    else:
+        icon_color = "#ef4444"
+        type_label = {"sr": "Medicinski Transport", "en": "Medical Transport"}
+    
+    if language == "en":
+        subject = f"Booking Confirmation - {type_label['en']} - Paramedic Care 018"
+        body = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f8fafc;">
+            {get_email_header()}
+            <div style="padding: 30px; max-width: 600px; margin: 0 auto;">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="display: inline-block; background-color: #dcfce7; border-radius: 50%; padding: 15px;">
+                        <span style="font-size: 30px;">✓</span>
+                    </div>
+                </div>
+                
+                <h2 style="color: #0f172a; margin-bottom: 20px; text-align: center;">Booking Confirmed!</h2>
+                <p style="color: #334155; line-height: 1.6; text-align: center;">Your <strong>{type_label['en']}</strong> booking has been successfully submitted.</p>
+                
+                <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 25px 0;">
+                    <h3 style="color: {icon_color}; margin-top: 0; border-bottom: 2px solid {icon_color}; padding-bottom: 10px;">Booking Details</h3>
+                    <table style="width: 100%; color: #334155;">
+                        <tr>
+                            <td style="padding: 8px 0; font-weight: bold; width: 40%;">Booking ID:</td>
+                            <td style="padding: 8px 0;">{booking_id[:8]}...</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; font-weight: bold;">Patient Name:</td>
+                            <td style="padding: 8px 0;">{patient_name}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; font-weight: bold;">Date & Time:</td>
+                            <td style="padding: 8px 0;">{booking_date}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; font-weight: bold;">Pickup Location:</td>
+                            <td style="padding: 8px 0;">{start_point}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; font-weight: bold;">Destination:</td>
+                            <td style="padding: 8px 0;">{end_point}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; font-weight: bold;">Status:</td>
+                            <td style="padding: 8px 0;"><span style="background-color: #fef3c7; color: #92400e; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold;">PENDING</span></td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div style="background-color: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 15px; margin: 20px 0;">
+                    <p style="margin: 0; color: #0369a1;"><strong>What happens next?</strong></p>
+                    <p style="margin: 10px 0 0 0; color: #334155;">Our team will review your booking and contact you to confirm the details. You will receive a confirmation call or SMS.</p>
+                </div>
+                
+                <p style="color: #334155; line-height: 1.6;">For any questions or changes to your booking, please contact us:</p>
+                <p style="color: #0ea5e9; font-size: 18px; font-weight: bold; margin: 10px 0;">+381 18 123 456</p>
+                <p style="color: #64748b; font-size: 14px;">info@paramedic-care018.rs</p>
+                
+                <p style="color: #334155; line-height: 1.6; margin-top: 30px;">Best regards,<br><strong>Paramedic Care 018 Team</strong></p>
+            </div>
+            {get_email_footer("en")}
+        </body>
+        </html>
+        """
+    else:
+        subject = f"Potvrda rezervacije - {type_label['sr']} - Paramedic Care 018"
+        body = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f8fafc;">
+            {get_email_header()}
+            <div style="padding: 30px; max-width: 600px; margin: 0 auto;">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="display: inline-block; background-color: #dcfce7; border-radius: 50%; padding: 15px;">
+                        <span style="font-size: 30px;">✓</span>
+                    </div>
+                </div>
+                
+                <h2 style="color: #0f172a; margin-bottom: 20px; text-align: center;">Rezervacija potvrđena!</h2>
+                <p style="color: #334155; line-height: 1.6; text-align: center;">Vaša rezervacija za <strong>{type_label['sr']}</strong> je uspešno primljena.</p>
+                
+                <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 25px 0;">
+                    <h3 style="color: {icon_color}; margin-top: 0; border-bottom: 2px solid {icon_color}; padding-bottom: 10px;">Detalji rezervacije</h3>
+                    <table style="width: 100%; color: #334155;">
+                        <tr>
+                            <td style="padding: 8px 0; font-weight: bold; width: 40%;">ID rezervacije:</td>
+                            <td style="padding: 8px 0;">{booking_id[:8]}...</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; font-weight: bold;">Ime pacijenta:</td>
+                            <td style="padding: 8px 0;">{patient_name}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; font-weight: bold;">Datum i vreme:</td>
+                            <td style="padding: 8px 0;">{booking_date}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; font-weight: bold;">Polazna lokacija:</td>
+                            <td style="padding: 8px 0;">{start_point}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; font-weight: bold;">Odredište:</td>
+                            <td style="padding: 8px 0;">{end_point}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; font-weight: bold;">Status:</td>
+                            <td style="padding: 8px 0;"><span style="background-color: #fef3c7; color: #92400e; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold;">NA ČEKANJU</span></td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div style="background-color: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 15px; margin: 20px 0;">
+                    <p style="margin: 0; color: #0369a1;"><strong>Šta sledi?</strong></p>
+                    <p style="margin: 10px 0 0 0; color: #334155;">Naš tim će pregledati vašu rezervaciju i kontaktirati vas radi potvrde detalja. Dobićete poziv ili SMS sa potvrdom.</p>
+                </div>
+                
+                <p style="color: #334155; line-height: 1.6;">Za sva pitanja ili izmene rezervacije, kontaktirajte nas:</p>
+                <p style="color: #0ea5e9; font-size: 18px; font-weight: bold; margin: 10px 0;">+381 18 123 456</p>
+                <p style="color: #64748b; font-size: 14px;">info@paramedic-care018.rs</p>
+                
+                <p style="color: #334155; line-height: 1.6; margin-top: 30px;">Srdačan pozdrav,<br><strong>Tim Paramedic Care 018</strong></p>
+            </div>
+            {get_email_footer("sr")}
+        </body>
+        </html>
+        """
+    return subject, body
+
+def get_internal_notification_template(notification_type: str, data: dict):
+    """Internal notification email for staff"""
+    if notification_type == "new_booking":
+        return f"""
+        <html>
+        <body style="font-family: Arial, sans-serif;">
+            <h2>Nova Rezervacija / New Booking</h2>
+            <p><strong>Pacijent / Patient:</strong> {data.get('patient_name', 'N/A')}</p>
+            <p><strong>Polazna tačka / Start:</strong> {data.get('start_point', 'N/A')}</p>
+            <p><strong>Odredište / Destination:</strong> {data.get('end_point', 'N/A')}</p>
+            <p><strong>Datum / Date:</strong> {data.get('booking_date', 'N/A')}</p>
+            <p><strong>Telefon / Phone:</strong> {data.get('contact_phone', 'N/A')}</p>
+            <p><strong>Email:</strong> {data.get('contact_email', 'N/A')}</p>
+            <p><strong>Napomene / Notes:</strong> {data.get('notes', 'N/A')}</p>
+            <hr>
+            <p>Booking ID: {data.get('booking_id', 'N/A')}</p>
+        </body>
+        </html>
+        """
+    elif notification_type == "new_contact":
+        return f"""
+        <html>
+        <body style="font-family: Arial, sans-serif;">
+            <h2>Nova Kontakt Poruka / New Contact Message</h2>
+            <p><strong>Tip upita / Inquiry Type:</strong> {data.get('inquiry_type', 'N/A')}</p>
+            <p><strong>Ime / Name:</strong> {data.get('name', 'N/A')}</p>
+            <p><strong>Email:</strong> {data.get('email', 'N/A')}</p>
+            <p><strong>Telefon / Phone:</strong> {data.get('phone', 'N/A')}</p>
+            <p><strong>Poruka / Message:</strong></p>
+            <p>{data.get('message', 'N/A')}</p>
+        </body>
+        </html>
+        """
+    return ""
 
 # ============ HEALTH CHECK ============
 
