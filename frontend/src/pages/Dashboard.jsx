@@ -75,6 +75,7 @@ const Dashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'dashboard');
+  const [mainView, setMainView] = useState('admin');
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
   const [bookings, setBookings] = useState([]);
