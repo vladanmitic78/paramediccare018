@@ -357,27 +357,87 @@ const Booking = () => {
                       <Upload className="w-4 h-4 text-slate-500" />
                       {t('booking_documents')}
                     </label>
-                    <div className="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center hover:border-sky-300 transition-colors">
+                    
+                    {/* Drop Zone */}
+                    <div 
+                      className={`border-2 border-dashed rounded-xl p-6 text-center transition-all cursor-pointer ${
+                        isDragging 
+                          ? 'border-sky-500 bg-sky-50' 
+                          : 'border-slate-200 hover:border-sky-300 hover:bg-slate-50'
+                      }`}
+                      onDrop={handleDrop}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onClick={() => document.getElementById('file-upload').click()}
+                    >
                       <input
                         type="file"
                         multiple
                         onChange={handleFileChange}
                         className="hidden"
                         id="file-upload"
+                        accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx"
                         data-testid="file-upload"
                       />
-                      <label htmlFor="file-upload" className="cursor-pointer">
-                        <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                        <p className="text-sm text-slate-600">
-                          {language === 'sr' ? 'Kliknite za upload dokumenata' : 'Click to upload documents'}
-                        </p>
-                        {files.length > 0 && (
-                          <p className="text-xs text-sky-600 mt-2">
-                            {files.length} {language === 'sr' ? 'fajl(ova) izabrano' : 'file(s) selected'}
-                          </p>
-                        )}
-                      </label>
+                      <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Upload className="w-6 h-6 text-slate-400" />
+                      </div>
+                      <p className="text-sm font-medium text-slate-700">
+                        {language === 'sr' ? 'Prevucite fajlove ovde ili kliknite za izbor' : 'Drag files here or click to select'}
+                      </p>
+                      <p className="text-xs text-slate-500 mt-1">
+                        PDF, JPG, PNG, DOC • Max 10MB
+                      </p>
                     </div>
+                    
+                    {/* File List */}
+                    {files.length > 0 && (
+                      <div className="space-y-2 mt-3">
+                        <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                          {language === 'sr' ? 'Izabrani fajlovi' : 'Selected files'} ({files.length})
+                        </p>
+                        {files.map((file, index) => (
+                          <div 
+                            key={index} 
+                            className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              {getFileIcon(file)}
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium text-slate-700 truncate">{file.name}</p>
+                                <p className="text-xs text-slate-500">{formatFileSize(file.size)}</p>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeFile(index);
+                              }}
+                              className="p-1 hover:bg-slate-200 rounded-full transition-colors"
+                            >
+                              <X className="w-4 h-4 text-slate-500" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Upload Progress */}
+                    {loading && uploadProgress > 0 && uploadProgress < 100 && (
+                      <div className="mt-3">
+                        <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+                          <span>{language === 'sr' ? 'Upload u toku...' : 'Uploading...'}</span>
+                          <span>{uploadProgress}%</span>
+                        </div>
+                        <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-sky-500 transition-all duration-300"
+                            style={{ width: `${uploadProgress}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
