@@ -577,6 +577,7 @@ const Dashboard = () => {
                           <TableHead>{language === 'sr' ? 'Ruta' : 'Route'}</TableHead>
                           <TableHead>{language === 'sr' ? 'Mobilnost' : 'Mobility'}</TableHead>
                           <TableHead>{t('status')}</TableHead>
+                          <TableHead>{language === 'sr' ? 'Vozač' : 'Driver'}</TableHead>
                           <TableHead>{t('actions')}</TableHead>
                         </TableRow>
                       </TableHeader>
