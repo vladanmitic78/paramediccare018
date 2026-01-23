@@ -107,8 +107,23 @@ const Dashboard = () => {
   
   // Sidebar expanded groups state
   const [expandedGroups, setExpandedGroups] = useState(['operations']); // Default: operations expanded
+  
+  // Dark mode state
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem('adminDarkMode') === 'true';
+  });
 
   const isSuperAdmin = () => user?.role === 'superadmin';
+  
+  // Dark mode effect
+  useEffect(() => {
+    localStorage.setItem('adminDarkMode', darkMode.toString());
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
   
   // Toggle group expansion
   const toggleGroup = (groupId) => {
