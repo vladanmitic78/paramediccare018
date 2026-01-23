@@ -250,21 +250,30 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
    - Filter by role (driver, doctor, nurse, admin)
    - View aggregated team availability
    - Color-coded slots by status
+   - **Create availability on behalf of any staff member**
 
-6. **Visual Design**
+6. **View Modes** (NEW - Jan 23, 2026) ✅
+   - **Week View**: Standard 7-day grid with slots per day
+   - **Month View**: Full calendar month grid
+   - **Timeline View (Admin)**: Gantt-style with staff as rows, days as columns
+   - **Grouped View (Admin)**: Days as cards showing all staff availability
+
+7. **Visual Design**
    - Color-coded status indicators with legend
    - Role icons on slots (truck for drivers, stethoscope for doctors, etc.)
    - Time display on each slot
    - Click on date to add new slot
    - Click on slot to edit
+   - Coverage stats (available/total) in week view header
 
-7. **API Endpoints**
+8. **API Endpoints**
    - `POST /api/staff/availability` - Create availability slot(s)
    - `GET /api/staff/availability` - Get user's own availability
    - `PUT /api/staff/availability/{slot_id}` - Update availability slot
    - `DELETE /api/staff/availability/{slot_id}` - Delete availability slot
    - `GET /api/admin/staff-availability` - Get all staff availability (admin only)
    - `GET /api/admin/staff-list` - Get list of all staff members
+   - `POST /api/admin/staff-availability/create` - Admin create availability for any staff
 
 ### Technology Stack
 - Frontend: React with Tailwind CSS, Shadcn UI, react-leaflet
