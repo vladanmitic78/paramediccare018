@@ -161,11 +161,18 @@ const AdminBookingNotifications = ({ onViewBooking }) => {
     try {
       await axios.put(`${API}/admin/patient-bookings/${currentBooking.id}/status?status=confirmed`);
       toast.success(language === 'sr' ? 'Rezervacija potvrđena!' : 'Booking confirmed!');
-      setShowPopup(false);
-      setCurrentBooking(null);
       
-      // Remove from new bookings list
-      setNewBookings(prev => prev.filter(b => b.id !== currentBooking.id));
+      // Remove from new bookings list and show next if available
+      const remaining = newBookings.filter(b => b.id !== currentBooking.id);
+      setNewBookings(remaining);
+      
+      if (remaining.length > 0) {
+        // Show next pending booking
+        setCurrentBooking(remaining[0]);
+      } else {
+        setShowPopup(false);
+        setCurrentBooking(null);
+      }
     } catch (error) {
       toast.error(language === 'sr' ? 'Greška pri potvrdi' : 'Error confirming');
     }
@@ -177,11 +184,18 @@ const AdminBookingNotifications = ({ onViewBooking }) => {
     try {
       await axios.put(`${API}/admin/patient-bookings/${currentBooking.id}/status?status=cancelled`);
       toast.success(language === 'sr' ? 'Rezervacija odbijena' : 'Booking rejected');
-      setShowPopup(false);
-      setCurrentBooking(null);
       
-      // Remove from new bookings list
-      setNewBookings(prev => prev.filter(b => b.id !== currentBooking.id));
+      // Remove from new bookings list and show next if available
+      const remaining = newBookings.filter(b => b.id !== currentBooking.id);
+      setNewBookings(remaining);
+      
+      if (remaining.length > 0) {
+        // Show next pending booking
+        setCurrentBooking(remaining[0]);
+      } else {
+        setShowPopup(false);
+        setCurrentBooking(null);
+      }
     } catch (error) {
       toast.error(language === 'sr' ? 'Greška' : 'Error');
     }
@@ -195,8 +209,8 @@ const AdminBookingNotifications = ({ onViewBooking }) => {
   };
 
   const handleDismiss = () => {
+    // Just hide popup but keep badge visible
     setShowPopup(false);
-    setCurrentBooking(null);
   };
 
   const getMobilityLabel = (mobility) => {
