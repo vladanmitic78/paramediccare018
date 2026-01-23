@@ -64,6 +64,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
   const [bookings, setBookings] = useState([]);
+  const [patientBookings, setPatientBookings] = useState([]);
   const [users, setUsers] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [services, setServices] = useState([]);
@@ -79,12 +80,34 @@ const Dashboard = () => {
     setActiveTab('bookings');
   };
 
+  // Fetch patient bookings
+  const fetchPatientBookings = async () => {
+    try {
+      const response = await axios.get(`${API}/admin/patient-bookings`);
+      setPatientBookings(response.data);
+    } catch (error) {
+      console.error('Error fetching patient bookings:', error);
+    }
+  };
+
+  // Update patient booking status
+  const updatePatientBookingStatus = async (bookingId, status) => {
+    try {
+      await axios.put(`${API}/admin/patient-bookings/${bookingId}/status?status=${status}`);
+      toast.success(language === 'sr' ? 'Status ažuriran!' : 'Status updated!');
+      fetchPatientBookings();
+    } catch (error) {
+      toast.error(language === 'sr' ? 'Greška' : 'Error');
+    }
+  };
+
   useEffect(() => {
     if (!user) {
       navigate('/login');
       return;
     }
     fetchData();
+    fetchPatientBookings();
   }, [user, navigate]);
 
   const fetchData = async () => {
