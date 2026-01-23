@@ -19,7 +19,8 @@ import {
   Compass,
   XCircle,
   ThumbsUp,
-  ThumbsDown
+  ThumbsDown,
+  Globe
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { toast } from 'sonner';
@@ -32,7 +33,7 @@ const LOCATION_UPDATE_INTERVAL = 5000; // 5 seconds while moving
 const LOCATION_UPDATE_INTERVAL_IDLE = 20000; // 20 seconds when stationary
 
 const DriverDashboard = () => {
-  const { language } = useLanguage();
+  const { language, toggleLanguage } = useLanguage();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   
