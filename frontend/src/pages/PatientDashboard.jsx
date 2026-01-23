@@ -180,7 +180,18 @@ const PatientDashboard = () => {
               </Link>
             </div>
             
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
+              {/* Refresh Button */}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleRefresh}
+                className="text-slate-600 p-2"
+                title={language === 'sr' ? 'Osveži' : 'Refresh'}
+              >
+                <RefreshCw className="w-5 h-5" />
+              </Button>
+              
               {/* Emergency Button */}
               <a href="tel:+381181234567" className="hidden sm:flex">
                 <Button variant="outline" className="gap-2 border-red-200 text-red-600 hover:bg-red-50">
