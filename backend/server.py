@@ -1444,7 +1444,7 @@ async def register(user_data: UserCreate):
         "password": hash_password(user_data.password),
         "full_name": user_data.full_name,
         "phone": user_data.phone,
-        "role": user_data.role if user_data.role in [UserRole.REGULAR] else UserRole.REGULAR,
+        "role": user_data.role if user_data.role in [UserRole.REGULAR, UserRole.DOCTOR, UserRole.NURSE, UserRole.DRIVER] else UserRole.REGULAR,
         "language": user_data.language,
         "is_active": True,
         "is_verified": False,  # Not verified until email confirmation
