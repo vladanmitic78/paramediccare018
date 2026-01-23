@@ -206,9 +206,9 @@ const MedicalStaffPWA = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white">
+    <div className="min-h-screen bg-slate-900 text-white" data-testid="medical-staff-pwa">
       {/* Header - Compact */}
-      <header className="bg-slate-800 px-4 py-3 flex items-center justify-between sticky top-0 z-50">
+      <header className="bg-slate-800 px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-lg" data-testid="pwa-header">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg overflow-hidden">
             <img src="/logo.jpg" alt="PC018" className="w-full h-full object-cover" />
@@ -219,13 +219,13 @@ const MedicalStaffPWA = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={toggleLanguage} className="text-slate-400">
+          <Button variant="ghost" size="icon" onClick={toggleLanguage} className="text-slate-400" data-testid="language-toggle-btn">
             <Globe className="w-5 h-5" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={fetchTransports} className="text-slate-400">
+          <Button variant="ghost" size="icon" onClick={fetchTransports} className="text-slate-400" data-testid="refresh-btn">
             <RefreshCw className="w-5 h-5" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-400">
+          <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-400" data-testid="logout-btn">
             <LogOut className="w-5 h-5" />
           </Button>
         </div>
