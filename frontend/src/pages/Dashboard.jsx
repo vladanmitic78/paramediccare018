@@ -44,7 +44,8 @@ import {
   Globe,
   Activity,
   HeartPulse,
-  Navigation
+  Navigation,
+  Ambulance
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
