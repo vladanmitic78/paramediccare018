@@ -264,15 +264,33 @@ const DriverDashboard = () => {
     
     switch (driverStatus) {
       case 'assigned':
+        // Show Accept/Reject buttons for new assignments
         return (
-          <Button 
-            onClick={() => updateStatus('en_route', assignment.id)}
-            disabled={updatingStatus}
-            className="w-full h-20 text-xl font-bold bg-purple-600 hover:bg-purple-700 gap-3"
-          >
-            {updatingStatus ? <Loader2 className="w-6 h-6 animate-spin" /> : <Navigation className="w-8 h-8" />}
-            {language === 'sr' ? 'KRENI NA PUT' : 'START ROUTE'}
-          </Button>
+          <div className="space-y-3">
+            <p className="text-center text-slate-400 text-sm mb-2">
+              {language === 'sr' ? 'Novi zadatak čeka vašu potvrdu' : 'New task awaiting your confirmation'}
+            </p>
+            <div className="flex gap-3">
+              <Button 
+                onClick={rejectAssignment}
+                disabled={updatingStatus}
+                className="flex-1 h-16 text-lg font-bold bg-red-600 hover:bg-red-700 gap-2"
+                data-testid="reject-assignment-btn"
+              >
+                {updatingStatus ? <Loader2 className="w-5 h-5 animate-spin" /> : <XCircle className="w-6 h-6" />}
+                {language === 'sr' ? 'ODBIJ' : 'REJECT'}
+              </Button>
+              <Button 
+                onClick={acceptAssignment}
+                disabled={updatingStatus}
+                className="flex-1 h-16 text-lg font-bold bg-green-600 hover:bg-green-700 gap-2"
+                data-testid="accept-assignment-btn"
+              >
+                {updatingStatus ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-6 h-6" />}
+                {language === 'sr' ? 'PRIHVATI' : 'ACCEPT'}
+              </Button>
+            </div>
+          </div>
         );
       
       case 'en_route':
@@ -281,6 +299,7 @@ const DriverDashboard = () => {
             onClick={() => updateStatus('on_site', assignment.id)}
             disabled={updatingStatus}
             className="w-full h-20 text-xl font-bold bg-amber-600 hover:bg-amber-700 gap-3"
+            data-testid="arrived-btn"
           >
             {updatingStatus ? <Loader2 className="w-6 h-6 animate-spin" /> : <MapPin className="w-8 h-8" />}
             {language === 'sr' ? 'STIGAO NA LOKACIJU' : 'ARRIVED AT PICKUP'}
@@ -293,6 +312,7 @@ const DriverDashboard = () => {
             onClick={() => updateStatus('transporting', assignment.id)}
             disabled={updatingStatus}
             className="w-full h-20 text-xl font-bold bg-red-600 hover:bg-red-700 gap-3"
+            data-testid="start-transport-btn"
           >
             {updatingStatus ? <Loader2 className="w-6 h-6 animate-spin" /> : <Truck className="w-8 h-8" />}
             {language === 'sr' ? 'ZAPOČNI TRANSPORT' : 'START TRANSPORT'}
@@ -305,6 +325,7 @@ const DriverDashboard = () => {
             onClick={completeTransport}
             disabled={updatingStatus}
             className="w-full h-20 text-xl font-bold bg-green-600 hover:bg-green-700 gap-3"
+            data-testid="complete-transport-btn"
           >
             {updatingStatus ? <Loader2 className="w-6 h-6 animate-spin" /> : <CheckCircle className="w-8 h-8" />}
             {language === 'sr' ? 'ZAVRŠI TRANSPORT' : 'COMPLETE TRANSPORT'}
