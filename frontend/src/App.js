@@ -20,6 +20,7 @@ import Dashboard from "./pages/Dashboard";
 import PatientDashboard from "./pages/PatientDashboard";
 import PatientBookingWizard from "./pages/PatientBookingWizard";
 import PatientBookings from "./pages/PatientBookings";
+import PatientBookingDetail from "./pages/PatientBookingDetail";
 import PatientInvoices from "./pages/PatientInvoices";
 import PatientProfile from "./pages/PatientProfile";
 import PatientNotifications from "./pages/PatientNotifications";
