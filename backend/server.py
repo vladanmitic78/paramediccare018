@@ -132,6 +132,7 @@ class ContactCreate(BaseModel):
     phone: Optional[str] = None
     message: str
     inquiry_type: str = "general"  # general, transport, medical
+    language: str = "sr"  # User's language preference
 
 class ContactResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
