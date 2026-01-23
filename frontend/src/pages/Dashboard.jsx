@@ -1288,23 +1288,7 @@ const Dashboard = () => {
             </div>
           )}
 
-          {/* Availability (Admin only) - Coming Soon */}
-          {activeTab === 'availability' && isAdmin() && (
-            <div className="space-y-6">
-              <h1 className="text-2xl font-bold text-slate-900">
-                {language === 'sr' ? 'Dostupnost' : 'Availability'}
-              </h1>
-              <div className="card-base text-center py-12">
-                <Calendar className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">
-                  {language === 'sr' ? 'Uskoro dostupno' : 'Coming Soon'}
-                </h3>
-                <p className="text-slate-600">
-                  {language === 'sr' ? 'Upravljanje dostupnošću tima će biti dostupno u sledećoj verziji.' : 'Team availability management will be available in the next version.'}
-                </p>
-              </div>
-            </div>
-          )}
+          {/* Availability Section - StaffAvailabilityCalendar is rendered above at line 1197 */}
         </main>
       </div>
     </div>
