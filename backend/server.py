@@ -1303,6 +1303,7 @@ async def create_user(user_data: UserCreate, admin: dict = Depends(require_roles
         "phone": user_data.phone,
         "role": user_data.role,
         "is_active": True,
+        "is_verified": True,  # Admin-created users are auto-verified
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.users.insert_one(user_doc)
