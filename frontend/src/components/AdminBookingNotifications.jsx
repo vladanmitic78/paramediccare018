@@ -144,11 +144,6 @@ const AdminBookingNotifications = ({ onViewBooking }) => {
     };
     loadInitialBookings();
   }, []);
-        console.error('Error loading initial bookings:', error);
-      }
-    };
-    loadInitialBookings();
-  }, []);
 
   // Polling for new bookings
   useEffect(() => {
