@@ -498,6 +498,108 @@ def get_registration_email_template(full_name: str, email: str, language: str = 
         """
     return subject, body
 
+def get_admin_new_user_notification_template(user_name: str, user_email: str, user_phone: str, registration_time: str, language: str = "sr"):
+    """Email template to notify admin of new user registration"""
+    if language == "en":
+        subject = "🆕 New User Registration - Paramedic Care 018"
+        body = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f8fafc;">
+            {get_email_header()}
+            <div style="padding: 30px; max-width: 600px; margin: 0 auto;">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="display: inline-block; background-color: #dbeafe; border-radius: 50%; padding: 15px;">
+                        <span style="font-size: 30px;">👤</span>
+                    </div>
+                </div>
+                
+                <h2 style="color: #0f172a; margin-bottom: 20px; text-align: center;">New User Registration</h2>
+                <p style="color: #334155; line-height: 1.6; text-align: center;">A new user has registered on the Paramedic Care 018 platform.</p>
+                
+                <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 25px 0;">
+                    <h3 style="color: #0ea5e9; margin-top: 0; border-bottom: 2px solid #0ea5e9; padding-bottom: 10px;">User Details</h3>
+                    <table style="width: 100%; color: #334155;">
+                        <tr>
+                            <td style="padding: 10px 0; font-weight: bold; width: 35%;">Full Name:</td>
+                            <td style="padding: 10px 0;">{user_name}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; font-weight: bold;">Email:</td>
+                            <td style="padding: 10px 0;"><a href="mailto:{user_email}" style="color: #0ea5e9;">{user_email}</a></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; font-weight: bold;">Phone:</td>
+                            <td style="padding: 10px 0;"><a href="tel:{user_phone}" style="color: #0ea5e9;">{user_phone}</a></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; font-weight: bold;">Registered:</td>
+                            <td style="padding: 10px 0;">{registration_time}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div style="background-color: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 15px; margin: 20px 0;">
+                    <p style="margin: 0; color: #0369a1;"><strong>Action Required:</strong></p>
+                    <p style="margin: 10px 0 0 0; color: #334155;">You can view and manage this user in the Admin Dashboard under User Management.</p>
+                </div>
+                
+                <p style="color: #64748b; font-size: 12px; text-align: center; margin-top: 30px;">This is an automated notification from Paramedic Care 018 system.</p>
+            </div>
+            {get_email_footer("en")}
+        </body>
+        </html>
+        """
+    else:
+        subject = "🆕 Nova registracija korisnika - Paramedic Care 018"
+        body = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f8fafc;">
+            {get_email_header()}
+            <div style="padding: 30px; max-width: 600px; margin: 0 auto;">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="display: inline-block; background-color: #dbeafe; border-radius: 50%; padding: 15px;">
+                        <span style="font-size: 30px;">👤</span>
+                    </div>
+                </div>
+                
+                <h2 style="color: #0f172a; margin-bottom: 20px; text-align: center;">Nova registracija korisnika</h2>
+                <p style="color: #334155; line-height: 1.6; text-align: center;">Novi korisnik se registrovao na platformi Paramedic Care 018.</p>
+                
+                <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 25px 0;">
+                    <h3 style="color: #0ea5e9; margin-top: 0; border-bottom: 2px solid #0ea5e9; padding-bottom: 10px;">Podaci o korisniku</h3>
+                    <table style="width: 100%; color: #334155;">
+                        <tr>
+                            <td style="padding: 10px 0; font-weight: bold; width: 35%;">Ime i prezime:</td>
+                            <td style="padding: 10px 0;">{user_name}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; font-weight: bold;">Email:</td>
+                            <td style="padding: 10px 0;"><a href="mailto:{user_email}" style="color: #0ea5e9;">{user_email}</a></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; font-weight: bold;">Telefon:</td>
+                            <td style="padding: 10px 0;"><a href="tel:{user_phone}" style="color: #0ea5e9;">{user_phone}</a></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; font-weight: bold;">Registrovan:</td>
+                            <td style="padding: 10px 0;">{registration_time}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div style="background-color: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 15px; margin: 20px 0;">
+                    <p style="margin: 0; color: #0369a1;"><strong>Potrebna akcija:</strong></p>
+                    <p style="margin: 10px 0 0 0; color: #334155;">Možete pregledati i upravljati ovim korisnikom u Admin panelu pod Upravljanje korisnicima.</p>
+                </div>
+                
+                <p style="color: #64748b; font-size: 12px; text-align: center; margin-top: 30px;">Ovo je automatska notifikacija iz sistema Paramedic Care 018.</p>
+            </div>
+            {get_email_footer("sr")}
+        </body>
+        </html>
+        """
+    return subject, body
+
 def get_contact_autoreply_template(name: str, inquiry_type: str, language: str = "sr"):
     """Email template for contact form auto-reply"""
     inquiry_labels = {
