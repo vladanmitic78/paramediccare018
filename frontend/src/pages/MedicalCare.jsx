@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { 
@@ -11,9 +12,63 @@ import {
   Phone
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import axios from 'axios';
+
+const API = process.env.REACT_APP_BACKEND_URL;
 
 const MedicalCare = () => {
   const { language } = useLanguage();
+  const [pageContent, setPageContent] = useState(null);
+
+  // Fetch medical care page content from CMS
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const response = await axios.get(`${API}/api/pages/medical-care`);
+        const content = {};
+        response.data.forEach(item => {
+          content[item.section] = item;
+        });
+        setPageContent(content);
+      } catch (error) {
+        console.log('Using default medical care content');
+      }
+    };
+    fetchContent();
+  }, []);
+
+  // Get content from CMS or use defaults
+  const heroTitle = pageContent?.hero?.[language === 'sr' ? 'title_sr' : 'title_en'] || 
+    (language === 'sr' ? 'Profesionalna Medicinska Pomoć' : 'Professional Medical Assistance');
+  
+  const heroSubtitle = pageContent?.hero?.[language === 'sr' ? 'content_sr' : 'content_en'] || 
+    (language === 'sr'
+      ? 'Pružamo vrhunsku medicinsku negu sa fokusom na bezbednost i udobnost pacijenata. Naš tim je dostupan 24 sata dnevno, 7 dana u nedelji.'
+      : 'We provide top-quality medical care with a focus on patient safety and comfort. Our team is available 24 hours a day, 7 days a week.');
+  
+  const heroImage = pageContent?.hero?.image_url || 'https://images.pexels.com/photos/4173251/pexels-photo-4173251.jpeg';
+
+  const servicesTitle = pageContent?.['services-title']?.[language === 'sr' ? 'title_sr' : 'title_en'] || 
+    (language === 'sr' ? 'Naše Usluge' : 'Our Services');
+  
+  const servicesSubtitle = pageContent?.['services-title']?.[language === 'sr' ? 'content_sr' : 'content_en'] || 
+    (language === 'sr' ? 'Pružamo kompletnu medicinsku negu prilagođenu vašim potrebama' : 'We provide complete medical care tailored to your needs');
+
+  const teamTitle = pageContent?.team?.[language === 'sr' ? 'title_sr' : 'title_en'] || 
+    (language === 'sr' ? 'Naš Tim Profesionalaca' : 'Our Team of Professionals');
+  
+  const teamContent = pageContent?.team?.[language === 'sr' ? 'content_sr' : 'content_en'] || 
+    (language === 'sr'
+      ? 'Naš medicinski tim čine iskusni profesionalci koji su posvećeni pružanju najbolje moguće nege. Svaki član tima prolazi redovne obuke kako bi bio u toku sa najnovijim medicinskim praksama.'
+      : 'Our medical team consists of experienced professionals dedicated to providing the best possible care. Each team member undergoes regular training to stay up-to-date with the latest medical practices.');
+  
+  const teamImage = pageContent?.team?.image_url || 'https://images.pexels.com/photos/9893525/pexels-photo-9893525.jpeg';
+
+  const ctaTitle = pageContent?.cta?.[language === 'sr' ? 'title_sr' : 'title_en'] || 
+    (language === 'sr' ? 'Potrebna vam je pomoć?' : 'Need Assistance?');
+  
+  const ctaContent = pageContent?.cta?.[language === 'sr' ? 'content_sr' : 'content_en'] || 
+    (language === 'sr' ? 'Naš tim je spreman da vam pomogne. Kontaktirajte nas danas.' : 'Our team is ready to help you. Contact us today.');
 
   const services = [
     {
@@ -69,15 +124,11 @@ const MedicalCare = () => {
               </div>
               
               <h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight mb-6">
-                {language === 'sr' 
-                  ? 'Profesionalna Medicinska Pomoć'
-                  : 'Professional Medical Assistance'}
+                {heroTitle}
               </h1>
               
               <p className="text-lg text-slate-600 leading-relaxed mb-8">
-                {language === 'sr'
-                  ? 'Pružamo vrhunsku medicinsku negu sa fokusom na bezbednost i udobnost pacijenata. Naš tim je dostupan 24 sata dnevno, 7 dana u nedelji.'
-                  : 'We provide top-quality medical care with a focus on patient safety and comfort. Our team is available 24 hours a day, 7 days a week.'}
+                {heroSubtitle}
               </p>
 
               <div className="flex flex-wrap gap-4">
@@ -97,7 +148,7 @@ const MedicalCare = () => {
 
             <div className="relative">
               <img
-                src="https://images.pexels.com/photos/4173251/pexels-photo-4173251.jpeg"
+                src={heroImage}
                 alt="Doctor"
                 className="rounded-2xl shadow-2xl w-full h-[400px] object-cover"
               />
@@ -140,12 +191,10 @@ const MedicalCare = () => {
         <div className="section-container">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-              {language === 'sr' ? 'Naše Usluge' : 'Our Services'}
+              {servicesTitle}
             </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              {language === 'sr'
-                ? 'Pružamo kompletnu medicinsku negu prilagođenu vašim potrebama'
-                : 'We provide complete medical care tailored to your needs'}
+              {servicesSubtitle}
             </p>
           </div>
 
@@ -188,21 +237,17 @@ const MedicalCare = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <img
-                src="https://images.pexels.com/photos/9893525/pexels-photo-9893525.jpeg"
+                src={teamImage}
                 alt="Medical team"
                 className="rounded-2xl shadow-xl w-full h-[400px] object-cover"
               />
             </div>
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">
-                {language === 'sr' 
-                  ? 'Naš Tim Profesionalaca'
-                  : 'Our Team of Professionals'}
+                {teamTitle}
               </h2>
               <p className="text-lg text-slate-600 mb-6">
-                {language === 'sr'
-                  ? 'Naš medicinski tim čine iskusni profesionalci koji su posvećeni pružanju najbolje moguće nege. Svaki član tima prolazi redovne obuke kako bi bio u toku sa najnovijim medicinskim praksama.'
-                  : 'Our medical team consists of experienced professionals dedicated to providing the best possible care. Each team member undergoes regular training to stay up-to-date with the latest medical practices.'}
+                {teamContent}
               </p>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
@@ -233,12 +278,10 @@ const MedicalCare = () => {
       <section className="py-16 bg-sky-600">
         <div className="section-container text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            {language === 'sr' ? 'Potrebna vam je pomoć?' : 'Need Assistance?'}
+            {ctaTitle}
           </h2>
           <p className="text-lg text-sky-100 mb-8 max-w-xl mx-auto">
-            {language === 'sr'
-              ? 'Naš tim je spreman da vam pomogne. Kontaktirajte nas danas.'
-              : 'Our team is ready to help you. Contact us today.'}
+            {ctaContent}
           </p>
           <Link to="/contact">
             <Button className="bg-white text-sky-600 hover:bg-sky-50 rounded-full px-8 py-3 font-medium">
