@@ -773,24 +773,35 @@ async def create_booking(booking: BookingCreate, user: dict = Depends(get_option
     }
     await db.bookings.insert_one(booking_doc)
     
-    # Send email notification
-    email_body = f"""
-    <html>
-    <body style="font-family: Arial, sans-serif;">
-        <h2>Nova Rezervacija Transporta / New Transport Booking</h2>
-        <p><strong>Pacijent / Patient:</strong> {booking.patient_name}</p>
-        <p><strong>Polazna tačka / Start:</strong> {booking.start_point}</p>
-        <p><strong>Odredište / Destination:</strong> {booking.end_point}</p>
-        <p><strong>Datum / Date:</strong> {booking.booking_date}</p>
-        <p><strong>Telefon / Phone:</strong> {booking.contact_phone}</p>
-        <p><strong>Email:</strong> {booking.contact_email}</p>
-        <p><strong>Napomene / Notes:</strong> {booking.notes or 'N/A'}</p>
-        <hr>
-        <p>Booking ID: {booking_id}</p>
-    </body>
-    </html>
-    """
-    await send_email(TRANSPORT_EMAIL, f"Nova Rezervacija - {booking.patient_name}", email_body)
+    # Send confirmation email to customer
+    subject, body = get_booking_confirmation_template(
+        booking.patient_name,
+        booking.booking_date,
+        booking.start_point,
+        booking.end_point,
+        booking_id,
+        booking.booking_type,
+        booking.language
+    )
+    await send_email(booking.contact_email, subject, body)
+    
+    # Send internal notification to staff
+    internal_body = get_internal_notification_template("new_booking", {
+        "patient_name": booking.patient_name,
+        "start_point": booking.start_point,
+        "end_point": booking.end_point,
+        "booking_date": booking.booking_date,
+        "contact_phone": booking.contact_phone,
+        "contact_email": booking.contact_email,
+        "notes": booking.notes,
+        "booking_id": booking_id
+    })
+    
+    # Route to appropriate internal email based on booking type
+    if booking.booking_type == "medical":
+        await send_email(MEDICAL_EMAIL, f"Nova Rezervacija Medicinske Nege - {booking.patient_name}", internal_body)
+    else:
+        await send_email(TRANSPORT_EMAIL, f"Nova Rezervacija Transporta - {booking.patient_name}", internal_body)
     
     return BookingResponse(**{k: v for k, v in booking_doc.items() if k != "_id"})
 
