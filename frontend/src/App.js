@@ -58,7 +58,7 @@ function App() {
               <Route path="/patient" element={<PatientRoute><PatientDashboard /></PatientRoute>} />
               <Route path="/patient/book" element={<PatientRoute><PatientBookingWizard /></PatientRoute>} />
               <Route path="/patient/bookings" element={<PatientRoute><PatientBookings /></PatientRoute>} />
-              <Route path="/patient/bookings/:id" element={<PatientRoute><PatientBookings /></PatientRoute>} />
+              <Route path="/patient/bookings/:id" element={<PatientRoute><PatientBookingDetail /></PatientRoute>} />
               <Route path="/patient/invoices" element={<PatientRoute><PatientInvoices /></PatientRoute>} />
               <Route path="/patient/profile" element={<PatientRoute><PatientProfile /></PatientRoute>} />
               <Route path="/patient/notifications" element={<PatientRoute><PatientNotifications /></PatientRoute>} />
