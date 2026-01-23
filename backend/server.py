@@ -1249,6 +1249,46 @@ async def create_notification(user_id: str, notification_type: str, title_sr: st
     await db.notifications.insert_one(notification)
     return notification
 
+# Admin endpoint to get all patient bookings
+@api_router.get("/admin/patient-bookings")
+async def get_all_patient_bookings(
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.DRIVER])),
+    status: Optional[str] = None,
+    limit: int = 100
+):
+    """Get all patient bookings for admin"""
+    query = {}
+    if status:
+        query["status"] = status
+    
+    bookings = await db.patient_bookings.find(query, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
+    return bookings
+
+# Admin endpoint to get new bookings count (for polling)
+@api_router.get("/admin/patient-bookings/new-count")
+async def get_new_bookings_count(
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.DRIVER])),
+    since: Optional[str] = None
+):
+    """Get count of new bookings since a given timestamp"""
+    query = {"status": BookingStatus.REQUESTED}
+    if since:
+        query["created_at"] = {"$gt": since}
+    
+    count = await db.patient_bookings.count_documents(query)
+    
+    # Also get the latest booking for popup
+    latest = await db.patient_bookings.find_one(
+        {"status": BookingStatus.REQUESTED},
+        {"_id": 0},
+        sort=[("created_at", -1)]
+    )
+    
+    return {
+        "new_count": count,
+        "latest_booking": latest
+    }
+
 # Admin endpoint to update booking status (triggers patient notification)
 @api_router.put("/admin/patient-bookings/{booking_id}/status")
 async def update_patient_booking_status(
