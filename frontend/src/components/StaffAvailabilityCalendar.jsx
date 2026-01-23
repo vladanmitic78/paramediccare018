@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from './ui/button';
@@ -16,7 +16,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from './ui/dialog';
 import { 
   ChevronLeft, 
@@ -26,7 +25,6 @@ import {
   Clock,
   User,
   Trash2,
-  Edit,
   Loader2,
   Users,
   Truck,
@@ -36,7 +34,11 @@ import {
   Check,
   X,
   Palmtree,
-  AlertCircle
+  AlertCircle,
+  LayoutGrid,
+  GanttChart,
+  List,
+  UserPlus
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
@@ -51,6 +53,7 @@ const STATUS_CONFIG = {
     color: 'bg-green-500', 
     bgColor: 'bg-green-100',
     textColor: 'text-green-700',
+    borderColor: 'border-green-300',
     icon: Check
   },
   unavailable: { 
@@ -59,6 +62,7 @@ const STATUS_CONFIG = {
     color: 'bg-red-500', 
     bgColor: 'bg-red-100',
     textColor: 'text-red-700',
+    borderColor: 'border-red-300',
     icon: X
   },
   on_leave: { 
@@ -67,6 +71,7 @@ const STATUS_CONFIG = {
     color: 'bg-amber-500', 
     bgColor: 'bg-amber-100',
     textColor: 'text-amber-700',
+    borderColor: 'border-amber-300',
     icon: Palmtree
   },
   sick: { 
@@ -75,6 +80,7 @@ const STATUS_CONFIG = {
     color: 'bg-purple-500', 
     bgColor: 'bg-purple-100',
     textColor: 'text-purple-700',
+    borderColor: 'border-purple-300',
     icon: AlertCircle
   }
 };
@@ -85,30 +91,35 @@ const ROLE_CONFIG = {
     label_sr: 'Vozač', 
     label_en: 'Driver', 
     color: 'bg-blue-500',
+    textColor: 'text-blue-700',
     icon: Truck
   },
   doctor: { 
     label_sr: 'Doktor', 
     label_en: 'Doctor', 
     color: 'bg-emerald-500',
+    textColor: 'text-emerald-700',
     icon: Stethoscope
   },
   nurse: { 
     label_sr: 'Med. sestra', 
     label_en: 'Nurse', 
     color: 'bg-pink-500',
+    textColor: 'text-pink-700',
     icon: HeartPulse
   },
   admin: { 
     label_sr: 'Admin', 
     label_en: 'Admin', 
     color: 'bg-slate-500',
+    textColor: 'text-slate-700',
     icon: UserCog
   },
   superadmin: { 
     label_sr: 'Super Admin', 
     label_en: 'Super Admin', 
     color: 'bg-slate-700',
+    textColor: 'text-slate-700',
     icon: UserCog
   }
 };
@@ -118,7 +129,7 @@ const StaffAvailabilityCalendar = () => {
   const { user, isAdmin } = useAuth();
   
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState('week'); // 'week' or 'month'
+  const [viewMode, setViewMode] = useState('week'); // 'week', 'month', 'timeline', 'grouped'
   const [availability, setAvailability] = useState([]);
   const [staffList, setStaffList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -129,6 +140,7 @@ const StaffAvailabilityCalendar = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [editingSlot, setEditingSlot] = useState(null);
+  const [selectedStaffForAdd, setSelectedStaffForAdd] = useState('');
   
   // Form states
   const [formData, setFormData] = useState({
@@ -144,8 +156,9 @@ const StaffAvailabilityCalendar = () => {
   // Fetch availability data
   const fetchAvailability = useCallback(async () => {
     try {
+      setLoading(true);
       const startDate = getWeekStart(currentDate);
-      const endDate = viewMode === 'week' 
+      const endDate = (viewMode === 'week' || viewMode === 'timeline' || viewMode === 'grouped')
         ? new Date(startDate.getTime() + 6 * 24 * 60 * 60 * 1000)
         : getMonthEnd(currentDate);
       
@@ -219,20 +232,17 @@ const StaffAvailabilityCalendar = () => {
     const month = currentDate.getMonth();
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
-    const startPadding = (firstDay.getDay() + 6) % 7; // Monday = 0
+    const startPadding = (firstDay.getDay() + 6) % 7;
     
     const days = [];
-    // Add padding for days before month starts
     for (let i = startPadding - 1; i >= 0; i--) {
       const d = new Date(firstDay);
       d.setDate(d.getDate() - i - 1);
       days.push({ date: d, isCurrentMonth: false });
     }
-    // Add days of the month
     for (let d = 1; d <= lastDay.getDate(); d++) {
       days.push({ date: new Date(year, month, d), isCurrentMonth: true });
     }
-    // Add padding to complete the grid
     const remaining = 42 - days.length;
     for (let i = 1; i <= remaining; i++) {
       const d = new Date(lastDay);
@@ -244,19 +254,23 @@ const StaffAvailabilityCalendar = () => {
 
   // Navigation
   const navigatePrev = () => {
-    if (viewMode === 'week') {
-      setCurrentDate(new Date(currentDate.setDate(currentDate.getDate() - 7)));
+    const newDate = new Date(currentDate);
+    if (viewMode === 'month') {
+      newDate.setMonth(newDate.getMonth() - 1);
     } else {
-      setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)));
+      newDate.setDate(newDate.getDate() - 7);
     }
+    setCurrentDate(newDate);
   };
 
   const navigateNext = () => {
-    if (viewMode === 'week') {
-      setCurrentDate(new Date(currentDate.setDate(currentDate.getDate() + 7)));
+    const newDate = new Date(currentDate);
+    if (viewMode === 'month') {
+      newDate.setMonth(newDate.getMonth() + 1);
     } else {
-      setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)));
+      newDate.setDate(newDate.getDate() + 7);
     }
+    setCurrentDate(newDate);
   };
 
   const goToToday = () => {
@@ -269,9 +283,39 @@ const StaffAvailabilityCalendar = () => {
     return availability.filter(slot => slot.date === dateStr);
   };
 
+  // Get unique staff members from availability data
+  const uniqueStaffFromAvailability = useMemo(() => {
+    const staffMap = new Map();
+    availability.forEach(slot => {
+      if (!staffMap.has(slot.user_id)) {
+        staffMap.set(slot.user_id, {
+          id: slot.user_id,
+          name: slot.user_name,
+          role: slot.user_role
+        });
+      }
+    });
+    return Array.from(staffMap.values());
+  }, [availability]);
+
+  // Group availability by date for grouped view
+  const availabilityByDate = useMemo(() => {
+    const grouped = {};
+    const weekDays = getWeekDays();
+    weekDays.forEach(day => {
+      const dateStr = formatDate(day);
+      grouped[dateStr] = {
+        date: day,
+        slots: getSlotsForDate(day)
+      };
+    });
+    return grouped;
+  }, [availability, currentDate]);
+
   // Handle add/edit slot
-  const handleOpenAddDialog = (date = null) => {
+  const handleOpenAddDialog = (date = null, staffId = null) => {
     setSelectedDate(date);
+    setSelectedStaffForAdd(staffId || '');
     setFormData({
       date: date ? formatDate(date) : formatDate(new Date()),
       start_time: '08:00',
@@ -286,6 +330,7 @@ const StaffAvailabilityCalendar = () => {
 
   const handleEditSlot = (slot) => {
     setEditingSlot(slot);
+    setSelectedStaffForAdd('');
     setFormData({
       date: slot.date,
       start_time: slot.start_time,
@@ -301,7 +346,6 @@ const StaffAvailabilityCalendar = () => {
     setSubmitting(true);
     try {
       if (editingSlot) {
-        // Update existing slot
         await axios.put(`${API}/staff/availability/${editingSlot.id}`, {
           start_time: formData.start_time,
           end_time: formData.end_time,
@@ -310,8 +354,16 @@ const StaffAvailabilityCalendar = () => {
         });
         toast.success(language === 'sr' ? 'Dostupnost ažurirana' : 'Availability updated');
       } else {
-        // Create new slot
-        await axios.post(`${API}/staff/availability`, formData);
+        // If admin is creating for another staff member
+        const endpoint = selectedStaffForAdd && isAdmin()
+          ? `${API}/admin/staff-availability/create`
+          : `${API}/staff/availability`;
+        
+        const payload = selectedStaffForAdd && isAdmin()
+          ? { ...formData, user_id: selectedStaffForAdd }
+          : formData;
+        
+        await axios.post(endpoint, payload);
         toast.success(
           formData.repeat_weekly 
             ? (language === 'sr' ? 'Dostupnost kreirana za 5 nedelja' : 'Availability created for 5 weeks')
@@ -343,9 +395,21 @@ const StaffAvailabilityCalendar = () => {
     ? ['Pon', 'Uto', 'Sre', 'Čet', 'Pet', 'Sub', 'Ned']
     : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+  const dayNamesFull = language === 'sr' 
+    ? ['Ponedeljak', 'Utorak', 'Sreda', 'Četvrtak', 'Petak', 'Subota', 'Nedelja']
+    : ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
   const monthNames = language === 'sr'
     ? ['Januar', 'Februar', 'Mart', 'April', 'Maj', 'Jun', 'Jul', 'Avgust', 'Septembar', 'Oktobar', 'Novembar', 'Decembar']
     : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+  // Calculate coverage stats for a date
+  const getCoverageStats = (date) => {
+    const slots = getSlotsForDate(date);
+    const available = slots.filter(s => s.status === 'available').length;
+    const total = staffList.length || uniqueStaffFromAvailability.length;
+    return { available, total };
+  };
 
   if (loading) {
     return (
@@ -383,7 +447,7 @@ const StaffAvailabilityCalendar = () => {
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-slate-400" />
             <Select value={selectedStaff} onValueChange={setSelectedStaff}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-48" data-testid="staff-filter">
                 <SelectValue placeholder={language === 'sr' ? 'Svi zaposleni' : 'All Staff'} />
               </SelectTrigger>
               <SelectContent>
@@ -400,7 +464,7 @@ const StaffAvailabilityCalendar = () => {
           <div className="flex items-center gap-2">
             <User className="w-4 h-4 text-slate-400" />
             <Select value={selectedRole} onValueChange={setSelectedRole}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-40" data-testid="role-filter">
                 <SelectValue placeholder={language === 'sr' ? 'Sve uloge' : 'All Roles'} />
               </SelectTrigger>
               <SelectContent>
@@ -418,39 +482,69 @@ const StaffAvailabilityCalendar = () => {
       {/* Calendar Controls */}
       <div className="flex flex-wrap items-center justify-between gap-4 bg-white rounded-xl p-4 border border-slate-200">
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={navigatePrev}>
+          <Button variant="outline" size="icon" onClick={navigatePrev} data-testid="nav-prev">
             <ChevronLeft className="w-4 h-4" />
           </Button>
-          <Button variant="outline" size="icon" onClick={navigateNext}>
+          <Button variant="outline" size="icon" onClick={navigateNext} data-testid="nav-next">
             <ChevronRight className="w-4 h-4" />
           </Button>
-          <Button variant="ghost" onClick={goToToday} className="text-sm">
+          <Button variant="ghost" onClick={goToToday} className="text-sm" data-testid="nav-today">
             {language === 'sr' ? 'Danas' : 'Today'}
           </Button>
         </div>
         
         <h2 className="text-lg font-semibold text-slate-900">
-          {viewMode === 'week' 
+          {(viewMode === 'week' || viewMode === 'timeline' || viewMode === 'grouped')
             ? `${formatDate(getWeekStart(currentDate))} - ${formatDate(new Date(getWeekStart(currentDate).getTime() + 6 * 24 * 60 * 60 * 1000))}`
             : `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`
           }
         </h2>
         
-        <div className="flex gap-2">
+        <div className="flex gap-1 bg-slate-100 p-1 rounded-lg">
           <Button 
-            variant={viewMode === 'week' ? 'default' : 'outline'} 
+            variant={viewMode === 'week' ? 'default' : 'ghost'} 
             size="sm"
             onClick={() => setViewMode('week')}
+            className="gap-1"
+            data-testid="view-week"
           >
+            <LayoutGrid className="w-4 h-4" />
             {language === 'sr' ? 'Nedelja' : 'Week'}
           </Button>
           <Button 
-            variant={viewMode === 'month' ? 'default' : 'outline'} 
+            variant={viewMode === 'month' ? 'default' : 'ghost'} 
             size="sm"
             onClick={() => setViewMode('month')}
+            className="gap-1"
+            data-testid="view-month"
           >
+            <Calendar className="w-4 h-4" />
             {language === 'sr' ? 'Mesec' : 'Month'}
           </Button>
+          {isAdmin() && (
+            <>
+              <Button 
+                variant={viewMode === 'timeline' ? 'default' : 'ghost'} 
+                size="sm"
+                onClick={() => setViewMode('timeline')}
+                className="gap-1"
+                data-testid="view-timeline"
+              >
+                <GanttChart className="w-4 h-4" />
+                {language === 'sr' ? 'Vremenska' : 'Timeline'}
+              </Button>
+              <Button 
+                variant={viewMode === 'grouped' ? 'default' : 'ghost'} 
+                size="sm"
+                onClick={() => setViewMode('grouped')}
+                className="gap-1"
+                data-testid="view-grouped"
+              >
+                <List className="w-4 h-4" />
+                {language === 'sr' ? 'Grupisano' : 'Grouped'}
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
@@ -467,10 +561,10 @@ const StaffAvailabilityCalendar = () => {
       {/* Week View */}
       {viewMode === 'week' && (
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-          {/* Day Headers */}
           <div className="grid grid-cols-7 border-b border-slate-200">
             {getWeekDays().map((day, idx) => {
               const isToday = formatDate(day) === formatDate(new Date());
+              const coverage = getCoverageStats(day);
               return (
                 <div 
                   key={idx} 
@@ -480,12 +574,16 @@ const StaffAvailabilityCalendar = () => {
                   <p className={`text-lg font-semibold ${isToday ? 'text-sky-600' : 'text-slate-900'}`}>
                     {day.getDate()}
                   </p>
+                  {isAdmin() && coverage.total > 0 && (
+                    <p className={`text-xs mt-1 ${coverage.available > 0 ? 'text-green-600' : 'text-slate-400'}`}>
+                      {coverage.available}/{coverage.total}
+                    </p>
+                  )}
                 </div>
               );
             })}
           </div>
           
-          {/* Day Content */}
           <div className="grid grid-cols-7 min-h-[400px]">
             {getWeekDays().map((day, idx) => {
               const slots = getSlotsForDate(day);
@@ -514,6 +612,7 @@ const StaffAvailabilityCalendar = () => {
                             }
                           }}
                           className={`p-2 rounded-lg text-xs ${statusConfig.bgColor} ${statusConfig.textColor} cursor-pointer hover:opacity-80 transition-opacity`}
+                          data-testid={`slot-${slot.id}`}
                         >
                           <div className="flex items-center gap-1 font-medium">
                             <RoleIcon className="w-3 h-3" />
@@ -537,7 +636,6 @@ const StaffAvailabilityCalendar = () => {
       {/* Month View */}
       {viewMode === 'month' && (
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-          {/* Day Headers */}
           <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50">
             {dayNames.map(day => (
               <div key={day} className="p-2 text-center text-xs font-medium text-slate-500">
@@ -546,7 +644,6 @@ const StaffAvailabilityCalendar = () => {
             ))}
           </div>
           
-          {/* Calendar Grid */}
           <div className="grid grid-cols-7">
             {getMonthDays().map(({ date, isCurrentMonth }, idx) => {
               const slots = getSlotsForDate(date);
@@ -594,6 +691,227 @@ const StaffAvailabilityCalendar = () => {
         </div>
       )}
 
+      {/* Timeline View (Admin only) - Gantt-style */}
+      {viewMode === 'timeline' && isAdmin() && (
+        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+          {/* Header with days */}
+          <div className="grid" style={{ gridTemplateColumns: '200px repeat(7, 1fr)' }}>
+            <div className="p-3 bg-slate-50 border-r border-b font-medium text-slate-700">
+              {language === 'sr' ? 'Zaposleni' : 'Staff Member'}
+            </div>
+            {getWeekDays().map((day, idx) => {
+              const isToday = formatDate(day) === formatDate(new Date());
+              return (
+                <div 
+                  key={idx} 
+                  className={`p-3 text-center border-r last:border-r-0 border-b ${isToday ? 'bg-sky-50' : 'bg-slate-50'}`}
+                >
+                  <p className="text-xs text-slate-500">{dayNames[idx]}</p>
+                  <p className={`text-lg font-semibold ${isToday ? 'text-sky-600' : 'text-slate-900'}`}>
+                    {day.getDate()}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+          
+          {/* Staff rows */}
+          {(staffList.length > 0 ? staffList : uniqueStaffFromAvailability).map(staff => {
+            const staffId = staff.id;
+            const staffName = staff.full_name || staff.name;
+            const staffRole = staff.role;
+            const roleConfig = ROLE_CONFIG[staffRole] || ROLE_CONFIG.admin;
+            const RoleIcon = roleConfig.icon;
+            
+            return (
+              <div 
+                key={staffId} 
+                className="grid border-b last:border-b-0" 
+                style={{ gridTemplateColumns: '200px repeat(7, 1fr)' }}
+              >
+                {/* Staff info */}
+                <div className="p-3 border-r bg-slate-25 flex items-center gap-2">
+                  <div className={`p-1.5 rounded ${roleConfig.color}`}>
+                    <RoleIcon className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm text-slate-800 truncate">{staffName}</p>
+                    <p className="text-xs text-slate-500">
+                      {language === 'sr' ? roleConfig.label_sr : roleConfig.label_en}
+                    </p>
+                  </div>
+                  {isAdmin() && (
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="ml-auto h-7 w-7"
+                      onClick={() => handleOpenAddDialog(null, staffId)}
+                      title={language === 'sr' ? 'Dodaj dostupnost' : 'Add availability'}
+                    >
+                      <UserPlus className="w-3.5 h-3.5 text-slate-400" />
+                    </Button>
+                  )}
+                </div>
+                
+                {/* Day cells */}
+                {getWeekDays().map((day, dayIdx) => {
+                  const slots = availability.filter(
+                    s => s.user_id === staffId && s.date === formatDate(day)
+                  );
+                  const isToday = formatDate(day) === formatDate(new Date());
+                  
+                  return (
+                    <div 
+                      key={dayIdx} 
+                      className={`p-2 border-r last:border-r-0 min-h-[60px] ${isToday ? 'bg-sky-50/30' : ''}`}
+                      onClick={() => handleOpenAddDialog(day, staffId)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {slots.map(slot => {
+                        const statusConfig = STATUS_CONFIG[slot.status] || STATUS_CONFIG.available;
+                        return (
+                          <div 
+                            key={slot.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditSlot(slot);
+                            }}
+                            className={`px-2 py-1 rounded text-xs ${statusConfig.bgColor} ${statusConfig.textColor} border ${statusConfig.borderColor} cursor-pointer hover:opacity-80`}
+                          >
+                            <span className="font-medium">{slot.start_time}-{slot.end_time}</span>
+                            {slot.notes && <span className="block text-[10px] opacity-75 truncate">{slot.notes}</span>}
+                          </div>
+                        );
+                      })}
+                      {slots.length === 0 && (
+                        <div className="h-full flex items-center justify-center">
+                          <span className="text-slate-300 text-xs">-</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+          
+          {(staffList.length === 0 && uniqueStaffFromAvailability.length === 0) && (
+            <div className="p-8 text-center text-slate-500">
+              {language === 'sr' ? 'Nema registrovanih zaposlenih' : 'No staff members registered'}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Grouped View (Admin only) - All staff under each date */}
+      {viewMode === 'grouped' && isAdmin() && (
+        <div className="space-y-4">
+          {getWeekDays().map((day, idx) => {
+            const dateStr = formatDate(day);
+            const slots = getSlotsForDate(day);
+            const isToday = dateStr === formatDate(new Date());
+            const dayIndex = (day.getDay() + 6) % 7; // Convert to Monday=0
+            
+            // Group slots by status
+            const byStatus = {
+              available: slots.filter(s => s.status === 'available'),
+              unavailable: slots.filter(s => s.status === 'unavailable'),
+              on_leave: slots.filter(s => s.status === 'on_leave'),
+              sick: slots.filter(s => s.status === 'sick')
+            };
+            
+            return (
+              <div 
+                key={idx} 
+                className={`bg-white rounded-xl border ${isToday ? 'border-sky-300 ring-2 ring-sky-100' : 'border-slate-200'}`}
+              >
+                {/* Date Header */}
+                <div className={`p-4 border-b ${isToday ? 'bg-sky-50' : 'bg-slate-50'} rounded-t-xl`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-lg ${isToday ? 'bg-sky-500' : 'bg-slate-200'}`}>
+                        <Calendar className={`w-5 h-5 ${isToday ? 'text-white' : 'text-slate-600'}`} />
+                      </div>
+                      <div>
+                        <h3 className={`font-bold text-lg ${isToday ? 'text-sky-700' : 'text-slate-800'}`}>
+                          {dayNamesFull[dayIndex]}
+                        </h3>
+                        <p className="text-sm text-slate-500">{dateStr}</p>
+                      </div>
+                      {isToday && (
+                        <Badge className="bg-sky-500 ml-2">{language === 'sr' ? 'Danas' : 'Today'}</Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-4 text-sm">
+                      <span className="text-green-600 font-medium">
+                        {byStatus.available.length} {language === 'sr' ? 'dostupno' : 'available'}
+                      </span>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="gap-1"
+                        onClick={() => handleOpenAddDialog(day)}
+                      >
+                        <Plus className="w-3 h-3" />
+                        {language === 'sr' ? 'Dodaj' : 'Add'}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Staff Grid */}
+                <div className="p-4">
+                  {slots.length === 0 ? (
+                    <p className="text-center text-slate-400 py-4">
+                      {language === 'sr' ? 'Nema unete dostupnosti za ovaj dan' : 'No availability entries for this day'}
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                      {slots.map(slot => {
+                        const statusConfig = STATUS_CONFIG[slot.status] || STATUS_CONFIG.available;
+                        const roleConfig = ROLE_CONFIG[slot.user_role] || ROLE_CONFIG.admin;
+                        const RoleIcon = roleConfig.icon;
+                        const StatusIcon = statusConfig.icon;
+                        
+                        return (
+                          <div 
+                            key={slot.id}
+                            onClick={() => handleEditSlot(slot)}
+                            className={`p-3 rounded-lg border-2 ${statusConfig.borderColor} ${statusConfig.bgColor} cursor-pointer hover:shadow-md transition-all`}
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className={`p-1.5 rounded ${roleConfig.color}`}>
+                                  <RoleIcon className="w-4 h-4 text-white" />
+                                </div>
+                                <div>
+                                  <p className="font-medium text-slate-800">{slot.user_name}</p>
+                                  <p className="text-xs text-slate-500">
+                                    {language === 'sr' ? roleConfig.label_sr : roleConfig.label_en}
+                                  </p>
+                                </div>
+                              </div>
+                              <StatusIcon className={`w-5 h-5 ${statusConfig.textColor}`} />
+                            </div>
+                            <div className="mt-2 flex items-center gap-2 text-sm">
+                              <Clock className={`w-4 h-4 ${statusConfig.textColor}`} />
+                              <span className={statusConfig.textColor}>{slot.start_time} - {slot.end_time}</span>
+                            </div>
+                            {slot.notes && (
+                              <p className="mt-1 text-xs text-slate-500 truncate">{slot.notes}</p>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {/* Add/Edit Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="max-w-md">
@@ -607,6 +925,28 @@ const StaffAvailabilityCalendar = () => {
           </DialogHeader>
           
           <div className="space-y-4 pt-4">
+            {/* Staff Selection (Admin only, for new slots) */}
+            {isAdmin() && !editingSlot && (
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  {language === 'sr' ? 'Zaposleni' : 'Staff Member'}
+                </label>
+                <Select value={selectedStaffForAdd} onValueChange={setSelectedStaffForAdd}>
+                  <SelectTrigger data-testid="staff-select-dialog">
+                    <SelectValue placeholder={language === 'sr' ? 'Izaberite ili ostavite prazno za sebe' : 'Select or leave empty for yourself'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">{language === 'sr' ? 'Za sebe' : 'For myself'}</SelectItem>
+                    {staffList.map(staff => (
+                      <SelectItem key={staff.id} value={staff.id}>
+                        {staff.full_name} ({ROLE_CONFIG[staff.role]?.[language === 'sr' ? 'label_sr' : 'label_en'] || staff.role})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            
             {/* Date */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -617,6 +957,7 @@ const StaffAvailabilityCalendar = () => {
                 value={formData.date}
                 onChange={(e) => setFormData({...formData, date: e.target.value})}
                 disabled={!!editingSlot}
+                data-testid="date-input"
               />
             </div>
             
@@ -630,6 +971,7 @@ const StaffAvailabilityCalendar = () => {
                   type="time"
                   value={formData.start_time}
                   onChange={(e) => setFormData({...formData, start_time: e.target.value})}
+                  data-testid="start-time-input"
                 />
               </div>
               <div>
@@ -640,6 +982,7 @@ const StaffAvailabilityCalendar = () => {
                   type="time"
                   value={formData.end_time}
                   onChange={(e) => setFormData({...formData, end_time: e.target.value})}
+                  data-testid="end-time-input"
                 />
               </div>
             </div>
@@ -650,7 +993,7 @@ const StaffAvailabilityCalendar = () => {
                 {language === 'sr' ? 'Status' : 'Status'}
               </label>
               <Select value={formData.status} onValueChange={(v) => setFormData({...formData, status: v})}>
-                <SelectTrigger>
+                <SelectTrigger data-testid="status-select">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -675,6 +1018,7 @@ const StaffAvailabilityCalendar = () => {
                 value={formData.notes}
                 onChange={(e) => setFormData({...formData, notes: e.target.value})}
                 placeholder={language === 'sr' ? 'Npr. samo za hitne slučajeve' : 'E.g. emergencies only'}
+                data-testid="notes-input"
               />
             </div>
             
@@ -687,6 +1031,7 @@ const StaffAvailabilityCalendar = () => {
                   checked={formData.repeat_weekly}
                   onChange={(e) => setFormData({...formData, repeat_weekly: e.target.checked})}
                   className="rounded border-slate-300"
+                  data-testid="repeat-weekly-checkbox"
                 />
                 <label htmlFor="repeat_weekly" className="text-sm text-slate-600">
                   {language === 'sr' ? 'Ponovi naredne 4 nedelje' : 'Repeat for next 4 weeks'}
@@ -704,6 +1049,7 @@ const StaffAvailabilityCalendar = () => {
                     setIsAddDialogOpen(false);
                   }}
                   className="gap-2"
+                  data-testid="delete-slot-btn"
                 >
                   <Trash2 className="w-4 h-4" />
                   {language === 'sr' ? 'Obriši' : 'Delete'}
@@ -713,6 +1059,7 @@ const StaffAvailabilityCalendar = () => {
                 variant="outline" 
                 onClick={() => setIsAddDialogOpen(false)}
                 className="flex-1"
+                data-testid="cancel-btn"
               >
                 {language === 'sr' ? 'Otkaži' : 'Cancel'}
               </Button>
@@ -720,6 +1067,7 @@ const StaffAvailabilityCalendar = () => {
                 onClick={handleSubmit}
                 disabled={submitting}
                 className="flex-1 gap-2"
+                data-testid="submit-btn"
               >
                 {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
                 {editingSlot 
