@@ -1383,9 +1383,9 @@ async def upload_image(
     with open(file_path, "wb") as f:
         f.write(content)
     
-    # Return the URL (relative to API)
-    # The URL will be accessible via /uploads/filename
-    image_url = f"/uploads/{safe_filename}"
+    # Return the URL (with /api prefix for ingress routing)
+    # The URL will be accessible via /api/uploads/filename
+    image_url = f"/api/uploads/{safe_filename}"
     
     logger.info(f"Image uploaded: {safe_filename} by {user.get('email', 'unknown')}")
     
