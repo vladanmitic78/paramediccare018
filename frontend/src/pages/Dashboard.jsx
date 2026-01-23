@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Button } from '../components/ui/button';
@@ -21,15 +21,8 @@ import {
   TableRow,
 } from '../components/ui/table';
 import { Badge } from '../components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { 
-  LayoutDashboard,
-  Calendar,
-  Users,
-  FileText,
-  MessageSquare,
-  Settings,
   Loader2,
   Plus,
   Eye,
@@ -40,20 +33,20 @@ import {
   Clock,
   Truck,
   AlertCircle,
-  LogOut,
-  Globe,
   Activity,
   HeartPulse,
-  Navigation,
   Ambulance,
-  Map,
   Search,
-  MapPin
+  MapPin,
+  CalendarClock,
+  Users,
+  TrendingUp,
+  FileText
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
+import DashboardLayout from '../components/layout/DashboardLayout';
 import CMSManager from '../components/CMSManager';
-import OperationsDashboard from '../components/OperationsDashboard';
 import AdminBookingNotifications from '../components/AdminBookingNotifications';
 import InvoiceManager from '../components/InvoiceManager';
 import AdminLiveMap from '../components/AdminLiveMap';
