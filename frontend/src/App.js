@@ -1,7 +1,7 @@
 import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { LanguageProvider } from "./contexts/LanguageContext";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { Toaster } from "./components/ui/sonner";
@@ -16,6 +16,33 @@ import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 
+// Patient Portal Pages
+import PatientDashboard from "./pages/PatientDashboard";
+import PatientBookingWizard from "./pages/PatientBookingWizard";
+import PatientBookings from "./pages/PatientBookings";
+import PatientInvoices from "./pages/PatientInvoices";
+import PatientProfile from "./pages/PatientProfile";
+import PatientNotifications from "./pages/PatientNotifications";
+
+// Protected Route for Patient Portal
+const PatientRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-600"></div>
+      </div>
+    );
+  }
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return children;
+};
+
 function App() {
   return (
     <LanguageProvider>
@@ -23,8 +50,17 @@ function App() {
         <BrowserRouter>
           <div className="min-h-screen flex flex-col bg-slate-50">
             <Routes>
-              {/* Dashboard without header/footer */}
+              {/* Admin Dashboard without header/footer */}
               <Route path="/dashboard" element={<Dashboard />} />
+              
+              {/* Patient Portal without header/footer */}
+              <Route path="/patient" element={<PatientRoute><PatientDashboard /></PatientRoute>} />
+              <Route path="/patient/book" element={<PatientRoute><PatientBookingWizard /></PatientRoute>} />
+              <Route path="/patient/bookings" element={<PatientRoute><PatientBookings /></PatientRoute>} />
+              <Route path="/patient/bookings/:id" element={<PatientRoute><PatientBookings /></PatientRoute>} />
+              <Route path="/patient/invoices" element={<PatientRoute><PatientInvoices /></PatientRoute>} />
+              <Route path="/patient/profile" element={<PatientRoute><PatientProfile /></PatientRoute>} />
+              <Route path="/patient/notifications" element={<PatientRoute><PatientNotifications /></PatientRoute>} />
               
               {/* Public pages with header/footer */}
               <Route
