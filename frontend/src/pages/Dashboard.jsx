@@ -563,6 +563,14 @@ const Dashboard = () => {
               <LogOut className="w-5 h-5" />
               {t('nav_logout')}
             </button>
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-sky-400 hover:bg-sky-500/10 transition-all mt-1"
+              data-testid="dark-mode-toggle"
+            >
+              {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {darkMode ? (language === 'sr' ? 'Svetli režim' : 'Light Mode') : (language === 'sr' ? 'Tamni režim' : 'Dark Mode')}
+            </button>
           </div>
         </aside>
 
