@@ -196,6 +196,40 @@ const DriverDashboard = () => {
     window.open(googleMapsUrl, '_blank');
   };
 
+  // Accept assignment
+  const acceptAssignment = async () => {
+    if (!assignment) return;
+    setUpdatingStatus(true);
+    try {
+      await axios.post(`${API}/api/driver/accept-assignment/${assignment.id}`);
+      setDriverStatus('en_route');
+      startGPSTracking();
+      toast.success(language === 'sr' ? 'Zadatak prihvaćen! Krećete na put.' : 'Task accepted! Starting route.');
+      fetchDriverData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || (language === 'sr' ? 'Greška' : 'Error'));
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  // Reject assignment
+  const rejectAssignment = async () => {
+    if (!assignment) return;
+    setUpdatingStatus(true);
+    try {
+      await axios.post(`${API}/api/driver/reject-assignment/${assignment.id}`);
+      setDriverStatus('available');
+      setAssignment(null);
+      toast.success(language === 'sr' ? 'Zadatak odbijen. Čekate novi zadatak.' : 'Task rejected. Waiting for new task.');
+      fetchDriverData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || (language === 'sr' ? 'Greška' : 'Error'));
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
   // Go online/offline
   const toggleOnline = () => {
     if (driverStatus === 'offline') {
