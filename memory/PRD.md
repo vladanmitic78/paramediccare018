@@ -26,7 +26,17 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
    - Admin
    - Super Admin
 
-4. **Admin Dashboard**
+4. **Content Management System (CMS)**
+   - Admin can edit: Home, Medical Care, Transport, About Us pages
+   - Super Admin can edit: All Admin pages + Header and Footer
+   - Bilingual content editing (Serbian/English)
+   - Section-based organization with ordering
+   - Image URL and icon support
+   - Active/Inactive toggle for content visibility
+   - Lock icon indicator for Super Admin only sections
+   - Purple banner warning for global sections (Header/Footer)
+
+5. **Admin Dashboard**
    - Two main views: Operations and Administration
    - Statistics overview
    - Booking management
