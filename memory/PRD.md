@@ -73,6 +73,16 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
      - Status progress bar updates automatically
      - Refresh button for manual updates
 
+9. **Invoice Management System** (NEW - Jan 23, 2026) ✅
+   - Admin can create invoices for completed bookings
+   - Invoice fields: Amount, VAT (20% auto-calculated), Service description
+   - Invoice number format: PC018-YYYY-NNNNN
+   - Due date auto-set to 30 days
+   - Status management: Pending → Paid / Overdue / Cancelled
+   - **PDF Generation** with bilingual format (SR/EN)
+   - PDF includes: Company info, invoice details, service table, totals, payment instructions
+   - Patients can download PDF from their portal
+
 ### Phase 2 - Patient Portal (NEW - Jan 23, 2026) ✅
 
 #### Patient Portal Features (COMPLETE)
