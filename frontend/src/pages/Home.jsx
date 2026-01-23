@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { 
@@ -13,9 +14,47 @@ import {
   Siren
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import axios from 'axios';
+
+const API = process.env.REACT_APP_BACKEND_URL;
 
 const Home = () => {
   const { t, language } = useLanguage();
+  const [homeContent, setHomeContent] = useState(null);
+
+  // Fetch home page content from CMS
+  useEffect(() => {
+    const fetchHomeContent = async () => {
+      try {
+        const response = await axios.get(`${API}/api/pages/home`);
+        const content = {};
+        response.data.forEach(item => {
+          content[item.section] = item;
+        });
+        setHomeContent(content);
+      } catch (error) {
+        console.log('Using default home content');
+      }
+    };
+    fetchHomeContent();
+  }, []);
+
+  // Get content from CMS or use defaults
+  const heroTitle = homeContent?.hero?.[language === 'sr' ? 'title_sr' : 'title_en'] || t('hero_title');
+  const heroSubtitle = homeContent?.hero?.[language === 'sr' ? 'content_sr' : 'content_en'] || t('hero_subtitle');
+  const heroImage = homeContent?.hero?.image_url || 'https://images.pexels.com/photos/6520105/pexels-photo-6520105.jpeg';
+  
+  const servicesTitle = homeContent?.['services-title']?.[language === 'sr' ? 'title_sr' : 'title_en'] || t('services_title');
+  const servicesSubtitle = homeContent?.['services-title']?.[language === 'sr' ? 'content_sr' : 'content_en'] || t('services_subtitle');
+  
+  const ctaTitle = homeContent?.cta?.[language === 'sr' ? 'title_sr' : 'title_en'] || 
+    (language === 'sr' ? 'Potreban vam je transport?' : 'Need Transport?');
+  const ctaText = homeContent?.cta?.[language === 'sr' ? 'content_sr' : 'content_en'] || 
+    (language === 'sr' 
+      ? 'Zakažite medicinski transport brzo i jednostavno. Naš tim je spreman da vam pomogne.'
+      : 'Book medical transport quickly and easily. Our team is ready to help you.');
+  
+  const emergencyPhone = homeContent?.['emergency-phone']?.[language === 'sr' ? 'content_sr' : 'content_en'] || '+381 18 123 456';
 
   const medicalServices = [
     { 
