@@ -1073,10 +1073,39 @@ async def health():
 
 # ============ AUTH ROUTES ============
 
-@api_router.post("/auth/register", response_model=TokenResponse)
+def create_verification_token(user_id: str) -> str:
+    """Create a JWT token for email verification"""
+    payload = {
+        "user_id": user_id,
+        "type": "email_verification",
+        "exp": datetime.now(timezone.utc) + timedelta(hours=VERIFICATION_TOKEN_HOURS)
+    }
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+def verify_verification_token(token: str) -> dict:
+    """Verify and decode the email verification token"""
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        if payload.get("type") != "email_verification":
+            raise HTTPException(status_code=400, detail="Invalid token type")
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=400, detail="Verification link has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=400, detail="Invalid verification token")
+
+@api_router.post("/auth/register")
 async def register(user_data: UserCreate):
     existing = await db.users.find_one({"email": user_data.email})
     if existing:
+        # Check if user exists but is not verified
+        if not existing.get("is_verified", False):
+            # Resend verification email
+            verification_token = create_verification_token(existing["id"])
+            verification_link = f"{FRONTEND_URL}/verify-email?token={verification_token}"
+            subject, body = get_verification_email_template(existing["full_name"], verification_link, user_data.language)
+            await send_email(user_data.email, subject, body)
+            return {"message": "Verification email resent. Please check your inbox.", "requires_verification": True}
         raise HTTPException(status_code=400, detail="Email already registered")
     
     user_id = str(uuid.uuid4())
@@ -1090,31 +1119,56 @@ async def register(user_data: UserCreate):
         "role": user_data.role if user_data.role in [UserRole.REGULAR] else UserRole.REGULAR,
         "language": user_data.language,
         "is_active": True,
+        "is_verified": False,  # Not verified until email confirmation
         "created_at": registration_time.isoformat()
     }
     await db.users.insert_one(user_doc)
     
-    # Send welcome email to user
-    subject, body = get_registration_email_template(user_data.full_name, user_data.email, user_data.language)
+    # Create verification token and send verification email
+    verification_token = create_verification_token(user_id)
+    verification_link = f"{FRONTEND_URL}/verify-email?token={verification_token}"
+    
+    subject, body = get_verification_email_template(user_data.full_name, verification_link, user_data.language)
     await send_email(user_data.email, subject, body)
     
-    # Send notification email to admin (info@paramedic-care018.rs)
-    # Use Serbian as default admin language, but can be configured
+    # Send notification email to admin
     admin_email = "info@paramedic-care018.rs"
-    admin_language = "sr"  # Admin notification in Serbian by default
     formatted_time = registration_time.strftime("%d.%m.%Y %H:%M")
     admin_subject, admin_body = get_admin_new_user_notification_template(
         user_data.full_name, 
         user_data.email, 
         user_data.phone or "N/A",
         formatted_time,
-        admin_language
+        "sr"  # Admin notification in Serbian
     )
     await send_email(admin_email, admin_subject, admin_body)
     
-    token = create_token(user_id, user_doc["role"])
-    user_response = {k: v for k, v in user_doc.items() if k != "password" and k != "_id"}
-    return TokenResponse(access_token=token, user=UserResponse(**user_response))
+    return {"message": "Registration successful. Please check your email to verify your account.", "requires_verification": True}
+
+@api_router.get("/auth/verify-email")
+async def verify_email(token: str):
+    """Verify user's email address"""
+    payload = verify_verification_token(token)
+    user_id = payload["user_id"]
+    
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if user.get("is_verified", False):
+        return {"message": "Email already verified", "already_verified": True}
+    
+    # Update user as verified
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"is_verified": True, "verified_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    # Send welcome email now that user is verified
+    subject, body = get_registration_email_template(user["full_name"], user["email"], user.get("language", "sr"))
+    await send_email(user["email"], subject, body)
+    
+    return {"message": "Email verified successfully! Welcome email has been sent.", "verified": True}
 
 @api_router.post("/auth/login", response_model=TokenResponse)
 async def login(credentials: UserLogin):
@@ -1123,6 +1177,8 @@ async def login(credentials: UserLogin):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     if not user.get("is_active", True):
         raise HTTPException(status_code=401, detail="Account deactivated")
+    if not user.get("is_verified", False):
+        raise HTTPException(status_code=401, detail="Please verify your email before logging in")
     
     token = create_token(user["id"], user["role"])
     user_response = {k: v for k, v in user.items() if k != "password"}
