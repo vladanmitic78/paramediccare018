@@ -2554,6 +2554,516 @@ async def get_staff_list(
     ).to_list(100)
     return staff
 
+# ============ MEDICAL PATIENT PROFILE ROUTES ============
+
+def calculate_age(birth_date_str: str) -> int:
+    """Calculate age from date of birth string (YYYY-MM-DD)"""
+    try:
+        birth_date = datetime.strptime(birth_date_str, "%Y-%m-%d")
+        today = datetime.now()
+        age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+        return age
+    except:
+        return None
+
+def calculate_bmi(height_cm: int, weight_kg: float) -> float:
+    """Calculate BMI from height (cm) and weight (kg)"""
+    if height_cm and weight_kg and height_cm > 0:
+        height_m = height_cm / 100
+        return round(weight_kg / (height_m * height_m), 1)
+    return None
+
+async def generate_patient_id() -> str:
+    """Generate unique patient ID like PC018-P-00001"""
+    count = await db.medical_patients.count_documents({})
+    return f"PC018-P-{str(count + 1).zfill(5)}"
+
+@api_router.post("/medical/patients")
+async def create_medical_patient(
+    patient: PatientMedicalProfileCreate,
+    user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Create a new medical patient profile"""
+    patient_id = await generate_patient_id()
+    
+    patient_data = {
+        "id": str(uuid.uuid4()),
+        "patient_id": patient_id,
+        **patient.model_dump(),
+        "age": calculate_age(patient.date_of_birth) if patient.date_of_birth else None,
+        "bmi": calculate_bmi(patient.height_cm, patient.weight_kg),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_by": user["id"],
+        "created_by_name": user.get("full_name", "Unknown")
+    }
+    
+    await db.medical_patients.insert_one(patient_data)
+    
+    # Return without _id
+    patient_data.pop("_id", None)
+    return patient_data
+
+@api_router.get("/medical/patients")
+async def list_medical_patients(
+    search: str = None,
+    blood_type: str = None,
+    has_allergies: bool = None,
+    limit: int = 50,
+    offset: int = 0,
+    user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """List all medical patients with search and filters"""
+    query = {}
+    
+    if search:
+        query["$or"] = [
+            {"full_name": {"$regex": search, "$options": "i"}},
+            {"patient_id": {"$regex": search, "$options": "i"}},
+            {"phone": {"$regex": search, "$options": "i"}},
+            {"email": {"$regex": search, "$options": "i"}}
+        ]
+    
+    if blood_type:
+        query["blood_type"] = blood_type
+    
+    if has_allergies is True:
+        query["allergies.0"] = {"$exists": True}
+    
+    total = await db.medical_patients.count_documents(query)
+    patients = await db.medical_patients.find(
+        query, {"_id": 0}
+    ).sort("created_at", -1).skip(offset).limit(limit).to_list(limit)
+    
+    return {"total": total, "patients": patients}
+
+@api_router.get("/medical/patients/{patient_id}")
+async def get_medical_patient(
+    patient_id: str,
+    user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Get a medical patient profile by ID"""
+    patient = await db.medical_patients.find_one(
+        {"$or": [{"id": patient_id}, {"patient_id": patient_id}]},
+        {"_id": 0}
+    )
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    return patient
+
+@api_router.put("/medical/patients/{patient_id}")
+async def update_medical_patient(
+    patient_id: str,
+    update: PatientMedicalProfileUpdate,
+    user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Update a medical patient profile"""
+    patient = await db.medical_patients.find_one(
+        {"$or": [{"id": patient_id}, {"patient_id": patient_id}]}
+    )
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    
+    update_data = {k: v for k, v in update.model_dump().items() if v is not None}
+    
+    # Recalculate age if DOB changed
+    if "date_of_birth" in update_data:
+        update_data["age"] = calculate_age(update_data["date_of_birth"])
+    
+    # Recalculate BMI if height or weight changed
+    height = update_data.get("height_cm", patient.get("height_cm"))
+    weight = update_data.get("weight_kg", patient.get("weight_kg"))
+    if height and weight:
+        update_data["bmi"] = calculate_bmi(height, weight)
+    
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    update_data["updated_by"] = user["id"]
+    update_data["updated_by_name"] = user.get("full_name", "Unknown")
+    
+    await db.medical_patients.update_one(
+        {"$or": [{"id": patient_id}, {"patient_id": patient_id}]},
+        {"$set": update_data}
+    )
+    
+    return {"success": True, "message": "Patient updated"}
+
+@api_router.delete("/medical/patients/{patient_id}")
+async def delete_medical_patient(
+    patient_id: str,
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Delete a medical patient profile (Admin only)"""
+    result = await db.medical_patients.delete_one(
+        {"$or": [{"id": patient_id}, {"patient_id": patient_id}]}
+    )
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    return {"success": True, "message": "Patient deleted"}
+
+@api_router.post("/medical/patients/{patient_id}/photo")
+async def upload_patient_photo(
+    patient_id: str,
+    file: UploadFile = File(...),
+    user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Upload patient photo"""
+    patient = await db.medical_patients.find_one(
+        {"$or": [{"id": patient_id}, {"patient_id": patient_id}]}
+    )
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    
+    # Validate file type
+    allowed_types = ["image/jpeg", "image/png", "image/webp"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Only JPEG, PNG, and WEBP images are allowed")
+    
+    # Save file
+    file_ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
+    filename = f"patient_{patient_id}_{uuid.uuid4()}.{file_ext}"
+    file_path = UPLOADS_DIR / filename
+    
+    with open(file_path, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+    
+    photo_url = f"/api/uploads/{filename}"
+    
+    await db.medical_patients.update_one(
+        {"$or": [{"id": patient_id}, {"patient_id": patient_id}]},
+        {"$set": {"photo_url": photo_url, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"success": True, "photo_url": photo_url}
+
+# ============ VITAL SIGNS ROUTES ============
+
+def check_vital_flags(vitals: dict) -> List[str]:
+    """Check vitals against normal ranges and return flags"""
+    flags = []
+    
+    # Blood Pressure
+    if vitals.get("systolic_bp"):
+        if vitals["systolic_bp"] > 140:
+            flags.append("HIGH_BP")
+        elif vitals["systolic_bp"] < 90:
+            flags.append("LOW_BP")
+    
+    # Heart Rate
+    if vitals.get("heart_rate"):
+        if vitals["heart_rate"] > 100:
+            flags.append("TACHYCARDIA")
+        elif vitals["heart_rate"] < 60:
+            flags.append("BRADYCARDIA")
+    
+    # Oxygen Saturation
+    if vitals.get("oxygen_saturation"):
+        if vitals["oxygen_saturation"] < 95:
+            flags.append("LOW_SPO2")
+        if vitals["oxygen_saturation"] < 90:
+            flags.append("CRITICAL_SPO2")
+    
+    # Temperature
+    if vitals.get("temperature"):
+        if vitals["temperature"] > 38:
+            flags.append("FEVER")
+        elif vitals["temperature"] < 36:
+            flags.append("HYPOTHERMIA")
+    
+    # Respiratory Rate
+    if vitals.get("respiratory_rate"):
+        if vitals["respiratory_rate"] > 20:
+            flags.append("TACHYPNEA")
+        elif vitals["respiratory_rate"] < 12:
+            flags.append("BRADYPNEA")
+    
+    # Blood Glucose
+    if vitals.get("blood_glucose"):
+        if vitals["blood_glucose"] > 180:
+            flags.append("HYPERGLYCEMIA")
+        elif vitals["blood_glucose"] < 70:
+            flags.append("HYPOGLYCEMIA")
+    
+    # GCS
+    if vitals.get("gcs_score"):
+        if vitals["gcs_score"] <= 8:
+            flags.append("SEVERE_CONSCIOUSNESS")
+        elif vitals["gcs_score"] <= 12:
+            flags.append("MODERATE_CONSCIOUSNESS")
+    
+    return flags
+
+@api_router.post("/medical/vitals")
+async def record_vital_signs(
+    vitals: VitalSignsEntry,
+    user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Record vital signs for a patient"""
+    # Verify patient exists
+    patient = await db.medical_patients.find_one(
+        {"$or": [{"id": vitals.patient_id}, {"patient_id": vitals.patient_id}]}
+    )
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    
+    vitals_data = vitals.model_dump()
+    vitals_data["id"] = str(uuid.uuid4())
+    vitals_data["patient_id"] = patient["id"]  # Normalize to internal ID
+    vitals_data["recorded_by"] = user["id"]
+    vitals_data["recorded_by_name"] = user.get("full_name", "Unknown")
+    vitals_data["recorded_at"] = datetime.now(timezone.utc).isoformat()
+    vitals_data["flags"] = check_vital_flags(vitals_data)
+    
+    await db.medical_vitals.insert_one(vitals_data)
+    vitals_data.pop("_id", None)
+    
+    return vitals_data
+
+@api_router.get("/medical/vitals/{patient_id}")
+async def get_patient_vitals(
+    patient_id: str,
+    start_date: str = None,
+    end_date: str = None,
+    measurement_type: str = None,
+    limit: int = 100,
+    user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Get vital signs history for a patient"""
+    # Get patient internal ID
+    patient = await db.medical_patients.find_one(
+        {"$or": [{"id": patient_id}, {"patient_id": patient_id}]}
+    )
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    
+    query = {"patient_id": patient["id"]}
+    
+    if start_date or end_date:
+        query["recorded_at"] = {}
+        if start_date:
+            query["recorded_at"]["$gte"] = start_date
+        if end_date:
+            query["recorded_at"]["$lte"] = end_date
+    
+    if measurement_type:
+        query["measurement_type"] = measurement_type
+    
+    vitals = await db.medical_vitals.find(
+        query, {"_id": 0}
+    ).sort("recorded_at", -1).limit(limit).to_list(limit)
+    
+    return {"patient_id": patient_id, "vitals": vitals}
+
+@api_router.get("/medical/vitals/{patient_id}/latest")
+async def get_latest_vitals(
+    patient_id: str,
+    user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Get the latest vital signs for a patient"""
+    patient = await db.medical_patients.find_one(
+        {"$or": [{"id": patient_id}, {"patient_id": patient_id}]}
+    )
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    
+    vitals = await db.medical_vitals.find_one(
+        {"patient_id": patient["id"]},
+        {"_id": 0},
+        sort=[("recorded_at", -1)]
+    )
+    
+    return vitals or {}
+
+# ============ MEDICAL CHECK / EXAMINATION ROUTES ============
+
+@api_router.post("/medical/checks")
+async def create_medical_check(
+    check: MedicalCheckCreate,
+    user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Create a medical check/examination record"""
+    # Verify patient exists
+    patient = await db.medical_patients.find_one(
+        {"$or": [{"id": check.patient_id}, {"patient_id": check.patient_id}]}
+    )
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    
+    check_data = check.model_dump()
+    check_data["id"] = str(uuid.uuid4())
+    check_data["patient_id"] = patient["id"]
+    check_data["patient_name"] = patient.get("full_name")
+    check_data["performed_by"] = user["id"]
+    check_data["performed_by_name"] = user.get("full_name", "Unknown")
+    check_data["performed_at"] = datetime.now(timezone.utc).isoformat()
+    
+    # If vitals included, also save to vitals collection
+    if check.vitals:
+        vitals_data = check.vitals.model_dump()
+        vitals_data["id"] = str(uuid.uuid4())
+        vitals_data["patient_id"] = patient["id"]
+        vitals_data["recorded_by"] = user["id"]
+        vitals_data["recorded_by_name"] = user.get("full_name", "Unknown")
+        vitals_data["recorded_at"] = datetime.now(timezone.utc).isoformat()
+        vitals_data["measurement_type"] = check.check_type
+        vitals_data["flags"] = check_vital_flags(vitals_data)
+        await db.medical_vitals.insert_one(vitals_data)
+        check_data["vitals"]["id"] = vitals_data["id"]
+    
+    await db.medical_checks.insert_one(check_data)
+    check_data.pop("_id", None)
+    
+    return check_data
+
+@api_router.get("/medical/checks")
+async def list_medical_checks(
+    patient_id: str = None,
+    check_type: str = None,
+    start_date: str = None,
+    end_date: str = None,
+    limit: int = 50,
+    user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """List medical checks with filters"""
+    query = {}
+    
+    if patient_id:
+        patient = await db.medical_patients.find_one(
+            {"$or": [{"id": patient_id}, {"patient_id": patient_id}]}
+        )
+        if patient:
+            query["patient_id"] = patient["id"]
+    
+    if check_type:
+        query["check_type"] = check_type
+    
+    if start_date or end_date:
+        query["performed_at"] = {}
+        if start_date:
+            query["performed_at"]["$gte"] = start_date
+        if end_date:
+            query["performed_at"]["$lte"] = end_date
+    
+    checks = await db.medical_checks.find(
+        query, {"_id": 0}
+    ).sort("performed_at", -1).limit(limit).to_list(limit)
+    
+    return {"checks": checks}
+
+@api_router.get("/medical/checks/{check_id}")
+async def get_medical_check(
+    check_id: str,
+    user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Get a specific medical check"""
+    check = await db.medical_checks.find_one({"id": check_id}, {"_id": 0})
+    if not check:
+        raise HTTPException(status_code=404, detail="Medical check not found")
+    return check
+
+@api_router.post("/medical/checks/{check_id}/sign")
+async def sign_medical_check(
+    check_id: str,
+    user: dict = Depends(require_roles([UserRole.DOCTOR]))
+):
+    """Sign a medical check (Doctor only)"""
+    check = await db.medical_checks.find_one({"id": check_id})
+    if not check:
+        raise HTTPException(status_code=404, detail="Medical check not found")
+    
+    await db.medical_checks.update_one(
+        {"id": check_id},
+        {"$set": {
+            "signed_by": user["id"],
+            "signed_by_name": user.get("full_name", "Unknown"),
+            "signed_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"success": True, "message": "Medical check signed"}
+
+# ============ DOCTOR/NURSE DASHBOARD ROUTES ============
+
+@api_router.get("/medical/dashboard")
+async def get_medical_dashboard(
+    user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Get medical dashboard data"""
+    # Get counts
+    total_patients = await db.medical_patients.count_documents({})
+    
+    # Get recent patients (last 7 days)
+    week_ago = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
+    recent_patients = await db.medical_patients.count_documents({"created_at": {"$gte": week_ago}})
+    
+    # Get patients with critical vitals (last 24 hours)
+    day_ago = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
+    critical_vitals = await db.medical_vitals.find(
+        {
+            "recorded_at": {"$gte": day_ago},
+            "flags": {"$in": ["CRITICAL_SPO2", "SEVERE_CONSCIOUSNESS", "LOW_BP"]}
+        },
+        {"_id": 0}
+    ).to_list(20)
+    
+    # Get active transports (bookings with status in_progress)
+    active_transports = await db.bookings.find(
+        {"status": {"$in": ["confirmed", "en_route", "picked_up"]}},
+        {"_id": 0}
+    ).to_list(20)
+    
+    patient_bookings = await db.patient_bookings.find(
+        {"status": {"$in": ["confirmed", "en_route", "picked_up"]}},
+        {"_id": 0}
+    ).to_list(20)
+    
+    # Get recent medical checks
+    recent_checks = await db.medical_checks.find(
+        {}, {"_id": 0}
+    ).sort("performed_at", -1).limit(10).to_list(10)
+    
+    # Get today's checks count
+    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
+    today_checks = await db.medical_checks.count_documents({"performed_at": {"$gte": today_start}})
+    
+    return {
+        "stats": {
+            "total_patients": total_patients,
+            "recent_patients": recent_patients,
+            "critical_alerts": len(critical_vitals),
+            "active_transports": len(active_transports) + len(patient_bookings),
+            "today_checks": today_checks
+        },
+        "critical_vitals": critical_vitals,
+        "active_transports": active_transports + patient_bookings,
+        "recent_checks": recent_checks
+    }
+
+@api_router.get("/medical/alerts")
+async def get_medical_alerts(
+    user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Get medical alerts - critical vitals and urgent cases"""
+    day_ago = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
+    
+    # Get all critical vitals from last 24 hours
+    critical_vitals = await db.medical_vitals.find(
+        {
+            "recorded_at": {"$gte": day_ago},
+            "flags.0": {"$exists": True}  # Has at least one flag
+        },
+        {"_id": 0}
+    ).sort("recorded_at", -1).to_list(50)
+    
+    # Enrich with patient info
+    for vital in critical_vitals:
+        patient = await db.medical_patients.find_one(
+            {"id": vital["patient_id"]},
+            {"_id": 0, "full_name": 1, "patient_id": 1, "blood_type": 1, "allergies": 1}
+        )
+        if patient:
+            vital["patient"] = patient
+    
+    return {"alerts": critical_vitals}
+
 # ============ DRIVER APP ROUTES ============
 
 @api_router.get("/driver/profile")
