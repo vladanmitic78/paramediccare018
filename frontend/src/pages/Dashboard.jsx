@@ -461,7 +461,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-100" data-testid="dashboard-page">
+    <div className={`min-h-screen transition-colors duration-300 ${darkMode ? 'bg-slate-800' : 'bg-slate-100'}`} data-testid="dashboard-page">
       {/* Admin Booking Notifications */}
       {isAdmin() && (
         <AdminBookingNotifications onViewBooking={handleViewPatientBooking} />
