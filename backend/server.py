@@ -2193,8 +2193,10 @@ async def create_availability(
             }
             slots_to_create.append(repeat_slot)
     
-    await db.staff_availability.insert_many(slots_to_create)
-    return {"success": True, "slots_created": len(slots_to_create), "slots": slots_to_create}
+    # Insert without returning _id
+    await db.staff_availability.insert_many([{**slot} for slot in slots_to_create])
+    
+    return {"success": True, "slots_created": len(slots_to_create)}
 
 @api_router.put("/staff/availability/{slot_id}")
 async def update_availability(
