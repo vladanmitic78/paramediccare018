@@ -244,10 +244,13 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
 - [x] **Driver App PWA** (NEW - Jan 23, 2026) ✅
 - [x] **Admin Live Map** (NEW - Jan 23, 2026) ✅
 - [x] **Driver Assignment System** (NEW - Jan 23, 2026) ✅
+- [x] **Professional Sidebar Redesign** (NEW - Jan 23, 2026) ✅
 
 ### P1 (Next Up)
-- [ ] Integrate live data into Operations Dashboard (replace mocked data)
-- [ ] Push notifications (browser)
+- [ ] Implement Patients database (MEDICINSKI CENTAR)
+- [ ] Implement Statistics & Analytics dashboard
+- [ ] Implement Staff Availability calendar
+- [ ] Integrate live data into Operations Dashboard
 
 ### P2 (Future)
 - [ ] Electronic Medical Records (EMR)
