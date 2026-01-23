@@ -457,36 +457,62 @@ const Dashboard = () => {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
-            {navigationGroups.map((group, groupIndex) => (
-              <div key={groupIndex}>
-                <h2 className="px-3 mb-2 text-[11px] font-bold uppercase tracking-widest text-slate-500" style={{ fontFamily: 'Manrope, sans-serif' }}>
-                  {group.label}
-                </h2>
-                <div className="space-y-1">
-                  {group.items.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => setActiveTab(item.id)}
-                      data-testid={`sidebar-${item.id}`}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
-                        activeTab === item.id 
-                          ? 'bg-white/10 text-white font-semibold' 
-                          : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
-                      }`}
-                    >
-                      <item.icon className="w-5 h-5 flex-shrink-0" />
-                      <span className="flex-1 text-left">{item.label}</span>
-                      {item.badge && (
-                        <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-sky-500/20 text-sky-400">
-                          {item.badge}
-                        </span>
-                      )}
-                    </button>
-                  ))}
+          <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+            {navigationGroups.map((group) => {
+              const isExpanded = expandedGroups.includes(group.id);
+              const GroupIcon = group.icon;
+              const hasActiveItem = group.items.some(item => item.id === activeTab);
+              
+              return (
+                <div key={group.id}>
+                  {/* Group Header - Clickable to expand/collapse */}
+                  <button
+                    onClick={() => toggleGroup(group.id)}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                      hasActiveItem 
+                        ? 'bg-white/10 text-white' 
+                        : 'text-slate-300 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <GroupIcon className="w-5 h-5 flex-shrink-0" />
+                    <span className="flex-1 text-left">{group.label}</span>
+                    {isExpanded ? (
+                      <ChevronDown className="w-4 h-4 text-slate-500" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4 text-slate-500" />
+                    )}
+                  </button>
+                  
+                  {/* Sub-items - Collapsible */}
+                  <div className={`overflow-hidden transition-all duration-200 ${
+                    isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                  }`}>
+                    <div className="ml-4 mt-1 space-y-1 border-l border-slate-700 pl-3">
+                      {group.items.map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setActiveTab(item.id)}
+                          data-testid={`sidebar-${item.id}`}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
+                            activeTab === item.id 
+                              ? 'bg-sky-500/20 text-sky-400 font-medium' 
+                              : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                          }`}
+                        >
+                          <item.icon className="w-4 h-4 flex-shrink-0" />
+                          <span className="flex-1 text-left">{item.label}</span>
+                          {item.badge && (
+                            <span className="px-1.5 py-0.5 text-[9px] font-medium rounded bg-slate-700 text-slate-400">
+                              {item.badge}
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </nav>
 
           {/* User Info & Logout */}
