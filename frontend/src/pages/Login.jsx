@@ -33,9 +33,13 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     
+    // Trim whitespace from inputs (helps with mobile keyboard issues)
+    const email = formData.email.trim().toLowerCase();
+    const password = formData.password.trim();
+    
     try {
       if (isLogin) {
-        const user = await login(formData.email, formData.password);
+        const user = await login(email, password);
         toast.success(language === 'sr' ? 'Uspešna prijava!' : 'Login successful!');
         
         // Redirect based on role
@@ -50,10 +54,10 @@ const Login = () => {
       } else {
         // Registration - now returns message instead of token
         const response = await axios.post(`${API}/api/auth/register`, {
-          email: formData.email,
-          password: formData.password,
-          full_name: formData.full_name,
-          phone: formData.phone,
+          email: email,
+          password: password,
+          full_name: formData.full_name.trim(),
+          phone: formData.phone.trim(),
           language: language
         });
         
