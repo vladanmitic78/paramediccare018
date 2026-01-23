@@ -1001,41 +1001,7 @@ const MedicalDashboard = () => {
         
         {/* Alerts */}
         {activeTab === 'alerts' && (
-          <div className="space-y-4">
-            <div className={`${cardClass} border rounded-xl p-4`}>
-              <h2 className={`text-lg font-semibold ${textClass} mb-4 flex items-center gap-2`}>
-                <AlertTriangle className={darkMode ? 'text-red-400' : 'text-red-600'} />
-                {language === 'sr' ? 'Kritična upozorenja' : 'Critical Alerts'}
-              </h2>
-              {dashboardData?.critical_vitals?.length > 0 ? (
-                <div className="space-y-3">
-                  {dashboardData.critical_vitals.map((vital, idx) => (
-                    <div key={idx} className={`p-4 rounded-lg ${darkMode ? 'bg-red-900/30 border-red-800' : 'bg-red-50 border-red-200'} border`}>
-                      <div className="flex items-center justify-between mb-2">
-                        <p className={`font-semibold ${darkMode ? 'text-red-400' : 'text-red-700'}`}>
-                          {vital.patient?.full_name || 'Unknown Patient'}
-                        </p>
-                        <span className={`text-sm ${textMutedClass}`}>
-                          {new Date(vital.recorded_at).toLocaleString()}
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {vital.flags?.map((flag, fIdx) => (
-                          <Badge key={fIdx} variant="destructive">
-                            {flag}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className={`text-center py-8 ${textMutedClass}`}>
-                  {language === 'sr' ? 'Nema kritičnih upozorenja' : 'No critical alerts'}
-                </p>
-              )}
-            </div>
-          </div>
+          <CriticalAlertsPanel language={language} darkMode={darkMode} embedded={true} />
         )}
       </main>
       
