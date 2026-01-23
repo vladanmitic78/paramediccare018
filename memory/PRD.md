@@ -169,6 +169,36 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
    - Scheduled date/time
    - Click-to-call patient contact
 
+### Phase 4 - Admin Live Map (NEW - Jan 23, 2026) ✅
+
+#### Admin Live Map Features (COMPLETE)
+1. **Real-Time Map**
+   - Interactive OpenStreetMap display
+   - Centered on Niš, Serbia by default
+   - Auto-fit bounds to driver locations
+   - Zoom controls
+
+2. **Driver Markers**
+   - Color-coded by status (green=available, red=transporting, etc.)
+   - Custom truck icons
+   - Popup with driver details on click
+
+3. **Driver Cards**
+   - Driver name and phone
+   - Status badge with color
+   - GPS coordinates when available
+   - Speed indicator during transport
+
+4. **Real-Time Updates**
+   - WebSocket connection for instant updates
+   - Connection status indicator (Live/Disconnected)
+   - Auto-reconnect on disconnect
+   - Manual refresh button
+
+5. **Access Control**
+   - Admin/Superadmin only
+   - Protected by role-based authentication
+
 ### Technology Stack
 - Frontend: React with Tailwind CSS, Shadcn UI, react-leaflet
 - Backend: FastAPI with MongoDB
