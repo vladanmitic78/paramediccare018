@@ -864,26 +864,28 @@ async def create_contact(contact: ContactCreate):
     }
     inquiry_label = inquiry_labels.get(contact.inquiry_type, "Opšti upit / General Inquiry")
     
-    # Send notification email
-    email_body = f"""
-    <html>
-    <body>
-        <h2>Nova Kontakt Poruka / New Contact Message</h2>
-        <p><strong>Tip upita / Inquiry Type:</strong> {inquiry_label}</p>
-        <p><strong>Ime / Name:</strong> {contact.name}</p>
-        <p><strong>Email:</strong> {contact.email}</p>
-        <p><strong>Telefon / Phone:</strong> {contact.phone or 'N/A'}</p>
-        <p><strong>Poruka / Message:</strong></p>
-        <p>{contact.message}</p>
-    </body>
-    </html>
-    """
+    # Send internal notification to appropriate email
+    internal_body = get_internal_notification_template("new_contact", {
+        "inquiry_type": inquiry_label,
+        "name": contact.name,
+        "email": contact.email,
+        "phone": contact.phone or "N/A",
+        "message": contact.message
+    })
     
-    # Route to appropriate email based on inquiry type
+    # Route to appropriate internal email based on inquiry type
+    # General inquiries go to info@, medical to ambulanta@, transport to transport@
     if contact.inquiry_type == "medical":
-        await send_email(MEDICAL_EMAIL, f"Medicinska nega - {contact.name}", email_body, "medical")
+        await send_email(MEDICAL_EMAIL, f"Medicinska nega - {contact.name}", internal_body)
+    elif contact.inquiry_type == "transport":
+        await send_email(TRANSPORT_EMAIL, f"Transport - {contact.name}", internal_body)
     else:
-        await send_email(TRANSPORT_EMAIL, f"Kontakt: {contact.name}", email_body, "transport")
+        # General inquiry goes to info@paramedic-care018.rs
+        await send_email(INFO_EMAIL, f"Opšti upit - {contact.name}", internal_body)
+    
+    # Send auto-reply to customer in their preferred language
+    subject, body = get_contact_autoreply_template(contact.name, contact.inquiry_type, contact.language)
+    await send_email(contact.email, subject, body)
     
     return ContactResponse(**{k: v for k, v in contact_doc.items() if k != "_id"})
 
