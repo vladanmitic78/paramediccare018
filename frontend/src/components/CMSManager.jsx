@@ -72,7 +72,7 @@ const CMSManager = () => {
   });
 
   const isSuperAdmin = user?.role === 'superadmin';
-  const fileInputRef = React.useRef(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     fetchContent();
