@@ -835,6 +835,58 @@ const Dashboard = () => {
                         </TableCell>
                         <TableCell>{getStatusBadge(booking.status)}</TableCell>
                         <TableCell>
+                          {booking.assigned_driver_name ? (
+                            <div className="flex items-center gap-2">
+                              <Truck className="w-4 h-4 text-green-600" />
+                              <span className="text-sm font-medium text-green-700">{booking.assigned_driver_name}</span>
+                            </div>
+                          ) : booking.status === 'completed' || booking.status === 'cancelled' ? (
+                            <span className="text-sm text-slate-400">—</span>
+                          ) : isAdmin() ? (
+                            <Select
+                              onValueChange={(driverId) => assignDriverToBooking(booking.id, driverId, true)}
+                              disabled={assigningDriver === booking.id}
+                            >
+                              <SelectTrigger className="w-44" data-testid={`assign-driver-public-${booking.id}`}>
+                                <SelectValue placeholder={
+                                  assigningDriver === booking.id 
+                                    ? (language === 'sr' ? 'Dodeljujem...' : 'Assigning...') 
+                                    : (language === 'sr' ? 'Dodeli vozača' : 'Assign Driver')
+                                } />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {(() => {
+                                  const sortedDrivers = getDriversSortedByDistance(booking.start_lat, booking.start_lng);
+                                  if (sortedDrivers.length === 0) {
+                                    return (
+                                      <SelectItem value="none" disabled>
+                                        {language === 'sr' ? 'Nema dostupnih vozača' : 'No available drivers'}
+                                      </SelectItem>
+                                    );
+                                  }
+                                  return sortedDrivers.map((driver) => (
+                                    <SelectItem key={driver.id} value={driver.id}>
+                                      <div className="flex items-center gap-2">
+                                        <span className={`w-2 h-2 rounded-full ${
+                                          driver.driver_status === 'available' ? 'bg-green-500' : 'bg-slate-400'
+                                        }`} />
+                                        <span>{driver.full_name}</span>
+                                        {driver.distance !== Infinity && (
+                                          <span className="text-xs text-slate-400 ml-1">
+                                            ({driver.distance.toFixed(1)} km)
+                                          </span>
+                                        )}
+                                      </div>
+                                    </SelectItem>
+                                  ));
+                                })()}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <span className="text-sm text-slate-400">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
                           <div className="flex items-center gap-2">
                             {isAdmin() && (
                               <>
