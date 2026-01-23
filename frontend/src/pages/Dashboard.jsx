@@ -1184,26 +1184,9 @@ const Dashboard = () => {
             </div>
           )}
 
-          {/* Availability Section - Coming Soon */}
-          {activeTab === 'availability' && isAdmin() && (
-            <div className="space-y-6">
-              <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: 'Manrope, sans-serif' }}>
-                {language === 'sr' ? 'Raspored dostupnosti' : 'Availability Schedule'}
-              </h1>
-              <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-                <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
-                  <Calendar className="w-8 h-8 text-amber-600" />
-                </div>
-                <h2 className="text-xl font-semibold text-slate-900 mb-2">
-                  {language === 'sr' ? 'Uskoro dostupno' : 'Coming Soon'}
-                </h2>
-                <p className="text-slate-500 max-w-md mx-auto">
-                  {language === 'sr' 
-                    ? 'Kalendar za vozače, doktore i medicinske sestre da prijave svoju dostupnost. Admin pregled svih rasporeda.'
-                    : 'Calendar for drivers, doctors, and nurses to submit availability. Admin overview of all schedules.'}
-                </p>
-              </div>
-            </div>
+          {/* Availability Section */}
+          {activeTab === 'availability' && (
+            <StaffAvailabilityCalendar />
           )}
 
           {/* Services (Admin only) */}
