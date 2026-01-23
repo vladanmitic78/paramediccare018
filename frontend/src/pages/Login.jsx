@@ -4,16 +4,20 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import { Loader2, Mail, Lock, User, Phone } from 'lucide-react';
+import { Loader2, Mail, Lock, User, Phone, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import axios from 'axios';
+
+const API = process.env.REACT_APP_BACKEND_URL;
 
 const Login = () => {
-  const { login, register } = useAuth();
+  const { login } = useAuth();
   const { t, language } = useLanguage();
   const navigate = useNavigate();
   
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -42,10 +46,21 @@ const Login = () => {
           navigate('/patient');
         }
       } else {
-        await register(formData.email, formData.password, formData.full_name, formData.phone, language);
-        toast.success(language === 'sr' ? 'Uspešna registracija!' : 'Registration successful!');
-        // New users go to patient portal
-        navigate('/patient');
+        // Registration - now returns message instead of token
+        const response = await axios.post(`${API}/api/auth/register`, {
+          email: formData.email,
+          password: formData.password,
+          full_name: formData.full_name,
+          phone: formData.phone,
+          language: language
+        });
+        
+        if (response.data.requires_verification) {
+          setRegistrationSuccess(true);
+          toast.success(language === 'sr' 
+            ? 'Proverite vaš email za verifikaciju!' 
+            : 'Check your email for verification!');
+        }
       }
     } catch (error) {
       console.error('Auth error:', error);
@@ -54,6 +69,62 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+  // Show success message after registration
+  if (registrationSuccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-br from-sky-50 via-white to-blue-50">
+        <div className="w-full max-w-md text-center">
+          {/* Logo */}
+          <div className="mb-8">
+            <Link to="/">
+              <img 
+                src="https://customer-assets.emergentagent.com/job_433955cc-2ea1-4976-bce7-1cf9f8ad9654/artifacts/j7ye45w5_Paramedic%20Care%20018%20Logo.jpg"
+                alt="Paramedic Care 018"
+                className="h-16 w-auto mx-auto"
+              />
+            </Link>
+          </div>
+          
+          <div className="bg-white rounded-3xl shadow-xl border border-slate-200 p-8">
+            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg shadow-green-200">
+              <Mail className="w-10 h-10 text-white" />
+            </div>
+            
+            <h1 className="text-2xl font-bold text-slate-900 mb-3">
+              {language === 'sr' ? 'Proverite Vaš Email!' : 'Check Your Email!'}
+            </h1>
+            
+            <p className="text-slate-500 mb-6">
+              {language === 'sr' 
+                ? `Poslali smo verifikacioni link na ${formData.email}. Kliknite na link da aktivirate vaš nalog.`
+                : `We've sent a verification link to ${formData.email}. Click the link to activate your account.`}
+            </p>
+            
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-left">
+              <p className="text-amber-800 text-sm">
+                <strong>{language === 'sr' ? 'Napomena:' : 'Note:'}</strong>{' '}
+                {language === 'sr' 
+                  ? 'Link za verifikaciju ističe za 24 sata. Proverite i spam folder.'
+                  : 'The verification link expires in 24 hours. Check your spam folder too.'}
+              </p>
+            </div>
+            
+            <Button 
+              onClick={() => {
+                setRegistrationSuccess(false);
+                setIsLogin(true);
+              }}
+              variant="outline"
+              className="w-full py-6 rounded-xl"
+            >
+              {language === 'sr' ? 'Nazad na prijavu' : 'Back to Login'}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4" data-testid="login-page">
