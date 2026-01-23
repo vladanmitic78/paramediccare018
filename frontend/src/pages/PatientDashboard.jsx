@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -18,13 +18,18 @@ import {
   Package,
   LogOut,
   Settings,
-  Home
+  Home,
+  RefreshCw
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
+import { toast } from 'sonner';
 import axios from 'axios';
 
 const API = process.env.REACT_APP_BACKEND_URL;
+
+// Polling interval in milliseconds (10 seconds)
+const POLLING_INTERVAL = 10000;
 
 const PatientDashboard = () => {
   const { language } = useLanguage();
@@ -32,20 +37,73 @@ const PatientDashboard = () => {
   const navigate = useNavigate();
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [lastStatus, setLastStatus] = useState(null);
+  const pollingRef = useRef(null);
 
-  useEffect(() => {
-    fetchDashboard();
-  }, []);
-
-  const fetchDashboard = async () => {
+  const fetchDashboard = useCallback(async (showLoading = false) => {
+    if (showLoading) setLoading(true);
     try {
       const response = await axios.get(`${API}/api/patient/dashboard`);
-      setDashboardData(response.data);
+      const newData = response.data;
+      
+      // Check if booking status changed
+      if (lastStatus && newData.active_booking) {
+        const newStatus = newData.active_booking.status;
+        if (lastStatus !== newStatus) {
+          // Status changed - show notification
+          const statusMessages = {
+            confirmed: language === 'sr' ? 'Vaša rezervacija je potvrđena!' : 'Your booking has been confirmed!',
+            en_route: language === 'sr' ? 'Vozilo je na putu!' : 'Vehicle is on the way!',
+            picked_up: language === 'sr' ? 'Pacijent je preuzet' : 'Patient picked up',
+            completed: language === 'sr' ? 'Transport je završen' : 'Transport completed',
+            cancelled: language === 'sr' ? 'Rezervacija je otkazana' : 'Booking has been cancelled'
+          };
+          if (statusMessages[newStatus]) {
+            toast.success(statusMessages[newStatus], {
+              duration: 5000,
+              icon: newStatus === 'cancelled' ? '❌' : '🚑'
+            });
+          }
+        }
+      }
+      
+      // Update last status
+      if (newData.active_booking) {
+        setLastStatus(newData.active_booking.status);
+      } else {
+        setLastStatus(null);
+      }
+      
+      setDashboardData(newData);
     } catch (error) {
       console.error('Error fetching dashboard:', error);
     } finally {
       setLoading(false);
     }
+  }, [language, lastStatus]);
+
+  // Initial fetch
+  useEffect(() => {
+    fetchDashboard(true);
+  }, []);
+
+  // Polling for real-time updates
+  useEffect(() => {
+    pollingRef.current = setInterval(() => {
+      fetchDashboard(false);
+    }, POLLING_INTERVAL);
+
+    return () => {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+      }
+    };
+  }, [fetchDashboard]);
+
+  // Manual refresh function
+  const handleRefresh = () => {
+    fetchDashboard(true);
+    toast.info(language === 'sr' ? 'Osveženo' : 'Refreshed');
   };
 
   const getStatusIcon = (status) => {
