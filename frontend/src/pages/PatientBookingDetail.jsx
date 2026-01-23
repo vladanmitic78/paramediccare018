@@ -45,8 +45,20 @@ const PatientBookingDetail = () => {
   const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
-    fetchBooking();
-  }, [id]);
+    const loadBooking = async () => {
+      try {
+        const response = await axios.get(`${API}/api/patient/bookings/${id}`);
+        setBooking(response.data);
+      } catch (error) {
+        console.error('Error fetching booking:', error);
+        toast.error(language === 'sr' ? 'Greška pri učitavanju rezervacije' : 'Error loading booking');
+        navigate('/patient/bookings');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadBooking();
+  }, [id, language, navigate]);
 
   const fetchBooking = async () => {
     try {
@@ -54,10 +66,6 @@ const PatientBookingDetail = () => {
       setBooking(response.data);
     } catch (error) {
       console.error('Error fetching booking:', error);
-      toast.error(language === 'sr' ? 'Greška pri učitavanju rezervacije' : 'Error loading booking');
-      navigate('/patient/bookings');
-    } finally {
-      setLoading(false);
     }
   };
 
