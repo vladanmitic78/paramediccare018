@@ -358,8 +358,11 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-sky-600" />
+      <div className="min-h-screen flex items-center justify-center bg-slate-900">
+        <div className="text-center">
+          <Loader2 className="w-10 h-10 animate-spin text-sky-500 mx-auto mb-4" />
+          <p className="text-slate-400">{language === 'sr' ? 'Učitavanje...' : 'Loading...'}</p>
+        </div>
       </div>
     );
   }
