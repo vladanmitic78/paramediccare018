@@ -97,6 +97,8 @@ class BookingCreate(BaseModel):
     patient_name: str
     notes: Optional[str] = None
     documents: Optional[List[str]] = []
+    booking_type: str = "transport"  # transport or medical
+    language: str = "sr"  # User's language preference
 
 class BookingResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
