@@ -336,7 +336,17 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
 - `POST /api/driver/location` - Update driver GPS location
 - `GET /api/driver/assignment` - Get current assignment
 - `POST /api/driver/complete-transport/:id` - Mark transport as complete
+- `POST /api/driver/assignment/accept` - Accept assigned task
+- `POST /api/driver/assignment/reject` - Reject assigned task
 - `WS /api/ws/driver/:driver_id` - WebSocket for real-time updates
+
+### Staff Availability APIs (NEW - Jan 23, 2026)
+- `POST /api/staff/availability` - Create availability slot(s), supports repeat_weekly
+- `GET /api/staff/availability` - Get user's own availability with date filters
+- `PUT /api/staff/availability/{slot_id}` - Update availability slot
+- `DELETE /api/staff/availability/{slot_id}` - Delete availability slot
+- `GET /api/admin/staff-availability` - Get all staff availability (admin only)
+- `GET /api/admin/staff-list` - Get list of all staff members (excludes patients)
 
 ## Test Credentials
 - **Super Admin:** admin@paramedic-care018.rs / Admin123!
