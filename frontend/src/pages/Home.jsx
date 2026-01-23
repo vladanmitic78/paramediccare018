@@ -312,13 +312,16 @@ const Home = () => {
               {galleryTitle}
             </h2>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px]">
             {galleryImages.map((img, index) => (
-              <div key={index} className={`rounded-xl overflow-hidden ${img.className}`}>
+              <div 
+                key={index} 
+                className={`rounded-xl overflow-hidden ${img.className} bg-slate-200`}
+              >
                 <img
                   src={img.src}
                   alt={img.alt}
-                  className={`${img.imgClassName} hover:scale-105 transition-transform duration-500`}
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                 />
               </div>
             ))}
