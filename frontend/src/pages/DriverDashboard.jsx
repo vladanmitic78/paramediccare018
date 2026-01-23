@@ -459,7 +459,7 @@ const DriverDashboard = () => {
 
       {/* Footer with emergency */}
       <footer className="bg-slate-800 border-t border-slate-700 p-4">
-        <a href="tel:+381181234567" className="block">
+        <a href="tel:+381181234567" className="block" data-testid="driver-emergency-link">
           <Button variant="outline" className="w-full border-red-600 text-red-400 hover:bg-red-950 gap-2">
             <AlertCircle className="w-5 h-5" />
             {language === 'sr' ? 'HITNA POMOĆ: +381 18 123 456' : 'EMERGENCY: +381 18 123 456'}
