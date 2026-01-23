@@ -17,7 +17,7 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
    - Home - Hero section, services overview, image gallery
    - Medical Care - Light blue theme, professional staff info
    - Transport - Red urgent theme, ambulance services
-   - Booking - OpenStreetMap integration for location selection
+   - Booking - OpenStreetMap integration for location selection + **Document Upload** ✅
    - About Us - Company info, values, team
    - Contact - Contact form with email notification and auto-reply
 
@@ -27,6 +27,13 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
    - Drivers
    - Admin
    - Super Admin
+
+4. **Document Upload on Public Booking** (NEW - Jan 23, 2026) ✅
+   - Drag & drop file upload interface
+   - Supported formats: PDF, JPG, PNG, WEBP, DOC, DOCX
+   - Max file size: 10MB per file
+   - Progress bar during upload
+   - File preview with remove option
 
 4. **Content Management System (CMS)**
    - Admin can edit: Home, Medical Care, Transport, About Us pages
