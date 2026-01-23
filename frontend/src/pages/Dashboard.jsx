@@ -468,6 +468,11 @@ const Dashboard = () => {
         <AdminBookingNotifications onViewBooking={handleViewPatientBooking} />
       )}
       
+      {/* Critical Alerts Panel */}
+      {isAdmin() && (
+        <CriticalAlertsPanel language={language} darkMode={darkMode} />
+      )}
+      
       <div className="flex">
         {/* Sidebar - New Professional Design */}
         <aside className="w-72 bg-slate-900 min-h-screen hidden lg:flex lg:flex-col" style={{ fontFamily: 'Inter, sans-serif' }}>
