@@ -165,6 +165,87 @@ class MobilityStatus:
     WHEELCHAIR = "wheelchair"
     STRETCHER = "stretcher"
 
+# ============ DRIVER APP MODELS ============
+
+class DriverStatus:
+    OFFLINE = "offline"
+    AVAILABLE = "available"
+    ASSIGNED = "assigned"
+    EN_ROUTE = "en_route"
+    ON_SITE = "on_site"
+    TRANSPORTING = "transporting"
+
+class DriverLocationUpdate(BaseModel):
+    latitude: float
+    longitude: float
+    speed: Optional[float] = None  # km/h
+    heading: Optional[float] = None  # degrees
+    accuracy: Optional[float] = None  # meters
+
+class DriverStatusUpdate(BaseModel):
+    status: str
+    booking_id: Optional[str] = None
+
+class DriverAssignment(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    booking_id: str
+    patient_name: str
+    pickup_address: str
+    pickup_lat: Optional[float] = None
+    pickup_lng: Optional[float] = None
+    destination_address: str
+    destination_lat: Optional[float] = None
+    destination_lng: Optional[float] = None
+    preferred_date: str
+    preferred_time: str
+    mobility_status: str
+    transport_reason: str
+    contact_phone: str
+    status: str
+
+# WebSocket connection manager for real-time updates
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: Dict[str, WebSocket] = {}  # driver_id -> websocket
+        self.admin_connections: List[WebSocket] = []  # admin websockets for live map
+    
+    async def connect_driver(self, websocket: WebSocket, driver_id: str):
+        await websocket.accept()
+        self.active_connections[driver_id] = websocket
+        logger.info(f"Driver {driver_id} connected")
+    
+    async def connect_admin(self, websocket: WebSocket):
+        await websocket.accept()
+        self.admin_connections.append(websocket)
+        logger.info(f"Admin connected to live map")
+    
+    def disconnect_driver(self, driver_id: str):
+        if driver_id in self.active_connections:
+            del self.active_connections[driver_id]
+            logger.info(f"Driver {driver_id} disconnected")
+    
+    def disconnect_admin(self, websocket: WebSocket):
+        if websocket in self.admin_connections:
+            self.admin_connections.remove(websocket)
+            logger.info(f"Admin disconnected from live map")
+    
+    async def send_to_driver(self, driver_id: str, message: dict):
+        if driver_id in self.active_connections:
+            await self.active_connections[driver_id].send_json(message)
+    
+    async def broadcast_to_admins(self, message: dict):
+        disconnected = []
+        for connection in self.admin_connections:
+            try:
+                await connection.send_json(message)
+            except:
+                disconnected.append(connection)
+        for conn in disconnected:
+            self.admin_connections.remove(conn)
+
+ws_manager = ConnectionManager()
+
 class PatientBookingCreate(BaseModel):
     # Patient Information
     patient_name: str
