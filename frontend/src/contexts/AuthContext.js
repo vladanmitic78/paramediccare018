@@ -41,13 +41,14 @@ export const AuthProvider = ({ children }) => {
     return userData;
   };
 
-  const register = async (email, password, full_name, phone) => {
+  const register = async (email, password, full_name, phone, language = 'sr') => {
     const response = await axios.post(`${API}/auth/register`, { 
       email, 
       password, 
       full_name, 
       phone,
-      role: 'regular'
+      role: 'regular',
+      language  // Include language for email template
     });
     const { access_token, user: userData } = response.data;
     localStorage.setItem('token', access_token);
