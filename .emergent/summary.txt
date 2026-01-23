@@ -1,183 +1,174 @@
 <analysis>**original_problem_statement:**
-The user wants to build a medical system called Paramedic Care 018. The initial MVP included a public website, a booking system, and a 5-tier RBAC system. The scope has since expanded significantly.
+The user wants to build a comprehensive medical transport system called Paramedic Care 018. The project began with an MVP for a public website, booking system, and a 5-tier RBAC. The scope has since expanded to include a full patient portal, real-time admin and driver applications, invoice management, a driver PWA with live location tracking, an admin live map, a sophisticated driver assignment UI, and a redesigned admin dashboard. The latest request is for a staff availability and scheduling system.
 
 **Recent PRODUCT REQUIREMENTS:**
-1.  **Patient Portal (Phase 1 - COMPLETE):** A secure portal for patients to manage bookings, view invoices, and update their profiles.
-2.  **Real-Time Updates (COMPLETE):** Patients see booking status changes in real-time, and admins receive immediate pop-up notifications for new bookings.
-3.  **Email Verification (COMPLETE):** A full email verification flow for new user registrations.
-4.  **Public Booking Document Upload (COMPLETE):** Users can upload documents on the public booking form.
-5.  **Admin Invoice Management (COMPLETE):** Admins can create invoices from completed bookings and generate PDFs.
-6.  **Driver App (PWA - IN PROGRESS):** A very simple, mobile-first Progressive Web App for drivers to see assignments, update their status, and share their live location during active transports.
+1.  **Driver App PWA (COMPLETE):** A mobile-first PWA for drivers to see assignments, update their status, share their location, and accept/reject tasks.
+2.  **Admin Live Map (COMPLETE):** A real-time map in the admin dashboard to track driver locations.
+3.  **Admin Driver Assignment UI (COMPLETE):** A UI for admins to assign bookings to drivers, showing only available drivers sorted by proximity to the pickup location. Includes search functionality.
+4.  **Professional Sidebar Redesign (COMPLETE):** A complete redesign of the admin dashboard's navigation into a collapsible, role-based, hierarchical sidebar.
+5.  **Staff Availability Calendar (IN PROGRESS):** A system for staff (drivers, doctors, nurses) to submit their availability and for admins to view it.
 
-The full, original PRD is in .
+The full PRD is in .
 
-**User's preferred language**: The user communicates in English. The application's default language is Serbian, with an English translation option. The next agent should communicate in **English**.
+**User's preferred language**: The user communicates in English. The agent MUST respond in **English**.
 
 **what currently exists?**
-A full-stack application with a React frontend and FastAPI backend using MongoDB.
--   **Frontend:** The public site is fully CMS-driven. A sophisticated admin dashboard allows for user management, CMS editing, and now includes a full invoice management system. A complete, functional patient portal allows patients to manage their entire journey. Placeholder files and backend stubs for the new Driver App have been created.
--   **Backend:** The API supports JWT authentication, a 5-tier RBAC system, and full CRUD for the CMS. It features a comprehensive email system (registration, verification, admin notifications), handles image and document uploads, and generates PDF invoices. The backend now includes models, API endpoints, and WebSocket support for the Driver App.
--   **Key Features Implemented:**
-    -   Patient Portal (Dashboard, Booking, Profile, Invoices).
-    -   Real-time admin pop-up notifications for new bookings.
-    -   Real-time patient-side status updates (via polling).
-    -   Secure email verification flow for new registrations.
-    -   Admin email notifications for new user sign-ups.
-    -   Document upload on the public booking page.
-    -   Full invoice management for admins with PDF generation.
+A full-stack application with a React frontend and a FastAPI backend using MongoDB.
+*   **Frontend:** The application features a public website, a complete patient portal, and a highly functional admin dashboard with a newly redesigned professional sidebar. A complete Driver PWA allows drivers to manage their tasks.
+*   **Backend:** A monolithic  file powers the application. It supports JWT authentication, a 5-tier RBAC system, real-time updates via WebSockets for driver location and admin notifications, PDF invoice generation, and document uploads. It includes all necessary APIs for the Driver App, Admin Live Map, and driver assignment. The backend foundation for the Staff Availability calendar has been created but is currently being debugged.
+*   **Key Features Implemented:**
+    *   Driver PWA with accept/reject functionality.
+    *   Admin Live Map for real-time vehicle tracking.
+    *   Advanced admin UI for assigning drivers to bookings.
+    *   Complete, collapsible, and hierarchical sidebar redesign for the admin dashboard.
+    *   Patient Portal, Real-time notifications, Email verification, and Invoice management.
 
 **Last working item**:
--   **Last item agent was working:** The agent began implementing the **Driver App**. This involved setting up the backend foundation:
-    1.  Added WebSocket dependencies and a connection manager.
-    2.  Created Pydantic models for driver status and location (, , ).
-    3.  Created API stubs for driver actions () and a WebSocket endpoint ().
-    4.  Created the placeholder frontend component at .
--   **Status:** IN PROGRESS
--   **Agent Testing Done:** N
--   **Which testing method agent to use?** Both. Use the backend testing agent to verify the WebSocket and location update endpoints. Use the frontend testing agent to test the driver PWA flow.
--   **User Testing Done:** N
+*   **Last item agent was working:** Implementing the **Staff Availability Calendar**. The agent created the backend models (, ) and API endpoints for CRUD operations. While testing the  endpoint, a  occurred. The agent identified the cause—returning the raw result from  which includes non-serializable s—and applied a fix to the endpoint to return a clean, serializable response.
+*   **Status:** IN PROGRESS
+*   **Agent Testing Done:** N
+*   **Which testing method agent to use?** Start by using  or  to test the  endpoint to confirm the fix. Once all backend endpoints are verified, use the frontend testing agent to test the  component.
+*   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: (P2) Ephemeral Image Storage**
-    -   **Description:** Images uploaded by users are stored on the preview environment's local filesystem (), which is lost when a new fork is created. This caused all CMS images to appear broken. They were replaced with stock photos as a temporary fix.
-    -   **Next debug checklist:** The long-term solution is to use a persistent, external storage service (like AWS S3). This requires significant changes. For now, the user must re-upload images via the CMS after a fork.
-    -   **Why fix this issue and what will be achieved with the fix?** To ensure data persistence and prevent data loss between development sessions.
-    -   **Status:** NOT STARTED
-    -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Both.
+*   **Issue 1: (P0) Backend Error on Creating Availability Slots**
+    *   **Description:** The  endpoint was returning a 500 Internal Server Error due to an  serialization error.
+    *   **Attempted fixes:** The agent modified  to create a serializable list of dictionaries from the database insertion result, excluding the  field. This fix has been applied but not yet tested.
+    *   **Next debug checklist:**
+        1.  In , review the  function (around line 2170) to ensure the fix correctly handles the response.
+        2.  Execute a test API call to  to verify the fix.
+        3.  If successful, test the , , and  availability endpoints to ensure they are also free of serialization errors.
+    *   **Why fix this issue and what will be achieved with the fix?** This is a critical blocker for the entire Staff Availability feature. Fixing it will unblock development and allow staff to manage their schedules.
+    *   **Status:** IN PROGRESS
+    *   **Is recurring issue?** N
+    *   **Should Test frontend/backend/both after fix?** Backend, then both.
+
+*   **Issue 2: (P2) Ephemeral Image Storage**
+    *   **Description:** Images and documents uploaded by users are stored on the preview environment's local filesystem (), which is not persistent and is lost when a new fork is created.
+    *   **Next debug checklist:** This requires migrating file storage to a persistent service like AWS S3. This is a significant architectural change.
+    *   **Why fix this issue and what will be achieved with the fix?** To ensure data persistence and prevent data loss between development sessions.
+    *   **Status:** NOT STARTED
+    *   **Is recurring issue?** Y
+    *   **Should Test frontend/backend/both after fix?** Both.
 
 **In progress Task List**:
--   **Task 1: (P0) Implement the Driver App PWA**
-    -   **Where to resume:** The backend foundation is ready. The agent just created the file . The immediate next steps are:
-        1.  Add a route for  in  that points to a  wrapping .
-        2.  Implement the UI in  as per the user's spec (current task, status buttons).
-        3.  Implement the client-side logic for GPS location tracking using the browser's Geolocation API.
-        4.  Connect the PWA to the backend WebSocket to send location updates.
-    -   **What will be achieved with this?** A functional PWA for drivers to manage their assignments and share their location.
-    -   **Status:** IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?** Both.
-    -   **Blocked on something:** None.
+*   **Task 1: (P0) Implement the Staff Availability Calendar**
+    *   **Where to resume:** The backend fix has been applied in . The immediate next step is to verify it.
+        1.  Test the  endpoint to confirm it works.
+        2.  Flesh out the frontend component in . Implement the UI to allow users to view the calendar, add new availability slots (e.g., by clicking and dragging), and delete existing ones.
+        3.  Connect the frontend component to the now-functional backend APIs.
+    *   **What will be achieved with this?** A working calendar system for staff to manage their work schedules.
+    *   **Status:** IN PROGRESS
+    *   **Should Test frontend/backend/both after fix?** Both.
+    *   **Blocked on something:** Issue 1 (Backend Error).
 
 **Upcoming and Future Tasks**
--   **Upcoming Tasks:**
-    -   **(P0) Admin Live Map View:** Implement a new section in the admin dashboard to display drivers' locations in real-time on a map, consuming data from the WebSocket.
-    -   **(P1) Integrate Backend Data into Operations Dashboard:** Replace mock data in  with live API data.
--   **Future Tasks:**
-    -   **(P2) Implement Role-Specific Dashboards:** Develop dedicated views for Doctors and Nurses.
-    -   **(P2) Image Gallery for CMS:** Add a feature to reuse previously uploaded images (a media library).
-    -   **(P2) Email Status Tracking:** Add a dashboard to monitor sent/failed emails.
+*   **Upcoming Tasks:**
+    *   **(P1) Admin View for Staff Calendar:** Extend  with an admin view that aggregates and displays availability for all staff members, allowing for centralized scheduling.
+    *   **(P1) Role-Specific Dashboards:** Begin implementing the dedicated sections for Doctors and Nurses as defined in the new sidebar structure.
+*   **Future Tasks:**
+    *   **(P2) Persist Collapsible Sidebar State:** Use  to remember which sidebar categories are expanded or collapsed between sessions.
+    *   **(P2) Driver Rejection Reason:** Implement a modal or text field for drivers to provide a reason when they reject a task.
+    *   **(P2) Medical Center Module (EMR):** Build out the patient database, medical records, and transport reports functionalities.
+    *   **(P2) Fleet Management Module:** Implement the Vehicles and Equipment management sections.
+    *   **(P2) Calendar View for Bookings:** Create a new calendar interface under  to visualize all bookings.
 
 **Completed work in this session**
--   **Patient Portal:** Fully implemented a secure, functional patient portal with a dashboard, booking wizard, booking history, invoice viewer, and profile management.
--   **Real-Time Functionality:**
-    -   Implemented real-time pop-up notifications with audio alerts for admins when new bookings are created.
-    -   Implemented real-time status updates on the patient dashboard via polling.
--   **Mobile Responsiveness:** Fixed all layout issues on the Patient Portal for a clean mobile experience.
--   **Registration & Security:**
-    -   Implemented a full email verification flow for new users. Users cannot log in until they verify their email.
-    -   Added admin email notifications for every new user registration.
--   **Admin & Booking Features:**
-    -   Implemented document uploads on the public booking page.
-    -   Built a complete invoice management system for admins, allowing creation of invoices from completed bookings and PDF generation/download.
--   **Bug Fixes & Maintenance:**
-    -   Fixed an issue where the admin new-booking pop-up was not showing on initial login.
-    -   Resolved an issue with broken images on the home page by replacing ephemeral URLs with stock photos and identifying the root cause.
--   **Driver App Foundation:** Laid the backend groundwork by adding models, API endpoints, and WebSocket support.
+*   **Driver PWA - Accept/Reject Task:** Added buttons and backend logic for drivers to accept or reject assigned tasks.
+*   **Admin UI for Driver Assignment:** Implemented a UI in the admin dashboard to assign drivers to both public and patient bookings, featuring distance-based sorting of available drivers and search bars.
+*   **Admin Live Map:** Created and integrated a real-time map to track driver locations.
+*   **Professional Sidebar Redesign:** Overhauled the admin dashboard navigation with a new collapsible, grouped, and professionally styled sidebar based on design agent guidelines.
+*   **Mobile Login Fix:** Patched the login flow to handle whitespace issues from mobile keyboards.
+*   **Testing:** Successfully used the testing agent to validate the Driver App, Live Map, and Assignment features.
 
 **Earlier issues found/mentioned but not fixed**
--   None. All previously mentioned issues have been addressed.
+*   **Ephemeral Image Storage:** This issue persists and is tracked in the pending issue list.
 
 **Known issue recurrence from previous fork**
--   **Issue recurrence in previous fork:** Fragile Made with Emergent Badge Removal.
--   **Recurrence count:** 2
--   **Status:** RESOLVED (with a brittle CSS hack). This might break again with platform updates.
+*   **Issue recurrence in previous fork:** Fragile Made with Emergent Badge Removal.
+*   **Recurrence count:** 2
+*   **Status:** RESOLVED (via a brittle CSS hack).
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Frontend:** React, Tailwind CSS, Shadcn UI, React Router, Axios, .
--   **Backend:** FastAPI, MongoDB (using ), Pydantic, JWT, WebSockets,  (for PDF generation).
--   **Architecture:** Full-stack monolithic repo, Role-Based Access Control (RBAC), real-time updates via WebSockets and polling.
+*   **Frontend:** React, Tailwind CSS, Shadcn UI, , .
+*   **Backend:** FastAPI, MongoDB (using ), Pydantic, WebSockets.
+*   **Architecture:** Full-stack monolithic repo, RBAC, real-time updates via WebSockets, Haversine formula for distance calculation.
 
 **key DB schema**
--   **users:** Added  (bool),  (str),  (datetime).
--   **bookings:** No major changes.
--   **invoices:** No major changes.
--   **driver_locations:** (New Collection) , , , , .
+*   **availability_slots (New):** 
 
 **changes in tech stack**
--   : Added to the backend for PDF generation.
--   FastAPI : Added for real-time communication.
+*   No new libraries were added. Manrope and Inter fonts were added to  for the new design.
 
 **All files of reference**
--   **/app/backend/server.py**: Heavily modified to add email verification, admin notifications, PDF generation, invoice management, document upload logic, and the entire backend for the Driver App (models, APIs, WebSocket).
--   **/app/frontend/src/App.js**: Updated with routes for the patient portal and email verification. Needs a route for .
--   **/app/frontend/src/pages/Login.jsx**: Modified to handle the new email verification flow.
--   **/app/frontend/src/pages/Dashboard.jsx**: Heavily modified to integrate the admin booking notifications and the new  component.
--   **/app/frontend/src/pages/PatientDashboard.jsx**: Modified to implement real-time status polling and mobile responsiveness fixes.
--   **/app/frontend/src/pages/Booking.jsx**: Updated to improve the document upload UI.
--   **/app/frontend/src/components/AdminBookingNotifications.jsx**: New file for the admin pop-up.
--   **/app/frontend/src/components/InvoiceManager.jsx**: New file for admin invoice management.
--   **/app/frontend/src/pages/VerifyEmail.jsx**: New file for the email verification page.
--   **/app/frontend/src/pages/DriverDashboard.jsx**: New placeholder file for the driver PWA.
+*   : Modified to add endpoints for driver accept/reject and the new staff availability CRUD.
+*   : Heavily refactored to implement the new collapsible sidebar design and integrate placeholders for future modules.
+*   : Updated to add accept/reject buttons and API calls.
+*   : New component for the admin's real-time map.
+*   : New component for the staff scheduling feature.
+*   : New file from the design agent outlining the new sidebar visual identity.
 
 **Areas that need refactoring**:
--   **CRITICAL:**  is now extremely large (over 3000 lines). It urgently needs to be broken down into a modular structure using FastAPI's . Create separate files in a  directory for , , , , , etc.
--    has also become very large and complex. Consider breaking down its logic into smaller, more focused child components or custom hooks.
+*   **CRITICAL:**  remains a large monolith and is becoming increasingly hard to maintain. It should be broken down into a modular structure using FastAPI's  (e.g., , ).
+*   **CRITICAL:**  is now over 1300 lines long and highly complex. The content for each tab (, , , etc.) should be extracted into separate, dedicated components to improve readability and maintainability.
 
 **key api endpoints**
--   : (POST) Now initiates email verification.
--   : (GET) New endpoint to verify a user's email via a token.
--   : (GET/POST) Manage invoices.
--   : (GET) Download an invoice as a PDF.
--   : (POST) Handles document uploads from the public booking form.
--   : (POST) For drivers to update their status.
--   : (POST) For drivers to post their location.
--   : (WebSocket) Real-time location channel for drivers.
+*    (POST): New endpoint for a driver to accept a task.
+*    (POST): New endpoint for a driver to reject a task.
+*    (POST): New endpoint to assign a driver to a booking from the public form.
+*    (POST): New endpoint to create availability slots.
+*    (GET): New endpoint to fetch availability for a specific user.
+*    (PUT/DELETE): New endpoints to update or delete an availability slot.
 
 **Critical Info for New Agent**
--   The highest priority is to continue building the **Driver App**. The backend setup is complete. Your next steps are on the frontend: add the route in , build the UI in , and implement the GPS tracking logic.
--   After the driver PWA is functional, the next step is to build the corresponding **Admin Live Map** to display the driver's location in real-time.
--   **Refactoring  is now a high-priority technical debt item.** Please consider addressing this after completing the driver app feature to improve maintainability.
--   The issue with uploaded images disappearing is due to the ephemeral nature of the preview environment's storage. Inform the user they must re-upload images via the CMS if they are lost after a fork.
+*   Your first priority is to **verify the fix for the Staff Availability backend**. Test the  endpoint. If it works, proceed to build the full frontend calendar UI in .
+*   The  file is extremely large and fragile. Be cautious when editing it. A good next step after the calendar is to propose refactoring its tab content into smaller, manageable components.
+*   The  monolith is a major source of technical debt. Plan to refactor it into smaller route-based files after completing the current high-priority features.
+*   The user is highly responsive and provides clear, valuable direction. Continue to propose plans and seek confirmation before major changes.
 
 **documents and test reports created in this job**
--    (updated)
--   
+*   
+*   
+*   
+*   
+*    (Updated)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Asks for new user registration to trigger an admin email notification. **Status:** COMPLETED.
-2.  **User:** Requests an email verification flow for new users instead of instant login. **Status:** COMPLETED.
-3.  **User:** Asks for document upload on the public booking page and an invoice creation panel for admins. **Status:** COMPLETED.
-4.  **User:** Reports that images on the home page are broken/missing. **Status:** TEMPORARILY FIXED (by replacing with stock photos).
-5.  **Agent:** Explains the root cause of the broken images (ephemeral storage) and proposes GPS tracking options for drivers.
-6.  **User:** Confirms the home page images are broken and asks for a fix. **Status:** COMPLETED.
-7.  **Agent:** Fixes the images by replacing them with stock photos via the CMS and informs the user they can upload their own.
-8.  **User:** Provides a detailed specification for a simple Driver PWA with live location sharing. **Status:** IN PROGRESS.
-9.  **Agent:** Acknowledges the driver app spec and begins implementation.
-10. **Agent:** Continues implementation of the driver app backend.
+1.  **User:** Asks to develop the Availability Calendar. **Status:** IN PROGRESS.
+2.  **User:** Requests that drivers can provide a reason for rejecting a task. **Status:** NOT STARTED.
+3.  **User:** Reports drivers can't accept/reject tasks. **Status:** COMPLETED.
+4.  **User:** Asks for the collapsible sidebar to remember its state. **Status:** NOT STARTED.
+5.  **User:** Asks for collapsible categories in the new sidebar. **Status:** COMPLETED.
+6.  **User:** Approves the sidebar implementation. **Status:** COMPLETED.
+7.  **User:** Approves the design consultation first for the sidebar. **Status:** COMPLETED.
+8.  **User:** Adds Medical Center to the sidebar requirements. **Status:** COMPLETED.
+9.  **User:** Provides more requirements for the sidebar, including Doctor/Nurse roles and availability. **Status:** COMPLETED.
+10. **User:** Agrees with reorganizing the sidebar for a more professional structure. **Status:** COMPLETED.
 
 **Project Health Check:**
--   **Broken:** None.
--   **Mocked:**
-    -   The **Operations Dashboard** () is still populated with static data.
-    -   The **Admin Live Map** for driver tracking has not been built yet.
+*   **Broken:**
+    *   The  endpoint was broken; a fix has been applied but needs verification.
+*   **Mocked:**
+    *   Several sections in the new sidebar are placeholders marked with an Uskoro (Soon) badge: Patients, Statistics, Doctors, Nurses, Vehicles, and Equipment.
 
 **3rd Party Integrations**
--   **Leaflet:** Used for map placeholders. No API key required.
--   **reportlab:** Used for generating PDF invoices on the backend.
+*   **Leaflet:** Used for map displays. No API key required.
+*   **reportlab:** Used for generating PDF invoices on the backend.
 
 **Testing status**
--   **Testing agent used after significant changes:** YES, for the initial patient portal.
--   **Troubleshoot agent used after agent stuck in loop:** NO
--   **Test files created:** 
--   **Known regressions:** None.
+*   **Testing agent used after significant changes:** YES. Used for the Driver App updates, Admin Live Map, and Driver Assignment features.
+*   **Troubleshoot agent used after agent stuck in loop:** NO.
+*   **Test files created:** , , .
+*   **Known regressions:** None.
 
 **Credentials to test flow:**
--   **Super Admin:**  / 
--   **Admin:**  / 
--   **Patient:**  / 
+*   **Super Admin:**  / 
+*   **Driver:**  / 
+*   **Patient:**  / 
 
 **What agent forgot to execute**
--   The agent created the  file but did not add the corresponding route () to . This should be the immediate next step.</analysis>
+*   The agent created  and  but abandoned them, leaving unused files in the codebase. This contributed to the bloating of .
+*   The user's suggestion to persist the sidebar's collapsed/expanded state was acknowledged in a  message but not added to the upcoming task list.</analysis>
