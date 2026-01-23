@@ -32,7 +32,11 @@ import {
   Globe,
   RefreshCw,
   ChevronLeft,
-  Stethoscope
+  Stethoscope,
+  WifiOff,
+  Wifi,
+  CloudOff,
+  Upload
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
@@ -42,6 +46,58 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 // Extra large styles for gloved hands in shaking ambulance
 const bigButtonClass = "h-20 text-xl font-bold rounded-2xl shadow-lg";
 const inputBigClass = "h-16 text-2xl text-center font-bold rounded-2xl border-2";
+
+// IndexedDB for offline storage
+const DB_NAME = 'pc018_medical_pwa';
+const DB_VERSION = 1;
+const STORE_NAME = 'pending_vitals';
+
+const openDB = () => {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+      }
+    };
+  });
+};
+
+const saveToIndexedDB = async (data) => {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    const request = store.add({ ...data, savedAt: new Date().toISOString() });
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+};
+
+const getPendingVitals = async () => {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+};
+
+const deletePendingVital = async (id) => {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    const request = store.delete(id);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+};
 
 const MedicalStaffPWA = () => {
   const navigate = useNavigate();
@@ -53,6 +109,9 @@ const MedicalStaffPWA = () => {
   const [selectedTransport, setSelectedTransport] = useState(null);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [syncing, setSyncing] = useState(false);
   
   // Vital signs form - simplified for quick entry
   const [vitals, setVitals] = useState({
@@ -67,17 +126,113 @@ const MedicalStaffPWA = () => {
     notes: ''
   });
 
+  // Monitor online/offline status
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      toast.success(language === 'sr' ? 'Povezani ste!' : 'You are online!');
+      syncPendingVitals();
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+      toast.warning(language === 'sr' ? 'Offline režim - podaci će se sačuvati lokalno' : 'Offline mode - data will be saved locally');
+    };
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [language]);
+
+  // Check pending vitals count
+  useEffect(() => {
+    const checkPending = async () => {
+      try {
+        const pending = await getPendingVitals();
+        setPendingCount(pending.length);
+      } catch (e) {
+        console.error('Error checking pending vitals:', e);
+      }
+    };
+    checkPending();
+  }, [lastSaved]);
+
+  // Sync pending vitals when online
+  const syncPendingVitals = async () => {
+    if (!isOnline || syncing) return;
+    
+    setSyncing(true);
+    try {
+      const pending = await getPendingVitals();
+      if (pending.length === 0) {
+        setSyncing(false);
+        return;
+      }
+      
+      let synced = 0;
+      for (const item of pending) {
+        try {
+          await axios.post(`${API}/transport/vitals`, item.payload);
+          await deletePendingVital(item.id);
+          synced++;
+        } catch (e) {
+          console.error('Error syncing vital:', e);
+        }
+      }
+      
+      if (synced > 0) {
+        toast.success(
+          language === 'sr' 
+            ? `✓ ${synced} offline zapis(a) sinhronizovano!` 
+            : `✓ ${synced} offline record(s) synced!`
+        );
+        setPendingCount(prev => prev - synced);
+      }
+    } catch (e) {
+      console.error('Sync error:', e);
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  // Register service worker
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('SW registered:', reg.scope))
+        .catch(err => console.log('SW registration failed:', err));
+      
+      // Listen for sync messages from service worker
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data.type === 'SYNC_VITALS') {
+          syncPendingVitals();
+        }
+      });
+    }
+  }, []);
+
   // Fetch active transports
   const fetchTransports = useCallback(async () => {
     try {
       const response = await axios.get(`${API}/medical/dashboard`);
       setActiveTransports(response.data.active_transports || []);
+      // Cache transports for offline use
+      localStorage.setItem('cached_transports', JSON.stringify(response.data.active_transports || []));
     } catch (error) {
       console.error('Error fetching transports:', error);
+      // Use cached transports if offline
+      const cached = localStorage.getItem('cached_transports');
+      if (cached) {
+        setActiveTransports(JSON.parse(cached));
+        toast.info(language === 'sr' ? 'Prikazujem keširane podatke' : 'Showing cached data');
+      }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [language]);
 
   useEffect(() => {
     fetchTransports();
