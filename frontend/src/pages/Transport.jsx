@@ -63,7 +63,7 @@ const Transport = () => {
       ? 'Naša flota sanitetskih vozila je opremljena najmodernijom medicinskom opremom. Sva vozila su klimatizovana i redovno servisirana kako bi osigurali maksimalnu udobnost i bezbednost pacijenata.'
       : 'Our ambulance fleet is equipped with the most modern medical equipment. All vehicles are air-conditioned and regularly serviced to ensure maximum comfort and safety for patients.');
   
-  const fleetImage = pageContent?.fleet?.image_url || 'https://images.pexels.com/photos/6519910/pexels-photo-6519910.jpeg';
+  const fleetImage = pageContent?.fleet?.image_url || null;
 
   const ctaTitle = pageContent?.cta?.[language === 'sr' ? 'title_sr' : 'title_en'] || 
     (language === 'sr' ? 'Zakažite Transport Sada' : 'Book Transport Now');
