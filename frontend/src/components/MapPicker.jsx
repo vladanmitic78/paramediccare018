@@ -73,20 +73,33 @@ export const MapPicker = ({
   const fetchSuggestions = useCallback(async (query) => {
     if (!query || query.length < 3) {
       setSuggestions([]);
+      setShowSuggestions(false);
       return;
     }
     
     setLoadingSuggestions(true);
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=rs&limit=5&addressdetails=1`
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=rs&limit=5&addressdetails=1`,
+        {
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'ParamedicCare018/1.0'
+          }
+        }
       );
       const data = await response.json();
-      setSuggestions(data || []);
-      setShowSuggestions(true);
+      if (data && data.length > 0) {
+        setSuggestions(data);
+        setShowSuggestions(true);
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
     } catch (error) {
       console.error('Autocomplete error:', error);
       setSuggestions([]);
+      setShowSuggestions(false);
     } finally {
       setLoadingSuggestions(false);
     }
