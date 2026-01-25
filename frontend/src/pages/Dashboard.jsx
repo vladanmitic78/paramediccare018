@@ -871,8 +871,7 @@ const Dashboard = () => {
                               </Select>
                             </TableCell>
                           </TableRow>
-                        ))
-                        }
+                        ))}
                       </TableBody>
                     </Table>
                   </div>
