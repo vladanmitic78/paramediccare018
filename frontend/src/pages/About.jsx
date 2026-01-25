@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { 
   Cross,
@@ -7,11 +8,37 @@ import {
   Clock,
   Users,
   Award,
-  CheckCircle
+  CheckCircle,
+  Building2
 } from 'lucide-react';
+import axios from 'axios';
+
+const API = process.env.REACT_APP_BACKEND_URL;
 
 const About = () => {
   const { language, t } = useLanguage();
+  const [pageContent, setPageContent] = useState(null);
+
+  // Fetch about page content from CMS
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const response = await axios.get(`${API}/api/pages/about`);
+        const content = {};
+        response.data.forEach(item => {
+          content[item.section] = item;
+        });
+        setPageContent(content);
+      } catch (error) {
+        console.log('Using default about content');
+      }
+    };
+    fetchContent();
+  }, []);
+
+  // Get images from CMS
+  const heroImage = pageContent?.hero?.image_url || null;
+  const missionImage = pageContent?.mission?.image_url || null;
 
   const values = [
     { 
