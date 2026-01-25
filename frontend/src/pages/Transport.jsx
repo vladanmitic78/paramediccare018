@@ -47,7 +47,7 @@ const Transport = () => {
       ? 'Pružamo siguran i pouzdan medicinski transport sa profesionalnom pratnjom. Naša flota je opremljena najmodernijom medicinskom opremom.'
       : 'We provide safe and reliable medical transport with professional escort. Our fleet is equipped with the most modern medical equipment.');
   
-  const heroImage = pageContent?.hero?.image_url || 'https://images.pexels.com/photos/6520105/pexels-photo-6520105.jpeg';
+  const heroImage = pageContent?.hero?.image_url || null;
 
   const servicesTitle = pageContent?.['services-title']?.[language === 'sr' ? 'title_sr' : 'title_en'] || 
     (language === 'sr' ? 'Vrste Transporta' : 'Transport Types');
