@@ -105,6 +105,7 @@ const Dashboard = () => {
   // Search states
   const [patientBookingSearch, setPatientBookingSearch] = useState('');
   const [publicBookingSearch, setPublicBookingSearch] = useState('');
+  const [userSearch, setUserSearch] = useState('');
   
   // Sidebar expanded groups state
   const [expandedGroups, setExpandedGroups] = useState(['operations']); // Default: operations expanded
