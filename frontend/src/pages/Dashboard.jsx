@@ -184,6 +184,36 @@ const Dashboard = () => {
     );
   });
 
+  // Filter users based on search (all parameters)
+  const filteredUsers = users.filter(u => {
+    if (!userSearch.trim()) return true;
+    const search = userSearch.toLowerCase();
+    
+    // Role labels for search
+    const roleLabels = {
+      regular: language === 'sr' ? 'korisnik' : 'user',
+      doctor: language === 'sr' ? 'lekar' : 'doctor',
+      nurse: language === 'sr' ? 'sestra' : 'nurse',
+      driver: language === 'sr' ? 'vozač' : 'driver',
+      admin: 'admin',
+      superadmin: 'superadmin'
+    };
+    
+    // Status labels for search
+    const statusLabel = u.is_active 
+      ? (language === 'sr' ? 'aktivan' : 'active')
+      : (language === 'sr' ? 'neaktivan' : 'inactive');
+    
+    return (
+      u.full_name?.toLowerCase().includes(search) ||
+      u.email?.toLowerCase().includes(search) ||
+      u.phone?.toLowerCase().includes(search) ||
+      u.role?.toLowerCase().includes(search) ||
+      roleLabels[u.role]?.toLowerCase().includes(search) ||
+      statusLabel.includes(search)
+    );
+  });
+
   // Handle viewing a patient booking from notification
   const handleViewPatientBooking = (booking) => {
     setSelectedPatientBooking(booking);
