@@ -1041,6 +1041,37 @@ const Dashboard = () => {
                 </div>
               </div>
 
+              {/* Search Field */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Input
+                  value={userSearch}
+                  onChange={(e) => setUserSearch(e.target.value)}
+                  placeholder={language === 'sr' 
+                    ? 'Pretraži po imenu, emailu, telefonu, ulozi ili statusu...' 
+                    : 'Search by name, email, phone, role or status...'}
+                  className="pl-10 h-11"
+                  data-testid="user-search-input"
+                />
+                {userSearch && (
+                  <button
+                    onClick={() => setUserSearch('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Results count */}
+              {userSearch && (
+                <p className="text-sm text-slate-500">
+                  {language === 'sr' 
+                    ? `Pronađeno ${filteredUsers.length} od ${users.length} korisnika`
+                    : `Found ${filteredUsers.length} of ${users.length} users`}
+                </p>
+              )}
+
               <div className="card-base overflow-x-auto">
                 <Table>
                   <TableHeader>
@@ -1054,7 +1085,16 @@ const Dashboard = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {users.map((u) => (
+                    {filteredUsers.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-8 text-slate-500">
+                          {userSearch 
+                            ? (language === 'sr' ? 'Nema rezultata pretrage' : 'No search results')
+                            : (language === 'sr' ? 'Nema korisnika' : 'No users')}
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                    filteredUsers.map((u) => (
                       <TableRow key={u.id}>
                         <TableCell className="font-medium">{u.full_name}</TableCell>
                         <TableCell>{u.email}</TableCell>
