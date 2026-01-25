@@ -60,33 +60,33 @@ const Home = () => {
   const galleryTitle = homeContent?.['gallery-title']?.[language === 'sr' ? 'title_sr' : 'title_en'] || 
     (language === 'sr' ? 'Galerija' : 'Gallery');
 
-  // Gallery images from CMS (gallery-1, gallery-2, gallery-3, gallery-4)
+  // Gallery images from CMS (gallery-1, gallery-2, gallery-3, gallery-4) - only show if loaded
   const galleryImages = [
     {
-      src: homeContent?.['gallery-1']?.image_url || 'https://images.pexels.com/photos/6519910/pexels-photo-6519910.jpeg',
+      src: homeContent?.['gallery-1']?.image_url || null,
       alt: homeContent?.['gallery-1']?.[language === 'sr' ? 'title_sr' : 'title_en'] || 'Paramedic team',
       className: 'col-span-2 row-span-2',
       imgClassName: 'w-full h-full object-cover'
     },
     {
-      src: homeContent?.['gallery-2']?.image_url || 'https://images.pexels.com/photos/4173251/pexels-photo-4173251.jpeg',
+      src: homeContent?.['gallery-2']?.image_url || null,
       alt: homeContent?.['gallery-2']?.[language === 'sr' ? 'title_sr' : 'title_en'] || 'Doctor',
       className: '',
       imgClassName: 'w-full h-48 object-cover'
     },
     {
-      src: homeContent?.['gallery-3']?.image_url || 'https://images.pexels.com/photos/9893525/pexels-photo-9893525.jpeg',
+      src: homeContent?.['gallery-3']?.image_url || null,
       alt: homeContent?.['gallery-3']?.[language === 'sr' ? 'title_sr' : 'title_en'] || 'Nurse',
       className: '',
       imgClassName: 'w-full h-48 object-cover'
     },
     {
-      src: homeContent?.['gallery-4']?.image_url || 'https://images.pexels.com/photos/263402/pexels-photo-263402.jpeg',
+      src: homeContent?.['gallery-4']?.image_url || null,
       alt: homeContent?.['gallery-4']?.[language === 'sr' ? 'title_sr' : 'title_en'] || 'Hospital',
       className: 'col-span-2',
       imgClassName: 'w-full h-48 object-cover'
     }
-  ];
+  ].filter(img => img.src); // Filter out images without src
 
   const medicalServices = [
     { 
