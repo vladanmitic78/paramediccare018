@@ -179,11 +179,17 @@ const Home = () => {
             {/* Hero Image */}
             <div className="relative animate-slide-up" style={{ animationDelay: '0.2s' }}>
               <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-                <img
-                  src={heroImage}
-                  alt="Ambulance"
-                  className="w-full h-[400px] lg:h-[500px] object-cover"
-                />
+                {heroImage ? (
+                  <img
+                    src={heroImage}
+                    alt="Ambulance"
+                    className="w-full h-[400px] lg:h-[500px] object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-[400px] lg:h-[500px] bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center">
+                    <Ambulance className="w-32 h-32 text-white/30" />
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent" />
               </div>
               
