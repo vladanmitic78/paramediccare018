@@ -46,7 +46,7 @@ const MedicalCare = () => {
       ? 'Pružamo vrhunsku medicinsku negu sa fokusom na bezbednost i udobnost pacijenata. Naš tim je dostupan 24 sata dnevno, 7 dana u nedelji.'
       : 'We provide top-quality medical care with a focus on patient safety and comfort. Our team is available 24 hours a day, 7 days a week.');
   
-  const heroImage = pageContent?.hero?.image_url || 'https://images.pexels.com/photos/4173251/pexels-photo-4173251.jpeg';
+  const heroImage = pageContent?.hero?.image_url || null;
 
   const servicesTitle = pageContent?.['services-title']?.[language === 'sr' ? 'title_sr' : 'title_en'] || 
     (language === 'sr' ? 'Naše Usluge' : 'Our Services');
@@ -62,7 +62,7 @@ const MedicalCare = () => {
       ? 'Naš medicinski tim čine iskusni profesionalci koji su posvećeni pružanju najbolje moguće nege. Svaki član tima prolazi redovne obuke kako bi bio u toku sa najnovijim medicinskim praksama.'
       : 'Our medical team consists of experienced professionals dedicated to providing the best possible care. Each team member undergoes regular training to stay up-to-date with the latest medical practices.');
   
-  const teamImage = pageContent?.team?.image_url || 'https://images.pexels.com/photos/9893525/pexels-photo-9893525.jpeg';
+  const teamImage = pageContent?.team?.image_url || null;
 
   const ctaTitle = pageContent?.cta?.[language === 'sr' ? 'title_sr' : 'title_en'] || 
     (language === 'sr' ? 'Potrebna vam je pomoć?' : 'Need Assistance?');
