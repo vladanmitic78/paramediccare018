@@ -127,11 +127,17 @@ const About = () => {
         <div className="section-container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <img
-                src="https://images.pexels.com/photos/4173251/pexels-photo-4173251.jpeg"
-                alt="Medical care"
-                className="rounded-2xl shadow-xl w-full h-[400px] object-cover"
-              />
+              {missionImage ? (
+                <img
+                  src={missionImage}
+                  alt="Medical care"
+                  className="rounded-2xl shadow-xl w-full h-[400px] object-cover"
+                />
+              ) : (
+                <div className="rounded-2xl shadow-xl w-full h-[400px] bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center">
+                  <Target className="w-24 h-24 text-white/30" />
+                </div>
+              )}
             </div>
             <div>
               <div className="flex items-center gap-3 mb-6">
