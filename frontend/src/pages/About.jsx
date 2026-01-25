@@ -235,48 +235,40 @@ const About = () => {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="rounded-xl overflow-hidden">
-              <img
-                src="https://images.pexels.com/photos/4173251/pexels-photo-4173251.jpeg"
-                alt="Doctor"
-                className="w-full h-64 object-cover"
-              />
+            <div className="rounded-xl overflow-hidden bg-gradient-to-br from-sky-500 to-sky-700">
+              <div className="w-full h-64 flex items-center justify-center">
+                <Cross className="w-16 h-16 text-white/50" />
+              </div>
               <div className="bg-white p-4 text-center">
                 <p className="font-semibold text-slate-900">
                   {language === 'sr' ? 'Lekari' : 'Doctors'}
                 </p>
               </div>
             </div>
-            <div className="rounded-xl overflow-hidden">
-              <img
-                src="https://images.pexels.com/photos/9893525/pexels-photo-9893525.jpeg"
-                alt="Nurse"
-                className="w-full h-64 object-cover"
-              />
+            <div className="rounded-xl overflow-hidden bg-gradient-to-br from-pink-500 to-pink-700">
+              <div className="w-full h-64 flex items-center justify-center">
+                <Heart className="w-16 h-16 text-white/50" />
+              </div>
               <div className="bg-white p-4 text-center">
                 <p className="font-semibold text-slate-900">
                   {language === 'sr' ? 'Medicinske Sestre' : 'Nurses'}
                 </p>
               </div>
             </div>
-            <div className="rounded-xl overflow-hidden">
-              <img
-                src="https://images.pexels.com/photos/6519910/pexels-photo-6519910.jpeg"
-                alt="Paramedics"
-                className="w-full h-64 object-cover"
-              />
+            <div className="rounded-xl overflow-hidden bg-gradient-to-br from-emerald-500 to-emerald-700">
+              <div className="w-full h-64 flex items-center justify-center">
+                <Shield className="w-16 h-16 text-white/50" />
+              </div>
               <div className="bg-white p-4 text-center">
                 <p className="font-semibold text-slate-900">
                   {language === 'sr' ? 'Paramedici' : 'Paramedics'}
                 </p>
               </div>
             </div>
-            <div className="rounded-xl overflow-hidden">
-              <img
-                src="https://images.pexels.com/photos/6520105/pexels-photo-6520105.jpeg"
-                alt="Drivers"
-                className="w-full h-64 object-cover"
-              />
+            <div className="rounded-xl overflow-hidden bg-gradient-to-br from-amber-500 to-amber-700">
+              <div className="w-full h-64 flex items-center justify-center">
+                <Building2 className="w-16 h-16 text-white/50" />
+              </div>
               <div className="bg-white p-4 text-center">
                 <p className="font-semibold text-slate-900">
                   {language === 'sr' ? 'Vozači' : 'Drivers'}
