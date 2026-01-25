@@ -56,7 +56,8 @@ import {
   Receipt,
   BarChart3,
   Moon,
-  Sun
+  Sun,
+  X
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
