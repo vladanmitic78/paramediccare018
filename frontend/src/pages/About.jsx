@@ -92,11 +92,17 @@ const About = () => {
             </div>
 
             <div className="relative">
-              <img
-                src="https://images.pexels.com/photos/6519910/pexels-photo-6519910.jpeg"
-                alt="Our team"
-                className="rounded-2xl shadow-2xl w-full h-[400px] object-cover"
-              />
+              {heroImage ? (
+                <img
+                  src={heroImage}
+                  alt="Our team"
+                  className="rounded-2xl shadow-2xl w-full h-[400px] object-cover"
+                />
+              ) : (
+                <div className="rounded-2xl shadow-2xl w-full h-[400px] bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center">
+                  <Users className="w-24 h-24 text-white/30" />
+                </div>
+              )}
             </div>
           </div>
         </div>
