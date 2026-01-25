@@ -226,11 +226,13 @@ export const MapPicker = ({
             <Input
               value={searchQuery}
               onChange={handleInputChange}
+              onInput={handleInputChange}
               onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
               placeholder={placeholder}
               className="w-full pr-8"
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
               data-testid={`map-search-${markerColor}`}
+              autoComplete="off"
             />
             {loadingSuggestions && (
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
