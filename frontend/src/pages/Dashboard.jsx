@@ -872,7 +872,7 @@ const Dashboard = () => {
                             </TableCell>
                           </TableRow>
                         ))
-                        )}
+                        }
                       </TableBody>
                     </Table>
                   </div>
