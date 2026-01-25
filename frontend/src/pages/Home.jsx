@@ -42,7 +42,7 @@ const Home = () => {
   // Get content from CMS or use defaults
   const heroTitle = homeContent?.hero?.[language === 'sr' ? 'title_sr' : 'title_en'] || t('hero_title');
   const heroSubtitle = homeContent?.hero?.[language === 'sr' ? 'content_sr' : 'content_en'] || t('hero_subtitle');
-  const heroImage = homeContent?.hero?.image_url || 'https://images.pexels.com/photos/6520105/pexels-photo-6520105.jpeg';
+  const heroImage = homeContent?.hero?.image_url || null; // No fallback - use gradient if no image
   
   const servicesTitle = homeContent?.['services-title']?.[language === 'sr' ? 'title_sr' : 'title_en'] || t('services_title');
   const servicesSubtitle = homeContent?.['services-title']?.[language === 'sr' ? 'content_sr' : 'content_en'] || t('services_subtitle');
