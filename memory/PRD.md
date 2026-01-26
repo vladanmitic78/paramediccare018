@@ -474,6 +474,7 @@ A comprehensive fleet management system where each ambulance has assigned teams.
 - [x] **Emergency Transport Vitals & Alerts** (Real-time critical value detection) (NEW - Jan 23, 2026) ✅
 - [x] **Medical Staff PWA** (Mobile-first vitals input for ambulance use) (NEW - Jan 23, 2026) ✅
 - [x] **User Registration Role Bug Fix** (Roles doctor/nurse/driver now correctly assigned) (NEW - Jan 23, 2026) ✅
+- [x] **Fleet Management Module** (Vehicle-centric team assignment) (NEW - Jan 26, 2026) ✅
 
 ### P1 (Next Up)
 - [ ] Emergency Transport Timeline (chronological event log)
