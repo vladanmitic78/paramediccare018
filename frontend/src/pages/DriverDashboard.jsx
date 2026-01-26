@@ -926,7 +926,7 @@ const DriverDashboard = () => {
             
             {/* Complete Transport Button */}
             <Button
-              onClick={() => updateDriverStatus('completed')}
+              onClick={completeTransport}
               disabled={updatingStatus}
               className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 gap-2 text-lg font-bold"
               data-testid="complete-transport-btn"
