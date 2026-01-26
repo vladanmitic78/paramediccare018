@@ -1132,6 +1132,154 @@ const Dashboard = () => {
             </div>
           )}
 
+          {/* Users Management Section */}
+          {activeTab === 'users' && isAdmin() && (
+            <div className="space-y-6" data-testid="users-page">
+              <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: 'Manrope, sans-serif' }}>
+                  {language === 'sr' ? 'Upravljanje Korisnicima' : 'User Management'}
+                </h1>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={fetchData}
+                  data-testid="refresh-users-btn"
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  {language === 'sr' ? 'Osveži' : 'Refresh'}
+                </Button>
+              </div>
+
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Input
+                  placeholder={language === 'sr' ? 'Pretraži korisnike (ime, email, telefon, uloga, status)...' : 'Search users (name, email, phone, role, status)...'}
+                  value={userSearch}
+                  onChange={(e) => setUserSearch(e.target.value)}
+                  className="pl-10"
+                  data-testid="user-search-input"
+                />
+              </div>
+
+              {/* Users Table */}
+              <div className="card-base overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-slate-200">
+                        <th className="text-left p-4 text-sm font-semibold text-slate-600">
+                          {language === 'sr' ? 'Korisnik' : 'User'}
+                        </th>
+                        <th className="text-left p-4 text-sm font-semibold text-slate-600">
+                          {language === 'sr' ? 'Kontakt' : 'Contact'}
+                        </th>
+                        <th className="text-left p-4 text-sm font-semibold text-slate-600">
+                          {language === 'sr' ? 'Uloga' : 'Role'}
+                        </th>
+                        <th className="text-left p-4 text-sm font-semibold text-slate-600">
+                          {language === 'sr' ? 'Status' : 'Status'}
+                        </th>
+                        <th className="text-left p-4 text-sm font-semibold text-slate-600">
+                          {language === 'sr' ? 'Akcije' : 'Actions'}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredUsers.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="p-8 text-center text-slate-500">
+                            {userSearch 
+                              ? (language === 'sr' ? 'Nema rezultata pretrage' : 'No search results')
+                              : (language === 'sr' ? 'Nema korisnika' : 'No users')
+                            }
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredUsers.map((u) => (
+                          <tr key={u.id} className="border-b border-slate-100 hover:bg-slate-50" data-testid={`user-row-${u.id}`}>
+                            <td className="p-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sky-500 to-emerald-500 flex items-center justify-center text-white font-semibold">
+                                  {u.full_name?.charAt(0)?.toUpperCase() || '?'}
+                                </div>
+                                <div>
+                                  <p className="font-medium text-slate-900">{u.full_name}</p>
+                                  <p className="text-xs text-slate-500">
+                                    {language === 'sr' ? 'Registrovan' : 'Registered'}: {new Date(u.created_at).toLocaleDateString()}
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="p-4">
+                              <p className="text-sm text-slate-900">{u.email}</p>
+                              <p className="text-xs text-slate-500">{u.phone || '—'}</p>
+                            </td>
+                            <td className="p-4">
+                              <Select
+                                value={u.role}
+                                onValueChange={(value) => updateUserRole(u.id, value)}
+                                disabled={u.role === 'superadmin' && !isSuperAdmin()}
+                              >
+                                <SelectTrigger className="w-32" data-testid={`role-select-${u.id}`}>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="regular">{language === 'sr' ? 'Korisnik' : 'User'}</SelectItem>
+                                  <SelectItem value="doctor">{language === 'sr' ? 'Lekar' : 'Doctor'}</SelectItem>
+                                  <SelectItem value="nurse">{language === 'sr' ? 'Sestra' : 'Nurse'}</SelectItem>
+                                  <SelectItem value="driver">{language === 'sr' ? 'Vozač' : 'Driver'}</SelectItem>
+                                  <SelectItem value="admin">Admin</SelectItem>
+                                  {isSuperAdmin() && <SelectItem value="superadmin">Super Admin</SelectItem>}
+                                </SelectContent>
+                              </Select>
+                            </td>
+                            <td className="p-4">
+                              <Button
+                                variant={u.is_active ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => toggleUserStatus(u.id, u.is_active)}
+                                className={u.is_active ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+                                data-testid={`status-toggle-${u.id}`}
+                              >
+                                {u.is_active 
+                                  ? (language === 'sr' ? 'Aktivan' : 'Active')
+                                  : (language === 'sr' ? 'Neaktivan' : 'Inactive')
+                                }
+                              </Button>
+                            </td>
+                            <td className="p-4">
+                              {/* Don't allow deleting superadmins, or admins deleting other admins */}
+                              {u.role !== 'superadmin' && !(user?.role === 'admin' && u.role === 'admin') && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => openDeleteUserDialog(u)}
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  data-testid={`delete-user-${u.id}`}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              )}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="p-4 border-t border-slate-200 bg-slate-50">
+                  <p className="text-sm text-slate-600">
+                    {language === 'sr' 
+                      ? `Prikazano ${filteredUsers.length} od ${users.length} korisnika`
+                      : `Showing ${filteredUsers.length} of ${users.length} users`
+                    }
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* API Settings Section (Super Admin only) */}
           {activeTab === 'api-settings' && isSuperAdmin() && (
             <div className="space-y-6" data-testid="api-settings-page">
