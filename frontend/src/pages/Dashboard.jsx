@@ -386,14 +386,23 @@ const Dashboard = () => {
   };
 
   const deleteUser = async (userId) => {
-    if (!window.confirm(language === 'sr' ? 'Da li ste sigurni da želite obrisati korisnika?' : 'Are you sure you want to delete this user?')) return;
+    setDeletingUser(true);
     try {
       await axios.delete(`${API}/users/${userId}`);
       toast.success(language === 'sr' ? 'Korisnik obrisan' : 'User deleted');
+      setShowDeleteUserDialog(false);
+      setUserToDelete(null);
       fetchData();
     } catch (error) {
-      toast.error(language === 'sr' ? 'Greška' : 'Error');
+      toast.error(language === 'sr' ? 'Greška pri brisanju korisnika' : 'Error deleting user');
+    } finally {
+      setDeletingUser(false);
     }
+  };
+
+  const openDeleteUserDialog = (user) => {
+    setUserToDelete(user);
+    setShowDeleteUserDialog(true);
   };
 
   const getStatusBadge = (status) => {
