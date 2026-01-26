@@ -35,6 +35,9 @@ import MedicalDashboard from "./pages/MedicalDashboard";
 // Medical Staff PWA
 import MedicalStaffPWA from "./pages/MedicalStaffPWA";
 
+// Admin PWA
+import AdminPWA from "./pages/AdminPWA";
+
 // Protected Route for Patient Portal
 const PatientRoute = ({ children }) => {
   const { user, loading } = useAuth();
