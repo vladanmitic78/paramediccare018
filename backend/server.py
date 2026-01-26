@@ -4283,7 +4283,162 @@ async def unlock_vehicle_team(
         reason=reason
     )
     
+    # Save to fleet history when mission ends
+    vehicle = await db.vehicles.find_one({"id": vehicle_id}, {"_id": 0})
+    history_entry = {
+        "id": str(uuid.uuid4()),
+        "vehicle_id": vehicle_id,
+        "vehicle_name": vehicle.get("name", "Unknown") if vehicle else "Unknown",
+        "vehicle_registration": vehicle.get("registration_plate", "N/A") if vehicle else "N/A",
+        "mission_id": lock.get("mission_id"),
+        "booking_id": lock.get("booking_id"),
+        "team": lock.get("locked_team", []),
+        "started_at": lock.get("locked_at"),
+        "ended_at": datetime.now(timezone.utc).isoformat(),
+        "ended_by": user["id"],
+        "ended_by_name": user["full_name"],
+        "reason": reason,
+        "status": "completed"
+    }
+    await db.fleet_history.insert_one(history_entry)
+    
     return {"message": "Team unlocked"}
+
+
+# ============ FLEET HISTORY ============
+
+@api_router.get("/fleet/history")
+async def get_fleet_history(
+    search: str = None,
+    vehicle_id: str = None,
+    from_date: str = None,
+    to_date: str = None,
+    limit: int = 100,
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.DOCTOR, UserRole.NURSE]))
+):
+    """Get fleet mission history with search and filters"""
+    query = {}
+    
+    if vehicle_id:
+        query["vehicle_id"] = vehicle_id
+    
+    if from_date:
+        query["started_at"] = {"$gte": from_date}
+    
+    if to_date:
+        if "started_at" in query:
+            query["started_at"]["$lte"] = to_date
+        else:
+            query["ended_at"] = {"$lte": to_date}
+    
+    history = await db.fleet_history.find(query, {"_id": 0}).sort("ended_at", -1).to_list(limit)
+    
+    # Apply search filter on results
+    if search:
+        search_lower = search.lower()
+        history = [
+            h for h in history
+            if search_lower in h.get("vehicle_name", "").lower()
+            or search_lower in h.get("vehicle_registration", "").lower()
+            or search_lower in h.get("mission_id", "").lower()
+            or any(search_lower in m.get("user_name", "").lower() for m in h.get("team", []))
+        ]
+    
+    return history
+
+
+@api_router.get("/fleet/history/{history_id}")
+async def get_fleet_history_detail(
+    history_id: str,
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.DOCTOR, UserRole.NURSE]))
+):
+    """Get detailed fleet history entry"""
+    entry = await db.fleet_history.find_one({"id": history_id}, {"_id": 0})
+    if not entry:
+        raise HTTPException(status_code=404, detail="History entry not found")
+    return entry
+
+
+@api_router.post("/fleet/vehicles/{vehicle_id}/complete-mission")
+async def complete_vehicle_mission(
+    vehicle_id: str,
+    booking_id: str = None,
+    notes: str = None,
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.DRIVER]))
+):
+    """Complete a mission and save to history"""
+    vehicle = await db.vehicles.find_one({"id": vehicle_id}, {"_id": 0})
+    if not vehicle:
+        raise HTTPException(status_code=404, detail="Vehicle not found")
+    
+    # Get current team
+    current_team = await db.vehicle_teams.find(
+        {"vehicle_id": vehicle_id, "is_active": True},
+        {"_id": 0}
+    ).to_list(100)
+    
+    # Check for active lock
+    lock = await db.team_locks.find_one({"vehicle_id": vehicle_id, "is_active": True})
+    
+    now = datetime.now(timezone.utc).isoformat()
+    
+    # Create history entry
+    history_entry = {
+        "id": str(uuid.uuid4()),
+        "vehicle_id": vehicle_id,
+        "vehicle_name": vehicle.get("name", "Unknown"),
+        "vehicle_registration": vehicle.get("registration_plate", "N/A"),
+        "mission_id": lock.get("mission_id") if lock else str(uuid.uuid4())[:8],
+        "booking_id": booking_id,
+        "team": [
+            {
+                "user_id": t.get("user_id"),
+                "user_name": t.get("user_name"),
+                "role": t.get("role"),
+                "is_remote": t.get("is_remote", False)
+            }
+            for t in current_team
+        ],
+        "started_at": lock.get("locked_at") if lock else vehicle.get("mission_started_at", now),
+        "ended_at": now,
+        "ended_by": user["id"],
+        "ended_by_name": user["full_name"],
+        "notes": notes,
+        "status": "completed"
+    }
+    await db.fleet_history.insert_one(history_entry)
+    
+    # If there was a lock, deactivate it
+    if lock:
+        await db.team_locks.update_one(
+            {"id": lock["id"]},
+            {"$set": {
+                "is_active": False,
+                "unlocked_at": now,
+                "unlocked_by": user["id"]
+            }}
+        )
+    
+    # Update vehicle status
+    await db.vehicles.update_one(
+        {"id": vehicle_id},
+        {"$set": {
+            "status": VehicleStatus.AVAILABLE,
+            "current_mission_id": None
+        }}
+    )
+    
+    # Log audit
+    await log_team_audit(
+        vehicle_id=vehicle_id,
+        mission_id=history_entry["mission_id"],
+        action="mission_completed",
+        performed_by=user["id"],
+        performed_by_name=user["full_name"],
+        reason=notes
+    )
+    
+    return {"message": "Mission completed", "history_id": history_entry["id"]}
 
 
 @api_router.post("/fleet/vehicles/{vehicle_id}/emergency-override")
