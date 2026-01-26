@@ -97,6 +97,24 @@ const FleetManagement = () => {
   const [showAuditLog, setShowAuditLog] = useState(false);
   const [auditLog, setAuditLog] = useState([]);
   const [staffSearch, setStaffSearch] = useState('');
+  const [vehicleSearch, setVehicleSearch] = useState('');
+  
+  // Delete confirmation
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [vehicleToDelete, setVehicleToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  
+  // Team assignment with confirmation
+  const [selectedTeamMembers, setSelectedTeamMembers] = useState([]);
+  const [showConfirmAssignment, setShowConfirmAssignment] = useState(false);
+  const [savingTeam, setSavingTeam] = useState(false);
+  
+  // Video call state
+  const [showVideoCall, setShowVideoCall] = useState(false);
+  const [activeCallRoom, setActiveCallRoom] = useState(null);
+  
+  // Check if user is super admin
+  const isSuperAdmin = () => user?.role === 'superadmin';
   
   // New vehicle form
   const [newVehicle, setNewVehicle] = useState({
