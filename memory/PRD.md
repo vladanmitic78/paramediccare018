@@ -492,6 +492,37 @@ A comprehensive fleet management system where each ambulance has assigned teams.
    - GET/POST/DELETE /api/incoming-apis (incoming)
    - POST /api/incoming-apis/{service_type}/test
 
+#### Phase 6: Unified Dispatch Console (NEW - Jan 26, 2026) ✅
+**Merged "Operations/Bookings" and "Fleet/Vehicles & Teams" into single view**
+
+1. **New FleetDispatch Component** (`/app/frontend/src/components/FleetDispatch.jsx`)
+   - Split-screen layout: Vehicles (left 50%) | Bookings (right 50%)
+   - Drag-and-drop: Vehicle card → Booking to assign
+   - Real-time status updates via polling
+
+2. **Vehicle Cards:**
+   - Shows team members with role badges (driver, nurse, doctor)
+   - Status: SPREMNO (Ready) when has driver, BEZ VOZAČA (No Driver) otherwise
+   - Draggable only when vehicle has a driver assigned
+   - Team assignment dialog with staff selection
+
+3. **Booking Cards:**
+   - Shows patient name, addresses, date/time, phone
+   - Status badges: Čeka (Pending), Potvrđeno (Confirmed), U toku (In Progress)
+   - Drop zone for vehicle assignment
+   - Filter tabs: Pending / Active / All
+
+4. **Driver PWA Notifications:**
+   - Polls every 5 seconds for new assignments
+   - Full-screen popup when new task assigned
+   - Audio beep notification + device vibration
+   - Toast message: "🚨 NEW TASK RECEIVED!"
+
+**Navigation Changes:**
+- Removed separate "Bookings" from Operations menu
+- Renamed "Fleet" to "Dispečerski centar" (Dispatch Center)
+- Main item: "Vozila & Rezervacije" (Vehicles & Bookings)
+
 **Edge Cases Handled:**
 - Mission start blocked if required roles not filled
 - Team locking prevents changes during active transport
