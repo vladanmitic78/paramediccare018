@@ -465,14 +465,32 @@ A comprehensive fleet management system where each ambulance has assigned teams.
    - Protection: Admins cannot delete other admin accounts
    - Backend DELETE /api/users/{user_id} supports ADMIN and SUPERADMIN roles
 
-2. **API Key Management Page**
+2. **API Key Management Page** (Enhanced - Jan 26, 2026)
    - New page under Settings > API Settings (superadmin only)
+   - **Two-section layout with tabs:**
+   
+   **Incoming APIs (Services the app uses):**
+   - Google Maps - API key, endpoint URL configuration
+   - OpenStreetMap - Tile server URL, optional API key
+   - Stripe - Secret key, publishable key, webhook secret
+   - SMS Service - Provider selection (Twilio/Nexmo/Infobip), API credentials, sender ID
+   - Email Service - SMTP host, port, username, password, SSL toggle
+   - Medical Devices - Device type (Lifepak 15, Zoll X, Philips MRx), API credentials
+   - Each service has: Save, Test Connection, and Delete buttons
+   - API keys masked in display (first 4 + **** + last 4 chars)
+   - "Configured" badge shows when service is set up
+   
+   **Outgoing APIs (External systems accessing the app):**
    - Create API keys with name and permissions (read/write/delete)
    - Full key shown only once on creation (security)
    - Active keys list shows key prefix, permissions, creation date
    - Revoke keys (soft delete with audit trail)
    - API documentation section with usage example
-   - Backend endpoints: GET/POST/DELETE /api/apikeys
+   
+   **Backend endpoints:**
+   - GET/POST/DELETE /api/apikeys (outgoing)
+   - GET/POST/DELETE /api/incoming-apis (incoming)
+   - POST /api/incoming-apis/{service_type}/test
 
 **Edge Cases Handled:**
 - Mission start blocked if required roles not filled
