@@ -493,8 +493,8 @@ const FleetDispatch = () => {
     fetchData();
     fetchAvailableStaff();
     
-    // Poll every 10 seconds
-    const interval = setInterval(() => fetchData(), 10000);
+    // Poll every 5 seconds for live status updates
+    const interval = setInterval(() => fetchData(), 5000);
     return () => clearInterval(interval);
   }, [fetchData, fetchAvailableStaff]);
 
