@@ -965,9 +965,9 @@ const Dashboard = () => {
             <AdminLiveMap />
           )}
 
-          {/* Fleet Management - Vehicles & Teams */}
+          {/* Fleet Management - Vehicles & Teams + Bookings */}
           {activeTab === 'vehicles' && isAdmin() && (
-            <FleetManagement />
+            <FleetDispatch />
           )}
 
           {/* Fleet History */}
