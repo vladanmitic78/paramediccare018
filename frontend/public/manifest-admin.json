@@ -1,0 +1,24 @@
+{
+  "short_name": "PC018 Admin",
+  "name": "Paramedic Care 018 - Admin",
+  "icons": [
+    {
+      "src": "/admin-icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/admin-icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/admin-app",
+  "scope": "/admin-app",
+  "display": "standalone",
+  "theme_color": "#1e3a5f",
+  "background_color": "#0f172a",
+  "orientation": "portrait"
+}
