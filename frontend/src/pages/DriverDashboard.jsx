@@ -23,8 +23,7 @@ import {
   XCircle,
   ThumbsUp,
   ThumbsDown,
-  Globe,
-  Map as MapIcon
+  Globe
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { toast } from 'sonner';
