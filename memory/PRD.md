@@ -444,14 +444,14 @@ A comprehensive fleet management system where each ambulance has assigned teams.
 - Full audit trail for compliance/government standards
 
 **Benefits achieved:**
-- Reduced server.py by ~574 lines (12.6% reduction)
+- Reduced server.py from ~4783 to ~4624 lines (15.3% total reduction)
 - Clear separation of concerns
 - Reusable models and utilities
 - Better code organization for team collaboration
 
 **Next refactoring steps (Future):**
-- Extract email templates to `utils/email.py`
-- Create route modules (`routes/auth.py`, `routes/admin.py`, etc.)
+- Extract remaining email templates (verification, registration, booking confirmation)
+- Create route modules (`routes/auth.py`, `routes/admin.py`, `routes/fleet.py`, etc.)
 - Move CMS models to models package
 
 ### Technology Stack
