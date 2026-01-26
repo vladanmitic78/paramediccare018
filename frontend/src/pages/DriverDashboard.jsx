@@ -36,6 +36,91 @@ const API = process.env.REACT_APP_BACKEND_URL;
 const LOCATION_UPDATE_INTERVAL = 5000; // 5 seconds while moving
 const LOCATION_UPDATE_INTERVAL_IDLE = 20000; // 20 seconds when stationary
 
+// Custom marker icons for the map
+const driverIcon = new L.DivIcon({
+  className: 'driver-marker',
+  html: `<div style="background: #3b82f6; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;">
+    <div style="width: 8px; height: 8px; background: white; border-radius: 50%;"></div>
+  </div>`,
+  iconSize: [24, 24],
+  iconAnchor: [12, 12]
+});
+
+const destinationIcon = new L.DivIcon({
+  className: 'destination-marker',
+  html: `<div style="background: #ef4444; width: 32px; height: 32px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;">
+    <div style="width: 10px; height: 10px; background: white; border-radius: 50%; transform: rotate(45deg);"></div>
+  </div>`,
+  iconSize: [32, 32],
+  iconAnchor: [16, 32]
+});
+
+// Component to auto-fit map bounds
+const MapBoundsUpdater = ({ driverLocation, destination }) => {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (driverLocation && destination) {
+      const bounds = L.latLngBounds([
+        [driverLocation.latitude, driverLocation.longitude],
+        [destination.lat, destination.lng]
+      ]);
+      map.fitBounds(bounds, { padding: [50, 50] });
+    } else if (driverLocation) {
+      map.setView([driverLocation.latitude, driverLocation.longitude], 15);
+    } else if (destination) {
+      map.setView([destination.lat, destination.lng], 15);
+    }
+  }, [map, driverLocation, destination]);
+  
+  return null;
+};
+
+// Custom hook for Screen Wake Lock - prevents phone from sleeping
+const useWakeLock = (enabled) => {
+  const wakeLockRef = useRef(null);
+  
+  useEffect(() => {
+    const requestWakeLock = async () => {
+      if (enabled && 'wakeLock' in navigator) {
+        try {
+          wakeLockRef.current = await navigator.wakeLock.request('screen');
+          console.log('Wake Lock activated - screen will stay on');
+        } catch (err) {
+          console.log('Wake Lock error:', err.message);
+        }
+      }
+    };
+    
+    const releaseWakeLock = () => {
+      if (wakeLockRef.current) {
+        wakeLockRef.current.release();
+        wakeLockRef.current = null;
+        console.log('Wake Lock released');
+      }
+    };
+    
+    if (enabled) {
+      requestWakeLock();
+      
+      // Re-acquire wake lock when page becomes visible again
+      const handleVisibilityChange = () => {
+        if (document.visibilityState === 'visible' && enabled) {
+          requestWakeLock();
+        }
+      };
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      
+      return () => {
+        releaseWakeLock();
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+      };
+    } else {
+      releaseWakeLock();
+    }
+  }, [enabled]);
+};
+
 // Custom hook to set driver PWA manifest
 const useDriverPWAManifest = () => {
   useEffect(() => {
