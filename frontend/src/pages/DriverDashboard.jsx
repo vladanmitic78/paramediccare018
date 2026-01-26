@@ -815,121 +815,133 @@ const DriverDashboard = () => {
             </div>
           </div>
         )}
+      </main>
 
-        {/* Map Toggle Button - show during active transport */}
-        {assignment && isActiveTransport && (
-          <Button
-            onClick={() => setShowMap(!showMap)}
-            className={`w-full h-12 gap-2 ${showMap ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-700 hover:bg-slate-600'}`}
-            data-testid="toggle-map-btn"
-          >
-            <MapIcon className="w-5 h-5" />
-            {showMap 
-              ? (language === 'sr' ? 'SAKRIJ MAPU' : 'HIDE MAP')
-              : (language === 'sr' ? 'PRIKAŽI MAPU' : 'SHOW MAP')
-            }
-          </Button>
-        )}
-
-        {/* Live Navigation Map */}
-        {assignment && showMap && isActiveTransport && (
-          <div className="bg-slate-800 rounded-2xl overflow-hidden" data-testid="driver-map">
-            <div className="p-3 border-b border-slate-700 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
-                <span className="text-sm font-medium">
-                  {language === 'sr' ? 'Navigacija uživo' : 'Live Navigation'}
-                </span>
+      {/* FULL SCREEN MAP - Shows automatically during transport */}
+      {assignment && showFullScreenMap && (
+        <div className="fixed inset-0 z-50 bg-slate-900 flex flex-col" data-testid="fullscreen-map">
+          {/* Map Header */}
+          <div className="bg-slate-800 px-4 py-3 flex items-center justify-between border-b border-slate-700">
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+              <div>
+                <p className="text-white font-semibold text-sm">
+                  {language === 'sr' ? 'U TRANSPORTU' : 'TRANSPORTING'}
+                </p>
+                <p className="text-slate-400 text-xs truncate max-w-[200px]">
+                  → {assignment.destination_address}
+                </p>
               </div>
-              <span className="text-xs text-slate-400">
-                {language === 'sr' ? 'Ekran neće zaspati' : 'Screen will stay on'}
-              </span>
             </div>
-            <div style={{ height: '300px', width: '100%' }}>
-              <MapContainer
-                center={[
-                  lastLocation?.latitude || assignment.destination_lat || 43.3209,
-                  lastLocation?.longitude || assignment.destination_lng || 21.8958
-                ]}
-                zoom={14}
-                style={{ height: '100%', width: '100%' }}
-                zoomControl={false}
-              >
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                
-                {/* Driver's current location */}
-                {lastLocation && (
-                  <Marker 
-                    position={[lastLocation.latitude, lastLocation.longitude]} 
-                    icon={driverIcon}
-                  >
-                    <Popup>
-                      <div className="text-center">
-                        <strong>{language === 'sr' ? 'Vaša lokacija' : 'Your location'}</strong>
-                        {lastLocation.speed && (
-                          <div className="text-sm">{Math.round(lastLocation.speed)} km/h</div>
-                        )}
-                      </div>
-                    </Popup>
-                  </Marker>
-                )}
-                
-                {/* Destination marker */}
-                {(assignment.destination_lat && assignment.destination_lng) && (
-                  <Marker 
-                    position={[assignment.destination_lat, assignment.destination_lng]} 
-                    icon={destinationIcon}
-                  >
-                    <Popup>
-                      <div className="text-center">
-                        <strong>{language === 'sr' ? 'Odredište' : 'Destination'}</strong>
-                        <div className="text-sm">{assignment.destination_address}</div>
-                      </div>
-                    </Popup>
-                  </Marker>
-                )}
-                
-                {/* Line from driver to destination */}
-                {lastLocation && assignment.destination_lat && assignment.destination_lng && (
-                  <Polyline
-                    positions={[
-                      [lastLocation.latitude, lastLocation.longitude],
-                      [assignment.destination_lat, assignment.destination_lng]
-                    ]}
-                    color="#3b82f6"
-                    weight={4}
-                    opacity={0.7}
-                    dashArray="10, 10"
-                  />
-                )}
-                
-                <MapBoundsUpdater 
-                  driverLocation={lastLocation}
-                  destination={
-                    assignment.destination_lat && assignment.destination_lng
-                      ? { lat: assignment.destination_lat, lng: assignment.destination_lng }
-                      : null
-                  }
-                />
-              </MapContainer>
-            </div>
-            
-            {/* Quick navigation button */}
-            <div className="p-3 border-t border-slate-700">
-              <Button
-                onClick={() => openNavigation(assignment.destination_lat, assignment.destination_lng, assignment.destination_address)}
-                className="w-full bg-blue-600 hover:bg-blue-700 gap-2"
-              >
-                <Navigation className="w-5 h-5" />
-                {language === 'sr' ? 'OTVORI U GOOGLE MAPS' : 'OPEN IN GOOGLE MAPS'}
-              </Button>
+            <div className="text-xs text-slate-400 text-right">
+              <p>{language === 'sr' ? 'Ekran aktivan' : 'Screen active'}</p>
+              {lastLocation?.speed && (
+                <p className="text-white">{Math.round(lastLocation.speed)} km/h</p>
+              )}
             </div>
           </div>
-        )}
-      </main>
+          
+          {/* Full Screen Map */}
+          <div className="flex-1">
+            <MapContainer
+              center={[
+                lastLocation?.latitude || assignment.destination_lat || 43.3209,
+                lastLocation?.longitude || assignment.destination_lng || 21.8958
+              ]}
+              zoom={14}
+              style={{ height: '100%', width: '100%' }}
+              zoomControl={false}
+            >
+              <TileLayer
+                attribution='&copy; OpenStreetMap'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              
+              {/* Driver's current location */}
+              {lastLocation && (
+                <Marker 
+                  position={[lastLocation.latitude, lastLocation.longitude]} 
+                  icon={driverIcon}
+                >
+                  <Popup>
+                    <div className="text-center">
+                      <strong>{language === 'sr' ? 'Vaša lokacija' : 'Your location'}</strong>
+                      {lastLocation.speed && (
+                        <div className="text-sm">{Math.round(lastLocation.speed)} km/h</div>
+                      )}
+                    </div>
+                  </Popup>
+                </Marker>
+              )}
+              
+              {/* Destination marker */}
+              {(assignment.destination_lat && assignment.destination_lng) && (
+                <Marker 
+                  position={[assignment.destination_lat, assignment.destination_lng]} 
+                  icon={destinationIcon}
+                >
+                  <Popup>
+                    <div className="text-center">
+                      <strong>{language === 'sr' ? 'Odredište' : 'Destination'}</strong>
+                      <div className="text-sm">{assignment.destination_address}</div>
+                    </div>
+                  </Popup>
+                </Marker>
+              )}
+              
+              {/* Line from driver to destination */}
+              {lastLocation && assignment.destination_lat && assignment.destination_lng && (
+                <Polyline
+                  positions={[
+                    [lastLocation.latitude, lastLocation.longitude],
+                    [assignment.destination_lat, assignment.destination_lng]
+                  ]}
+                  color="#3b82f6"
+                  weight={4}
+                  opacity={0.7}
+                  dashArray="10, 10"
+                />
+              )}
+              
+              <MapBoundsUpdater 
+                driverLocation={lastLocation}
+                destination={
+                  assignment.destination_lat && assignment.destination_lng
+                    ? { lat: assignment.destination_lat, lng: assignment.destination_lng }
+                    : null
+                }
+              />
+            </MapContainer>
+          </div>
+          
+          {/* Bottom Action Buttons */}
+          <div className="bg-slate-800 p-4 space-y-3 border-t border-slate-700">
+            {/* Open in Google Maps */}
+            <Button
+              onClick={() => openNavigation(assignment.destination_lat, assignment.destination_lng, assignment.destination_address)}
+              className="w-full h-12 bg-blue-600 hover:bg-blue-700 gap-2"
+            >
+              <Navigation className="w-5 h-5" />
+              {language === 'sr' ? 'OTVORI U GOOGLE MAPS' : 'OPEN IN GOOGLE MAPS'}
+            </Button>
+            
+            {/* Complete Transport Button */}
+            <Button
+              onClick={() => updateDriverStatus('completed')}
+              disabled={updatingStatus}
+              className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 gap-2 text-lg font-bold"
+              data-testid="complete-transport-btn"
+            >
+              {updatingStatus ? (
+                <Loader2 className="w-6 h-6 animate-spin" />
+              ) : (
+                <CheckCircle className="w-6 h-6" />
+              )}
+              {language === 'sr' ? 'ZAVRŠI TRANSPORT' : 'COMPLETE TRANSPORT'}
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Footer with emergency */}
       <footer className="bg-slate-800 border-t border-slate-700 p-4">
