@@ -1501,6 +1501,221 @@ const Dashboard = () => {
             </div>
           )}
 
+          {/* API Settings Section (Super Admin only) */}
+          {activeTab === 'api-settings' && isSuperAdmin() && (
+            <div className="space-y-6" data-testid="api-settings-page">
+              <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: 'Manrope, sans-serif' }}>
+                  {language === 'sr' ? 'API Podešavanja' : 'API Settings'}
+                </h1>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={fetchApiKeys}
+                  disabled={loadingApiKeys}
+                  data-testid="refresh-api-keys-btn"
+                >
+                  <RefreshCw className={`w-4 h-4 mr-2 ${loadingApiKeys ? 'animate-spin' : ''}`} />
+                  {language === 'sr' ? 'Osveži' : 'Refresh'}
+                </Button>
+              </div>
+
+              {/* Create New API Key */}
+              <div className="card-base">
+                <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                  <Key className="w-5 h-5 text-sky-600" />
+                  {language === 'sr' ? 'Kreiraj novi API ključ' : 'Create New API Key'}
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      {language === 'sr' ? 'Naziv ključa' : 'Key Name'}
+                    </label>
+                    <Input
+                      value={newApiKeyName}
+                      onChange={(e) => setNewApiKeyName(e.target.value)}
+                      placeholder={language === 'sr' ? 'npr. Mobilna aplikacija' : 'e.g., Mobile App'}
+                      className="max-w-md"
+                      data-testid="api-key-name-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      {language === 'sr' ? 'Dozvole' : 'Permissions'}
+                    </label>
+                    <div className="flex flex-wrap gap-3">
+                      {['read', 'write', 'delete'].map((perm) => (
+                        <label key={perm} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={newApiKeyPermissions.includes(perm)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setNewApiKeyPermissions([...newApiKeyPermissions, perm]);
+                              } else {
+                                setNewApiKeyPermissions(newApiKeyPermissions.filter(p => p !== perm));
+                              }
+                            }}
+                            className="w-4 h-4 text-sky-600 rounded border-slate-300 focus:ring-sky-500"
+                          />
+                          <span className="text-sm text-slate-700 capitalize">{perm}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <Button
+                    onClick={createApiKey}
+                    disabled={creatingApiKey || !newApiKeyName.trim()}
+                    className="bg-sky-600 hover:bg-sky-700 text-white"
+                    data-testid="create-api-key-btn"
+                  >
+                    {creatingApiKey ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Plus className="w-4 h-4 mr-2" />
+                    )}
+                    {language === 'sr' ? 'Kreiraj ključ' : 'Create Key'}
+                  </Button>
+                </div>
+
+                {/* Show newly created key */}
+                {newlyCreatedKey && (
+                  <div className="mt-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+                    <div className="flex items-center gap-2 text-emerald-700 mb-2">
+                      <Shield className="w-5 h-5" />
+                      <span className="font-semibold">
+                        {language === 'sr' ? 'Novi API ključ kreiran!' : 'New API Key Created!'}
+                      </span>
+                    </div>
+                    <p className="text-sm text-emerald-600 mb-3">
+                      {language === 'sr' 
+                        ? 'Kopirajte ovaj ključ sada. Nećete ga moći videti ponovo.'
+                        : 'Copy this key now. You will not be able to see it again.'}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 p-3 bg-white border border-emerald-300 rounded font-mono text-sm break-all">
+                        {newlyCreatedKey}
+                      </code>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => copyToClipboard(newlyCreatedKey)}
+                        className="shrink-0"
+                        data-testid="copy-new-key-btn"
+                      >
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setNewlyCreatedKey(null)}
+                      className="mt-2 text-emerald-600"
+                    >
+                      {language === 'sr' ? 'Razumem, sakrij' : 'Got it, hide'}
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Active API Keys */}
+              <div className="card-base">
+                <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-purple-600" />
+                  {language === 'sr' ? 'Aktivni API ključevi' : 'Active API Keys'}
+                </h3>
+                
+                {loadingApiKeys ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin text-sky-600" />
+                  </div>
+                ) : apiKeys.length === 0 ? (
+                  <div className="text-center py-8 text-slate-500">
+                    <Key className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+                    <p>{language === 'sr' ? 'Nema aktivnih API ključeva' : 'No active API keys'}</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>{language === 'sr' ? 'Naziv' : 'Name'}</TableHead>
+                          <TableHead>{language === 'sr' ? 'Prefiks ključa' : 'Key Prefix'}</TableHead>
+                          <TableHead>{language === 'sr' ? 'Dozvole' : 'Permissions'}</TableHead>
+                          <TableHead>{language === 'sr' ? 'Kreirano' : 'Created'}</TableHead>
+                          <TableHead>{language === 'sr' ? 'Poslednje korišćenje' : 'Last Used'}</TableHead>
+                          <TableHead className="text-right">{language === 'sr' ? 'Akcije' : 'Actions'}</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {apiKeys.map((key) => (
+                          <TableRow key={key.id}>
+                            <TableCell className="font-medium">{key.name}</TableCell>
+                            <TableCell>
+                              <code className="px-2 py-1 bg-slate-100 rounded text-sm font-mono">
+                                {key.key_prefix}...
+                              </code>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-1 flex-wrap">
+                                {key.permissions.map((perm) => (
+                                  <Badge 
+                                    key={perm} 
+                                    className={
+                                      perm === 'read' ? 'bg-emerald-100 text-emerald-800' :
+                                      perm === 'write' ? 'bg-amber-100 text-amber-800' :
+                                      'bg-red-100 text-red-800'
+                                    }
+                                  >
+                                    {perm}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-sm text-slate-500">
+                              {new Date(key.created_at).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell className="text-sm text-slate-500">
+                              {key.last_used ? new Date(key.last_used).toLocaleDateString() : '-'}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => revokeApiKey(key.id)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                data-testid={`revoke-key-${key.id}`}
+                              >
+                                <Trash2 className="w-4 h-4 mr-1" />
+                                {language === 'sr' ? 'Opozovi' : 'Revoke'}
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </div>
+
+              {/* API Documentation Info */}
+              <div className="card-base bg-sky-50 border-sky-200">
+                <h3 className="text-lg font-semibold text-sky-900 mb-3 flex items-center gap-2">
+                  <ExternalLink className="w-5 h-5" />
+                  {language === 'sr' ? 'API Dokumentacija' : 'API Documentation'}
+                </h3>
+                <p className="text-sm text-sky-700 mb-3">
+                  {language === 'sr' 
+                    ? 'Koristite API ključeve za integraciju sa spoljnim sistemima. Uključite ključ u zaglavlje zahteva:'
+                    : 'Use API keys to integrate with external systems. Include the key in your request header:'}
+                </p>
+                <code className="block p-3 bg-white border border-sky-200 rounded font-mono text-sm text-slate-700">
+                  X-API-Key: your_api_key_here
+                </code>
+              </div>
+            </div>
+          )}
+
           {/* Availability Section - StaffAvailabilityCalendar is rendered above at line 1197 */}
         </main>
       </div>
