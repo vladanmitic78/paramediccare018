@@ -5,6 +5,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { Textarea } from './ui/textarea';
+import { Checkbox } from './ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -19,7 +20,18 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
+  DialogDescription,
 } from './ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from './ui/alert-dialog';
 import {
   Table,
   TableBody,
@@ -49,12 +61,28 @@ import {
   Shield,
   Video,
   Wrench,
-  Search
+  Search,
+  Trash2,
+  Save,
+  X,
+  VideoIcon,
+  ExternalLink
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+
+// Jitsi Meet integration helper
+const generateJitsiRoomId = (vehicleId, missionId) => {
+  const timestamp = Date.now().toString(36);
+  return `pc018-${vehicleId.slice(0, 8)}-${missionId ? missionId.slice(0, 8) : timestamp}`;
+};
+
+const openJitsiCall = (roomId, userName) => {
+  const jitsiUrl = `https://meet.jit.si/${roomId}#userInfo.displayName="${encodeURIComponent(userName)}"`;
+  window.open(jitsiUrl, '_blank', 'width=1200,height=800');
+};
 
 const FleetManagement = () => {
   const { language } = useLanguage();
