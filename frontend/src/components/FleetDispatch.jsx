@@ -120,10 +120,8 @@ const DraggableVehicleCard = ({ vehicle, language, onAssignClick, onVideoCall, o
         rounded-xl border-2 p-4 transition-all duration-200 mb-4
         ${getStatusColor()}
         ${isDragging ? 'shadow-2xl ring-2 ring-slate-900 ring-offset-2 opacity-90' : 'shadow-sm'}
-        ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}
       `}
       data-testid={`vehicle-card-${vehicle.id}`}
-      {...(isDraggable ? { ...attributes, ...listeners } : {})}
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
