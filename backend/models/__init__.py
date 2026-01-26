@@ -56,5 +56,9 @@ __all__ = [
     'VehicleStatus', 'VehicleType', 'TeamRole', 'TeamMemberAssignment',
     'ShiftSchedule', 'VehicleCreate', 'VehicleUpdate', 'VehicleResponse',
     'TeamAssignmentCreate', 'TeamAssignmentUpdate', 'MissionTeamLock',
-    'TeamAuditEntry', 'MissionTeamValidation'
+    'TeamAuditEntry', 'MissionTeamValidation',
+    # CMS models
+    'ContentCreate', 'ContentResponse',
+    'PageContentCreate', 'PageContentResponse',
+    'ServiceCreate', 'ServiceResponse'
 ]
