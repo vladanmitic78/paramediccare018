@@ -813,6 +813,120 @@ const DriverDashboard = () => {
             </div>
           </div>
         )}
+
+        {/* Map Toggle Button - show during active transport */}
+        {assignment && isActiveTransport && (
+          <Button
+            onClick={() => setShowMap(!showMap)}
+            className={`w-full h-12 gap-2 ${showMap ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-700 hover:bg-slate-600'}`}
+            data-testid="toggle-map-btn"
+          >
+            <MapIcon className="w-5 h-5" />
+            {showMap 
+              ? (language === 'sr' ? 'SAKRIJ MAPU' : 'HIDE MAP')
+              : (language === 'sr' ? 'PRIKAŽI MAPU' : 'SHOW MAP')
+            }
+          </Button>
+        )}
+
+        {/* Live Navigation Map */}
+        {assignment && showMap && isActiveTransport && (
+          <div className="bg-slate-800 rounded-2xl overflow-hidden" data-testid="driver-map">
+            <div className="p-3 border-b border-slate-700 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+                <span className="text-sm font-medium">
+                  {language === 'sr' ? 'Navigacija uživo' : 'Live Navigation'}
+                </span>
+              </div>
+              <span className="text-xs text-slate-400">
+                {language === 'sr' ? 'Ekran neće zaspati' : 'Screen will stay on'}
+              </span>
+            </div>
+            <div style={{ height: '300px', width: '100%' }}>
+              <MapContainer
+                center={[
+                  lastLocation?.latitude || assignment.destination_lat || 43.3209,
+                  lastLocation?.longitude || assignment.destination_lng || 21.8958
+                ]}
+                zoom={14}
+                style={{ height: '100%', width: '100%' }}
+                zoomControl={false}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                
+                {/* Driver's current location */}
+                {lastLocation && (
+                  <Marker 
+                    position={[lastLocation.latitude, lastLocation.longitude]} 
+                    icon={driverIcon}
+                  >
+                    <Popup>
+                      <div className="text-center">
+                        <strong>{language === 'sr' ? 'Vaša lokacija' : 'Your location'}</strong>
+                        {lastLocation.speed && (
+                          <div className="text-sm">{Math.round(lastLocation.speed)} km/h</div>
+                        )}
+                      </div>
+                    </Popup>
+                  </Marker>
+                )}
+                
+                {/* Destination marker */}
+                {(assignment.destination_lat && assignment.destination_lng) && (
+                  <Marker 
+                    position={[assignment.destination_lat, assignment.destination_lng]} 
+                    icon={destinationIcon}
+                  >
+                    <Popup>
+                      <div className="text-center">
+                        <strong>{language === 'sr' ? 'Odredište' : 'Destination'}</strong>
+                        <div className="text-sm">{assignment.destination_address}</div>
+                      </div>
+                    </Popup>
+                  </Marker>
+                )}
+                
+                {/* Line from driver to destination */}
+                {lastLocation && assignment.destination_lat && assignment.destination_lng && (
+                  <Polyline
+                    positions={[
+                      [lastLocation.latitude, lastLocation.longitude],
+                      [assignment.destination_lat, assignment.destination_lng]
+                    ]}
+                    color="#3b82f6"
+                    weight={4}
+                    opacity={0.7}
+                    dashArray="10, 10"
+                  />
+                )}
+                
+                <MapBoundsUpdater 
+                  driverLocation={lastLocation}
+                  destination={
+                    assignment.destination_lat && assignment.destination_lng
+                      ? { lat: assignment.destination_lat, lng: assignment.destination_lng }
+                      : null
+                  }
+                />
+              </MapContainer>
+            </div>
+            
+            {/* Quick navigation button */}
+            <div className="p-3 border-t border-slate-700">
+              <Button
+                onClick={() => openNavigation(assignment.destination_lat, assignment.destination_lng, assignment.destination_address)}
+                className="w-full bg-blue-600 hover:bg-blue-700 gap-2"
+              >
+                <Navigation className="w-5 h-5" />
+                {language === 'sr' ? 'OTVORI U GOOGLE MAPS' : 'OPEN IN GOOGLE MAPS'}
+              </Button>
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Footer with emergency */}
