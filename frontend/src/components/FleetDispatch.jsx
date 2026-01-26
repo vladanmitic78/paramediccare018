@@ -420,6 +420,21 @@ const FleetDispatch = () => {
   const [completingMission, setCompletingMission] = useState(false);
   const [missionNotes, setMissionNotes] = useState('');
   
+  // Manual booking creation state
+  const [showCreateBooking, setShowCreateBooking] = useState(false);
+  const [creatingBooking, setCreatingBooking] = useState(false);
+  const [newBooking, setNewBooking] = useState({
+    patient_name: '',
+    contact_phone: '',
+    contact_email: '',
+    pickup_address: '',
+    destination_address: '',
+    booking_date: '',
+    booking_time: '',
+    mobility_status: 'walking',
+    notes: ''
+  });
+  
   // Drag state
   const [activeVehicle, setActiveVehicle] = useState(null);
   const [assigning, setAssigning] = useState(false);
