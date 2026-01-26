@@ -51,14 +51,23 @@ class ConnectionManager:
     """WebSocket connection manager for real-time driver updates"""
     def __init__(self):
         self.active_connections: Dict[str, WebSocket] = {}
+        self.admin_connections: Dict[str, WebSocket] = {}
 
     async def connect(self, driver_id: str, websocket: WebSocket):
         await websocket.accept()
         self.active_connections[driver_id] = websocket
 
+    async def connect_admin(self, admin_id: str, websocket: WebSocket):
+        await websocket.accept()
+        self.admin_connections[admin_id] = websocket
+
     def disconnect(self, driver_id: str):
         if driver_id in self.active_connections:
             del self.active_connections[driver_id]
+
+    def disconnect_admin(self, admin_id: str):
+        if admin_id in self.admin_connections:
+            del self.admin_connections[admin_id]
 
     async def send_personal_message(self, driver_id: str, message: dict):
         if driver_id in self.active_connections:
@@ -67,3 +76,15 @@ class ConnectionManager:
     async def broadcast(self, message: dict):
         for connection in self.active_connections.values():
             await connection.send_json(message)
+
+    async def broadcast_to_admins(self, message: dict):
+        """Broadcast message to all connected admin clients"""
+        disconnected = []
+        for admin_id, connection in self.admin_connections.items():
+            try:
+                await connection.send_json(message)
+            except Exception:
+                disconnected.append(admin_id)
+        # Clean up disconnected admins
+        for admin_id in disconnected:
+            del self.admin_connections[admin_id]
