@@ -470,6 +470,7 @@ const Dashboard = () => {
       icon: Ambulance,
       label: language === 'sr' ? 'Flota' : 'Fleet',
       items: [
+        { id: 'vehicles', icon: Truck, label: language === 'sr' ? 'Vozila & Timovi' : 'Vehicles & Teams' },
         { id: 'livemap', icon: Map, label: language === 'sr' ? 'Praćenje vozila' : 'Live Tracking' },
       ]
     }] : []),
