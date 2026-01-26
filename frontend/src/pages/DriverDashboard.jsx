@@ -184,7 +184,6 @@ const DriverDashboard = () => {
   const [lastLocation, setLastLocation] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState('connected');
   const [updatingStatus, setUpdatingStatus] = useState(false);
-  const [showMap, setShowMap] = useState(false);
   
   const watchIdRef = useRef(null);
   const wsRef = useRef(null);
