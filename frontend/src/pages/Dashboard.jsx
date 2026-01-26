@@ -791,24 +791,41 @@ const Dashboard = () => {
                   }`}>
                     <div className="ml-4 mt-1 space-y-1 border-l border-slate-700 pl-3">
                       {group.items.map((item) => (
-                        <button
-                          key={item.id}
-                          onClick={() => setActiveTab(item.id)}
-                          data-testid={`sidebar-${item.id}`}
-                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
-                            activeTab === item.id 
-                              ? 'bg-sky-500/20 text-sky-400 font-medium' 
-                              : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
-                          }`}
-                        >
-                          <item.icon className="w-4 h-4 flex-shrink-0" />
-                          <span className="flex-1 text-left">{item.label}</span>
-                          {item.badge && (
-                            <span className="px-1.5 py-0.5 text-[9px] font-medium rounded bg-slate-700 text-slate-400">
-                              {item.badge}
-                            </span>
-                          )}
-                        </button>
+                        item.isExternal ? (
+                          <a
+                            key={item.id}
+                            href={item.href}
+                            data-testid={`sidebar-${item.id}`}
+                            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                          >
+                            <item.icon className="w-4 h-4 flex-shrink-0" />
+                            <span className="flex-1 text-left">{item.label}</span>
+                            {item.badge && (
+                              <span className="px-1.5 py-0.5 text-[9px] font-medium rounded bg-emerald-600 text-white">
+                                {item.badge}
+                              </span>
+                            )}
+                          </a>
+                        ) : (
+                          <button
+                            key={item.id}
+                            onClick={() => setActiveTab(item.id)}
+                            data-testid={`sidebar-${item.id}`}
+                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
+                              activeTab === item.id 
+                                ? 'bg-sky-500/20 text-sky-400 font-medium' 
+                                : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                            }`}
+                          >
+                            <item.icon className="w-4 h-4 flex-shrink-0" />
+                            <span className="flex-1 text-left">{item.label}</span>
+                            {item.badge && (
+                              <span className="px-1.5 py-0.5 text-[9px] font-medium rounded bg-slate-700 text-slate-400">
+                                {item.badge}
+                              </span>
+                            )}
+                          </button>
+                        )
                       ))}
                     </div>
                   </div>
