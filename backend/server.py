@@ -58,13 +58,22 @@ from models import (
     VehicleStatus, VehicleType, TeamRole, TeamMemberAssignment,
     ShiftSchedule, VehicleCreate, VehicleUpdate, VehicleResponse,
     TeamAssignmentCreate, TeamAssignmentUpdate, MissionTeamLock,
-    TeamAuditEntry, MissionTeamValidation
+    TeamAuditEntry, MissionTeamValidation,
+    ContentCreate, ContentResponse,
+    PageContentCreate, PageContentResponse,
+    ServiceCreate, ServiceResponse
 )
 
 # Import auth utilities
 from utils.auth import (
     hash_password, verify_password, create_token,
     get_current_user, get_optional_user, require_roles, security
+)
+
+# Import email utilities
+from utils.email import (
+    send_email, get_email_header, get_email_footer,
+    get_internal_notification_template
 )
 
 # Create the main app
