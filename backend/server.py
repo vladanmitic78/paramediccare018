@@ -2717,11 +2717,27 @@ async def generate_patient_report(
         from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
         from reportlab.lib.units import mm
         from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+        from reportlab.pdfbase import pdfmetrics
+        from reportlab.pdfbase.ttfonts import TTFont
         from io import BytesIO
+        
+        # Register DejaVu fonts for Serbian Latin character support (šđžčć)
+        try:
+            pdfmetrics.registerFont(TTFont('DejaVuSans', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
+            pdfmetrics.registerFont(TTFont('DejaVuSans-Bold', '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'))
+        except Exception as font_err:
+            logger.warning(f"Could not register DejaVu fonts: {font_err}")
         
         buffer = BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=20*mm, leftMargin=20*mm, topMargin=20*mm, bottomMargin=20*mm)
         styles = getSampleStyleSheet()
+        
+        # Override styles to use DejaVu fonts for Serbian character support
+        styles['Normal'].fontName = 'DejaVuSans'
+        styles['Heading1'].fontName = 'DejaVuSans-Bold'
+        styles['Heading2'].fontName = 'DejaVuSans-Bold'
+        styles['BodyText'].fontName = 'DejaVuSans'
+        
         elements = []
         
         # Logo and Header
@@ -2747,7 +2763,7 @@ async def generate_patient_report(
                 elements.append(header_table)
         except Exception as e:
             # Fallback if logo fails
-            title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=18, spaceAfter=20)
+            title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=18, spaceAfter=20, fontName='DejaVuSans-Bold')
             elements.append(Paragraph("PARAMEDIC CARE 018", title_style))
             elements.append(Paragraph("Medical Report / Medicinski izveštaj", styles['Normal']))
         
