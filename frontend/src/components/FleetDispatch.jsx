@@ -527,7 +527,7 @@ const FleetDispatch = () => {
   const filteredBookings = bookings.filter(b => {
     if (bookingFilter === 'all') return b.status !== 'completed' && b.status !== 'cancelled';
     if (bookingFilter === 'pending') return b.status === 'pending';
-    if (bookingFilter === 'active') return b.status === 'confirmed' || b.status === 'in_progress';
+    if (bookingFilter === 'active') return ['confirmed', 'in_progress', 'en_route', 'on_site', 'transporting'].includes(b.status);
     return true;
   });
 
