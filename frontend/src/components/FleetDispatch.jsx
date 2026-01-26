@@ -560,17 +560,28 @@ const FleetDispatch = () => {
   const saveTeamAssignment = async () => {
     setSavingTeam(true);
     try {
-      const teamData = selectedTeamMembers.map(userId => {
-        const staff = availableStaff.find(s => s.id === userId);
-        return {
-          user_id: userId,
-          name: staff?.full_name,
-          role: staff?.role,
-          phone: staff?.phone
-        };
-      });
+      // First, remove existing team members that are not selected
+      const currentTeam = selectedVehicle.team || [];
+      const currentUserIds = currentTeam.map(m => m.user_id);
+      
+      // Remove team members that are not in new selection
+      for (const member of currentTeam) {
+        if (!selectedTeamMembers.includes(member.user_id)) {
+          await axios.delete(`${API}/fleet/vehicles/${selectedVehicle.id}/team/${member.user_id}`);
+        }
+      }
+      
+      // Add new team members
+      for (const userId of selectedTeamMembers) {
+        if (!currentUserIds.includes(userId)) {
+          const staff = availableStaff.find(s => s.id === userId);
+          await axios.post(`${API}/fleet/vehicles/${selectedVehicle.id}/team`, {
+            user_id: userId,
+            role: staff?.role
+          });
+        }
+      }
 
-      await axios.post(`${API}/fleet/vehicles/${selectedVehicle.id}/team`, { team: teamData });
       toast.success(language === 'sr' ? 'Tim sačuvan!' : 'Team saved!');
       setShowAssignTeam(false);
       setShowConfirmAssignment(false);
