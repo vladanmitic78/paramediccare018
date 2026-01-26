@@ -418,6 +418,57 @@ const Dashboard = () => {
     setShowDeleteUserDialog(true);
   };
 
+  // API Key management functions
+  const fetchApiKeys = async () => {
+    setLoadingApiKeys(true);
+    try {
+      const response = await axios.get(`${API}/apikeys`);
+      setApiKeys(response.data);
+    } catch (error) {
+      toast.error(language === 'sr' ? 'Greška pri učitavanju API ključeva' : 'Error loading API keys');
+    } finally {
+      setLoadingApiKeys(false);
+    }
+  };
+
+  const createApiKey = async () => {
+    if (!newApiKeyName.trim()) {
+      toast.error(language === 'sr' ? 'Unesite naziv ključa' : 'Enter key name');
+      return;
+    }
+    setCreatingApiKey(true);
+    try {
+      const response = await axios.post(`${API}/apikeys`, {
+        name: newApiKeyName,
+        permissions: newApiKeyPermissions
+      });
+      setNewlyCreatedKey(response.data.key);
+      setNewApiKeyName('');
+      setNewApiKeyPermissions(['read']);
+      fetchApiKeys();
+      toast.success(language === 'sr' ? 'API ključ kreiran' : 'API key created');
+    } catch (error) {
+      toast.error(language === 'sr' ? 'Greška pri kreiranju ključa' : 'Error creating API key');
+    } finally {
+      setCreatingApiKey(false);
+    }
+  };
+
+  const revokeApiKey = async (keyId) => {
+    try {
+      await axios.delete(`${API}/apikeys/${keyId}`);
+      fetchApiKeys();
+      toast.success(language === 'sr' ? 'API ključ opozvan' : 'API key revoked');
+    } catch (error) {
+      toast.error(language === 'sr' ? 'Greška pri opozivanju ključa' : 'Error revoking API key');
+    }
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    toast.success(language === 'sr' ? 'Kopirano u međuspremnik' : 'Copied to clipboard');
+  };
+
   const getStatusBadge = (status) => {
     const styles = {
       pending: 'bg-amber-100 text-amber-800',
