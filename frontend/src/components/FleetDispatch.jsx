@@ -539,7 +539,10 @@ const FleetDispatch = () => {
       
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.detail || (language === 'sr' ? 'Greška pri dodeli' : 'Assignment error'));
+      const errMsg = typeof error.response?.data?.detail === 'string' 
+        ? error.response.data.detail 
+        : (language === 'sr' ? 'Greška pri dodeli' : 'Assignment error');
+      toast.error(errMsg);
     } finally {
       setAssigning(false);
     }
