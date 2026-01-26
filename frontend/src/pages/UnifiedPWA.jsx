@@ -170,6 +170,20 @@ const UnifiedPWA = () => {
   const [assigning, setAssigning] = useState(false);
   const [showCreateBooking, setShowCreateBooking] = useState(false);
   
+  // Medical-specific state
+  const [showVitalsModal, setShowVitalsModal] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [vitals, setVitals] = useState({
+    heart_rate: '',
+    blood_pressure_systolic: '',
+    blood_pressure_diastolic: '',
+    temperature: '',
+    oxygen_saturation: '',
+    respiratory_rate: '',
+    notes: ''
+  });
+  const [savingVitals, setSavingVitals] = useState(false);
+  
   // Role checks
   const isDriver = user?.role === 'driver';
   const isMedical = ['doctor', 'nurse'].includes(user?.role);
