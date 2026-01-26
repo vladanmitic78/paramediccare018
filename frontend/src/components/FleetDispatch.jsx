@@ -780,7 +780,7 @@ const FleetDispatch = () => {
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=rs&limit=5`,
-        { headers: { 'Accept-Language': 'sr' } }
+        { headers: { 'Accept-Language': 'sr-Latn,en' } }
       );
       const data = await response.json();
       
