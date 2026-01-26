@@ -756,6 +756,80 @@ const FleetDispatch = () => {
   const activeCount = bookings.filter(b => b.status === 'confirmed' || b.status === 'in_progress').length;
   const readyVehicles = vehicles.filter(v => !v.current_mission && v.team?.some(m => m.role === 'driver')).length;
 
+  // Address search using Nominatim (OpenStreetMap)
+  const searchAddress = async (query, type) => {
+    if (!query || query.length < 3) {
+      if (type === 'pickup') setPickupSuggestions([]);
+      else setDestinationSuggestions([]);
+      return;
+    }
+    
+    if (type === 'pickup') setSearchingPickup(true);
+    else setSearchingDestination(true);
+    
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=rs&limit=5`,
+        { headers: { 'Accept-Language': 'sr' } }
+      );
+      const data = await response.json();
+      
+      const suggestions = data.map(item => ({
+        display_name: item.display_name,
+        lat: parseFloat(item.lat),
+        lng: parseFloat(item.lon)
+      }));
+      
+      if (type === 'pickup') setPickupSuggestions(suggestions);
+      else setDestinationSuggestions(suggestions);
+    } catch (error) {
+      console.error('Address search error:', error);
+    } finally {
+      if (type === 'pickup') setSearchingPickup(false);
+      else setSearchingDestination(false);
+    }
+  };
+
+  // Debounced address search handlers
+  const handlePickupSearch = (value) => {
+    setNewBooking({...newBooking, pickup_address: value, pickup_lat: null, pickup_lng: null});
+    
+    if (pickupSearchTimeout.current) clearTimeout(pickupSearchTimeout.current);
+    pickupSearchTimeout.current = setTimeout(() => {
+      searchAddress(value, 'pickup');
+    }, 300);
+  };
+
+  const handleDestinationSearch = (value) => {
+    setNewBooking({...newBooking, destination_address: value, destination_lat: null, destination_lng: null});
+    
+    if (destinationSearchTimeout.current) clearTimeout(destinationSearchTimeout.current);
+    destinationSearchTimeout.current = setTimeout(() => {
+      searchAddress(value, 'destination');
+    }, 300);
+  };
+
+  // Select address from suggestions
+  const selectPickupAddress = (suggestion) => {
+    setNewBooking({
+      ...newBooking,
+      pickup_address: suggestion.display_name,
+      pickup_lat: suggestion.lat,
+      pickup_lng: suggestion.lng
+    });
+    setPickupSuggestions([]);
+  };
+
+  const selectDestinationAddress = (suggestion) => {
+    setNewBooking({
+      ...newBooking,
+      destination_address: suggestion.display_name,
+      destination_lat: suggestion.lat,
+      destination_lng: suggestion.lng
+    });
+    setDestinationSuggestions([]);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
