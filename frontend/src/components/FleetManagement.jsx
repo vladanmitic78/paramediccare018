@@ -1071,6 +1071,71 @@ const FleetManagement = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Complete Mission Dialog */}
+      <Dialog open={showCompleteMission} onOpenChange={setShowCompleteMission}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-emerald-600" />
+              {language === 'sr' ? 'Završi misiju' : 'Complete Mission'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-emerald-50 rounded-lg">
+              <p className="font-medium text-emerald-800">{vehicleToComplete?.name}</p>
+              <p className="text-sm text-emerald-600">{vehicleToComplete?.registration_plate}</p>
+              {vehicleToComplete?.current_team && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {vehicleToComplete.current_team.map((member, idx) => (
+                    <Badge key={idx} variant="outline" className="text-xs">
+                      {member.user_name}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                {language === 'sr' ? 'Napomene (opciono)' : 'Notes (optional)'}
+              </label>
+              <textarea
+                value={missionNotes}
+                onChange={(e) => setMissionNotes(e.target.value)}
+                className="w-full p-3 border rounded-lg resize-none h-24"
+                placeholder={language === 'sr' 
+                  ? 'Dodajte napomene o završenoj misiji...' 
+                  : 'Add notes about the completed mission...'}
+              />
+            </div>
+            <p className="text-sm text-slate-500">
+              {language === 'sr' 
+                ? 'Ova akcija će označiti misiju kao završenu i prebaciti podatke u istoriju. Tim će biti oslobođen za nove zadatke.' 
+                : 'This action will mark the mission as completed and move the data to history. The team will be available for new assignments.'}
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => { setShowCompleteMission(false); setMissionNotes(''); }}
+              >
+                {language === 'sr' ? 'Otkaži' : 'Cancel'}
+              </Button>
+              <Button 
+                className="bg-emerald-600 hover:bg-emerald-700"
+                onClick={handleCompleteMission}
+                disabled={completingMission}
+              >
+                {completingMission ? (
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                )}
+                {language === 'sr' ? 'Završi misiju' : 'Complete Mission'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
