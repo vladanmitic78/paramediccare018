@@ -4388,6 +4388,7 @@ async def get_vehicles(user: dict = Depends(get_current_user)):
                     "user_system_role": user_info.get("role")
                 })
         vehicle["current_team"] = current_team
+        vehicle["team"] = current_team  # Also include as 'team' for frontend compatibility
         
         # Get active mission if any
         active_booking = await db.patient_bookings.find_one(
