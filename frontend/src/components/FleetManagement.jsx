@@ -219,6 +219,27 @@ const FleetManagement = () => {
     }
   };
 
+  // Complete mission and move to history
+  const handleCompleteMission = async () => {
+    if (!vehicleToComplete) return;
+    
+    setCompletingMission(true);
+    try {
+      await axios.post(`${API}/fleet/vehicles/${vehicleToComplete.id}/complete-mission`, null, {
+        params: { notes: missionNotes }
+      });
+      toast.success(language === 'sr' ? 'Misija završena i prebačena u istoriju' : 'Mission completed and moved to history');
+      setShowCompleteMission(false);
+      setVehicleToComplete(null);
+      setMissionNotes('');
+      fetchVehicles();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Error completing mission');
+    } finally {
+      setCompletingMission(false);
+    }
+  };
+
   // Toggle team member selection
   const toggleTeamMemberSelection = (staff, role) => {
     const existingIndex = selectedTeamMembers.findIndex(
