@@ -3920,9 +3920,9 @@ async def update_vehicle(
 @api_router.delete("/fleet/vehicles/{vehicle_id}")
 async def delete_vehicle(
     vehicle_id: str,
-    user: dict = Depends(require_roles([UserRole.SUPERADMIN]))
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
 ):
-    """Delete a vehicle (superadmin only)"""
+    """Delete a vehicle (admin and superadmin)"""
     vehicle = await db.vehicles.find_one({"id": vehicle_id})
     if not vehicle:
         raise HTTPException(status_code=404, detail="Vehicle not found")
