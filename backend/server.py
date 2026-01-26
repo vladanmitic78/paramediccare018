@@ -3166,14 +3166,20 @@ async def update_driver_status(
     # Also update booking status if applicable
     if status_update.booking_id and status_update.status in [DriverStatus.EN_ROUTE, DriverStatus.ON_SITE, DriverStatus.TRANSPORTING]:
         booking_status_map = {
-            DriverStatus.EN_ROUTE: BookingStatus.EN_ROUTE,
-            DriverStatus.ON_SITE: BookingStatus.EN_ROUTE,  # Still en route until picked up
-            DriverStatus.TRANSPORTING: BookingStatus.PICKED_UP
+            DriverStatus.EN_ROUTE: "en_route",
+            DriverStatus.ON_SITE: "on_site",
+            DriverStatus.TRANSPORTING: "transporting"
         }
-        if status_update.status in booking_status_map:
+        new_booking_status = booking_status_map.get(status_update.status)
+        if new_booking_status:
+            # Update in both bookings collections for admin visibility
+            await db.bookings.update_one(
+                {"id": status_update.booking_id},
+                {"$set": {"status": new_booking_status, "updated_at": datetime.now(timezone.utc).isoformat()}}
+            )
             await db.patient_bookings.update_one(
                 {"id": status_update.booking_id},
-                {"$set": {"status": booking_status_map[status_update.status], "updated_at": datetime.now(timezone.utc).isoformat()}}
+                {"$set": {"status": new_booking_status, "updated_at": datetime.now(timezone.utc).isoformat()}}
             )
             
             # Create notification for patient
