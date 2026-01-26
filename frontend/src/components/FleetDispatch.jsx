@@ -859,7 +859,16 @@ const FleetDispatch = () => {
                   <Calendar className="w-4 h-4" />
                   {language === 'sr' ? 'Rezervacije' : 'Bookings'}
                 </h3>
-                <div className="flex gap-1">
+                <div className="flex gap-1 items-center">
+                  <Button
+                    size="sm"
+                    onClick={() => setShowCreateBooking(true)}
+                    className="h-7 px-2 text-xs bg-emerald-600 hover:bg-emerald-700 mr-2"
+                    data-testid="create-booking-btn"
+                  >
+                    <Plus className="w-3 h-3 mr-1" />
+                    {language === 'sr' ? 'Nova' : 'New'}
+                  </Button>
                   {[
                     { key: 'pending', label: language === 'sr' ? 'Čekaju' : 'Pending', count: pendingCount },
                     { key: 'active', label: language === 'sr' ? 'Aktivni' : 'Active', count: activeCount },
