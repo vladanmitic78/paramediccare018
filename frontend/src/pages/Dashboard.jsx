@@ -7,6 +7,7 @@ import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import CriticalAlertsPanel from '../components/CriticalAlertsPanel';
 import FleetManagement from '../components/FleetManagement';
+import FleetHistory from '../components/FleetHistory';
 import {
   Select,
   SelectContent,
