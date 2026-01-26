@@ -504,19 +504,6 @@ const DriverDashboard = () => {
 
   return (
     <div className="min-h-screen bg-slate-900 text-white flex flex-col" data-testid="driver-dashboard">
-      {/* PWA manifest and meta tags for Driver App */}
-      <Helmet>
-        <title>PC018 Vozač - Paramedic Care 018</title>
-        <link rel="manifest" href="/manifest-driver.json" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon-driver.png" />
-        <meta name="theme-color" content="#0f172a" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="PC018 Vozač" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="application-name" content="PC018 Vozač" />
-      </Helmet>
-
       {/* NEW TASK POPUP */}
       {showNewTaskPopup && assignment && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in">
