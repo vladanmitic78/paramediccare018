@@ -414,6 +414,25 @@ const MedicalDashboard = () => {
           </div>
           
           <div className="flex items-center gap-3">
+            {/* PDF Report button - only show when viewing patient details */}
+            {activeTab === 'patient-detail' && selectedPatient && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={generatePatientReport}
+                disabled={generatingReport}
+                className={`gap-2 ${darkMode ? 'border-slate-600 text-slate-300 hover:text-white' : ''}`}
+                data-testid="header-pdf-report-btn"
+              >
+                {generatingReport ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4" />
+                )}
+                {language === 'sr' ? 'PDF Izveštaj' : 'PDF Report'}
+              </Button>
+            )}
+            
             {/* Language toggle */}
             <Button
               variant="ghost"
