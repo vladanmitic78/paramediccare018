@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { 
@@ -20,7 +23,8 @@ import {
   XCircle,
   ThumbsUp,
   ThumbsDown,
-  Globe
+  Globe,
+  Map as MapIcon
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { toast } from 'sonner';
