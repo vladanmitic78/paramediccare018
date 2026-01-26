@@ -373,6 +373,16 @@ const FleetManagement = () => {
            s.role?.toLowerCase().includes(search);
   });
 
+  // Filter vehicles based on search
+  const filteredVehicles = vehicles.filter(v => {
+    if (!vehicleSearch) return true;
+    const search = vehicleSearch.toLowerCase();
+    return v.name?.toLowerCase().includes(search) || 
+           v.registration_plate?.toLowerCase().includes(search) ||
+           v.status?.toLowerCase().includes(search) ||
+           v.vehicle_type?.toLowerCase().includes(search);
+  });
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -384,7 +394,7 @@ const FleetManagement = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
             {language === 'sr' ? 'Upravljanje Flotom' : 'Fleet Management'}
