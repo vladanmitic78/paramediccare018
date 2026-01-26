@@ -895,6 +895,81 @@ async def get_staff(user: dict = Depends(require_roles([UserRole.ADMIN, UserRole
     staff = await db.users.find({"role": {"$in": [UserRole.DOCTOR, UserRole.NURSE, UserRole.DRIVER]}}, {"_id": 0, "password": 0}).to_list(1000)
     return [UserResponse(**s) for s in staff]
 
+# ============ API KEY MANAGEMENT (Super Admin) ============
+
+class ApiKeyCreate(BaseModel):
+    name: str
+    permissions: List[str] = ["read"]
+
+class ApiKeyResponse(BaseModel):
+    id: str
+    name: str
+    key_prefix: str
+    permissions: List[str]
+    created_at: str
+    last_used: Optional[str] = None
+    created_by: str
+
+class ApiKeyCreateResponse(BaseModel):
+    id: str
+    name: str
+    key: str  # Full key, shown only once
+    permissions: List[str]
+    created_at: str
+
+@api_router.get("/apikeys", response_model=List[ApiKeyResponse])
+async def get_api_keys(user: dict = Depends(require_roles([UserRole.SUPERADMIN]))):
+    """Get all API keys (without the actual key value)"""
+    keys = await db.api_keys.find({"is_active": True}, {"_id": 0, "key_hash": 0}).to_list(100)
+    return [ApiKeyResponse(**k) for k in keys]
+
+@api_router.post("/apikeys", response_model=ApiKeyCreateResponse)
+async def create_api_key(data: ApiKeyCreate, user: dict = Depends(require_roles([UserRole.SUPERADMIN]))):
+    """Create a new API key. The full key is only shown once."""
+    import secrets
+    import hashlib
+    
+    # Generate a secure random key
+    raw_key = secrets.token_urlsafe(32)
+    key_prefix = raw_key[:8]
+    key_hash = hashlib.sha256(raw_key.encode()).hexdigest()
+    
+    key_id = str(uuid.uuid4())
+    now = datetime.now(timezone.utc).isoformat()
+    
+    key_doc = {
+        "id": key_id,
+        "name": data.name,
+        "key_prefix": key_prefix,
+        "key_hash": key_hash,
+        "permissions": data.permissions,
+        "created_at": now,
+        "last_used": None,
+        "created_by": user["id"],
+        "is_active": True
+    }
+    
+    await db.api_keys.insert_one(key_doc)
+    
+    return ApiKeyCreateResponse(
+        id=key_id,
+        name=data.name,
+        key=raw_key,
+        permissions=data.permissions,
+        created_at=now
+    )
+
+@api_router.delete("/apikeys/{key_id}")
+async def revoke_api_key(key_id: str, user: dict = Depends(require_roles([UserRole.SUPERADMIN]))):
+    """Revoke (soft delete) an API key"""
+    result = await db.api_keys.update_one(
+        {"id": key_id},
+        {"$set": {"is_active": False, "revoked_at": datetime.now(timezone.utc).isoformat(), "revoked_by": user["id"]}}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="API key not found")
+    return {"success": True}
+
 # ============ BOOKING ROUTES ============
 
 @api_router.post("/bookings", response_model=BookingResponse)
