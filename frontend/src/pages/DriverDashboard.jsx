@@ -628,23 +628,53 @@ const DriverDashboard = () => {
               
               <div className="bg-white/10 rounded-lg p-4 mb-4 text-left">
                 <p className="text-white font-semibold">{assignment.patient_name}</p>
-                <p className="text-red-100 text-sm flex items-center gap-2 mt-2">
-                  <MapPin className="w-4 h-4" />
-                  {assignment.pickup_address}
-                </p>
-                <p className="text-red-100 text-sm flex items-center gap-2 mt-1">
-                  <Navigation className="w-4 h-4" />
-                  {assignment.destination_address}
-                </p>
+                {assignment.pickup_address && (
+                  <p className="text-red-100 text-sm flex items-center gap-2 mt-2">
+                    <MapPin className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate">{assignment.pickup_address}</span>
+                  </p>
+                )}
+                {assignment.destination_address && (
+                  <p className="text-red-100 text-sm flex items-center gap-2 mt-1">
+                    <Navigation className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate">{assignment.destination_address}</span>
+                  </p>
+                )}
+                {assignment.contact_phone && (
+                  <p className="text-red-100 text-sm flex items-center gap-2 mt-1">
+                    <Phone className="w-4 h-4 flex-shrink-0" />
+                    <span>{assignment.contact_phone}</span>
+                  </p>
+                )}
               </div>
               
-              <Button 
-                onClick={() => setShowNewTaskPopup(false)}
-                className="w-full h-14 text-lg font-bold bg-white text-red-600 hover:bg-red-50"
-                data-testid="view-task-btn"
-              >
-                {language === 'sr' ? 'POGLEDAJ ZADATAK' : 'VIEW TASK'}
-              </Button>
+              {/* Accept and Reject buttons */}
+              <div className="space-y-3">
+                <Button 
+                  onClick={() => {
+                    setShowNewTaskPopup(false);
+                    acceptAssignment();
+                  }}
+                  className="w-full h-14 text-lg font-bold bg-emerald-500 hover:bg-emerald-600 text-white gap-2"
+                  data-testid="popup-accept-btn"
+                >
+                  <ThumbsUp className="w-6 h-6" />
+                  {language === 'sr' ? 'PRIHVATI' : 'ACCEPT'}
+                </Button>
+                
+                <Button 
+                  onClick={() => {
+                    setShowNewTaskPopup(false);
+                    rejectAssignment();
+                  }}
+                  variant="outline"
+                  className="w-full h-12 font-semibold border-white/50 text-white hover:bg-white/10 gap-2"
+                  data-testid="popup-reject-btn"
+                >
+                  <ThumbsDown className="w-5 h-5" />
+                  {language === 'sr' ? 'ODBIJ' : 'REJECT'}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
