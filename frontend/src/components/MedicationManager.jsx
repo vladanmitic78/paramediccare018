@@ -421,7 +421,7 @@ const MedicationManager = ({ patient, language = 'sr', onClose }) => {
                       </span>
                     </div>
                     {med.notes && (
-                      <p className="text-sm text-slate-600 mt-1 italic">"{med.notes}"</p>
+                      <p className="text-sm text-slate-600 mt-1 italic">&ldquo;{med.notes}&rdquo;</p>
                     )}
                   </div>
                 </div>
