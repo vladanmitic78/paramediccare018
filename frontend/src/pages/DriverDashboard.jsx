@@ -70,9 +70,13 @@ const DriverDashboard = () => {
       setDriverStatus(profileRes.data.status?.status || 'offline');
       
       if (assignmentRes.data.has_assignment) {
-        setAssignment(assignmentRes.data.assignment);
+        const currentAssignment = assignmentRes.data.assignment;
+        setAssignment(currentAssignment);
+        // Store in ref so polling doesn't trigger false "new task" on first load
+        prevAssignmentRef.current = currentAssignment;
       } else {
         setAssignment(null);
+        prevAssignmentRef.current = null;
       }
     } catch (error) {
       console.error('Error fetching driver data:', error);
