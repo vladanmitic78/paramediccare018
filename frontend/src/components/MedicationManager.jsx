@@ -15,7 +15,9 @@ import {
   ChevronDown,
   RefreshCw,
   Check,
-  X
+  X,
+  AlertTriangle,
+  ShieldAlert
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
