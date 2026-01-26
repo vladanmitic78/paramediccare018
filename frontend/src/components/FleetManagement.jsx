@@ -620,9 +620,10 @@ const FleetManagement = () => {
                               onClick={() => handleRemoveMember(vehicle.id, member.user_id)}
                               className="text-red-500 hover:text-red-700 h-7 w-7 p-0"
                             >
-                            <UserMinus className="w-4 h-4" />
-                          </Button>
-                        )}
+                              <UserMinus className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
