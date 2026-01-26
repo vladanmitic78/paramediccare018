@@ -31,9 +31,11 @@ class TestUserDeletion:
             "password": SUPERADMIN_PASSWORD
         })
         assert response.status_code == 200, f"Login failed: {response.text}"
-        token = response.json().get("token")
+        data = response.json()
+        token = data.get("access_token") or data.get("token")
+        assert token, f"No token in response: {data}"
         self.session.headers.update({"Authorization": f"Bearer {token}"})
-        self.superadmin_id = response.json().get("user", {}).get("id")
+        self.superadmin_id = data.get("user", {}).get("id")
         yield
         # Cleanup handled in individual tests
     
@@ -127,7 +129,9 @@ class TestApiKeyManagement:
             "password": SUPERADMIN_PASSWORD
         })
         assert response.status_code == 200, f"Login failed: {response.text}"
-        token = response.json().get("token")
+        data = response.json()
+        token = data.get("access_token") or data.get("token")
+        assert token, f"No token in response: {data}"
         self.session.headers.update({"Authorization": f"Bearer {token}"})
         self.created_key_ids = []
         yield
@@ -279,7 +283,9 @@ class TestAdminUserDeletion:
             "password": SUPERADMIN_PASSWORD
         })
         assert response.status_code == 200, f"Login failed: {response.text}"
-        token = response.json().get("token")
+        data = response.json()
+        token = data.get("access_token") or data.get("token")
+        assert token, f"No token in response: {data}"
         self.session.headers.update({"Authorization": f"Bearer {token}"})
         yield
     
