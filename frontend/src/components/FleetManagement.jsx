@@ -772,19 +772,19 @@ const FleetManagement = () => {
                       'bg-white border-slate-200 hover:border-sky-300'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">{staff.full_name}</p>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-medium text-sm truncate">{staff.full_name}</p>
                           {isAlreadyAssigned && (
-                            <Badge className="bg-emerald-100 text-emerald-800 text-xs">
+                            <Badge className="bg-emerald-100 text-emerald-800 text-xs shrink-0">
                               <CheckCircle className="w-3 h-3 mr-1" />
                               {language === 'sr' ? 'Već u timu' : 'Already assigned'}
                             </Badge>
                           )}
                         </div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge className={`text-xs ${
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                          <Badge className={`text-xs shrink-0 ${
                             staff.role === 'driver' ? 'bg-amber-100 text-amber-800' :
                             staff.role === 'nurse' ? 'bg-pink-100 text-pink-800' :
                             staff.role === 'doctor' ? 'bg-sky-100 text-sky-800' : 'bg-slate-100'
@@ -792,19 +792,19 @@ const FleetManagement = () => {
                             {staff.role}
                           </Badge>
                           {staff.current_assignment && !isAlreadyAssigned && (
-                            <span className="text-xs text-amber-600">
+                            <span className="text-xs text-amber-600 truncate">
                               ⚠️ {staff.current_assignment.vehicle_name}
                             </span>
                           )}
                         </div>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-1.5 shrink-0">
                         {staff.role === 'driver' && !isAlreadyAssigned && (
                           <Button
                             size="sm"
                             variant={isMemberSelected(staff.id, 'driver') ? 'default' : 'outline'}
                             onClick={() => toggleTeamMemberSelection(staff, 'driver')}
-                            className={isMemberSelected(staff.id, 'driver') ? 'bg-amber-600 hover:bg-amber-700' : ''}
+                            className={`h-8 px-2 text-xs ${isMemberSelected(staff.id, 'driver') ? 'bg-amber-600 hover:bg-amber-700' : ''}`}
                           >
                             {isMemberSelected(staff.id, 'driver') ? <CheckCircle className="w-3 h-3 mr-1" /> : null}
                             {language === 'sr' ? 'Vozač' : 'Driver'}
@@ -815,7 +815,7 @@ const FleetManagement = () => {
                             size="sm"
                             variant={isMemberSelected(staff.id, 'nurse') ? 'default' : 'outline'}
                             onClick={() => toggleTeamMemberSelection(staff, 'nurse')}
-                            className={isMemberSelected(staff.id, 'nurse') ? 'bg-pink-600 hover:bg-pink-700' : ''}
+                            className={`h-8 px-2 text-xs ${isMemberSelected(staff.id, 'nurse') ? 'bg-pink-600 hover:bg-pink-700' : ''}`}
                           >
                             {isMemberSelected(staff.id, 'nurse') ? <CheckCircle className="w-3 h-3 mr-1" /> : null}
                             {language === 'sr' ? 'Sestra' : 'Nurse'}
@@ -827,7 +827,7 @@ const FleetManagement = () => {
                               size="sm"
                               variant={isMemberSelected(staff.id, 'doctor') ? 'default' : 'outline'}
                               onClick={() => toggleTeamMemberSelection(staff, 'doctor')}
-                              className={isMemberSelected(staff.id, 'doctor') ? 'bg-sky-600 hover:bg-sky-700' : ''}
+                              className={`h-8 px-2 text-xs ${isMemberSelected(staff.id, 'doctor') ? 'bg-sky-600 hover:bg-sky-700' : ''}`}
                             >
                               {isMemberSelected(staff.id, 'doctor') ? <CheckCircle className="w-3 h-3 mr-1" /> : <Stethoscope className="w-3 h-3 mr-1" />}
                               {language === 'sr' ? 'Fizički' : 'On-site'}
@@ -836,7 +836,7 @@ const FleetManagement = () => {
                               size="sm"
                               variant={isMemberSelected(staff.id, 'remote_doctor') ? 'default' : 'outline'}
                               onClick={() => toggleTeamMemberSelection(staff, 'remote_doctor')}
-                              className={isMemberSelected(staff.id, 'remote_doctor') ? 'bg-indigo-600 hover:bg-indigo-700' : 'text-indigo-600 border-indigo-200 hover:bg-indigo-50'}
+                              className={`h-8 px-2 text-xs ${isMemberSelected(staff.id, 'remote_doctor') ? 'bg-indigo-600 hover:bg-indigo-700' : 'text-indigo-600 border-indigo-200 hover:bg-indigo-50'}`}
                             >
                               {isMemberSelected(staff.id, 'remote_doctor') ? <CheckCircle className="w-3 h-3 mr-1" /> : <Video className="w-3 h-3 mr-1" />}
                               {language === 'sr' ? 'Daljinski' : 'Remote'}
