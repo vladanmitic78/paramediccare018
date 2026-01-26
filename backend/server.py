@@ -3332,7 +3332,7 @@ async def accept_assignment(
     await db.bookings.update_one(
         {"id": booking_id},
         {"$set": {
-            "status": "in_progress",
+            "status": "en_route",
             "driver_accepted_at": datetime.now(timezone.utc).isoformat(),
             "updated_at": datetime.now(timezone.utc).isoformat()
         }}
