@@ -45,16 +45,21 @@ const Login = () => {
         // Check if on mobile device
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
         
-        // Redirect based on role
-        if (user.role === 'driver') {
-          navigate('/driver');
-        } else if (['doctor', 'nurse'].includes(user.role)) {
-          navigate(isMobile ? '/medical-pwa' : '/medical');
-        } else if (['admin', 'superadmin'].includes(user.role)) {
-          navigate(isMobile ? '/admin-app' : '/dashboard');
+        // Redirect based on role and device
+        if (isMobile) {
+          // All mobile users go to unified PWA
+          navigate('/app');
         } else {
-          // Regular users go to patient portal
-          navigate('/patient');
+          // Desktop users go to role-specific pages
+          if (user.role === 'driver') {
+            navigate('/driver');
+          } else if (['doctor', 'nurse'].includes(user.role)) {
+            navigate('/medical');
+          } else if (['admin', 'superadmin'].includes(user.role)) {
+            navigate('/dashboard');
+          } else {
+            navigate('/patient');
+          }
         }
       } else {
         // Registration - now returns message instead of token
