@@ -54,7 +54,11 @@ from models import (
     MedicalCheckCreate, MedicalCheckResponse,
     AvailabilityStatus, AvailabilityCreate, AvailabilityUpdate, AvailabilityResponse,
     DriverStatus, DriverLocationUpdate, DriverStatusUpdate,
-    DriverAssignment, ConnectionManager
+    DriverAssignment, ConnectionManager,
+    VehicleStatus, VehicleType, TeamRole, TeamMemberAssignment,
+    ShiftSchedule, VehicleCreate, VehicleUpdate, VehicleResponse,
+    TeamAssignmentCreate, TeamAssignmentUpdate, MissionTeamLock,
+    TeamAuditEntry, MissionTeamValidation
 )
 
 # Import auth utilities
