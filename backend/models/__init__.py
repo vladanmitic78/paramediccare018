@@ -22,6 +22,12 @@ from .driver import (
     DriverStatus, DriverLocationUpdate, DriverStatusUpdate,
     DriverAssignment, ConnectionManager
 )
+from .vehicle import (
+    VehicleStatus, VehicleType, TeamRole, TeamMemberAssignment,
+    ShiftSchedule, VehicleCreate, VehicleUpdate, VehicleResponse,
+    TeamAssignmentCreate, TeamAssignmentUpdate, MissionTeamLock,
+    TeamAuditEntry, MissionTeamValidation
+)
 
 __all__ = [
     # User models
@@ -40,5 +46,10 @@ __all__ = [
     'AvailabilityStatus', 'AvailabilityCreate', 'AvailabilityUpdate', 'AvailabilityResponse',
     # Driver models
     'DriverStatus', 'DriverLocationUpdate', 'DriverStatusUpdate',
-    'DriverAssignment', 'ConnectionManager'
+    'DriverAssignment', 'ConnectionManager',
+    # Vehicle & Team models
+    'VehicleStatus', 'VehicleType', 'TeamRole', 'TeamMemberAssignment',
+    'ShiftSchedule', 'VehicleCreate', 'VehicleUpdate', 'VehicleResponse',
+    'TeamAssignmentCreate', 'TeamAssignmentUpdate', 'MissionTeamLock',
+    'TeamAuditEntry', 'MissionTeamValidation'
 ]
