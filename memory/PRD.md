@@ -367,19 +367,68 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
 
 ```
 /app/backend/
-├── server.py           # Main app (3985 lines, reduced from 4559)
+├── server.py           # Main app (~4500 lines with Fleet APIs)
 ├── config.py           # Database, JWT, email settings (44 lines)
-├── models/             # Pydantic models (575 lines total)
+├── models/             # Pydantic models (~700 lines total)
 │   ├── __init__.py     # Exports all models
 │   ├── user.py         # UserRole, UserCreate, UserLogin, UserResponse
 │   ├── booking.py      # BookingStatus, PatientBookingCreate, InvoiceResponse
 │   ├── medical.py      # VitalSigns, MedicalCheck, Availability models
-│   └── driver.py       # DriverStatus, ConnectionManager
+│   ├── driver.py       # DriverStatus, ConnectionManager
+│   └── vehicle.py      # Vehicle, Team Assignment, Audit models (NEW)
 ├── utils/              # Shared utilities (97 lines)
 │   ├── __init__.py
 │   └── auth.py         # JWT, password hashing, role checking
 └── server_backup.py    # Backup before refactoring
 ```
+
+### Phase 9 - Fleet Management & Team Assignment (NEW - Jan 26, 2026) ✅
+
+#### Vehicle-Centric Team Assignment Module
+A comprehensive fleet management system where each ambulance has assigned teams.
+
+**Data Model:**
+- **Vehicles**: id, name, registration_plate, vehicle_type, status, equipment[], required_roles[], optional_roles[]
+- **Vehicle Teams**: vehicle_id, user_id, role, is_primary, is_remote, assigned_at, assigned_by, is_active
+- **Team Locks**: vehicle_id, mission_id, locked_team[], locked_at, is_active
+- **Team Audit**: vehicle_id, action, user_id, role, performed_by, timestamp, reason, handover_notes
+
+**API Endpoints:**
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | /api/fleet/vehicles | List all vehicles with current team |
+| POST | /api/fleet/vehicles | Create new vehicle |
+| GET | /api/fleet/vehicles/{id} | Get vehicle details + audit trail |
+| PUT | /api/fleet/vehicles/{id} | Update vehicle |
+| DELETE | /api/fleet/vehicles/{id} | Delete vehicle (superadmin) |
+| POST | /api/fleet/vehicles/{id}/team | Assign team member |
+| DELETE | /api/fleet/vehicles/{id}/team/{user_id} | Remove team member |
+| PUT | /api/fleet/vehicles/{id}/team/{user_id}/replace | Replace with handover notes |
+| POST | /api/fleet/vehicles/{id}/lock | Lock team for mission start |
+| POST | /api/fleet/vehicles/{id}/unlock | Unlock team when mission ends |
+| POST | /api/fleet/vehicles/{id}/emergency-override | Emergency team change during mission |
+| POST | /api/fleet/vehicles/{id}/remote-doctor | Add telemedicine doctor |
+| DELETE | /api/fleet/vehicles/{id}/remote-doctor/{id} | Remove remote doctor |
+| GET | /api/fleet/vehicles/{id}/validate-team | Check if required roles filled |
+| GET | /api/fleet/vehicles/{id}/audit | Get full audit trail |
+| GET | /api/fleet/available-staff | Get staff available for assignment |
+
+**UI Features (Admin > Flota > Vozila & Timovi):**
+1. Vehicle cards showing: name, registration, status, current team, required roles
+2. Status badges: Dostupno (green), Na misiji (blue), Održavanje (amber), Van funkcije (red)
+3. Required roles with visual indicators (red = missing, green = filled)
+4. Team assignment dialog with staff search and role-based buttons
+5. Remote doctor support: Fizički (On-site) vs Daljinski (Remote)
+6. Audit log viewer with timestamps and performer info
+7. Add Vehicle dialog with equipment multi-select
+
+**Edge Cases Handled:**
+- Mission start blocked if required roles not filled
+- Team locking prevents changes during active transport
+- Emergency override for critical situations (requires reason)
+- Reassignment warning when staff moved between vehicles
+- Remote doctors don't break team integrity
+- Full audit trail for compliance/government standards
 
 **Benefits achieved:**
 - Reduced server.py by ~574 lines (12.6% reduction)
