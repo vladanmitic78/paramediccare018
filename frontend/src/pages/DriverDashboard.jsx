@@ -449,6 +449,45 @@ const DriverDashboard = () => {
 
   return (
     <div className="min-h-screen bg-slate-900 text-white flex flex-col" data-testid="driver-dashboard">
+      {/* NEW TASK POPUP */}
+      {showNewTaskPopup && assignment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-gradient-to-b from-red-600 to-red-800 rounded-2xl p-6 mx-4 max-w-sm w-full shadow-2xl border-2 border-red-400 animate-in zoom-in-95">
+            <div className="text-center">
+              <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                <AlertCircle className="w-12 h-12 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-2">
+                {language === 'sr' ? '🚨 NOVI ZADATAK!' : '🚨 NEW TASK!'}
+              </h2>
+              <p className="text-red-100 mb-4">
+                {language === 'sr' ? 'Primili ste novi zadatak za transport' : 'You have received a new transport task'}
+              </p>
+              
+              <div className="bg-white/10 rounded-lg p-4 mb-4 text-left">
+                <p className="text-white font-semibold">{assignment.patient_name}</p>
+                <p className="text-red-100 text-sm flex items-center gap-2 mt-2">
+                  <MapPin className="w-4 h-4" />
+                  {assignment.pickup_address}
+                </p>
+                <p className="text-red-100 text-sm flex items-center gap-2 mt-1">
+                  <Navigation className="w-4 h-4" />
+                  {assignment.destination_address}
+                </p>
+              </div>
+              
+              <Button 
+                onClick={() => setShowNewTaskPopup(false)}
+                className="w-full h-14 text-lg font-bold bg-white text-red-600 hover:bg-red-50"
+                data-testid="view-task-btn"
+              >
+                {language === 'sr' ? 'POGLEDAJ ZADATAK' : 'VIEW TASK'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="bg-slate-800 border-b border-slate-700 px-4 py-3">
         <div className="flex items-center justify-between">
