@@ -473,6 +473,7 @@ const Dashboard = () => {
       label: language === 'sr' ? 'Flota' : 'Fleet',
       items: [
         { id: 'vehicles', icon: Truck, label: language === 'sr' ? 'Vozila & Timovi' : 'Vehicles & Teams' },
+        { id: 'fleet-history', icon: Clock, label: language === 'sr' ? 'Istorija' : 'History' },
         { id: 'livemap', icon: Map, label: language === 'sr' ? 'Praćenje vozila' : 'Live Tracking' },
       ]
     }] : []),
