@@ -288,13 +288,21 @@ const DroppableBookingCard = ({ booking, language, isOver }) => {
     pending: 'border-l-red-500 bg-red-50',
     confirmed: 'border-l-blue-500 bg-blue-50',
     in_progress: 'border-l-amber-500 bg-amber-50',
+    en_route: 'border-l-purple-500 bg-purple-50',
+    on_site: 'border-l-orange-500 bg-orange-50',
+    transporting: 'border-l-emerald-500 bg-emerald-50',
   };
 
   const statusLabels = {
-    pending: { sr: 'Čeka', en: 'Pending' },
-    confirmed: { sr: 'Potvrđeno', en: 'Confirmed' },
-    in_progress: { sr: 'U toku', en: 'In Progress' },
+    pending: { sr: 'Čeka', en: 'Pending', color: 'bg-red-100 text-red-700' },
+    confirmed: { sr: 'Potvrđeno', en: 'Confirmed', color: 'bg-blue-100 text-blue-700' },
+    in_progress: { sr: 'U toku', en: 'In Progress', color: 'bg-amber-100 text-amber-700' },
+    en_route: { sr: 'Na putu', en: 'En Route', color: 'bg-purple-100 text-purple-700', pulse: true },
+    on_site: { sr: 'Na lokaciji', en: 'On Site', color: 'bg-orange-100 text-orange-700', pulse: true },
+    transporting: { sr: 'U transportu', en: 'Transporting', color: 'bg-emerald-100 text-emerald-700', pulse: true },
   };
+
+  const currentStatus = statusLabels[booking.status] || { sr: booking.status, en: booking.status, color: 'bg-slate-100 text-slate-700' };
 
   // Only pending bookings without driver are droppable
   const isDroppable = booking.status === 'pending' && !booking.assigned_driver;
@@ -306,7 +314,7 @@ const DroppableBookingCard = ({ booking, language, isOver }) => {
         bg-white rounded-lg border-l-4 shadow-sm p-4 mb-3 transition-all duration-200
         ${statusColors[booking.status] || 'border-l-slate-300'}
         ${dropIsOver && isDroppable ? 'ring-2 ring-emerald-500 ring-offset-2 scale-[1.02] shadow-lg bg-emerald-50' : ''}
-        ${!isDroppable ? 'opacity-70' : ''}
+        ${!isDroppable && booking.status === 'pending' ? 'opacity-70' : ''}
       `}
       data-testid={`booking-card-${booking.id}`}
     >
@@ -317,12 +325,11 @@ const DroppableBookingCard = ({ booking, language, isOver }) => {
             {booking.patient_name}
           </span>
         </div>
-        <Badge className={`text-[10px] px-2 py-0.5 ${
-          booking.status === 'pending' ? 'bg-red-100 text-red-700' :
-          booking.status === 'confirmed' ? 'bg-blue-100 text-blue-700' :
-          'bg-amber-100 text-amber-700'
-        }`}>
-          {statusLabels[booking.status]?.[language] || booking.status}
+        <Badge className={`text-[10px] px-2 py-0.5 flex items-center gap-1 ${currentStatus.color}`}>
+          {currentStatus.pulse && (
+            <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
+          )}
+          {currentStatus[language] || booking.status}
         </Badge>
       </div>
 
@@ -350,11 +357,21 @@ const DroppableBookingCard = ({ booking, language, isOver }) => {
       </div>
 
       {booking.assigned_driver_name ? (
-        <div className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-2">
-          <CheckCircle className="w-4 h-4 text-emerald-600" />
-          <span className="text-sm text-emerald-700 font-medium">
-            {language === 'sr' ? 'Dodeljeno:' : 'Assigned:'} {booking.assigned_driver_name}
-          </span>
+        <div className="mt-3 pt-3 border-t border-slate-100">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-emerald-600" />
+              <span className="text-sm text-emerald-700 font-medium">
+                {booking.assigned_driver_name}
+              </span>
+            </div>
+            {['en_route', 'on_site', 'transporting'].includes(booking.status) && (
+              <span className="text-xs text-slate-500 flex items-center gap-1">
+                <Activity className="w-3 h-3 animate-pulse" />
+                LIVE
+              </span>
+            )}
+          </div>
         </div>
       ) : isDroppable ? (
         <div className={`
