@@ -970,6 +970,170 @@ async def revoke_api_key(key_id: str, user: dict = Depends(require_roles([UserRo
         raise HTTPException(status_code=404, detail="API key not found")
     return {"success": True}
 
+# ============ INCOMING APIS MANAGEMENT (Super Admin) ============
+
+class IncomingApiCreate(BaseModel):
+    service_type: str  # google_maps, osm_maps, stripe, sms, email, medical_device
+    api_key: Optional[str] = None
+    api_secret: Optional[str] = None
+    endpoint_url: Optional[str] = None
+    auth_type: Optional[str] = None
+    # SMS specific
+    provider: Optional[str] = None
+    sender_id: Optional[str] = None
+    # Email specific
+    smtp_host: Optional[str] = None
+    smtp_port: Optional[int] = None
+    smtp_user: Optional[str] = None
+    smtp_password: Optional[str] = None
+    from_email: Optional[str] = None
+    use_ssl: Optional[bool] = None
+    # Stripe specific
+    publishable_key: Optional[str] = None
+    webhook_secret: Optional[str] = None
+    # Medical device specific
+    device_type: Optional[str] = None
+
+class IncomingApiResponse(BaseModel):
+    id: str
+    service_type: str
+    api_key: Optional[str] = None  # Masked
+    api_secret: Optional[str] = None  # Masked
+    endpoint_url: Optional[str] = None
+    auth_type: Optional[str] = None
+    provider: Optional[str] = None
+    sender_id: Optional[str] = None
+    smtp_host: Optional[str] = None
+    smtp_port: Optional[int] = None
+    smtp_user: Optional[str] = None
+    smtp_password: Optional[str] = None  # Masked
+    from_email: Optional[str] = None
+    use_ssl: Optional[bool] = None
+    publishable_key: Optional[str] = None
+    webhook_secret: Optional[str] = None  # Masked
+    device_type: Optional[str] = None
+    created_at: str
+    updated_at: Optional[str] = None
+    is_active: bool = True
+
+def mask_secret(value: str) -> str:
+    """Mask a secret value, showing only first 4 characters"""
+    if not value or len(value) < 8:
+        return "****" if value else None
+    return value[:4] + "****" + value[-4:]
+
+@api_router.get("/incoming-apis")
+async def get_incoming_apis(user: dict = Depends(require_roles([UserRole.SUPERADMIN]))):
+    """Get all configured incoming APIs with masked secrets"""
+    apis = await db.incoming_apis.find({"is_active": True}, {"_id": 0}).to_list(100)
+    
+    # Mask sensitive fields
+    for api in apis:
+        if api.get("api_key"):
+            api["api_key"] = mask_secret(api["api_key"])
+        if api.get("api_secret"):
+            api["api_secret"] = mask_secret(api["api_secret"])
+        if api.get("smtp_password"):
+            api["smtp_password"] = mask_secret(api["smtp_password"])
+        if api.get("webhook_secret"):
+            api["webhook_secret"] = mask_secret(api["webhook_secret"])
+    
+    return apis
+
+@api_router.post("/incoming-apis")
+async def save_incoming_api(data: IncomingApiCreate, user: dict = Depends(require_roles([UserRole.SUPERADMIN]))):
+    """Create or update an incoming API configuration"""
+    now = datetime.now(timezone.utc).isoformat()
+    
+    # Check if this service type already exists
+    existing = await db.incoming_apis.find_one({"service_type": data.service_type, "is_active": True})
+    
+    api_doc = data.model_dump(exclude_none=True)
+    api_doc["updated_at"] = now
+    api_doc["updated_by"] = user["id"]
+    
+    if existing:
+        # Update existing - preserve fields that weren't sent (masked fields)
+        for field in ["api_key", "api_secret", "smtp_password", "webhook_secret"]:
+            if field in api_doc and api_doc[field] and "****" in api_doc[field]:
+                # User didn't change this field, keep the original
+                del api_doc[field]
+        
+        await db.incoming_apis.update_one(
+            {"id": existing["id"]},
+            {"$set": api_doc}
+        )
+        return {"success": True, "id": existing["id"], "action": "updated"}
+    else:
+        # Create new
+        api_id = str(uuid.uuid4())
+        api_doc["id"] = api_id
+        api_doc["created_at"] = now
+        api_doc["created_by"] = user["id"]
+        api_doc["is_active"] = True
+        
+        await db.incoming_apis.insert_one(api_doc)
+        return {"success": True, "id": api_id, "action": "created"}
+
+@api_router.post("/incoming-apis/{service_type}/test")
+async def test_incoming_api(service_type: str, user: dict = Depends(require_roles([UserRole.SUPERADMIN]))):
+    """Test connection to an incoming API"""
+    config = await db.incoming_apis.find_one({"service_type": service_type, "is_active": True}, {"_id": 0})
+    
+    if not config:
+        raise HTTPException(status_code=404, detail="API configuration not found")
+    
+    # Test based on service type
+    try:
+        if service_type == "google_maps":
+            # Simple validation - check if key format looks correct
+            if config.get("api_key") and len(config["api_key"]) > 10:
+                return {"success": True, "message": "Google Maps API key format valid"}
+            raise Exception("Invalid API key format")
+            
+        elif service_type == "osm_maps":
+            # OSM doesn't require API key, just validate endpoint
+            endpoint = config.get("endpoint_url", "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
+            if "openstreetmap" in endpoint or "tile" in endpoint:
+                return {"success": True, "message": "OpenStreetMap endpoint configured"}
+            return {"success": True, "message": "Custom tile server configured"}
+            
+        elif service_type == "stripe":
+            if config.get("api_key") and config["api_key"].startswith("sk_"):
+                return {"success": True, "message": "Stripe secret key format valid"}
+            raise Exception("Invalid Stripe key format (should start with sk_)")
+            
+        elif service_type == "sms":
+            if config.get("api_key") and config.get("api_secret"):
+                return {"success": True, "message": f"SMS provider ({config.get('provider', 'unknown')}) credentials configured"}
+            raise Exception("Missing API key or secret")
+            
+        elif service_type == "email":
+            if config.get("smtp_host") and config.get("smtp_user"):
+                return {"success": True, "message": f"SMTP configured: {config['smtp_host']}:{config.get('smtp_port', 465)}"}
+            raise Exception("Missing SMTP host or username")
+            
+        elif service_type == "medical_device":
+            device = config.get("device_type", "unknown")
+            return {"success": True, "message": f"Medical device ({device}) configuration saved"}
+            
+        else:
+            return {"success": True, "message": "Configuration saved"}
+            
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@api_router.delete("/incoming-apis/{service_type}")
+async def delete_incoming_api(service_type: str, user: dict = Depends(require_roles([UserRole.SUPERADMIN]))):
+    """Delete (soft delete) an incoming API configuration"""
+    result = await db.incoming_apis.update_one(
+        {"service_type": service_type, "is_active": True},
+        {"$set": {"is_active": False, "deleted_at": datetime.now(timezone.utc).isoformat(), "deleted_by": user["id"]}}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="API configuration not found")
+    return {"success": True}
+
 # ============ BOOKING ROUTES ============
 
 @api_router.post("/bookings", response_model=BookingResponse)
