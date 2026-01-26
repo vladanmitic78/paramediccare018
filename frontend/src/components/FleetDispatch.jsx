@@ -573,7 +573,10 @@ const FleetDispatch = () => {
       setShowConfirmAssignment(false);
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.detail || (language === 'sr' ? 'Greška' : 'Error'));
+      const errMsg = typeof error.response?.data?.detail === 'string' 
+        ? error.response.data.detail 
+        : (language === 'sr' ? 'Greška' : 'Error');
+      toast.error(errMsg);
     } finally {
       setSavingTeam(false);
     }
