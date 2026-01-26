@@ -457,6 +457,23 @@ A comprehensive fleet management system where each ambulance has assigned teams.
 12. **Fleet History Page** - Track completed missions, search, expandable details (Jan 26, 2026) ✅
 13. **Complete Mission Flow** - Mark mission complete, clear team, transfer to history (Jan 26, 2026) ✅
 
+#### Phase 5: Admin Enhancements (NEW - Jan 26, 2026) ✅
+1. **User Deletion Enhancement**
+   - Admin users (not just superadmin) can delete users from Settings > Users
+   - Confirmation modal with user details and warning
+   - Protection: Superadmin accounts cannot be deleted
+   - Protection: Admins cannot delete other admin accounts
+   - Backend DELETE /api/users/{user_id} supports ADMIN and SUPERADMIN roles
+
+2. **API Key Management Page**
+   - New page under Settings > API Settings (superadmin only)
+   - Create API keys with name and permissions (read/write/delete)
+   - Full key shown only once on creation (security)
+   - Active keys list shows key prefix, permissions, creation date
+   - Revoke keys (soft delete with audit trail)
+   - API documentation section with usage example
+   - Backend endpoints: GET/POST/DELETE /api/apikeys
+
 **Edge Cases Handled:**
 - Mission start blocked if required roles not filled
 - Team locking prevents changes during active transport
