@@ -127,7 +127,13 @@ const DraggableVehicleCard = ({ vehicle, language, onAssignClick, onVideoCall, o
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
           {isDraggable && (
-            <GripVertical className="w-4 h-4 text-slate-400" />
+            <div 
+              className="cursor-grab active:cursor-grabbing p-1 hover:bg-slate-100 rounded"
+              {...attributes}
+              {...listeners}
+            >
+              <GripVertical className="w-4 h-4 text-slate-400" />
+            </div>
           )}
           <div className="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center">
             <Ambulance className="w-5 h-5 text-white" />
