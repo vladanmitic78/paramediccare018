@@ -1,0 +1,834 @@
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
+import {
+  Truck,
+  MapPin,
+  Navigation,
+  Phone,
+  User,
+  Clock,
+  CheckCircle,
+  LogOut,
+  AlertCircle,
+  Loader2,
+  RefreshCw,
+  Globe,
+  Calendar,
+  Users,
+  Activity,
+  ChevronRight,
+  X,
+  Heart,
+  Thermometer,
+  ThumbsUp,
+  ThumbsDown,
+  Play,
+  Square,
+  Bell,
+  Home,
+  Settings,
+  ClipboardList,
+  Stethoscope,
+  Plus
+} from 'lucide-react';
+import { Button } from '../components/ui/button';
+import { Badge } from '../components/ui/badge';
+import { Input } from '../components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select';
+import { toast } from 'sonner';
+import axios from 'axios';
+
+const API = process.env.REACT_APP_BACKEND_URL;
+
+// Custom hook for PWA manifest
+const usePWAManifest = () => {
+  useEffect(() => {
+    const manifestLink = document.getElementById('pwa-manifest');
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    const originalManifest = manifestLink?.href;
+    const originalThemeColor = themeColorMeta?.content;
+    
+    document.title = 'PC018 Mobile - Paramedic Care 018';
+    if (manifestLink) manifestLink.href = '/manifest-mobile.json';
+    if (themeColorMeta) themeColorMeta.content = '#0f172a';
+    
+    return () => {
+      document.title = 'Paramedic Care 018';
+      if (manifestLink && originalManifest) manifestLink.href = originalManifest;
+      if (themeColorMeta && originalThemeColor) themeColorMeta.content = originalThemeColor;
+    };
+  }, []);
+};
+
+// Wake Lock hook
+const useWakeLock = (enabled) => {
+  const wakeLockRef = useRef(null);
+  
+  useEffect(() => {
+    const requestWakeLock = async () => {
+      if (enabled && 'wakeLock' in navigator) {
+        try {
+          wakeLockRef.current = await navigator.wakeLock.request('screen');
+        } catch (err) {
+          console.log('Wake Lock error:', err.message);
+        }
+      }
+    };
+    
+    if (enabled) {
+      requestWakeLock();
+      const handleVisibility = () => {
+        if (document.visibilityState === 'visible' && enabled) requestWakeLock();
+      };
+      document.addEventListener('visibilitychange', handleVisibility);
+      return () => {
+        if (wakeLockRef.current) wakeLockRef.current.release();
+        document.removeEventListener('visibilitychange', handleVisibility);
+      };
+    }
+  }, [enabled]);
+};
+
+// Map icons
+const driverIcon = new L.DivIcon({
+  className: 'driver-marker',
+  html: `<div style="background: #3b82f6; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;">
+    <div style="width: 10px; height: 10px; background: white; border-radius: 50%;"></div>
+  </div>`,
+  iconSize: [28, 28],
+  iconAnchor: [14, 14]
+});
+
+const destinationIcon = new L.DivIcon({
+  className: 'destination-marker',
+  html: `<div style="background: #ef4444; width: 32px; height: 32px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>`,
+  iconSize: [32, 32],
+  iconAnchor: [16, 32]
+});
+
+// Map bounds updater
+const MapBoundsUpdater = ({ positions }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (positions && positions.length > 0) {
+      const bounds = L.latLngBounds(positions);
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }, [map, positions]);
+  return null;
+};
+
+// Status configurations
+const statusConfig = {
+  pending: { label: { sr: 'Čeka', en: 'Pending' }, color: 'bg-red-500', textColor: 'text-red-700', bgLight: 'bg-red-50', border: 'border-red-500' },
+  confirmed: { label: { sr: 'Potvrđeno', en: 'Confirmed' }, color: 'bg-blue-500', textColor: 'text-blue-700', bgLight: 'bg-blue-50', border: 'border-blue-500' },
+  en_route: { label: { sr: 'Na putu', en: 'En Route' }, color: 'bg-purple-500', textColor: 'text-purple-700', bgLight: 'bg-purple-50', border: 'border-purple-500', pulse: true },
+  on_site: { label: { sr: 'Na lokaciji', en: 'On Site' }, color: 'bg-orange-500', textColor: 'text-orange-700', bgLight: 'bg-orange-50', border: 'border-orange-500', pulse: true },
+  transporting: { label: { sr: 'U transportu', en: 'Transporting' }, color: 'bg-emerald-500', textColor: 'text-emerald-700', bgLight: 'bg-emerald-50', border: 'border-emerald-500', pulse: true },
+  completed: { label: { sr: 'Završeno', en: 'Completed' }, color: 'bg-slate-400', textColor: 'text-slate-700', bgLight: 'bg-slate-50', border: 'border-slate-400' }
+};
+
+const UnifiedPWA = () => {
+  usePWAManifest();
+  
+  const { language, toggleLanguage } = useLanguage();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState('home');
+  
+  // Shared state
+  const [bookings, setBookings] = useState([]);
+  const [drivers, setDrivers] = useState([]);
+  
+  // Driver-specific state
+  const [driverStatus, setDriverStatus] = useState('offline');
+  const [assignment, setAssignment] = useState(null);
+  const [lastLocation, setLastLocation] = useState(null);
+  const [showNewTaskPopup, setShowNewTaskPopup] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const prevAssignmentRef = useRef(null);
+  const watchIdRef = useRef(null);
+  
+  // Admin-specific state
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [selectedDriver, setSelectedDriver] = useState('');
+  const [assigning, setAssigning] = useState(false);
+  const [showCreateBooking, setShowCreateBooking] = useState(false);
+  
+  // Role checks
+  const isDriver = user?.role === 'driver';
+  const isMedical = ['doctor', 'nurse'].includes(user?.role);
+  const isAdmin = ['admin', 'superadmin'].includes(user?.role);
+  
+  // Keep screen awake during active transport (driver)
+  const isActiveTransport = ['en_route', 'on_site', 'transporting'].includes(driverStatus);
+  useWakeLock(isDriver && isActiveTransport);
+
+  // Fetch data based on role
+  const fetchData = useCallback(async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    try {
+      if (isDriver) {
+        // Driver: fetch profile and assignment
+        const [profileRes, assignmentRes] = await Promise.all([
+          axios.get(`${API}/api/driver/profile`),
+          axios.get(`${API}/api/driver/assignment`)
+        ]);
+        
+        setDriverStatus(profileRes.data.status?.status || 'offline');
+        
+        if (assignmentRes.data.has_assignment) {
+          const newAssignment = assignmentRes.data.assignment;
+          // Check if this is a NEW assignment
+          if (!prevAssignmentRef.current || prevAssignmentRef.current.id !== newAssignment.id) {
+            if (prevAssignmentRef.current !== null) {
+              setShowNewTaskPopup(true);
+              // Audio/vibration alert
+              try {
+                if ('vibrate' in navigator) navigator.vibrate([200, 100, 200, 100, 200]);
+                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2Onp2ZkYV6c3N8iJOcn5uTiHxxbnJ+jJifoJqRhXlwb3WCj5qfopmQhHlwcHaEkZyhn5mPgndvcnmHlJ6in5eNf3Zwc3yKl6CinpWLfXRydYCOmqGhnpOIfHNzeIWSmaCgnZGFeXN0e4mWn6GemY5/d3R3gY+boaCblol7dHV6h5OdoJ6Yj4J4dXd+jZmfn5yVi397d3l/kZqfnpqTiH15eHyDlJyfnZiQg3t4en+Hl56dnJWOgXp5e4KMmp2cm5OLfnl6fIWQm52blo+Cfnp7f4mUm5yalI2AfHt8goyYm5uYko5/fHx9hY+ZmpqWkIx+fHx+iJOZmpiUj4p9fH1/i5WZmZaTjoh9fH2Bj5aYl5WRi4Z+fX6DkpWXlpOPiYR+fn+FlZWVlJGNh4F/f4GIk5WUk5CMhoJ/gIOKkpOTkY6KhIF/gYWNkZKRj4uIg4CAg4iPkZCPjImFgYCChYuOj4+MioeDgYGEiIyOjYuJhoOBgYOGio2MjIqHhIKBg4aJi4uKiIaEgoKEh4mKiYiGhIOCg4WHiYiIh4WDg4OEhoeHh4aFhIODhIWGh4aGhYSDg4SEhYaGhYWEg4ODhIWFhYWEhIODg4SEhYWFhISDg4OEhIWEhISEg4ODhISEhISEhIODg4SEhISEhISDg4OEhISEhISDg4ODg4SEhISDg4ODg4OEhISDg4ODg4ODhISDg4ODg4ODg4SDg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4OD');
+                audio.play();
+              } catch (e) {}
+            }
+            prevAssignmentRef.current = newAssignment;
+          }
+          setAssignment(newAssignment);
+        } else {
+          setAssignment(null);
+          prevAssignmentRef.current = null;
+        }
+      } else {
+        // Admin/Medical: fetch bookings and drivers
+        const [bookingsRes, usersRes] = await Promise.all([
+          axios.get(`${API}/api/bookings`),
+          axios.get(`${API}/api/users`)
+        ]);
+        
+        setBookings(bookingsRes.data);
+        setDrivers(usersRes.data.filter(u => u.role === 'driver'));
+      }
+      
+      if (isRefresh) toast.success(language === 'sr' ? 'Osveženo!' : 'Refreshed!');
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [isDriver, language]);
+
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(() => fetchData(), 5000);
+    return () => clearInterval(interval);
+  }, [fetchData]);
+
+  // GPS tracking for drivers
+  useEffect(() => {
+    if (isDriver && isActiveTransport && 'geolocation' in navigator) {
+      watchIdRef.current = navigator.geolocation.watchPosition(
+        (position) => {
+          setLastLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            speed: position.coords.speed ? position.coords.speed * 3.6 : null
+          });
+        },
+        (error) => console.error('GPS error:', error),
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+      return () => {
+        if (watchIdRef.current) navigator.geolocation.clearWatch(watchIdRef.current);
+      };
+    }
+  }, [isDriver, isActiveTransport]);
+
+  // Driver actions
+  const acceptAssignment = async () => {
+    if (!assignment) return;
+    setUpdatingStatus(true);
+    try {
+      await axios.post(`${API}/api/driver/accept-assignment/${assignment.id}`);
+      toast.success(language === 'sr' ? 'Zadatak prihvaćen!' : 'Task accepted!');
+      fetchData();
+    } catch (error) {
+      toast.error(language === 'sr' ? 'Greška' : 'Error');
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  const rejectAssignment = async () => {
+    if (!assignment) return;
+    setUpdatingStatus(true);
+    try {
+      await axios.post(`${API}/api/driver/reject-assignment/${assignment.id}`);
+      toast.success(language === 'sr' ? 'Zadatak odbijen' : 'Task rejected');
+      setAssignment(null);
+      prevAssignmentRef.current = null;
+      fetchData();
+    } catch (error) {
+      toast.error(language === 'sr' ? 'Greška' : 'Error');
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  const updateDriverStatus = async (newStatus) => {
+    setUpdatingStatus(true);
+    try {
+      await axios.put(`${API}/api/driver/status`, {
+        status: newStatus,
+        booking_id: assignment?.id
+      });
+      setDriverStatus(newStatus);
+      fetchData();
+    } catch (error) {
+      toast.error(language === 'sr' ? 'Greška' : 'Error');
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  const completeTransport = async () => {
+    if (!assignment) return;
+    setUpdatingStatus(true);
+    try {
+      await axios.post(`${API}/api/driver/complete-transport/${assignment.id}`);
+      toast.success(language === 'sr' ? 'Transport završen!' : 'Transport completed!');
+      setAssignment(null);
+      prevAssignmentRef.current = null;
+      setDriverStatus('available');
+      fetchData();
+    } catch (error) {
+      toast.error(language === 'sr' ? 'Greška' : 'Error');
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  const openNavigation = (lat, lng, address) => {
+    let url;
+    if (lat && lng) {
+      url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    } else if (address) {
+      url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
+    } else {
+      toast.error(language === 'sr' ? 'Adresa nije dostupna' : 'Address not available');
+      return;
+    }
+    window.open(url, '_blank');
+  };
+
+  // Admin actions
+  const assignDriver = async () => {
+    if (!selectedBooking || !selectedDriver) return;
+    setAssigning(true);
+    try {
+      await axios.post(`${API}/api/admin/assign-driver-public?booking_id=${selectedBooking.id}&driver_id=${selectedDriver}`);
+      toast.success(language === 'sr' ? 'Vozač dodeljen!' : 'Driver assigned!');
+      setShowAssignModal(false);
+      setSelectedBooking(null);
+      setSelectedDriver('');
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || (language === 'sr' ? 'Greška' : 'Error'));
+    } finally {
+      setAssigning(false);
+    }
+  };
+
+  // Logout
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  // Computed values
+  const pendingBookings = bookings.filter(b => b.status === 'pending');
+  const activeBookings = bookings.filter(b => ['confirmed', 'en_route', 'on_site', 'transporting'].includes(b.status));
+  const availableDrivers = drivers.filter(d => !bookings.some(b => b.assigned_driver === d.id && ['confirmed', 'en_route', 'on_site', 'transporting'].includes(b.status)));
+
+  // Get role label
+  const getRoleLabel = () => {
+    const labels = {
+      driver: { sr: 'Vozač', en: 'Driver' },
+      doctor: { sr: 'Lekar', en: 'Doctor' },
+      nurse: { sr: 'Medicinska sestra', en: 'Nurse' },
+      admin: { sr: 'Administrator', en: 'Admin' },
+      superadmin: { sr: 'Super Admin', en: 'Super Admin' }
+    };
+    return labels[user?.role]?.[language] || user?.role;
+  };
+
+  // Get status label
+  const getDriverStatusLabel = () => {
+    const labels = {
+      offline: { sr: 'Odjavljeni', en: 'Offline' },
+      available: { sr: 'Dostupan', en: 'Available' },
+      assigned: { sr: 'Dodeljen', en: 'Assigned' },
+      en_route: { sr: 'Na putu', en: 'En Route' },
+      on_site: { sr: 'Na lokaciji', en: 'On Site' },
+      transporting: { sr: 'U transportu', en: 'Transporting' }
+    };
+    return labels[driverStatus]?.[language] || driverStatus;
+  };
+
+  const getStatusColor = () => {
+    const colors = {
+      offline: 'bg-slate-500',
+      available: 'bg-emerald-500',
+      assigned: 'bg-blue-500',
+      en_route: 'bg-purple-500',
+      on_site: 'bg-orange-500',
+      transporting: 'bg-emerald-500'
+    };
+    return colors[driverStatus] || 'bg-slate-500';
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <Loader2 className="w-10 h-10 animate-spin text-sky-400" />
+      </div>
+    );
+  }
+
+  // Driver full-screen map during transport
+  if (isDriver && driverStatus === 'transporting' && assignment) {
+    return (
+      <div className="fixed inset-0 z-50 bg-slate-900 flex flex-col" data-testid="driver-transport-map">
+        <div className="bg-slate-800 px-4 py-3 flex items-center justify-between border-b border-slate-700">
+          <div className="flex items-center gap-3">
+            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+            <div>
+              <p className="text-white font-semibold text-sm">
+                {language === 'sr' ? 'U TRANSPORTU' : 'TRANSPORTING'}
+              </p>
+              <p className="text-slate-400 text-xs truncate max-w-[200px]">
+                → {assignment.destination_address}
+              </p>
+            </div>
+          </div>
+          <div className="text-xs text-slate-400 text-right">
+            {lastLocation?.speed && <p className="text-white">{Math.round(lastLocation.speed)} km/h</p>}
+          </div>
+        </div>
+        
+        <div className="flex-1">
+          <MapContainer
+            center={[lastLocation?.latitude || assignment.destination_lat || 43.3209, lastLocation?.longitude || assignment.destination_lng || 21.8958]}
+            zoom={14}
+            style={{ height: '100%', width: '100%' }}
+            zoomControl={false}
+          >
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            {lastLocation && <Marker position={[lastLocation.latitude, lastLocation.longitude]} icon={driverIcon} />}
+            {assignment.destination_lat && assignment.destination_lng && (
+              <Marker position={[assignment.destination_lat, assignment.destination_lng]} icon={destinationIcon} />
+            )}
+            {lastLocation && assignment.destination_lat && (
+              <Polyline positions={[[lastLocation.latitude, lastLocation.longitude], [assignment.destination_lat, assignment.destination_lng]]} color="#3b82f6" weight={4} dashArray="10, 10" />
+            )}
+          </MapContainer>
+        </div>
+        
+        <div className="bg-slate-800 p-4 space-y-3 border-t border-slate-700">
+          <Button onClick={() => openNavigation(assignment.destination_lat, assignment.destination_lng, assignment.destination_address)} className="w-full h-12 bg-blue-600 hover:bg-blue-700 gap-2">
+            <Navigation className="w-5 h-5" />
+            {language === 'sr' ? 'GOOGLE MAPS' : 'GOOGLE MAPS'}
+          </Button>
+          <Button onClick={completeTransport} disabled={updatingStatus} className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 gap-2 text-lg font-bold">
+            {updatingStatus ? <Loader2 className="w-6 h-6 animate-spin" /> : <CheckCircle className="w-6 h-6" />}
+            {language === 'sr' ? 'ZAVRŠI TRANSPORT' : 'COMPLETE TRANSPORT'}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-900 text-white flex flex-col" data-testid="unified-pwa">
+      {/* New Task Popup for Drivers */}
+      {isDriver && showNewTaskPopup && assignment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="bg-gradient-to-b from-red-600 to-red-800 rounded-2xl p-6 mx-4 max-w-sm w-full shadow-2xl border-2 border-red-400">
+            <div className="text-center">
+              <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                <AlertCircle className="w-12 h-12 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-2">🚨 {language === 'sr' ? 'NOVI ZADATAK!' : 'NEW TASK!'}</h2>
+              <div className="bg-white/10 rounded-lg p-4 mb-4 text-left">
+                <p className="text-white font-semibold">{assignment.patient_name}</p>
+                {assignment.pickup_address && <p className="text-red-100 text-sm mt-2"><MapPin className="w-4 h-4 inline mr-1" />{assignment.pickup_address}</p>}
+                {assignment.destination_address && <p className="text-red-100 text-sm mt-1"><Navigation className="w-4 h-4 inline mr-1" />{assignment.destination_address}</p>}
+              </div>
+              <div className="space-y-3">
+                <Button onClick={() => { setShowNewTaskPopup(false); acceptAssignment(); }} className="w-full h-14 text-lg font-bold bg-emerald-500 hover:bg-emerald-600 gap-2">
+                  <ThumbsUp className="w-6 h-6" />{language === 'sr' ? 'PRIHVATI' : 'ACCEPT'}
+                </Button>
+                <Button onClick={() => { setShowNewTaskPopup(false); rejectAssignment(); }} variant="outline" className="w-full h-12 border-white/50 text-white hover:bg-white/10 gap-2">
+                  <ThumbsDown className="w-5 h-5" />{language === 'sr' ? 'ODBIJ' : 'REJECT'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Header */}
+      <header className="bg-slate-800 border-b border-slate-700 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg overflow-hidden">
+              <img src="/logo.jpg" alt="PC018" className="w-full h-full object-cover" />
+            </div>
+            <div>
+              <p className="font-semibold text-sm">{user?.full_name}</p>
+              <div className="flex items-center gap-2">
+                <Badge className={`text-[10px] ${isDriver ? getStatusColor() : 'bg-sky-600'}`}>
+                  {isDriver ? getDriverStatusLabel() : getRoleLabel()}
+                </Badge>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" size="sm" onClick={() => fetchData(true)} disabled={refreshing} className="text-slate-400">
+              <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={toggleLanguage} className="text-slate-400">
+              <Globe className="w-5 h-5" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-slate-400">
+              <LogOut className="w-5 h-5" />
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {/* Stats Bar */}
+      <div className="bg-slate-800/50 px-4 py-3 grid grid-cols-3 gap-3 border-b border-slate-700">
+        {isDriver ? (
+          <>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-sky-400">{assignment ? 1 : 0}</p>
+              <p className="text-xs text-slate-400">{language === 'sr' ? 'Aktivan' : 'Active'}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-emerald-400">{driverStatus === 'available' ? '✓' : '—'}</p>
+              <p className="text-xs text-slate-400">{language === 'sr' ? 'Status' : 'Status'}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-amber-400">{lastLocation ? '📍' : '—'}</p>
+              <p className="text-xs text-slate-400">GPS</p>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-red-400">{pendingBookings.length}</p>
+              <p className="text-xs text-slate-400">{language === 'sr' ? 'Čekaju' : 'Pending'}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-emerald-400">{activeBookings.length}</p>
+              <p className="text-xs text-slate-400">{language === 'sr' ? 'Aktivni' : 'Active'}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-sky-400">{availableDrivers.length}</p>
+              <p className="text-xs text-slate-400">{language === 'sr' ? 'Vozači' : 'Drivers'}</p>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto p-4">
+        {/* DRIVER VIEW */}
+        {isDriver && (
+          <>
+            {/* Driver Status Toggle */}
+            {!assignment && (
+              <div className="mb-4">
+                <Button
+                  onClick={() => updateDriverStatus(driverStatus === 'available' ? 'offline' : 'available')}
+                  disabled={updatingStatus}
+                  className={`w-full h-14 text-lg font-bold gap-2 ${driverStatus === 'available' ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700'}`}
+                >
+                  {updatingStatus ? <Loader2 className="w-5 h-5 animate-spin" /> : driverStatus === 'available' ? <Square className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                  {driverStatus === 'available' ? (language === 'sr' ? 'ODJAVI SE' : 'GO OFFLINE') : (language === 'sr' ? 'PRIJAVI SE' : 'GO ONLINE')}
+                </Button>
+              </div>
+            )}
+
+            {/* Current Assignment */}
+            {assignment ? (
+              <div className="bg-slate-800 rounded-2xl overflow-hidden">
+                <div className="bg-gradient-to-r from-sky-600 to-emerald-600 px-4 py-3">
+                  <p className="text-sm font-medium opacity-90">{language === 'sr' ? 'Trenutni zadatak' : 'Current Task'}</p>
+                  <p className="text-xl font-bold">{assignment.patient_name}</p>
+                </div>
+                <div className="p-4 space-y-4">
+                  <div className="space-y-2">
+                    <button onClick={() => openNavigation(assignment.pickup_lat, assignment.pickup_lng, assignment.pickup_address)} className="w-full flex items-start gap-3 p-3 bg-slate-700/50 rounded-xl hover:bg-slate-700 transition-colors text-left">
+                      <MapPin className="w-5 h-5 text-emerald-400 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-slate-400">{language === 'sr' ? 'Preuzimanje' : 'Pickup'}</p>
+                        <p className="text-sm">{assignment.pickup_address || assignment.start_point}</p>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-slate-500" />
+                    </button>
+                    <button onClick={() => openNavigation(assignment.destination_lat, assignment.destination_lng, assignment.destination_address)} className="w-full flex items-start gap-3 p-3 bg-slate-700/50 rounded-xl hover:bg-slate-700 transition-colors text-left">
+                      <Navigation className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-slate-400">{language === 'sr' ? 'Odredište' : 'Destination'}</p>
+                        <p className="text-sm">{assignment.destination_address || assignment.end_point}</p>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-slate-500" />
+                    </button>
+                  </div>
+                  {assignment.contact_phone && (
+                    <a href={`tel:${assignment.contact_phone}`} className="flex items-center gap-3 p-3 bg-sky-600/20 rounded-xl">
+                      <Phone className="w-5 h-5 text-sky-400" />
+                      <span>{assignment.contact_phone}</span>
+                    </a>
+                  )}
+                  
+                  {/* Action Buttons based on status */}
+                  <div className="space-y-2 pt-2">
+                    {driverStatus === 'assigned' && (
+                      <Button onClick={() => updateDriverStatus('en_route')} disabled={updatingStatus} className="w-full h-14 bg-purple-600 hover:bg-purple-700 text-lg font-bold gap-2">
+                        {updatingStatus ? <Loader2 className="w-5 h-5 animate-spin" /> : <Navigation className="w-5 h-5" />}
+                        {language === 'sr' ? 'KRENI KA LOKACIJI' : 'START ROUTE'}
+                      </Button>
+                    )}
+                    {driverStatus === 'en_route' && (
+                      <Button onClick={() => updateDriverStatus('on_site')} disabled={updatingStatus} className="w-full h-14 bg-orange-600 hover:bg-orange-700 text-lg font-bold gap-2">
+                        {updatingStatus ? <Loader2 className="w-5 h-5 animate-spin" /> : <MapPin className="w-5 h-5" />}
+                        {language === 'sr' ? 'STIGAO NA LOKACIJU' : 'ARRIVED'}
+                      </Button>
+                    )}
+                    {driverStatus === 'on_site' && (
+                      <Button onClick={() => updateDriverStatus('transporting')} disabled={updatingStatus} className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-lg font-bold gap-2">
+                        {updatingStatus ? <Loader2 className="w-5 h-5 animate-spin" /> : <Truck className="w-5 h-5" />}
+                        {language === 'sr' ? 'ZAPOČNI TRANSPORT' : 'START TRANSPORT'}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : driverStatus === 'available' ? (
+              <div className="text-center py-12">
+                <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Clock className="w-10 h-10 text-slate-500" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">{language === 'sr' ? 'Čekanje na zadatak' : 'Waiting for Task'}</h3>
+                <p className="text-slate-400">{language === 'sr' ? 'Bićete obavešteni kada dobijete novi zadatak' : "You'll be notified when you get a new task"}</p>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <User className="w-10 h-10 text-slate-500" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">{language === 'sr' ? 'Odjavljeni ste' : "You're Offline"}</h3>
+                <p className="text-slate-400">{language === 'sr' ? 'Prijavite se da biste primali zadatke' : 'Go online to receive tasks'}</p>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ADMIN/MEDICAL VIEW */}
+        {(isAdmin || isMedical) && (
+          <>
+            {activeTab === 'home' && (
+              <div className="space-y-4">
+                {/* Pending Bookings */}
+                {pendingBookings.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-red-400 mb-2 flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4" />
+                      {language === 'sr' ? 'ČEKAJU DODELU' : 'WAITING'} ({pendingBookings.length})
+                    </h3>
+                    {pendingBookings.map(booking => (
+                      <BookingCard key={booking.id} booking={booking} language={language} onAssign={isAdmin ? () => { setSelectedBooking(booking); setShowAssignModal(true); } : null} />
+                    ))}
+                  </div>
+                )}
+                
+                {/* Active Transports */}
+                {activeBookings.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-emerald-400 mb-2 flex items-center gap-2">
+                      <Activity className="w-4 h-4" />
+                      {language === 'sr' ? 'AKTIVNI' : 'ACTIVE'} ({activeBookings.length})
+                    </h3>
+                    {activeBookings.map(booking => (
+                      <BookingCard key={booking.id} booking={booking} language={language} />
+                    ))}
+                  </div>
+                )}
+
+                {pendingBookings.length === 0 && activeBookings.length === 0 && (
+                  <div className="text-center py-12 text-slate-500">
+                    <CheckCircle className="w-16 h-16 mx-auto mb-3 text-slate-600" />
+                    <p>{language === 'sr' ? 'Nema rezervacija' : 'No bookings'}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'map' && (
+              <div style={{ height: 'calc(100vh - 240px)', marginLeft: '-1rem', marginRight: '-1rem', marginTop: '-1rem' }}>
+                <MapContainer center={[43.3209, 21.8958]} zoom={12} style={{ height: '100%', width: '100%' }} zoomControl={false}>
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                  {activeBookings.map(b => b.pickup_lat && b.pickup_lng && (
+                    <Marker key={b.id} position={[b.pickup_lat, b.pickup_lng]} icon={driverIcon}>
+                      <Popup><strong>{b.patient_name}</strong><br/>{b.assigned_driver_name}<br/>{statusConfig[b.status]?.label[language]}</Popup>
+                    </Marker>
+                  ))}
+                </MapContainer>
+              </div>
+            )}
+
+            {activeTab === 'drivers' && (
+              <div className="space-y-3">
+                {drivers.map(driver => {
+                  const activeBooking = bookings.find(b => b.assigned_driver === driver.id && ['confirmed', 'en_route', 'on_site', 'transporting'].includes(b.status));
+                  const isAvailable = !activeBooking;
+                  return (
+                    <div key={driver.id} className={`rounded-xl p-4 ${isAvailable ? 'bg-slate-800' : 'bg-slate-800/50'}`}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isAvailable ? 'bg-emerald-600' : 'bg-amber-600'}`}>
+                            <User className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <p className="font-semibold">{driver.full_name}</p>
+                            <p className="text-xs text-slate-400">{driver.phone || driver.email}</p>
+                          </div>
+                        </div>
+                        <Badge className={isAvailable ? 'bg-emerald-600' : 'bg-amber-600'}>
+                          {isAvailable ? (language === 'sr' ? 'Slobodan' : 'Free') : (language === 'sr' ? 'Zauzet' : 'Busy')}
+                        </Badge>
+                      </div>
+                      {activeBooking && (
+                        <div className="mt-3 pt-3 border-t border-slate-700 text-sm text-slate-400">
+                          <p><User className="w-3 h-3 inline mr-1" />{activeBooking.patient_name}</p>
+                          <p className="mt-1"><Activity className="w-3 h-3 inline mr-1" />{statusConfig[activeBooking.status]?.label[language]}</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        )}
+      </main>
+
+      {/* Bottom Navigation - Only for Admin/Medical */}
+      {(isAdmin || isMedical) && (
+        <nav className="bg-slate-800 border-t border-slate-700 grid grid-cols-3">
+          <button onClick={() => setActiveTab('home')} className={`py-4 flex flex-col items-center gap-1 relative ${activeTab === 'home' ? 'text-sky-400' : 'text-slate-500'}`}>
+            <Home className="w-5 h-5" />
+            <span className="text-xs">{language === 'sr' ? 'Početna' : 'Home'}</span>
+            {pendingBookings.length > 0 && <span className="absolute top-2 right-1/4 w-5 h-5 bg-red-500 rounded-full text-[10px] flex items-center justify-center">{pendingBookings.length}</span>}
+          </button>
+          <button onClick={() => setActiveTab('map')} className={`py-4 flex flex-col items-center gap-1 ${activeTab === 'map' ? 'text-sky-400' : 'text-slate-500'}`}>
+            <MapPin className="w-5 h-5" />
+            <span className="text-xs">{language === 'sr' ? 'Mapa' : 'Map'}</span>
+          </button>
+          <button onClick={() => setActiveTab('drivers')} className={`py-4 flex flex-col items-center gap-1 ${activeTab === 'drivers' ? 'text-sky-400' : 'text-slate-500'}`}>
+            <Users className="w-5 h-5" />
+            <span className="text-xs">{language === 'sr' ? 'Vozači' : 'Drivers'}</span>
+          </button>
+        </nav>
+      )}
+
+      {/* Assign Modal */}
+      {showAssignModal && selectedBooking && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70">
+          <div className="bg-slate-800 rounded-t-2xl w-full max-w-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold">{language === 'sr' ? 'Dodeli vozača' : 'Assign Driver'}</h3>
+              <Button variant="ghost" size="sm" onClick={() => setShowAssignModal(false)}><X className="w-5 h-5" /></Button>
+            </div>
+            <div className="bg-slate-700/50 rounded-lg p-4 mb-4">
+              <p className="font-semibold">{selectedBooking.patient_name}</p>
+              <p className="text-sm text-slate-400 mt-2"><MapPin className="w-4 h-4 inline mr-1 text-emerald-400" />{selectedBooking.start_point || selectedBooking.pickup_address}</p>
+              <p className="text-sm text-slate-400 mt-1"><Navigation className="w-4 h-4 inline mr-1 text-red-400" />{selectedBooking.end_point || selectedBooking.destination_address}</p>
+            </div>
+            <div className="mb-4">
+              <label className="text-sm text-slate-400 mb-2 block">{language === 'sr' ? 'Izaberi vozača' : 'Select Driver'}</label>
+              {availableDrivers.length > 0 ? (
+                <Select value={selectedDriver} onValueChange={setSelectedDriver}>
+                  <SelectTrigger className="bg-slate-700 border-slate-600"><SelectValue placeholder={language === 'sr' ? 'Izaberi...' : 'Select...'} /></SelectTrigger>
+                  <SelectContent>{availableDrivers.map(d => <SelectItem key={d.id} value={d.id}>{d.full_name}</SelectItem>)}</SelectContent>
+                </Select>
+              ) : (
+                <p className="text-amber-400 text-sm">{language === 'sr' ? 'Nema slobodnih vozača' : 'No available drivers'}</p>
+              )}
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowAssignModal(false)}>{language === 'sr' ? 'Otkaži' : 'Cancel'}</Button>
+              <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={assignDriver} disabled={!selectedDriver || assigning}>
+                {assigning && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}{language === 'sr' ? 'Dodeli' : 'Assign'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Booking Card Component
+const BookingCard = ({ booking, language, onAssign }) => {
+  const status = statusConfig[booking.status] || statusConfig.pending;
+  
+  return (
+    <div className={`rounded-xl p-4 mb-3 bg-slate-800 border-l-4 ${status.border}`}>
+      <div className="flex items-start justify-between mb-2">
+        <div>
+          <p className="font-semibold text-white">{booking.patient_name}</p>
+          <div className="flex items-center gap-2 mt-1">
+            <Badge className={`text-[10px] ${status.color} text-white flex items-center gap-1`}>
+              {status.pulse && <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
+              {status.label[language]}
+            </Badge>
+            {booking.assigned_driver_name && <span className="text-xs text-slate-400">• {booking.assigned_driver_name}</span>}
+          </div>
+        </div>
+        {booking.status === 'pending' && onAssign && (
+          <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 h-8" onClick={onAssign}>
+            {language === 'sr' ? 'Dodeli' : 'Assign'}
+          </Button>
+        )}
+      </div>
+      <div className="space-y-1 text-sm text-slate-300">
+        <p className="flex items-center gap-2"><MapPin className="w-3 h-3 text-emerald-400" /><span className="truncate">{booking.start_point || booking.pickup_address}</span></p>
+        <p className="flex items-center gap-2"><Navigation className="w-3 h-3 text-red-400" /><span className="truncate">{booking.end_point || booking.destination_address}</span></p>
+        <div className="flex items-center gap-4 pt-1 text-xs text-slate-500">
+          <span><Clock className="w-3 h-3 inline mr-1" />{booking.booking_time}</span>
+          {booking.contact_phone && <a href={`tel:${booking.contact_phone}`} className="text-sky-400"><Phone className="w-3 h-3 inline mr-1" />{booking.contact_phone}</a>}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default UnifiedPWA;
