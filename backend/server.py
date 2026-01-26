@@ -2789,7 +2789,8 @@ async def generate_patient_report(
         t.setStyle(TableStyle([
             ('FONTSIZE', (0, 0), (-1, -1), 10),
             ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-            ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+            ('FONTNAME', (0, 0), (0, -1), 'DejaVuSans-Bold'),
+            ('FONTNAME', (1, 0), (1, -1), 'DejaVuSans'),
         ]))
         elements.append(t)
         elements.append(Spacer(1, 10*mm))
@@ -2810,7 +2811,8 @@ async def generate_patient_report(
             t.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), colors.Color(0.059, 0.647, 0.914)),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTNAME', (0, 0), (-1, 0), 'DejaVuSans-Bold'),
+                ('FONTNAME', (0, 1), (-1, -1), 'DejaVuSans'),
                 ('FONTSIZE', (0, 0), (-1, -1), 8),
                 ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
                 ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
