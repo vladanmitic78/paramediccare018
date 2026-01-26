@@ -42,13 +42,16 @@ const Login = () => {
         const user = await login(email, password);
         toast.success(language === 'sr' ? 'Uspešna prijava!' : 'Login successful!');
         
+        // Check if on mobile device
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+        
         // Redirect based on role
         if (user.role === 'driver') {
           navigate('/driver');
         } else if (['doctor', 'nurse'].includes(user.role)) {
-          navigate('/medical');
+          navigate(isMobile ? '/medical-pwa' : '/medical');
         } else if (['admin', 'superadmin'].includes(user.role)) {
-          navigate('/dashboard');
+          navigate(isMobile ? '/admin-app' : '/dashboard');
         } else {
           // Regular users go to patient portal
           navigate('/patient');
