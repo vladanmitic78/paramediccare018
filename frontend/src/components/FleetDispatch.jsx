@@ -691,16 +691,15 @@ const FleetDispatch = () => {
       await axios.post(`${API}/bookings`, {
         patient_name: newBooking.patient_name,
         contact_phone: newBooking.contact_phone,
-        contact_email: newBooking.contact_email || '',
+        contact_email: newBooking.contact_email || 'nema@email.com',
         start_point: newBooking.pickup_address,
         end_point: newBooking.destination_address,
-        pickup_address: newBooking.pickup_address,
-        destination_address: newBooking.destination_address,
         booking_date: newBooking.booking_date || new Date().toISOString().split('T')[0],
         booking_time: newBooking.booking_time || '09:00',
         mobility_status: newBooking.mobility_status,
-        notes: newBooking.notes,
-        status: 'pending'
+        notes: newBooking.notes || '',
+        booking_type: 'transport',
+        language: language
       });
       
       toast.success(language === 'sr' ? 'Rezervacija kreirana!' : 'Booking created!');
