@@ -703,6 +703,19 @@ const FleetManagement = () => {
                   <UserPlus className="w-4 h-4 mr-1" />
                   {language === 'sr' ? 'Dodeli' : 'Assign'}
                 </Button>
+                {/* Complete Mission button - show when vehicle has team */}
+                {vehicle.current_team && vehicle.current_team.length > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+                    onClick={() => { setVehicleToComplete(vehicle); setShowCompleteMission(true); }}
+                    data-testid="complete-mission-btn"
+                  >
+                    <CheckCircle className="w-4 h-4 mr-1" />
+                    {language === 'sr' ? 'Završi' : 'Complete'}
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   size="sm"
