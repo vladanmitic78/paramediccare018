@@ -4383,8 +4383,11 @@ async def get_vehicles(user: dict = Depends(get_current_user)):
             if user_info:
                 current_team.append({
                     **assignment,
+                    "name": user_info.get("full_name"),  # For frontend compatibility
+                    "full_name": user_info.get("full_name"),
                     "user_name": user_info.get("full_name"),
                     "user_phone": user_info.get("phone"),
+                    "phone": user_info.get("phone"),
                     "user_system_role": user_info.get("role")
                 })
         vehicle["current_team"] = current_team
