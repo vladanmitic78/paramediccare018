@@ -484,6 +484,144 @@ const Dashboard = () => {
     toast.success(language === 'sr' ? 'Kopirano u međuspremnik' : 'Copied to clipboard');
   };
 
+  // Incoming APIs functions
+  const fetchIncomingApis = async () => {
+    setLoadingIncomingApis(true);
+    try {
+      const response = await axios.get(`${API}/incoming-apis`);
+      // Convert array to object keyed by service_type
+      const apisObj = {};
+      response.data.forEach(api => {
+        apisObj[api.service_type] = api;
+      });
+      setIncomingApis(apisObj);
+    } catch (error) {
+      console.error('Error fetching incoming APIs:', error);
+    } finally {
+      setLoadingIncomingApis(false);
+    }
+  };
+
+  const saveIncomingApi = async (serviceType, data) => {
+    setSavingIncomingApi(serviceType);
+    try {
+      await axios.post(`${API}/incoming-apis`, {
+        service_type: serviceType,
+        ...data
+      });
+      toast.success(language === 'sr' ? 'API konfiguracija sačuvana' : 'API configuration saved');
+      fetchIncomingApis();
+    } catch (error) {
+      toast.error(language === 'sr' ? 'Greška pri čuvanju' : 'Error saving configuration');
+    } finally {
+      setSavingIncomingApi(null);
+    }
+  };
+
+  const testApiConnection = async (serviceType) => {
+    setTestingApi(serviceType);
+    setApiTestResults(prev => ({ ...prev, [serviceType]: null }));
+    try {
+      const response = await axios.post(`${API}/incoming-apis/${serviceType}/test`);
+      setApiTestResults(prev => ({ 
+        ...prev, 
+        [serviceType]: { success: true, message: response.data.message } 
+      }));
+      toast.success(language === 'sr' ? 'Konekcija uspešna!' : 'Connection successful!');
+    } catch (error) {
+      setApiTestResults(prev => ({ 
+        ...prev, 
+        [serviceType]: { success: false, message: error.response?.data?.detail || 'Connection failed' } 
+      }));
+      toast.error(language === 'sr' ? 'Konekcija neuspešna' : 'Connection failed');
+    } finally {
+      setTestingApi(null);
+    }
+  };
+
+  const deleteIncomingApi = async (serviceType) => {
+    try {
+      await axios.delete(`${API}/incoming-apis/${serviceType}`);
+      toast.success(language === 'sr' ? 'API konfiguracija obrisana' : 'API configuration deleted');
+      fetchIncomingApis();
+    } catch (error) {
+      toast.error(language === 'sr' ? 'Greška pri brisanju' : 'Error deleting configuration');
+    }
+  };
+
+  // Incoming API service definitions
+  const incomingApiServices = [
+    {
+      type: 'google_maps',
+      name: language === 'sr' ? 'Google Maps' : 'Google Maps',
+      icon: '🗺️',
+      description: language === 'sr' ? 'Mape i geolokacija' : 'Maps and geolocation',
+      fields: [
+        { key: 'api_key', label: 'API Key', type: 'password', required: true },
+        { key: 'endpoint_url', label: 'Endpoint URL', type: 'text', placeholder: 'https://maps.googleapis.com/maps/api' }
+      ]
+    },
+    {
+      type: 'osm_maps',
+      name: 'OpenStreetMap',
+      icon: '🌍',
+      description: language === 'sr' ? 'Besplatne otvorene mape' : 'Free open maps',
+      fields: [
+        { key: 'endpoint_url', label: 'Tile Server URL', type: 'text', placeholder: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' },
+        { key: 'api_key', label: 'API Key (optional)', type: 'password', required: false }
+      ]
+    },
+    {
+      type: 'stripe',
+      name: 'Stripe',
+      icon: '💳',
+      description: language === 'sr' ? 'Plaćanja i fakturisanje' : 'Payments and billing',
+      fields: [
+        { key: 'api_key', label: 'Secret Key', type: 'password', required: true, placeholder: 'sk_...' },
+        { key: 'publishable_key', label: 'Publishable Key', type: 'text', placeholder: 'pk_...' },
+        { key: 'webhook_secret', label: 'Webhook Secret', type: 'password', placeholder: 'whsec_...' }
+      ]
+    },
+    {
+      type: 'sms',
+      name: language === 'sr' ? 'SMS Servis' : 'SMS Service',
+      icon: '📱',
+      description: language === 'sr' ? 'Slanje SMS poruka' : 'Send SMS messages',
+      fields: [
+        { key: 'provider', label: 'Provider', type: 'select', options: ['twilio', 'nexmo', 'infobip', 'other'] },
+        { key: 'api_key', label: 'API Key / Account SID', type: 'password', required: true },
+        { key: 'api_secret', label: 'API Secret / Auth Token', type: 'password', required: true },
+        { key: 'sender_id', label: 'Sender ID / Phone Number', type: 'text', placeholder: '+381...' }
+      ]
+    },
+    {
+      type: 'email',
+      name: language === 'sr' ? 'Email Servis' : 'Email Service',
+      icon: '📧',
+      description: language === 'sr' ? 'SMTP konfiguracija' : 'SMTP configuration',
+      fields: [
+        { key: 'smtp_host', label: 'SMTP Host', type: 'text', required: true, placeholder: 'smtp.example.com' },
+        { key: 'smtp_port', label: 'SMTP Port', type: 'number', required: true, placeholder: '465' },
+        { key: 'smtp_user', label: 'Username', type: 'text', required: true },
+        { key: 'smtp_password', label: 'Password', type: 'password', required: true },
+        { key: 'from_email', label: 'From Email', type: 'email', placeholder: 'noreply@example.com' },
+        { key: 'use_ssl', label: 'Use SSL', type: 'checkbox' }
+      ]
+    },
+    {
+      type: 'medical_device',
+      name: language === 'sr' ? 'Medicinski Uređaji' : 'Medical Devices',
+      icon: '🏥',
+      description: language === 'sr' ? 'Lifepak 15, monitori pacijenata' : 'Lifepak 15, patient monitors',
+      fields: [
+        { key: 'device_type', label: language === 'sr' ? 'Tip uređaja' : 'Device Type', type: 'select', options: ['lifepak_15', 'zoll_x', 'philips_mrx', 'other'] },
+        { key: 'api_key', label: 'API Key', type: 'password' },
+        { key: 'endpoint_url', label: 'Endpoint URL', type: 'text', placeholder: 'https://...' },
+        { key: 'auth_type', label: language === 'sr' ? 'Tip autentifikacije' : 'Auth Type', type: 'select', options: ['api_key', 'oauth2', 'basic', 'none'] }
+      ]
+    }
+  ];
+
   const getStatusBadge = (status) => {
     const styles = {
       pending: 'bg-amber-100 text-amber-800',
