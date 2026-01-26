@@ -31,19 +31,26 @@
         <link rel="canonical" href="https://paramedic-care018.rs/" />
         
         <!-- PWA Manifest (dynamically switched for driver app) -->
-        <link rel="manifest" href="%PUBLIC_URL%/manifest.json" id="pwa-manifest" />
-        <link rel="apple-touch-icon" href="%PUBLIC_URL%/driver-icon-192.png" />
+        <link rel="manifest" href="/manifest.json" id="pwa-manifest" />
+        <link rel="apple-touch-icon" href="/driver-icon-192.png" id="apple-touch-icon" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="PC018 Medical" />
+        <meta name="apple-mobile-web-app-title" content="PC018 Medical" id="app-title" />
         
         <!-- Dynamic manifest switching for Driver PWA -->
         <script>
-          if (window.location.pathname.startsWith('/driver')) {
-            document.getElementById('pwa-manifest').href = '/manifest-driver.json';
-            document.querySelector('meta[name="apple-mobile-web-app-title"]').content = 'PC018 Vozač';
-            document.querySelector('meta[name="theme-color"]').content = '#0f172a';
-          }
+          (function() {
+            var path = window.location.pathname;
+            if (path.startsWith('/driver') || path === '/driver') {
+              var manifest = document.getElementById('pwa-manifest');
+              var appTitle = document.getElementById('app-title');
+              var themeColor = document.querySelector('meta[name="theme-color"]');
+              
+              if (manifest) manifest.href = '/manifest-driver.json';
+              if (appTitle) appTitle.content = 'PC018 Vozač';
+              if (themeColor) themeColor.content = '#0f172a';
+            }
+          })();
         </script>
         
         <!-- Google Fonts: Manrope + Inter -->
