@@ -186,19 +186,82 @@ const FleetManagement = () => {
     }
   };
 
-  const handleAssignMember = async (vehicleId, userId, role) => {
+  // Delete vehicle (Super Admin only)
+  const handleDeleteVehicle = async () => {
+    if (!vehicleToDelete) return;
+    
+    setDeleting(true);
     try {
-      await axios.post(`${API}/fleet/vehicles/${vehicleId}/team`, {
-        user_id: userId,
+      await axios.delete(`${API}/fleet/vehicles/${vehicleToDelete.id}`);
+      toast.success(language === 'sr' ? 'Vozilo obrisano' : 'Vehicle deleted');
+      setShowDeleteConfirm(false);
+      setVehicleToDelete(null);
+      fetchVehicles();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Error deleting vehicle');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  // Toggle team member selection
+  const toggleTeamMemberSelection = (staff, role) => {
+    const existingIndex = selectedTeamMembers.findIndex(
+      m => m.user_id === staff.id && m.role === role
+    );
+    
+    if (existingIndex >= 0) {
+      setSelectedTeamMembers(prev => prev.filter((_, i) => i !== existingIndex));
+    } else {
+      setSelectedTeamMembers(prev => [...prev, {
+        user_id: staff.id,
+        user_name: staff.full_name,
         role: role,
-        is_primary: true,
-        is_remote: role === 'remote_doctor'
-      });
-      toast.success(language === 'sr' ? 'Član tima dodeljen' : 'Team member assigned');
+        is_remote: role === 'remote_doctor',
+        is_primary: true
+      }]);
+    }
+  };
+
+  // Check if member is selected
+  const isMemberSelected = (staffId, role) => {
+    return selectedTeamMembers.some(m => m.user_id === staffId && m.role === role);
+  };
+
+  // Save team assignments (batch)
+  const handleSaveTeam = async () => {
+    if (selectedTeamMembers.length === 0) {
+      toast.error(language === 'sr' ? 'Izaberite članove tima' : 'Select team members');
+      return;
+    }
+    
+    setSavingTeam(true);
+    try {
+      for (const member of selectedTeamMembers) {
+        if (member.role === 'remote_doctor') {
+          await axios.post(`${API}/fleet/vehicles/${selectedVehicle.id}/remote-doctor`, null, {
+            params: { doctor_id: member.user_id }
+          });
+        } else {
+          await axios.post(`${API}/fleet/vehicles/${selectedVehicle.id}/team`, {
+            user_id: member.user_id,
+            role: member.role,
+            is_primary: true,
+            is_remote: member.is_remote
+          });
+        }
+      }
+      
+      toast.success(language === 'sr' ? 'Tim sačuvan!' : 'Team saved!');
+      setShowConfirmAssignment(false);
+      setShowAssignTeam(false);
+      setSelectedTeamMembers([]);
       fetchVehicles();
       fetchAvailableStaff();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Error assigning member');
+      toast.error(error.response?.data?.detail || 'Error saving team');
+    } finally {
+      setSavingTeam(false);
     }
   };
 
@@ -212,6 +275,21 @@ const FleetManagement = () => {
       fetchAvailableStaff();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Error removing member');
+    }
+  };
+
+  // Start video call for vehicle
+  const startVideoCall = (vehicle) => {
+    const roomId = generateJitsiRoomId(vehicle.id, vehicle.current_mission?.id);
+    setActiveCallRoom(roomId);
+    setSelectedVehicle(vehicle);
+    setShowVideoCall(true);
+  };
+
+  // Join video call
+  const joinVideoCall = () => {
+    if (activeCallRoom) {
+      openJitsiCall(activeCallRoom, user?.full_name || 'User');
     }
   };
 
