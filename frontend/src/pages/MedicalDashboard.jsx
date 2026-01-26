@@ -8,6 +8,7 @@ import { Badge } from '../components/ui/badge';
 import VitalSignsGraph from '../components/VitalSignsGraph';
 import TransportVitalsDialog from '../components/TransportVitalsDialog';
 import CriticalAlertsPanel from '../components/CriticalAlertsPanel';
+import MedicationManager from '../components/MedicationManager';
 import {
   Select,
   SelectContent,
