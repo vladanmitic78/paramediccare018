@@ -34,7 +34,7 @@ TRANSPORT_EMAIL = os.environ.get('TRANSPORT_EMAIL', 'transport@paramedic-care018
 MEDICAL_EMAIL = os.environ.get('MEDICAL_EMAIL', 'ambulanta@paramedic-care018.rs')
 
 # Frontend URL for verification links
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://paramediccare.preview.emergentagent.com')
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://paracare.preview.emergentagent.com')
 
 # Verification token expiration
 VERIFICATION_TOKEN_HOURS = 24
