@@ -428,12 +428,24 @@ const FleetDispatch = () => {
     contact_phone: '',
     contact_email: '',
     pickup_address: '',
+    pickup_lat: null,
+    pickup_lng: null,
     destination_address: '',
+    destination_lat: null,
+    destination_lng: null,
     booking_date: '',
     booking_time: '',
     mobility_status: 'walking',
     notes: ''
   });
+  
+  // Address search state
+  const [pickupSuggestions, setPickupSuggestions] = useState([]);
+  const [destinationSuggestions, setDestinationSuggestions] = useState([]);
+  const [searchingPickup, setSearchingPickup] = useState(false);
+  const [searchingDestination, setSearchingDestination] = useState(false);
+  const pickupSearchTimeout = useRef(null);
+  const destinationSearchTimeout = useRef(null);
   
   // Drag state
   const [activeVehicle, setActiveVehicle] = useState(null);
