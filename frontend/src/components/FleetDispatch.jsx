@@ -706,6 +706,10 @@ const FleetDispatch = () => {
         contact_email: newBooking.contact_email || 'nema@email.com',
         start_point: newBooking.pickup_address,
         end_point: newBooking.destination_address,
+        start_lat: newBooking.pickup_lat,
+        start_lng: newBooking.pickup_lng,
+        end_lat: newBooking.destination_lat,
+        end_lng: newBooking.destination_lng,
         booking_date: newBooking.booking_date || new Date().toISOString().split('T')[0],
         booking_time: newBooking.booking_time || '09:00',
         mobility_status: newBooking.mobility_status,
@@ -721,12 +725,18 @@ const FleetDispatch = () => {
         contact_phone: '',
         contact_email: '',
         pickup_address: '',
+        pickup_lat: null,
+        pickup_lng: null,
         destination_address: '',
+        destination_lat: null,
+        destination_lng: null,
         booking_date: '',
         booking_time: '',
         mobility_status: 'walking',
         notes: ''
       });
+      setPickupSuggestions([]);
+      setDestinationSuggestions([]);
       fetchData();
     } catch (error) {
       const errMsg = typeof error.response?.data?.detail === 'string' 
