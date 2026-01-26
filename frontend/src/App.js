@@ -142,6 +142,9 @@ function App() {
               {/* Admin PWA without header/footer */}
               <Route path="/admin-app" element={<AdminPWA />} />
               
+              {/* Unified PWA - adapts to user role */}
+              <Route path="/app" element={<UnifiedPWA />} />
+              
               {/* Public pages with header/footer */}
               <Route
                 path="*"
