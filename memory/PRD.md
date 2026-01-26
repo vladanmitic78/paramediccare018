@@ -421,6 +421,10 @@ A comprehensive fleet management system where each ambulance has assigned teams.
 5. Remote doctor support: Fizički (On-site) vs Daljinski (Remote)
 6. Audit log viewer with timestamps and performer info
 7. Add Vehicle dialog with equipment multi-select
+8. **Vehicle Search** - Filter vehicles by name, registration, status (Jan 26, 2026) ✅
+9. **Delete Vehicle** - Super Admin can delete vehicles (with confirmation dialog) (Jan 26, 2026) ✅
+10. **Jitsi Video Calls** - Click video button to start call with remote doctor (Jan 26, 2026) ✅
+11. **Team Assignment Flow** - Checkbox selection + Save Team button + Confirmation dialog (Jan 26, 2026) ✅
 
 **Edge Cases Handled:**
 - Mission start blocked if required roles not filled
