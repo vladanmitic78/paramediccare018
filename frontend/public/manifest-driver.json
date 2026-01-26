@@ -1,0 +1,28 @@
+{
+  "short_name": "PC018 Vozač",
+  "name": "Paramedic Care 018 - Vozač",
+  "description": "Aplikacija za vozače hitne pomoći Paramedic Care 018",
+  "icons": [
+    {
+      "src": "/driver-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/driver-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/driver",
+  "scope": "/driver",
+  "display": "standalone",
+  "theme_color": "#0f172a",
+  "background_color": "#0f172a",
+  "orientation": "portrait",
+  "categories": ["medical", "health"],
+  "lang": "sr",
+  "dir": "ltr"
+}
