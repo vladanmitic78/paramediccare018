@@ -136,6 +136,9 @@ function App() {
               {/* Medical Staff PWA without header/footer */}
               <Route path="/medical-pwa" element={<MedicalRoute><MedicalStaffPWA /></MedicalRoute>} />
               
+              {/* Dispatch Console without header/footer (Admin only) */}
+              <Route path="/dispatch" element={<MedicalRoute><DispatchConsole /></MedicalRoute>} />
+              
               {/* Public pages with header/footer */}
               <Route
                 path="*"
