@@ -217,15 +217,6 @@ const MedicationManager = ({ patient, language = 'sr', onClose }) => {
         </div>
         <div className="flex gap-2">
           <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowReportDialog(true)}
-            data-testid="generate-report-btn"
-          >
-            <FileText className="w-4 h-4 mr-2" />
-            {language === 'sr' ? 'PDF Izveštaj' : 'PDF Report'}
-          </Button>
-          <Button
             size="sm"
             className="bg-sky-600 hover:bg-sky-700"
             onClick={() => setShowAddForm(true)}
