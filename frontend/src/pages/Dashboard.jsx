@@ -713,6 +713,11 @@ const Dashboard = () => {
             <AdminLiveMap />
           )}
 
+          {/* Fleet Management - Vehicles & Teams */}
+          {activeTab === 'vehicles' && isAdmin() && (
+            <FleetManagement />
+          )}
+
           {/* CMS - Page Management */}
           {activeTab === 'cms' && isAdmin() && (
             <CMSManager />
