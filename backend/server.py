@@ -2724,11 +2724,35 @@ async def generate_patient_report(
         styles = getSampleStyleSheet()
         elements = []
         
-        # Title
-        title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=18, spaceAfter=20)
-        elements.append(Paragraph("Medical Report / Medicinski izveštaj", title_style))
-        elements.append(Paragraph(f"Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M')}", styles['Normal']))
-        elements.append(Spacer(1, 10*mm))
+        # Logo and Header
+        from reportlab.platypus import Image
+        import urllib.request
+        import tempfile
+        
+        try:
+            # Download logo
+            logo_url = "https://customer-assets.emergentagent.com/job_433955cc-2ea1-4976-bce7-1cf9f8ad9654/artifacts/j7ye45w5_Paramedic%20Care%20018%20Logo.jpg"
+            with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp_logo:
+                urllib.request.urlretrieve(logo_url, tmp_logo.name)
+                logo = Image(tmp_logo.name, width=40*mm, height=15*mm)
+                
+                # Create header with logo and title
+                header_data = [[logo, Paragraph("<b>PARAMEDIC CARE 018</b><br/><font size='10'>Medical Report / Medicinski izveštaj</font>", styles['Normal'])]]
+                header_table = Table(header_data, colWidths=[45*mm, 115*mm])
+                header_table.setStyle(TableStyle([
+                    ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                    ('LEFTPADDING', (0, 0), (0, 0), 0),
+                ]))
+                elements.append(header_table)
+        except Exception as e:
+            # Fallback if logo fails
+            title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=18, spaceAfter=20)
+            elements.append(Paragraph("PARAMEDIC CARE 018", title_style))
+            elements.append(Paragraph("Medical Report / Medicinski izveštaj", styles['Normal']))
+        
+        elements.append(Spacer(1, 5*mm))
+        elements.append(Paragraph(f"<font size='9'>Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M')} | By: {user['full_name']}</font>", styles['Normal']))
+        elements.append(Spacer(1, 8*mm))
         
         # Patient Info
         elements.append(Paragraph("Patient Information / Podaci o pacijentu", styles['Heading2']))
