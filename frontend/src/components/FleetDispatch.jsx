@@ -1122,6 +1122,164 @@ const FleetDispatch = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Create Manual Booking Dialog */}
+        <Dialog open={showCreateBooking} onOpenChange={setShowCreateBooking}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>{language === 'sr' ? 'Nova Rezervacija' : 'New Booking'}</DialogTitle>
+              <DialogDescription>
+                {language === 'sr' 
+                  ? 'Ručno kreirajte novu rezervaciju transporta'
+                  : 'Manually create a new transport booking'
+                }
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+              {/* Patient Name */}
+              <div>
+                <label className="text-sm font-medium text-slate-700">
+                  {language === 'sr' ? 'Ime pacijenta' : 'Patient Name'} *
+                </label>
+                <Input
+                  value={newBooking.patient_name}
+                  onChange={(e) => setNewBooking({...newBooking, patient_name: e.target.value})}
+                  placeholder={language === 'sr' ? 'Ime i prezime' : 'Full name'}
+                  data-testid="booking-patient-name"
+                />
+              </div>
+              
+              {/* Contact Phone */}
+              <div>
+                <label className="text-sm font-medium text-slate-700">
+                  {language === 'sr' ? 'Telefon' : 'Phone'} *
+                </label>
+                <Input
+                  value={newBooking.contact_phone}
+                  onChange={(e) => setNewBooking({...newBooking, contact_phone: e.target.value})}
+                  placeholder="+381..."
+                  data-testid="booking-phone"
+                />
+              </div>
+              
+              {/* Contact Email */}
+              <div>
+                <label className="text-sm font-medium text-slate-700">
+                  {language === 'sr' ? 'Email (opciono)' : 'Email (optional)'}
+                </label>
+                <Input
+                  type="email"
+                  value={newBooking.contact_email}
+                  onChange={(e) => setNewBooking({...newBooking, contact_email: e.target.value})}
+                  placeholder="email@example.com"
+                  data-testid="booking-email"
+                />
+              </div>
+              
+              {/* Pickup Address */}
+              <div>
+                <label className="text-sm font-medium text-slate-700">
+                  {language === 'sr' ? 'Adresa polaska' : 'Pickup Address'} *
+                </label>
+                <Input
+                  value={newBooking.pickup_address}
+                  onChange={(e) => setNewBooking({...newBooking, pickup_address: e.target.value})}
+                  placeholder={language === 'sr' ? 'Ulica, broj, grad' : 'Street, number, city'}
+                  data-testid="booking-pickup"
+                />
+              </div>
+              
+              {/* Destination Address */}
+              <div>
+                <label className="text-sm font-medium text-slate-700">
+                  {language === 'sr' ? 'Adresa odredišta' : 'Destination Address'} *
+                </label>
+                <Input
+                  value={newBooking.destination_address}
+                  onChange={(e) => setNewBooking({...newBooking, destination_address: e.target.value})}
+                  placeholder={language === 'sr' ? 'Ulica, broj, grad' : 'Street, number, city'}
+                  data-testid="booking-destination"
+                />
+              </div>
+              
+              {/* Date and Time */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium text-slate-700">
+                    {language === 'sr' ? 'Datum' : 'Date'}
+                  </label>
+                  <Input
+                    type="date"
+                    value={newBooking.booking_date}
+                    onChange={(e) => setNewBooking({...newBooking, booking_date: e.target.value})}
+                    data-testid="booking-date"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-700">
+                    {language === 'sr' ? 'Vreme' : 'Time'}
+                  </label>
+                  <Input
+                    type="time"
+                    value={newBooking.booking_time}
+                    onChange={(e) => setNewBooking({...newBooking, booking_time: e.target.value})}
+                    data-testid="booking-time"
+                  />
+                </div>
+              </div>
+              
+              {/* Mobility Status */}
+              <div>
+                <label className="text-sm font-medium text-slate-700">
+                  {language === 'sr' ? 'Pokretljivost pacijenta' : 'Patient Mobility'}
+                </label>
+                <Select
+                  value={newBooking.mobility_status}
+                  onValueChange={(value) => setNewBooking({...newBooking, mobility_status: value})}
+                >
+                  <SelectTrigger data-testid="booking-mobility">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="walking">{language === 'sr' ? 'Pokretan - hoda' : 'Walking'}</SelectItem>
+                    <SelectItem value="wheelchair">{language === 'sr' ? 'Invalidska kolica' : 'Wheelchair'}</SelectItem>
+                    <SelectItem value="stretcher">{language === 'sr' ? 'Nosilica' : 'Stretcher'}</SelectItem>
+                    <SelectItem value="bedridden">{language === 'sr' ? 'Nepokretan' : 'Bedridden'}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Notes */}
+              <div>
+                <label className="text-sm font-medium text-slate-700">
+                  {language === 'sr' ? 'Napomene' : 'Notes'}
+                </label>
+                <Textarea
+                  value={newBooking.notes}
+                  onChange={(e) => setNewBooking({...newBooking, notes: e.target.value})}
+                  placeholder={language === 'sr' ? 'Dodatne informacije...' : 'Additional information...'}
+                  rows={3}
+                  data-testid="booking-notes"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateBooking(false)}>
+                {language === 'sr' ? 'Otkaži' : 'Cancel'}
+              </Button>
+              <Button 
+                onClick={handleCreateBooking} 
+                disabled={creatingBooking || !newBooking.patient_name || !newBooking.contact_phone || !newBooking.pickup_address || !newBooking.destination_address}
+                className="bg-emerald-600 hover:bg-emerald-700"
+                data-testid="save-booking-btn"
+              >
+                {creatingBooking && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                <Save className="w-4 h-4 mr-2" />
+                {language === 'sr' ? 'Sačuvaj' : 'Save'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </DndContext>
   );
