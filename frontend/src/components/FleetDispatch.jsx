@@ -679,6 +679,54 @@ const FleetDispatch = () => {
     }
   };
 
+  // Create manual booking
+  const handleCreateBooking = async () => {
+    if (!newBooking.patient_name || !newBooking.contact_phone || !newBooking.pickup_address || !newBooking.destination_address) {
+      toast.error(language === 'sr' ? 'Popunite obavezna polja' : 'Fill required fields');
+      return;
+    }
+    
+    setCreatingBooking(true);
+    try {
+      await axios.post(`${API}/bookings`, {
+        patient_name: newBooking.patient_name,
+        contact_phone: newBooking.contact_phone,
+        contact_email: newBooking.contact_email || '',
+        start_point: newBooking.pickup_address,
+        end_point: newBooking.destination_address,
+        pickup_address: newBooking.pickup_address,
+        destination_address: newBooking.destination_address,
+        booking_date: newBooking.booking_date || new Date().toISOString().split('T')[0],
+        booking_time: newBooking.booking_time || '09:00',
+        mobility_status: newBooking.mobility_status,
+        notes: newBooking.notes,
+        status: 'pending'
+      });
+      
+      toast.success(language === 'sr' ? 'Rezervacija kreirana!' : 'Booking created!');
+      setShowCreateBooking(false);
+      setNewBooking({
+        patient_name: '',
+        contact_phone: '',
+        contact_email: '',
+        pickup_address: '',
+        destination_address: '',
+        booking_date: '',
+        booking_time: '',
+        mobility_status: 'walking',
+        notes: ''
+      });
+      fetchData();
+    } catch (error) {
+      const errMsg = typeof error.response?.data?.detail === 'string' 
+        ? error.response.data.detail 
+        : (language === 'sr' ? 'Greška pri kreiranju rezervacije' : 'Error creating booking');
+      toast.error(errMsg);
+    } finally {
+      setCreatingBooking(false);
+    }
+  };
+
   // Video call
   const startVideoCall = (vehicle) => {
     const roomId = generateJitsiRoomId(vehicle.id, vehicle.current_mission?.id);
