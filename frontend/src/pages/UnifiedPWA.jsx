@@ -367,6 +367,47 @@ const UnifiedPWA = () => {
     }
   };
 
+  // Medical actions
+  const saveVitals = async () => {
+    if (!selectedPatient) return;
+    setSavingVitals(true);
+    try {
+      await axios.post(`${API}/api/medical/vitals`, {
+        booking_id: selectedPatient.id,
+        patient_name: selectedPatient.patient_name,
+        ...vitals,
+        recorded_by: user?.full_name,
+        recorded_at: new Date().toISOString()
+      });
+      toast.success(language === 'sr' ? 'Vitalni znaci sačuvani!' : 'Vitals saved!');
+      setShowVitalsModal(false);
+      setSelectedPatient(null);
+      setVitals({
+        heart_rate: '',
+        blood_pressure_systolic: '',
+        blood_pressure_diastolic: '',
+        temperature: '',
+        oxygen_saturation: '',
+        respiratory_rate: '',
+        notes: ''
+      });
+    } catch (error) {
+      toast.error(language === 'sr' ? 'Greška pri čuvanju' : 'Error saving');
+    } finally {
+      setSavingVitals(false);
+    }
+  };
+
+  // Check for critical vitals
+  const checkCriticalVitals = (v) => {
+    const alerts = [];
+    if (v.heart_rate && (v.heart_rate < 50 || v.heart_rate > 120)) alerts.push('HR');
+    if (v.oxygen_saturation && v.oxygen_saturation < 92) alerts.push('SpO2');
+    if (v.blood_pressure_systolic && (v.blood_pressure_systolic < 90 || v.blood_pressure_systolic > 180)) alerts.push('BP');
+    if (v.temperature && (v.temperature < 35 || v.temperature > 39)) alerts.push('Temp');
+    return alerts;
+  };
+
   // Logout
   const handleLogout = () => {
     logout();
