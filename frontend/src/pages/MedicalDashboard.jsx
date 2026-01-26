@@ -839,6 +839,14 @@ const MedicalDashboard = () => {
               darkMode={darkMode}
             />
             
+            {/* Medication Administration */}
+            <div className={`${cardClass} border rounded-xl p-4`}>
+              <MedicationManager 
+                patient={selectedPatient}
+                language={language}
+              />
+            </div>
+            
             {/* Vital Signs History */}
             <div className={`${cardClass} border rounded-xl p-4`}>
               <h3 className={`font-semibold ${textClass} mb-4 flex items-center gap-2`}>
