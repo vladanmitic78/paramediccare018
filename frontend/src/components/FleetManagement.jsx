@@ -90,6 +90,7 @@ const FleetManagement = () => {
   
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [availableStaff, setAvailableStaff] = useState([]);
   const [showAddVehicle, setShowAddVehicle] = useState(false);
