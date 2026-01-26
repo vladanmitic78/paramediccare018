@@ -1,6 +1,5 @@
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { HelmetProvider } from "react-helmet-async";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { Header } from "./components/Header";
@@ -105,10 +104,9 @@ const MedicalRoute = ({ children }) => {
 
 function App() {
   return (
-    <HelmetProvider>
-      <LanguageProvider>
-        <AuthProvider>
-          <BrowserRouter>
+    <LanguageProvider>
+      <AuthProvider>
+        <BrowserRouter>
           <div className="min-h-screen flex flex-col bg-slate-50">
             <Routes>
               {/* Admin Dashboard without header/footer */}
@@ -162,7 +160,6 @@ function App() {
         </BrowserRouter>
       </AuthProvider>
     </LanguageProvider>
-    </HelmetProvider>
   );
 }
 
