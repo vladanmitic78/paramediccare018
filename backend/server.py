@@ -3432,11 +3432,20 @@ async def complete_transport(
     user: dict = Depends(require_roles([UserRole.DRIVER]))
 ):
     """Mark transport as completed"""
-    # Update booking status
+    # Update booking status in both collections
     await db.patient_bookings.update_one(
         {"id": booking_id},
         {"$set": {
-            "status": BookingStatus.COMPLETED,
+            "status": "completed",
+            "completed_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    await db.bookings.update_one(
+        {"id": booking_id},
+        {"$set": {
+            "status": "completed",
             "completed_at": datetime.now(timezone.utc).isoformat(),
             "updated_at": datetime.now(timezone.utc).isoformat()
         }}
