@@ -307,7 +307,7 @@ const AdminPWA = () => {
         )}
 
         {activeTab === 'map' && (
-          <div className="h-full" style={{ minHeight: 'calc(100vh - 200px)' }}>
+          <div style={{ height: 'calc(100vh - 180px)', width: '100%' }}>
             <MapContainer
               center={[43.3209, 21.8958]}
               zoom={13}
