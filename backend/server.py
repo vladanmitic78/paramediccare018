@@ -877,11 +877,15 @@ async def update_user_status(user_id: str, data: StatusUpdate, admin: dict = Dep
     return {"success": True}
 
 @api_router.delete("/users/{user_id}")
-async def delete_user(user_id: str, admin: dict = Depends(require_roles([UserRole.SUPERADMIN]))):
-    # Cannot delete superadmin
+async def delete_user(user_id: str, admin: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))):
+    # Cannot delete superadmin (only superadmin can delete superadmin, but we block it entirely)
     target_user = await db.users.find_one({"id": user_id}, {"_id": 0})
     if target_user and target_user.get("role") == UserRole.SUPERADMIN:
         raise HTTPException(status_code=403, detail="Cannot delete Super Admin")
+    
+    # Admin cannot delete other admins, only superadmin can
+    if admin.get("role") == UserRole.ADMIN and target_user and target_user.get("role") == UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Admins cannot delete other admins")
     
     await db.users.delete_one({"id": user_id})
     return {"success": True}

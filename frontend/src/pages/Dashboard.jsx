@@ -59,7 +59,12 @@ import {
   BarChart3,
   Moon,
   Sun,
-  X
+  X,
+  Key,
+  Copy,
+  RefreshCw,
+  Shield,
+  ExternalLink
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
