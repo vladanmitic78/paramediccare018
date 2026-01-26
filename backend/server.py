@@ -4419,6 +4419,12 @@ async def complete_vehicle_mission(
             }}
         )
     
+    # Clear team assignments (move to history, team is released)
+    await db.vehicle_teams.update_many(
+        {"vehicle_id": vehicle_id, "is_active": True},
+        {"$set": {"is_active": False, "removed_at": now, "removed_reason": "mission_completed"}}
+    )
+    
     # Update vehicle status
     await db.vehicles.update_one(
         {"id": vehicle_id},
