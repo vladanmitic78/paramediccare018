@@ -1261,30 +1261,78 @@ const FleetDispatch = () => {
                 />
               </div>
               
-              {/* Pickup Address */}
-              <div>
+              {/* Pickup Address with Autocomplete */}
+              <div className="relative">
                 <label className="text-sm font-medium text-slate-700">
                   {language === 'sr' ? 'Adresa polaska' : 'Pickup Address'} *
                 </label>
-                <Input
-                  value={newBooking.pickup_address}
-                  onChange={(e) => setNewBooking({...newBooking, pickup_address: e.target.value})}
-                  placeholder={language === 'sr' ? 'Ulica, broj, grad' : 'Street, number, city'}
-                  data-testid="booking-pickup"
-                />
+                <div className="relative">
+                  <Input
+                    value={newBooking.pickup_address}
+                    onChange={(e) => handlePickupSearch(e.target.value)}
+                    placeholder={language === 'sr' ? 'Počnite kucati adresu...' : 'Start typing address...'}
+                    data-testid="booking-pickup"
+                    className="pr-8"
+                  />
+                  {searchingPickup && (
+                    <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-slate-400" />
+                  )}
+                  {newBooking.pickup_lat && (
+                    <CheckCircle className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
+                  )}
+                </div>
+                {pickupSuggestions.length > 0 && (
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {pickupSuggestions.map((suggestion, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => selectPickupAddress(suggestion)}
+                        className="w-full px-3 py-2 text-left text-sm hover:bg-slate-100 flex items-start gap-2 border-b border-slate-100 last:border-0"
+                      >
+                        <MapPin className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
+                        <span className="text-slate-700">{suggestion.display_name}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               
-              {/* Destination Address */}
-              <div>
+              {/* Destination Address with Autocomplete */}
+              <div className="relative">
                 <label className="text-sm font-medium text-slate-700">
                   {language === 'sr' ? 'Adresa odredišta' : 'Destination Address'} *
                 </label>
-                <Input
-                  value={newBooking.destination_address}
-                  onChange={(e) => setNewBooking({...newBooking, destination_address: e.target.value})}
-                  placeholder={language === 'sr' ? 'Ulica, broj, grad' : 'Street, number, city'}
-                  data-testid="booking-destination"
-                />
+                <div className="relative">
+                  <Input
+                    value={newBooking.destination_address}
+                    onChange={(e) => handleDestinationSearch(e.target.value)}
+                    placeholder={language === 'sr' ? 'Počnite kucati adresu...' : 'Start typing address...'}
+                    data-testid="booking-destination"
+                    className="pr-8"
+                  />
+                  {searchingDestination && (
+                    <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-slate-400" />
+                  )}
+                  {newBooking.destination_lat && (
+                    <CheckCircle className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
+                  )}
+                </div>
+                {destinationSuggestions.length > 0 && (
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {destinationSuggestions.map((suggestion, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => selectDestinationAddress(suggestion)}
+                        className="w-full px-3 py-2 text-left text-sm hover:bg-slate-100 flex items-start gap-2 border-b border-slate-100 last:border-0"
+                      >
+                        <MapPin className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
+                        <span className="text-slate-700">{suggestion.display_name}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               
               {/* Date and Time */}
