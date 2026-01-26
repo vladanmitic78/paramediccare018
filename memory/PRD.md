@@ -361,26 +361,35 @@ Build a medical platform called "Paramedic Care 018" for urgent medical care and
    - **Fix:** Moved critical alerts to dedicated "Alerts" tab in Medical Dashboard with embedded mode
    - **Result:** Full-width alert management with active alerts grid and acknowledged alerts history
 
-### Refactoring - Backend Modularization (Jan 23, 2026) ✅
+### Refactoring - Backend Modularization (Jan 23-26, 2026) ✅
 
 **Extracted modules from monolithic server.py:**
 
 ```
 /app/backend/
-├── server.py           # Main app (~4500 lines with Fleet APIs)
+├── server.py           # Main app (~4624 lines, down from 4783)
 ├── config.py           # Database, JWT, email settings (44 lines)
-├── models/             # Pydantic models (~700 lines total)
+├── models/             # Pydantic models (~800 lines total)
 │   ├── __init__.py     # Exports all models
 │   ├── user.py         # UserRole, UserCreate, UserLogin, UserResponse
 │   ├── booking.py      # BookingStatus, PatientBookingCreate, InvoiceResponse
 │   ├── medical.py      # VitalSigns, MedicalCheck, Availability models
 │   ├── driver.py       # DriverStatus, ConnectionManager
-│   └── vehicle.py      # Vehicle, Team Assignment, Audit models (NEW)
-├── utils/              # Shared utilities (97 lines)
+│   ├── vehicle.py      # Vehicle, Team Assignment, Audit models
+│   └── cms.py          # ContentCreate, PageContentCreate, ServiceCreate (NEW - Jan 26) ✅
+├── utils/              # Shared utilities (~200 lines total)
 │   ├── __init__.py
-│   └── auth.py         # JWT, password hashing, role checking
+│   ├── auth.py         # JWT, password hashing, role checking
+│   └── email.py        # send_email, get_email_header/footer, templates (NEW - Jan 26) ✅
 └── server_backup.py    # Backup before refactoring
 ```
+
+**Refactoring Progress:**
+| Date | Action | Lines Reduced |
+|------|--------|---------------|
+| Jan 23 | Initial modularization (models, config, auth) | ~574 lines |
+| Jan 26 | CMS models + email utilities extracted | ~159 lines |
+| **Total** | **From ~4783 to ~4624 lines** | **~733 lines (15.3%)** |
 
 ### Phase 9 - Fleet Management & Team Assignment (NEW - Jan 26, 2026) ✅
 
