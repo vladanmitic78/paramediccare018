@@ -668,8 +668,6 @@ const Dashboard = () => {
       label: language === 'sr' ? 'Operacije' : 'Operations',
       items: [
         { id: 'overview', icon: LayoutDashboard, label: language === 'sr' ? 'Kontrolna tabla' : 'Dashboard' },
-        { id: 'bookings', icon: Calendar, label: t('dashboard_bookings') },
-        { id: 'dispatch', icon: Activity, label: language === 'sr' ? 'Dispečerski centar' : 'Dispatch Center', isExternal: true, href: '/dispatch', badge: 'NEW' },
       ]
     },
     ...(isAdmin() ? [{
