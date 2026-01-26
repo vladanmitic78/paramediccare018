@@ -2839,7 +2839,8 @@ async def generate_patient_report(
             t.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), colors.Color(0.059, 0.647, 0.914)),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTNAME', (0, 0), (-1, 0), 'DejaVuSans-Bold'),
+                ('FONTNAME', (0, 1), (-1, -1), 'DejaVuSans'),
                 ('FONTSIZE', (0, 0), (-1, -1), 8),
                 ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
                 ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
