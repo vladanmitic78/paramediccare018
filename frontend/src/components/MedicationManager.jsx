@@ -297,10 +297,7 @@ const MedicationManager = ({ patient, language = 'sr', onClose }) => {
                 <div className="relative">
                   <Input
                     value={form.medication_name}
-                    onChange={(e) => {
-                      setForm({ ...form, medication_name: e.target.value });
-                      setShowSuggestions(true);
-                    }}
+                    onChange={(e) => handleMedicationNameChange(e.target.value)}
                     onFocus={() => setShowSuggestions(true)}
                     placeholder={language === 'sr' ? 'Unesite ili izaberite lek...' : 'Enter or select medication...'}
                     className="pr-10"
