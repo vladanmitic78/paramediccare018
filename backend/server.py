@@ -2525,6 +2525,299 @@ async def get_medical_alerts(
     
     return {"alerts": critical_vitals}
 
+
+# ============ MEDICATIONS MANAGEMENT ============
+
+@api_router.get("/medications/library")
+async def get_medications_library(
+    search: str = None,
+    user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Get the medication library (previously used medications)"""
+    query = {}
+    if search:
+        query["name"] = {"$regex": search, "$options": "i"}
+    
+    medications = await db.medications_library.find(query, {"_id": 0}).sort("usage_count", -1).to_list(100)
+    return medications
+
+
+@api_router.post("/medications/library")
+async def add_medication_to_library(
+    name: str,
+    default_dosage_mg: float = None,
+    dosage_unit: str = "mg",
+    category: str = None,
+    user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Add a new medication to the library"""
+    # Check if medication already exists
+    existing = await db.medications_library.find_one({"name": {"$regex": f"^{name}$", "$options": "i"}})
+    if existing:
+        # Update usage count
+        await db.medications_library.update_one(
+            {"id": existing["id"]},
+            {"$inc": {"usage_count": 1}}
+        )
+        return existing
+    
+    medication = {
+        "id": str(uuid.uuid4()),
+        "name": name,
+        "default_dosage_mg": default_dosage_mg,
+        "dosage_unit": dosage_unit or "mg",
+        "category": category,
+        "usage_count": 1,
+        "created_by": user["id"],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.medications_library.insert_one(medication)
+    return {k: v for k, v in medication.items() if k != "_id"}
+
+
+@api_router.post("/patients/{patient_id}/medications")
+async def administer_medication(
+    patient_id: str,
+    medication_name: str,
+    dosage: float,
+    dosage_unit: str = "mg",
+    route: str = "oral",  # oral, IV, IM, SC, etc.
+    notes: str = None,
+    user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Record medication administration for a patient"""
+    # Verify patient exists
+    patient = await db.medical_patients.find_one({"id": patient_id})
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    
+    now = datetime.now(timezone.utc).isoformat()
+    
+    # Record the administration
+    administration = {
+        "id": str(uuid.uuid4()),
+        "patient_id": patient_id,
+        "medication_name": medication_name,
+        "dosage": dosage,
+        "dosage_unit": dosage_unit,
+        "route": route,
+        "administered_at": now,
+        "administered_by": user["id"],
+        "administered_by_name": user["full_name"],
+        "notes": notes
+    }
+    await db.patient_medications.insert_one(administration)
+    
+    # Add medication to library if not exists, or increment usage count
+    existing_med = await db.medications_library.find_one(
+        {"name": {"$regex": f"^{medication_name}$", "$options": "i"}}
+    )
+    if existing_med:
+        await db.medications_library.update_one(
+            {"id": existing_med["id"]},
+            {"$inc": {"usage_count": 1}}
+        )
+    else:
+        new_med = {
+            "id": str(uuid.uuid4()),
+            "name": medication_name,
+            "default_dosage_mg": dosage if dosage_unit == "mg" else None,
+            "dosage_unit": dosage_unit,
+            "category": None,
+            "usage_count": 1,
+            "created_by": user["id"],
+            "created_at": now
+        }
+        await db.medications_library.insert_one(new_med)
+    
+    return {k: v for k, v in administration.items() if k != "_id"}
+
+
+@api_router.get("/patients/{patient_id}/medications")
+async def get_patient_medications(
+    patient_id: str,
+    from_date: str = None,
+    to_date: str = None,
+    user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Get medication history for a patient"""
+    query = {"patient_id": patient_id}
+    
+    if from_date:
+        query["administered_at"] = {"$gte": from_date}
+    if to_date:
+        if "administered_at" in query:
+            query["administered_at"]["$lte"] = to_date
+        else:
+            query["administered_at"] = {"$lte": to_date}
+    
+    medications = await db.patient_medications.find(query, {"_id": 0}).sort("administered_at", -1).to_list(500)
+    return medications
+
+
+@api_router.get("/patients/{patient_id}/report")
+async def generate_patient_report(
+    patient_id: str,
+    from_date: str = None,
+    to_date: str = None,
+    format: str = "json",  # json or pdf
+    user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Generate a comprehensive patient report"""
+    # Get patient info
+    patient = await db.medical_patients.find_one({"id": patient_id}, {"_id": 0})
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    
+    # Build date filter
+    date_filter = {}
+    if from_date:
+        date_filter["$gte"] = from_date
+    if to_date:
+        date_filter["$lte"] = to_date
+    
+    # Get vitals history
+    vitals_query = {"patient_id": patient_id}
+    if date_filter:
+        vitals_query["recorded_at"] = date_filter
+    vitals = await db.medical_vitals.find(vitals_query, {"_id": 0}).sort("recorded_at", -1).to_list(1000)
+    
+    # Get medications history
+    meds_query = {"patient_id": patient_id}
+    if date_filter:
+        meds_query["administered_at"] = date_filter
+    medications = await db.patient_medications.find(meds_query, {"_id": 0}).sort("administered_at", -1).to_list(500)
+    
+    # Get medical checks
+    checks_query = {"patient_id": patient_id}
+    if date_filter:
+        checks_query["performed_at"] = date_filter
+    checks = await db.medical_checks.find(checks_query, {"_id": 0}).sort("performed_at", -1).to_list(100)
+    
+    report_data = {
+        "patient": patient,
+        "report_generated_at": datetime.now(timezone.utc).isoformat(),
+        "report_generated_by": user["full_name"],
+        "date_range": {
+            "from": from_date,
+            "to": to_date
+        },
+        "vitals_history": vitals,
+        "vitals_count": len(vitals),
+        "medications_history": medications,
+        "medications_count": len(medications),
+        "medical_checks": checks,
+        "checks_count": len(checks)
+    }
+    
+    if format == "pdf":
+        # Generate PDF report
+        from reportlab.lib import colors
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.units import mm
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+        from io import BytesIO
+        
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=20*mm, leftMargin=20*mm, topMargin=20*mm, bottomMargin=20*mm)
+        styles = getSampleStyleSheet()
+        elements = []
+        
+        # Title
+        title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=18, spaceAfter=20)
+        elements.append(Paragraph("Medical Report / Medicinski izveštaj", title_style))
+        elements.append(Paragraph(f"Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M')}", styles['Normal']))
+        elements.append(Spacer(1, 10*mm))
+        
+        # Patient Info
+        elements.append(Paragraph("Patient Information / Podaci o pacijentu", styles['Heading2']))
+        patient_data = [
+            ["Name / Ime:", patient.get("full_name", "N/A")],
+            ["DOB / Datum rođenja:", patient.get("date_of_birth", "N/A")],
+            ["Blood Type / Krvna grupa:", patient.get("blood_type", "N/A")],
+            ["Phone / Telefon:", patient.get("phone", "N/A")],
+            ["Allergies / Alergije:", ", ".join(patient.get("allergies", [])) or "None"],
+        ]
+        t = Table(patient_data, colWidths=[60*mm, 100*mm])
+        t.setStyle(TableStyle([
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+            ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+        ]))
+        elements.append(t)
+        elements.append(Spacer(1, 10*mm))
+        
+        # Medications
+        elements.append(Paragraph(f"Medications ({len(medications)}) / Lekovi", styles['Heading2']))
+        if medications:
+            med_data = [["Date/Datum", "Medication/Lek", "Dosage/Doza", "Route/Put", "By/Od"]]
+            for med in medications[:20]:  # Limit to 20 entries
+                med_data.append([
+                    med.get("administered_at", "")[:16].replace("T", " "),
+                    med.get("medication_name", ""),
+                    f"{med.get('dosage', '')} {med.get('dosage_unit', 'mg')}",
+                    med.get("route", ""),
+                    med.get("administered_by_name", "")[:15]
+                ])
+            t = Table(med_data, colWidths=[35*mm, 45*mm, 25*mm, 20*mm, 35*mm])
+            t.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.Color(0.059, 0.647, 0.914)),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, -1), 8),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ]))
+            elements.append(t)
+        else:
+            elements.append(Paragraph("No medications recorded / Nema zabeleženih lekova", styles['Normal']))
+        elements.append(Spacer(1, 10*mm))
+        
+        # Vitals Summary
+        elements.append(Paragraph(f"Vitals History ({len(vitals)}) / Istorija vitalnih znakova", styles['Heading2']))
+        if vitals:
+            vitals_data = [["Date/Datum", "BP/Pritisak", "HR/Puls", "SpO2", "Temp/Temp", "RR"]]
+            for v in vitals[:15]:  # Limit to 15 entries
+                vitals_data.append([
+                    v.get("recorded_at", "")[:16].replace("T", " "),
+                    f"{v.get('systolic_bp', '-')}/{v.get('diastolic_bp', '-')}",
+                    str(v.get("heart_rate", "-")),
+                    f"{v.get('oxygen_saturation', '-')}%",
+                    f"{v.get('temperature', '-')}°C",
+                    str(v.get("respiratory_rate", "-"))
+                ])
+            t = Table(vitals_data, colWidths=[35*mm, 30*mm, 20*mm, 20*mm, 25*mm, 20*mm])
+            t.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.Color(0.059, 0.647, 0.914)),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, -1), 8),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ]))
+            elements.append(t)
+        else:
+            elements.append(Paragraph("No vitals recorded / Nema zabeleženih vitalnih znakova", styles['Normal']))
+        
+        # Footer
+        elements.append(Spacer(1, 15*mm))
+        elements.append(Paragraph(f"Report generated by: {user['full_name']}", styles['Normal']))
+        elements.append(Paragraph("Paramedic Care 018 - Medical Transport Services", styles['Normal']))
+        
+        doc.build(elements)
+        buffer.seek(0)
+        
+        from fastapi.responses import StreamingResponse
+        return StreamingResponse(
+            buffer,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename=patient_report_{patient_id[:8]}.pdf"}
+        )
+    
+    return report_data
+
+
 # ============ DRIVER APP ROUTES ============
 
 @api_router.get("/driver/profile")
