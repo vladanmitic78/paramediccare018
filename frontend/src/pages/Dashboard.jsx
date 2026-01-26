@@ -720,6 +720,11 @@ const Dashboard = () => {
             <FleetManagement />
           )}
 
+          {/* Fleet History */}
+          {activeTab === 'fleet-history' && isAdmin() && (
+            <FleetHistory language={language} />
+          )}
+
           {/* CMS - Page Management */}
           {activeTab === 'cms' && isAdmin() && (
             <CMSManager />
