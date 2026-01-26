@@ -561,14 +561,15 @@ const FleetManagement = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     {getStatusBadge(vehicle.status)}
-                    {/* Delete button (Super Admin only) */}
-                    {isSuperAdmin() && !vehicle.current_mission && (
+                    {/* Delete button (Admin and Super Admin) */}
+                    {canDeleteVehicle() && !vehicle.current_mission && (
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => { setVehicleToDelete(vehicle); setShowDeleteConfirm(true); }}
                         className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
                         title={language === 'sr' ? 'Obriši vozilo' : 'Delete vehicle'}
+                        data-testid="delete-vehicle-btn"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
