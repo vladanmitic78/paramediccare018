@@ -120,6 +120,14 @@ const Dashboard = () => {
   const [userToDelete, setUserToDelete] = useState(null);
   const [deletingUser, setDeletingUser] = useState(false);
   
+  // API Keys management state
+  const [apiKeys, setApiKeys] = useState([]);
+  const [loadingApiKeys, setLoadingApiKeys] = useState(false);
+  const [newApiKeyName, setNewApiKeyName] = useState('');
+  const [newApiKeyPermissions, setNewApiKeyPermissions] = useState(['read']);
+  const [creatingApiKey, setCreatingApiKey] = useState(false);
+  const [newlyCreatedKey, setNewlyCreatedKey] = useState(null);
+  
   // Sidebar expanded groups state
   const [expandedGroups, setExpandedGroups] = useState(['operations']); // Default: operations expanded
   
