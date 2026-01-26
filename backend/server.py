@@ -680,41 +680,6 @@ def get_booking_confirmation_template(patient_name: str, booking_date: str, star
         """
     return subject, body
 
-def get_internal_notification_template(notification_type: str, data: dict):
-    """Internal notification email for staff"""
-    if notification_type == "new_booking":
-        return f"""
-        <html>
-        <body style="font-family: Arial, sans-serif;">
-            <h2>Nova Rezervacija / New Booking</h2>
-            <p><strong>Pacijent / Patient:</strong> {data.get('patient_name', 'N/A')}</p>
-            <p><strong>Polazna tačka / Start:</strong> {data.get('start_point', 'N/A')}</p>
-            <p><strong>Odredište / Destination:</strong> {data.get('end_point', 'N/A')}</p>
-            <p><strong>Datum / Date:</strong> {data.get('booking_date', 'N/A')}</p>
-            <p><strong>Telefon / Phone:</strong> {data.get('contact_phone', 'N/A')}</p>
-            <p><strong>Email:</strong> {data.get('contact_email', 'N/A')}</p>
-            <p><strong>Napomene / Notes:</strong> {data.get('notes', 'N/A')}</p>
-            <hr>
-            <p>Booking ID: {data.get('booking_id', 'N/A')}</p>
-        </body>
-        </html>
-        """
-    elif notification_type == "new_contact":
-        return f"""
-        <html>
-        <body style="font-family: Arial, sans-serif;">
-            <h2>Nova Kontakt Poruka / New Contact Message</h2>
-            <p><strong>Tip upita / Inquiry Type:</strong> {data.get('inquiry_type', 'N/A')}</p>
-            <p><strong>Ime / Name:</strong> {data.get('name', 'N/A')}</p>
-            <p><strong>Email:</strong> {data.get('email', 'N/A')}</p>
-            <p><strong>Telefon / Phone:</strong> {data.get('phone', 'N/A')}</p>
-            <p><strong>Poruka / Message:</strong></p>
-            <p>{data.get('message', 'N/A')}</p>
-        </body>
-        </html>
-        """
-    return ""
-
 # ============ HEALTH CHECK ============
 
 # Health check
