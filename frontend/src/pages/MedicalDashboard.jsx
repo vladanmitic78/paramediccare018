@@ -97,6 +97,7 @@ const MedicalDashboard = () => {
   const [patientSearch, setPatientSearch] = useState('');
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [patientDialogOpen, setPatientDialogOpen] = useState(false);
+  const [generatingReport, setGeneratingReport] = useState(false);
   const [patientForm, setPatientForm] = useState({
     full_name: '',
     date_of_birth: '',
