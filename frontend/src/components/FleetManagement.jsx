@@ -135,15 +135,18 @@ const FleetManagement = () => {
     'Ventilator', 'Wheelchair', 'Spine Board', 'Medication Kit'
   ];
 
-  const fetchVehicles = useCallback(async () => {
+  const fetchVehicles = useCallback(async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
     try {
       const response = await axios.get(`${API}/fleet/vehicles`);
       setVehicles(response.data);
+      if (isRefresh) toast.success(language === 'sr' ? 'Osveženo!' : 'Refreshed!');
     } catch (error) {
       console.error('Error fetching vehicles:', error);
       toast.error(language === 'sr' ? 'Greška pri učitavanju vozila' : 'Error loading vehicles');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, [language]);
 
@@ -155,6 +158,11 @@ const FleetManagement = () => {
       console.error('Error fetching staff:', error);
     }
   }, []);
+
+  const handleRefresh = () => {
+    fetchVehicles(true);
+    fetchAvailableStaff();
+  };
 
   useEffect(() => {
     fetchVehicles();
