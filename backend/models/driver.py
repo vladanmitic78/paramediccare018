@@ -88,3 +88,20 @@ class ConnectionManager:
         # Clean up disconnected admins
         for admin_id in disconnected:
             del self.admin_connections[admin_id]
+
+    async def send_to_driver(self, driver_id: str, message: dict):
+        """Send message to a specific driver"""
+        if driver_id in self.active_connections:
+            try:
+                await self.active_connections[driver_id].send_json(message)
+                return True
+            except Exception:
+                # Driver disconnected, clean up
+                del self.active_connections[driver_id]
+                return False
+        return False
+
+    async def connect_driver(self, websocket: WebSocket, driver_id: str):
+        """Connect a driver's WebSocket"""
+        await websocket.accept()
+        self.active_connections[driver_id] = websocket
