@@ -110,6 +110,11 @@ const Dashboard = () => {
   const [publicBookingSearch, setPublicBookingSearch] = useState('');
   const [userSearch, setUserSearch] = useState('');
   
+  // Delete user confirmation dialog
+  const [showDeleteUserDialog, setShowDeleteUserDialog] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [deletingUser, setDeletingUser] = useState(false);
+  
   // Sidebar expanded groups state
   const [expandedGroups, setExpandedGroups] = useState(['operations']); // Default: operations expanded
   
