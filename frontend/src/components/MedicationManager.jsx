@@ -540,6 +540,79 @@ const MedicationManager = ({ patient, language = 'sr', onClose }) => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* ALLERGY WARNING DIALOG - Big Red Popup */}
+      <Dialog open={showAllergyWarning} onOpenChange={setShowAllergyWarning}>
+        <DialogContent className="max-w-md border-4 border-red-500 bg-red-50">
+          <DialogHeader className="space-y-4">
+            <div className="flex justify-center">
+              <div className="w-20 h-20 rounded-full bg-red-600 flex items-center justify-center animate-pulse">
+                <ShieldAlert className="w-12 h-12 text-white" />
+              </div>
+            </div>
+            <DialogTitle className="text-center text-2xl text-red-700">
+              {language === 'sr' ? '⚠️ UPOZORENJE NA ALERGIJU!' : '⚠️ ALLERGY WARNING!'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-red-100 border-2 border-red-400 rounded-lg p-4 text-center">
+              <p className="text-lg font-bold text-red-800 mb-2">
+                {language === 'sr' 
+                  ? 'NIJE DOZVOLJENO DATI OVAJ LEK!'
+                  : 'NOT ALLOWED TO GIVE THIS MEDICATION!'}
+              </p>
+              <p className="text-red-700">
+                {language === 'sr' 
+                  ? `Pacijent ${patient?.full_name} je ALERGIČAN na:`
+                  : `Patient ${patient?.full_name} is ALLERGIC to:`}
+              </p>
+              <p className="text-2xl font-bold text-red-900 mt-2">
+                {allergyMatch?.allergen || allergyMatch}
+              </p>
+              {allergyMatch?.severity && (
+                <Badge className={`mt-2 ${
+                  allergyMatch.severity === 'severe' 
+                    ? 'bg-red-700 text-white' 
+                    : allergyMatch.severity === 'moderate'
+                    ? 'bg-orange-600 text-white'
+                    : 'bg-yellow-500 text-black'
+                }`}>
+                  {allergyMatch.severity === 'severe' 
+                    ? (language === 'sr' ? 'TEŠKA ALERGIJA' : 'SEVERE ALLERGY')
+                    : allergyMatch.severity === 'moderate'
+                    ? (language === 'sr' ? 'UMERENA ALERGIJA' : 'MODERATE ALLERGY')
+                    : (language === 'sr' ? 'BLAGA ALERGIJA' : 'MILD ALLERGY')}
+                </Badge>
+              )}
+              {allergyMatch?.reaction && (
+                <p className="text-sm text-red-600 mt-2">
+                  {language === 'sr' ? 'Reakcija: ' : 'Reaction: '}{allergyMatch.reaction}
+                </p>
+              )}
+            </div>
+            
+            <div className="bg-white border border-red-300 rounded-lg p-3">
+              <p className="text-sm text-slate-700 flex items-start gap-2">
+                <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                {language === 'sr' 
+                  ? 'Davanje ovog leka može izazvati ozbiljnu alergijsku reakciju kod pacijenta. Molimo izaberite alternativni lek.'
+                  : 'Administering this medication may cause a serious allergic reaction in the patient. Please select an alternative medication.'}
+              </p>
+            </div>
+
+            <Button 
+              className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3"
+              onClick={() => {
+                setShowAllergyWarning(false);
+                setAllergyMatch(null);
+                setForm({ ...form, medication_name: '' });
+              }}
+            >
+              {language === 'sr' ? 'RAZUMEM - ZATVORI' : 'I UNDERSTAND - CLOSE'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
