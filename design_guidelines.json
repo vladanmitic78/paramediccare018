@@ -1,143 +1,127 @@
 {
-  "design_system": {
-    "typography": {
-      "font_family": {
-        "heading": "Manrope, sans-serif",
-        "body": "Inter, sans-serif",
-        "mono": "JetBrains Mono, monospace"
-      },
-      "scale": {
-        "h1": "text-4xl font-bold tracking-tight lg:text-5xl",
-        "h2": "text-3xl font-semibold tracking-tight",
-        "h3": "text-2xl font-semibold tracking-tight",
-        "nav_heading": "text-xs font-bold uppercase tracking-widest text-muted-foreground/70",
-        "nav_item": "text-sm font-medium"
-      }
+  "identity": {
+    "persona": "E1 - The Anti-AI Designer",
+    "principles": [
+      "Fusion over Imitation",
+      "Emotion First (Clinical Precision + Calm Authority)",
+      "Content is King (Data Clarity)",
+      "Zoom In (Focus on Status)",
+      "Negative Space (Breathing room in dense data)",
+      "Contrast (High visibility for emergency)"
+    ]
+  },
+  "typography": {
+    "headings": {
+      "family": "Manrope, sans-serif",
+      "weights": ["600", "700", "800"],
+      "usage": "Page titles, Card headers, Modal titles",
+      "letterSpacing": "tracking-tight"
     },
-    "colors": {
-      "palette": {
-        "primary": {
-          "DEFAULT": "hsl(199 89% 48%)",
-          "foreground": "hsl(210 40% 98%)",
-          "hover": "hsl(199 89% 40%)"
-        },
-        "sidebar": {
-          "background": "#0f172a",
-          "foreground": "#f8fafc",
-          "muted": "#94a3b8",
-          "border": "#1e293b",
-          "active_bg": "rgba(255, 255, 255, 0.1)",
-          "active_fg": "#ffffff",
-          "hover_bg": "rgba(255, 255, 255, 0.05)"
-        },
-        "status": {
-          "success": "#10b981",
-          "warning": "#f59e0b",
-          "error": "#ef4444",
-          "info": "#3b82f6"
-        }
-      }
+    "body": {
+      "family": "Inter, sans-serif",
+      "weights": ["400", "500"],
+      "usage": "Table data, descriptions, inputs",
+      "letterSpacing": "tracking-normal"
     },
+    "mono": {
+      "family": "JetBrains Mono, monospace",
+      "usage": "Vehicle IDs, Timestamps, Ticket Numbers"
+    }
+  },
+  "colors": {
+    "theme": "light",
+    "palette": {
+      "background": "#F8FAFC",
+      "surface": "#FFFFFF",
+      "surface_highlight": "#F1F5F9",
+      "border": "#E2E8F0",
+      "text_primary": "#0F172A",
+      "text_secondary": "#64748B",
+      "primary": "#0F172A",
+      "primary_foreground": "#FFFFFF",
+      "accent_critical": "#EF4444",
+      "accent_warning": "#F59E0B",
+      "accent_success": "#10B981",
+      "accent_info": "#3B82F6",
+      "accent_neutral": "#94A3B8"
+    },
+    "status_colors": {
+      "pending": "bg-red-50 text-red-700 border-red-200",
+      "confirmed": "bg-blue-50 text-blue-700 border-blue-200",
+      "in_progress": "bg-amber-50 text-amber-700 border-amber-200",
+      "completed": "bg-emerald-50 text-emerald-700 border-emerald-200",
+      "available": "bg-emerald-100 text-emerald-800",
+      "busy": "bg-red-100 text-red-800",
+      "maintenance": "bg-gray-100 text-gray-800"
+    }
+  },
+  "layout": {
+    "grid_system": "Bento Grid Mode B (High Density)",
     "spacing": {
-      "sidebar_width": "280px",
-      "sidebar_collapsed_width": "80px",
-      "container_padding": "p-6 md:p-8 lg:p-10"
+      "container_padding": "p-4 md:p-6",
+      "item_gap": "gap-4",
+      "internal_padding": "p-4"
     },
-    "shadows": {
-      "card": "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
-      "sidebar": "4px 0 24px rgba(0,0,0,0.05)"
-    },
-    "border_radius": {
-      "base": "0.5rem",
-      "sidebar_item": "0.5rem"
+    "dispatch_layout": {
+      "structure": "Split Screen (35% Left / 65% Right)",
+      "left_panel": "Incoming Requests & Booking List",
+      "right_panel": "Fleet Status & Live Map",
+      "mobile_strategy": "Tabbed view (Bookings | Fleet) instead of split screen"
     }
   },
   "components": {
-    "Sidebar": {
-      "path": "/app/frontend/src/components/layout/Sidebar.jsx",
-      "description": "A responsive, collapsible sidebar with grouped navigation. Uses a dark theme for high contrast against the light dashboard content.",
-      "structure": [
-        "Header: Logo + Brand Name (Collapsible)",
-        "ScrollArea: Navigation Groups",
-        "Footer: User Profile + Logout"
-      ],
-      "features": [
-        "Collapsible state (expanded/collapsed)",
-        "Role-based visibility (admin, doctor, nurse, driver)",
-        "Grouped items with labels",
-        "Active state highlighting",
-        "Tooltip support for collapsed state"
-      ]
+    "shadcn_customization": {
+      "card": "rounded-xl border-border shadow-sm hover:shadow-md transition-all duration-200",
+      "button": "rounded-lg font-medium tracking-wide",
+      "badge": "rounded-md px-2 py-0.5 font-semibold uppercase text-[10px] tracking-wider",
+      "input": "bg-white border-gray-200 focus:ring-2 focus:ring-slate-900 focus:border-transparent"
     },
-    "SidebarItem": {
-      "props": ["icon", "label", "href", "isActive", "isCollapsed", "badge"],
-      "styling": "Flex row, items-center, gap-3, p-3, rounded-md, transition-all duration-200. Hover: bg-sidebar-hover_bg. Active: bg-sidebar-active_bg text-sidebar-active_fg font-semibold."
+    "drag_and_drop": {
+      "library": "dnd-kit",
+      "interaction": "Drag 'Booking Card' from Left Panel -> Drop onto 'Vehicle Card' in Right Panel",
+      "visual_feedback": "Highlight drop target with ring-2 ring-primary ring-offset-2"
     },
-    "Layout": {
-      "path": "/app/frontend/src/components/layout/DashboardLayout.jsx",
-      "description": "Main layout wrapper handling the sidebar and main content area.",
-      "styling": "flex h-screen overflow-hidden bg-background"
+    "notifications": {
+      "library": "sonner",
+      "position": "top-right"
     }
   },
-  "navigation_structure": [
-    {
-      "group_label": "OPERACIJE",
-      "items": [
-        { "label": "Dashboard", "icon": "LayoutDashboard", "href": "/dashboard", "roles": ["all"] },
-        { "label": "Live Map", "icon": "Map", "href": "/map", "roles": ["admin", "driver"] },
-        { "label": "Bookings", "icon": "CalendarClock", "href": "/bookings", "roles": ["admin", "doctor"] }
-      ]
-    },
-    {
-      "group_label": "MEDICINSKI CENTAR",
-      "items": [
-        { "label": "Patients", "icon": "Users", "href": "/patients", "roles": ["admin", "doctor", "nurse"] },
-        { "label": "Medical Records", "icon": "FileHeart", "href": "/records", "roles": ["doctor", "nurse"] },
-        { "label": "Reports", "icon": "ClipboardStats", "href": "/reports", "roles": ["admin", "doctor"] }
-      ]
-    },
-    {
-      "group_label": "TIM",
-      "items": [
-        { "label": "Team Overview", "icon": "Stethoscope", "href": "/team", "roles": ["admin"] },
-        { "label": "Schedule", "icon": "CalendarDays", "href": "/schedule", "roles": ["all"] }
-      ]
-    },
-    {
-      "group_label": "FLOTA",
-      "items": [
-        { "label": "Vehicles", "icon": "Ambulance", "href": "/vehicles", "roles": ["admin", "driver"] },
-        { "label": "Equipment", "icon": "BriefcaseMedical", "href": "/equipment", "roles": ["admin", "nurse"] }
-      ]
-    },
-    {
-      "group_label": "FINANSIJE",
-      "items": [
-        { "label": "Invoices", "icon": "Receipt", "href": "/invoices", "roles": ["admin"] }
-      ]
-    },
-    {
-      "group_label": "PODEŠAVANJA",
-      "items": [
-        { "label": "Users", "icon": "UserCog", "href": "/users", "roles": ["superadmin"] },
-        { "label": "CMS", "icon": "Globe", "href": "/cms", "roles": ["admin"] },
-        { "label": "Messages", "icon": "MessageSquare", "href": "/messages", "roles": ["admin"] }
+  "visual_enhancers": {
+    "glassmorphism": "backdrop-blur-md bg-white/80 border-white/20 shadow-lg (Use for floating map controls)",
+    "borders": "1px solid #E2E8F0",
+    "shadows": "shadow-sm for cards, shadow-xl for floating elements"
+  },
+  "media": {
+    "icons": "Lucide React (default)",
+    "image_urls": {
+      "medical_staff": [
+        "https://images.unsplash.com/photo-1758691463605-f4a3a92d6d37?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "https://images.unsplash.com/photo-1758691462615-beafbf50bf3c?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "https://images.unsplash.com/photo-1758691463626-0ab959babe00?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "https://images.unsplash.com/photo-1758691461516-7e716e0ca135?crop=entropy&cs=srgb&fm=jpg&q=85"
       ]
     }
-  ],
-  "assets": {
-    "icons_library": "lucide-react",
-    "logo_placeholder": "Cross or Pulse icon in primary color"
+  },
+  "page_specifics": {
+    "dispatch_console": {
+      "path": "/app/frontend/src/pages/DispatchConsole.jsx",
+      "route": "/dispatch",
+      "features": [
+        "Unified view of Bookings and Fleet",
+        "Drag and drop assignment",
+        "Live Map integration (reuse AdminLiveMap)",
+        "Real-time status updates",
+        "Quick filters (Pending, Active, All)"
+      ],
+      "instructions": "Create a new page 'DispatchConsole'. Use a resizable split-pane layout if possible, or a fixed grid. Left side: 'BookingQueue' component. Right side: 'FleetGrid' component + 'Map' toggle. Ensure 'LanguageContext' is used for all text labels."
+    }
   },
   "universal_guidelines": [
-    "Use 'Manrope' for all headings to maintain brand consistency.",
-    "Ensure the sidebar is accessible: use semantic <nav> and <ul> tags.",
-    "Do not use gradients for the sidebar background; stick to solid Slate-900 for a professional 'Command Center' feel.",
-    "Active items must have a clear visual indicator (bg change + text color change).",
-    "Use Lucide-react icons consistently. Size: 20px (w-5 h-5).",
-    "Implement a 'Collapse' toggle at the bottom of the sidebar or in the header.",
-    "On mobile, the sidebar should be a Drawer (Sheet) component from Shadcn.",
-    "Ensure high contrast for text in the dark sidebar (Slate-400 for inactive, White for active)."
-  ],
-  "instructions_to_main_agent": "1. Create the Sidebar component using the structure defined above. 2. Update the DashboardLayout to include the Sidebar. 3. Ensure the sidebar is responsive (hidden on mobile, togglable via hamburger menu). 4. Use the defined color palette for the sidebar (Dark Slate). 5. Mock the 'roles' logic if actual auth is not present (default to 'admin' view)."
+    "Use 'sonner' for all toast notifications.",
+    "Ensure all interactive elements have 'data-testid'.",
+    "Do not use 'transition: all'. Animate specific properties.",
+    "Use 'Manrope' for headings and 'Inter' for body text.",
+    "Maintain high contrast for accessibility (WCAG AA).",
+    "Mobile-first responsive design is mandatory."
+  ]
 }
