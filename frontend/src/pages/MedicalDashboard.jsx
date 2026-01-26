@@ -316,6 +316,35 @@ const MedicalDashboard = () => {
     setActiveTab('patient-detail');
     fetchPatientVitals(patient.id);
   };
+
+  // Generate PDF report for patient
+  const generatePatientReport = async () => {
+    if (!selectedPatient) return;
+    
+    setGeneratingReport(true);
+    try {
+      const response = await axios.get(
+        `${API}/patients/${selectedPatient.id}/report?format=pdf`,
+        { responseType: 'blob' }
+      );
+
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `patient_report_${selectedPatient.full_name.replace(/\s+/g, '_')}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast.success(language === 'sr' ? 'Izveštaj generisan' : 'Report generated');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || (language === 'sr' ? 'Greška pri generisanju izveštaja' : 'Error generating report'));
+    } finally {
+      setGeneratingReport(false);
+    }
+  };
   
   // Get vital status color
   const getVitalStatus = (type, value) => {
