@@ -1432,6 +1432,60 @@ const Dashboard = () => {
           {/* Availability Section - StaffAvailabilityCalendar is rendered above at line 1197 */}
         </main>
       </div>
+
+      {/* Delete User Confirmation Dialog */}
+      <Dialog open={showDeleteUserDialog} onOpenChange={setShowDeleteUserDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="w-5 h-5" />
+              {language === 'sr' ? 'Obriši korisnika' : 'Delete User'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {userToDelete && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="text-slate-700 mb-2">
+                  {language === 'sr' 
+                    ? 'Da li ste sigurni da želite da obrišete korisnika:'
+                    : 'Are you sure you want to delete user:'}
+                </p>
+                <p className="font-semibold text-lg text-slate-900">{userToDelete.full_name}</p>
+                <p className="text-sm text-slate-600">{userToDelete.email}</p>
+                <div className="mt-2">
+                  {getRoleBadge(userToDelete.role)}
+                </div>
+              </div>
+            )}
+            <p className="text-sm text-red-600 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4" />
+              {language === 'sr' 
+                ? 'Ova akcija se ne može poništiti!'
+                : 'This action cannot be undone!'}
+            </p>
+            <div className="flex justify-end gap-3 pt-2">
+              <Button 
+                variant="outline" 
+                onClick={() => { setShowDeleteUserDialog(false); setUserToDelete(null); }}
+              >
+                {language === 'sr' ? 'Ne' : 'No'}
+              </Button>
+              <Button 
+                className="bg-red-600 hover:bg-red-700 text-white"
+                onClick={() => deleteUser(userToDelete?.id)}
+                disabled={deletingUser}
+              >
+                {deletingUser ? (
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4 mr-2" />
+                )}
+                {language === 'sr' ? 'Da, obriši' : 'Yes, delete'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
