@@ -113,8 +113,8 @@ const FleetManagement = () => {
   const [showVideoCall, setShowVideoCall] = useState(false);
   const [activeCallRoom, setActiveCallRoom] = useState(null);
   
-  // Check if user is super admin
-  const isSuperAdmin = () => user?.role === 'superadmin';
+  // Check if user is super admin or admin (both can delete)
+  const canDeleteVehicle = () => user?.role === 'superadmin' || user?.role === 'admin';
   
   // New vehicle form
   const [newVehicle, setNewVehicle] = useState({
