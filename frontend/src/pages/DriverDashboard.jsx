@@ -240,6 +240,38 @@ const DriverDashboard = () => {
     }
   };
 
+  // Track previous assignment to detect new ones
+  const prevAssignmentRef = useRef(null);
+  const [showNewTaskPopup, setShowNewTaskPopup] = useState(false);
+
+  // Play notification sound
+  const playNotificationSound = useCallback(() => {
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = 880; // A5 note
+      oscillator.type = 'sine';
+      gainNode.gain.value = 0.3;
+      
+      oscillator.start();
+      
+      // Play 3 beeps
+      setTimeout(() => { gainNode.gain.value = 0; }, 200);
+      setTimeout(() => { gainNode.gain.value = 0.3; }, 300);
+      setTimeout(() => { gainNode.gain.value = 0; }, 500);
+      setTimeout(() => { gainNode.gain.value = 0.3; }, 600);
+      setTimeout(() => { gainNode.gain.value = 0; }, 800);
+      setTimeout(() => { oscillator.stop(); }, 900);
+    } catch (e) {
+      console.log('Audio not supported');
+    }
+  }, []);
+
   // Initial load
   useEffect(() => {
     fetchDriverData();
@@ -251,6 +283,60 @@ const DriverDashboard = () => {
       }
     };
   }, [fetchDriverData, stopGPSTracking]);
+
+  // Poll for new assignments every 5 seconds when online
+  useEffect(() => {
+    if (driverStatus === 'offline') return;
+    
+    const pollInterval = setInterval(async () => {
+      try {
+        const [profileRes, assignmentRes] = await Promise.all([
+          axios.get(`${API}/api/driver/profile`),
+          axios.get(`${API}/api/driver/assignment`)
+        ]);
+        
+        const newStatus = profileRes.data.status?.status || 'offline';
+        setDriverStatus(newStatus);
+        
+        if (assignmentRes.data.has_assignment) {
+          const newAssignment = assignmentRes.data.assignment;
+          
+          // Check if this is a NEW assignment (not seen before)
+          if (newAssignment && (!prevAssignmentRef.current || prevAssignmentRef.current.id !== newAssignment.id)) {
+            // New task received!
+            setAssignment(newAssignment);
+            prevAssignmentRef.current = newAssignment;
+            
+            // Show popup and play sound
+            setShowNewTaskPopup(true);
+            playNotificationSound();
+            
+            // Also show toast
+            toast.success(
+              language === 'sr' 
+                ? '🚨 NOVI ZADATAK PRIMLJEN!' 
+                : '🚨 NEW TASK RECEIVED!',
+              { duration: 10000 }
+            );
+            
+            // Try to vibrate the device
+            if (navigator.vibrate) {
+              navigator.vibrate([200, 100, 200, 100, 200]);
+            }
+          } else {
+            setAssignment(newAssignment);
+          }
+        } else {
+          setAssignment(null);
+          prevAssignmentRef.current = null;
+        }
+      } catch (error) {
+        console.error('Polling error:', error);
+      }
+    }, 5000); // Poll every 5 seconds
+    
+    return () => clearInterval(pollInterval);
+  }, [driverStatus, language, playNotificationSound]);
 
   // Handle logout
   const handleLogout = () => {
