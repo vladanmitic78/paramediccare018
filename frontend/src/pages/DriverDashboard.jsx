@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { 
@@ -33,7 +32,58 @@ const API = process.env.REACT_APP_BACKEND_URL;
 const LOCATION_UPDATE_INTERVAL = 5000; // 5 seconds while moving
 const LOCATION_UPDATE_INTERVAL_IDLE = 20000; // 20 seconds when stationary
 
+// Custom hook to set driver PWA manifest
+const useDriverPWAManifest = () => {
+  useEffect(() => {
+    // Store original values
+    const manifestLink = document.getElementById('pwa-manifest');
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    const appleTouchIcon = document.querySelector('link[rel="apple-touch-icon"]');
+    const appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+    
+    const originalManifest = manifestLink?.href;
+    const originalThemeColor = themeColorMeta?.content;
+    const originalAppleIcon = appleTouchIcon?.href;
+    const originalAppleTitle = appleTitle?.content;
+    
+    // Update document title
+    document.title = 'PC018 Vozač - Paramedic Care 018';
+    
+    // Update manifest link
+    if (manifestLink) {
+      manifestLink.href = '/manifest-driver.json';
+    }
+    
+    // Update theme color
+    if (themeColorMeta) {
+      themeColorMeta.content = '#0f172a';
+    }
+    
+    // Update apple touch icon
+    if (appleTouchIcon) {
+      appleTouchIcon.href = '/apple-touch-icon-driver.png';
+    }
+    
+    // Update apple mobile web app title
+    if (appleTitle) {
+      appleTitle.content = 'PC018 Vozač';
+    }
+    
+    // Cleanup function - restore original values when leaving driver dashboard
+    return () => {
+      document.title = 'Paramedic Care 018 | Medicinska Nega i Transport';
+      if (manifestLink && originalManifest) manifestLink.href = originalManifest;
+      if (themeColorMeta && originalThemeColor) themeColorMeta.content = originalThemeColor;
+      if (appleTouchIcon && originalAppleIcon) appleTouchIcon.href = originalAppleIcon;
+      if (appleTitle && originalAppleTitle) appleTitle.content = originalAppleTitle;
+    };
+  }, []);
+};
+
 const DriverDashboard = () => {
+  // Apply driver PWA manifest settings
+  useDriverPWAManifest();
+  
   const { language, toggleLanguage } = useLanguage();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
