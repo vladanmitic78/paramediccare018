@@ -1,8 +1,12 @@
-const CACHE_NAME = 'pc018-medical-v1';
+const CACHE_NAME = 'pc018-medical-v2';
 const STATIC_ASSETS = [
   '/medical-pwa',
+  '/driver',
   '/logo.jpg',
-  '/manifest.json'
+  '/driver-icon-192.png',
+  '/driver-icon-512.png',
+  '/manifest.json',
+  '/manifest-driver.json'
 ];
 
 // Install event - cache static assets
