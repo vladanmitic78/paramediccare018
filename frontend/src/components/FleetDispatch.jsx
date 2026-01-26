@@ -603,7 +603,10 @@ const FleetDispatch = () => {
       });
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.detail || (language === 'sr' ? 'Greška' : 'Error'));
+      const errMsg = typeof error.response?.data?.detail === 'string' 
+        ? error.response.data.detail 
+        : (language === 'sr' ? 'Greška' : 'Error');
+      toast.error(errMsg);
     }
   };
 
@@ -618,7 +621,10 @@ const FleetDispatch = () => {
       setVehicleToDelete(null);
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.detail || (language === 'sr' ? 'Greška' : 'Error'));
+      const errMsg = typeof error.response?.data?.detail === 'string' 
+        ? error.response.data.detail 
+        : (language === 'sr' ? 'Greška' : 'Error');
+      toast.error(errMsg);
     } finally {
       setDeleting(false);
     }
@@ -638,7 +644,10 @@ const FleetDispatch = () => {
       setMissionNotes('');
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.detail || (language === 'sr' ? 'Greška' : 'Error'));
+      const errMsg = typeof error.response?.data?.detail === 'string' 
+        ? error.response.data.detail 
+        : (language === 'sr' ? 'Greška' : 'Error');
+      toast.error(errMsg);
     } finally {
       setCompletingMission(false);
     }
