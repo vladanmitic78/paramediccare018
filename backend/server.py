@@ -2734,11 +2734,12 @@ async def generate_patient_report(
             logo_url = "https://customer-assets.emergentagent.com/job_433955cc-2ea1-4976-bce7-1cf9f8ad9654/artifacts/j7ye45w5_Paramedic%20Care%20018%20Logo.jpg"
             with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp_logo:
                 urllib.request.urlretrieve(logo_url, tmp_logo.name)
-                logo = Image(tmp_logo.name, width=40*mm, height=15*mm)
+                # Use proportional sizing - the logo is roughly square, so keep aspect ratio
+                logo = Image(tmp_logo.name, width=20*mm, height=20*mm, kind='proportional')
                 
                 # Create header with logo and title
                 header_data = [[logo, Paragraph("<b>PARAMEDIC CARE 018</b><br/><font size='10'>Medical Report / Medicinski izveštaj</font>", styles['Normal'])]]
-                header_table = Table(header_data, colWidths=[45*mm, 115*mm])
+                header_table = Table(header_data, colWidths=[25*mm, 135*mm])
                 header_table.setStyle(TableStyle([
                     ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
                     ('LEFTPADDING', (0, 0), (0, 0), 0),
