@@ -1177,14 +1177,15 @@ const Dashboard = () => {
                                 >
                                   {u.is_active ? <XCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
                                 </Button>
-                                {/* Only Super Admin can delete users */}
-                                {isSuperAdmin() && u.role !== 'superadmin' && (
+                                {/* Admin and Super Admin can delete users (except superadmin accounts) */}
+                                {u.role !== 'superadmin' && (
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => deleteUser(u.id)}
+                                    onClick={() => openDeleteUserDialog(u)}
                                     className="text-red-600 hover:text-red-700"
                                     title={language === 'sr' ? 'Obriši' : 'Delete'}
+                                    data-testid="delete-user-btn"
                                   >
                                     <Trash2 className="w-4 h-4" />
                                   </Button>
