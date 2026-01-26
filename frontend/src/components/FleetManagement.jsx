@@ -413,8 +413,8 @@ const FleetManagement = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={fetchVehicles}>
-            <RefreshCw className="w-4 h-4 mr-2" />
+          <Button variant="outline" onClick={handleRefresh} disabled={refreshing}>
+            <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
             {language === 'sr' ? 'Osveži' : 'Refresh'}
           </Button>
           <Dialog open={showAddVehicle} onOpenChange={setShowAddVehicle}>
