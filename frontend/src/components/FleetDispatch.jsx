@@ -780,7 +780,7 @@ const FleetDispatch = () => {
   });
 
   const pendingCount = bookings.filter(b => b.status === 'pending').length;
-  const activeCount = bookings.filter(b => b.status === 'confirmed' || b.status === 'in_progress').length;
+  const activeCount = bookings.filter(b => ['confirmed', 'in_progress', 'en_route', 'on_site', 'transporting'].includes(b.status)).length;
   const readyVehicles = vehicles.filter(v => !v.current_mission && v.team?.some(m => m.role === 'driver')).length;
 
   // Address search using Nominatim (OpenStreetMap)
