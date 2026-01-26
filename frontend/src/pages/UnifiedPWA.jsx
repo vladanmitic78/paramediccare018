@@ -711,21 +711,39 @@ const UnifiedPWA = () => {
           <>
             {activeTab === 'home' && (
               <div className="space-y-4">
-                {/* Pending Bookings */}
-                {pendingBookings.length > 0 && (
+                {/* Medical Staff - Show Active Transports with Vitals Entry */}
+                {isMedical && activeBookings.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-emerald-400 mb-2 flex items-center gap-2">
+                      <Stethoscope className="w-4 h-4" />
+                      {language === 'sr' ? 'AKTIVNI PACIJENTI' : 'ACTIVE PATIENTS'} ({activeBookings.length})
+                    </h3>
+                    {activeBookings.map(booking => (
+                      <MedicalBookingCard 
+                        key={booking.id} 
+                        booking={booking} 
+                        language={language} 
+                        onVitals={() => { setSelectedPatient(booking); setShowVitalsModal(true); }}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {/* Admin - Show Pending Bookings */}
+                {isAdmin && pendingBookings.length > 0 && (
                   <div>
                     <h3 className="text-sm font-semibold text-red-400 mb-2 flex items-center gap-2">
                       <AlertCircle className="w-4 h-4" />
                       {language === 'sr' ? 'ČEKAJU DODELU' : 'WAITING'} ({pendingBookings.length})
                     </h3>
                     {pendingBookings.map(booking => (
-                      <BookingCard key={booking.id} booking={booking} language={language} onAssign={isAdmin ? () => { setSelectedBooking(booking); setShowAssignModal(true); } : null} />
+                      <BookingCard key={booking.id} booking={booking} language={language} onAssign={() => { setSelectedBooking(booking); setShowAssignModal(true); }} />
                     ))}
                   </div>
                 )}
                 
-                {/* Active Transports */}
-                {activeBookings.length > 0 && (
+                {/* Active Transports - Both roles */}
+                {(isAdmin || (isMedical && activeBookings.length === 0)) && activeBookings.length > 0 && (
                   <div>
                     <h3 className="text-sm font-semibold text-emerald-400 mb-2 flex items-center gap-2">
                       <Activity className="w-4 h-4" />
@@ -737,10 +755,54 @@ const UnifiedPWA = () => {
                   </div>
                 )}
 
-                {pendingBookings.length === 0 && activeBookings.length === 0 && (
+                {/* Medical - Empty State */}
+                {isMedical && activeBookings.length === 0 && (
+                  <div className="text-center py-12 text-slate-500">
+                    <Stethoscope className="w-16 h-16 mx-auto mb-3 text-slate-600" />
+                    <p className="text-lg font-medium">{language === 'sr' ? 'Nema aktivnih pacijenata' : 'No active patients'}</p>
+                    <p className="text-sm mt-2">{language === 'sr' ? 'Pacijenti će se pojaviti kada vozač započne transport' : 'Patients will appear when driver starts transport'}</p>
+                  </div>
+                )}
+
+                {/* Admin - Empty State */}
+                {isAdmin && pendingBookings.length === 0 && activeBookings.length === 0 && (
                   <div className="text-center py-12 text-slate-500">
                     <CheckCircle className="w-16 h-16 mx-auto mb-3 text-slate-600" />
                     <p>{language === 'sr' ? 'Nema rezervacija' : 'No bookings'}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'vitals' && isMedical && (
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-purple-400 mb-2 flex items-center gap-2">
+                  <Heart className="w-4 h-4" />
+                  {language === 'sr' ? 'BRZI UNOS VITALA' : 'QUICK VITALS ENTRY'}
+                </h3>
+                {activeBookings.length > 0 ? (
+                  activeBookings.map(booking => (
+                    <div key={booking.id} className="bg-slate-800 rounded-xl p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <p className="font-semibold">{booking.patient_name}</p>
+                          <p className="text-xs text-slate-400">{statusConfig[booking.status]?.label[language]}</p>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          className="bg-purple-600 hover:bg-purple-700"
+                          onClick={() => { setSelectedPatient(booking); setShowVitalsModal(true); }}
+                        >
+                          <Plus className="w-4 h-4 mr-1" />
+                          {language === 'sr' ? 'Vitali' : 'Vitals'}
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-slate-500">
+                    <Heart className="w-12 h-12 mx-auto mb-2 text-slate-600" />
+                    <p>{language === 'sr' ? 'Nema aktivnih pacijenata' : 'No active patients'}</p>
                   </div>
                 )}
               </div>
