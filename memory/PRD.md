@@ -487,17 +487,17 @@ A comprehensive fleet management system where each ambulance has assigned teams.
 - [ ] Integrate live data into Operations Dashboard
 
 ### P2 (Future)
+- [ ] Continue backend refactoring (server.py still ~3900 lines)
 - [ ] Persist collapsible sidebar state in localStorage
 - [ ] Driver rejection reason modal/text field
-- [ ] Doctor Decision Panel (live instructions, medication approval)
-- [ ] Medical Reports & PDF Export
-- [ ] Fleet Management Module (Vehicles, Equipment)
+- [ ] Medical Reports & PDF Export (FHIR format)
 - [ ] Calendar View for Bookings (OPERACIJE -> Kalendar)
 - [ ] Offline mode for Medical Dashboard (PWA)
 - [ ] Payment processing
 - [ ] Insurance integration
 - [ ] Mobile applications
 - [ ] Advanced analytics
+- [ ] Persistent file storage (S3 migration for uploads)
 
 ## API Endpoints
 
