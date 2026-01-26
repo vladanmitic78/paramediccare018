@@ -193,6 +193,9 @@ const DriverDashboard = () => {
   // Keep screen awake during active transport (en_route, on_site, transporting)
   const isActiveTransport = ['en_route', 'on_site', 'transporting'].includes(driverStatus);
   useWakeLock(isActiveTransport);
+  
+  // Auto-show full screen map when transporting
+  const showFullScreenMap = driverStatus === 'transporting';
 
   // Status labels
   const statusLabels = {
