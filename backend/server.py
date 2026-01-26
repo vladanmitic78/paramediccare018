@@ -3259,20 +3259,35 @@ async def get_driver_assignment(user: dict = Depends(require_roles([UserRole.DRI
     driver_status = await db.driver_status.find_one({"driver_id": user["id"]})
     
     if not driver_status or not driver_status.get("current_booking_id"):
-        # Check for any assigned bookings
+        # Check for any assigned bookings in both collections
         assigned_booking = await db.patient_bookings.find_one({
             "assigned_driver_id": user["id"],
             "status": {"$in": [BookingStatus.CONFIRMED, BookingStatus.EN_ROUTE, BookingStatus.PICKED_UP]}
         }, {"_id": 0})
         
+        if not assigned_booking:
+            # Also check public bookings
+            assigned_booking = await db.bookings.find_one({
+                "assigned_driver": user["id"],
+                "status": {"$in": ["confirmed", "en_route", "picked_up"]}
+            }, {"_id": 0})
+        
         if assigned_booking:
             return {"assignment": assigned_booking, "has_assignment": True}
         return {"assignment": None, "has_assignment": False}
     
+    # Try patient_bookings first
     booking = await db.patient_bookings.find_one(
         {"id": driver_status["current_booking_id"]},
         {"_id": 0}
     )
+    
+    # Also try public bookings
+    if not booking:
+        booking = await db.bookings.find_one(
+            {"id": driver_status["current_booking_id"]},
+            {"_id": 0}
+        )
     
     return {"assignment": booking, "has_assignment": booking is not None}
 
