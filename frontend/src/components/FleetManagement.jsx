@@ -114,6 +114,12 @@ const FleetManagement = () => {
   const [showVideoCall, setShowVideoCall] = useState(false);
   const [activeCallRoom, setActiveCallRoom] = useState(null);
   
+  // Complete mission state
+  const [showCompleteMission, setShowCompleteMission] = useState(false);
+  const [vehicleToComplete, setVehicleToComplete] = useState(null);
+  const [completingMission, setCompletingMission] = useState(false);
+  const [missionNotes, setMissionNotes] = useState('');
+  
   // Check if user is super admin or admin (both can delete)
   const canDeleteVehicle = () => user?.role === 'superadmin' || user?.role === 'admin';
   
