@@ -247,8 +247,20 @@ const DriverDashboard = () => {
 
   // Open navigation app
   const openNavigation = (lat, lng, address) => {
-    // Try Google Maps first, fallback to generic geo: URL
-    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    let googleMapsUrl;
+    
+    // Use coordinates if available, otherwise use address
+    if (lat && lng) {
+      googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    } else if (address) {
+      // Encode address for URL
+      const encodedAddress = encodeURIComponent(address);
+      googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
+    } else {
+      toast.error(language === 'sr' ? 'Adresa nije dostupna' : 'Address not available');
+      return;
+    }
+    
     window.open(googleMapsUrl, '_blank');
   };
 
