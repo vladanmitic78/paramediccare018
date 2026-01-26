@@ -62,6 +62,10 @@ const MedicationManager = ({ patient, language = 'sr', onClose }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   
+  // Allergy warning state
+  const [showAllergyWarning, setShowAllergyWarning] = useState(false);
+  const [allergyMatch, setAllergyMatch] = useState(null);
+  
   // Form state
   const [form, setForm] = useState({
     medication_name: '',
@@ -76,6 +80,35 @@ const MedicationManager = ({ patient, language = 'sr', onClose }) => {
   const [reportFromDate, setReportFromDate] = useState('');
   const [reportToDate, setReportToDate] = useState('');
   const [generatingReport, setGeneratingReport] = useState(false);
+
+  // Check if medication matches any patient allergies
+  const checkAllergyMatch = (medicationName) => {
+    if (!patient?.allergies || !medicationName) return null;
+    
+    const medNameLower = medicationName.toLowerCase();
+    
+    for (const allergy of patient.allergies) {
+      const allergenName = (allergy.allergen || allergy).toString().toLowerCase();
+      // Check if medication name contains allergen or vice versa
+      if (medNameLower.includes(allergenName) || allergenName.includes(medNameLower)) {
+        return allergy;
+      }
+    }
+    return null;
+  };
+
+  // Handle medication name change with allergy check
+  const handleMedicationNameChange = (name) => {
+    setForm({ ...form, medication_name: name });
+    setShowSuggestions(true);
+    
+    // Check for allergy match
+    const match = checkAllergyMatch(name);
+    if (match && name.length >= 3) {
+      setAllergyMatch(match);
+      setShowAllergyWarning(true);
+    }
+  };
 
   // Fetch patient medications
   const fetchMedications = useCallback(async () => {
