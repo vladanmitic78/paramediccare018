@@ -145,6 +145,15 @@ const MedicationManager = ({ patient, language = 'sr', onClose }) => {
 
   // Handle medication selection from dropdown
   const selectMedication = (med) => {
+    // Check for allergy before selecting
+    const match = checkAllergyMatch(med.name);
+    if (match) {
+      setAllergyMatch(match);
+      setShowAllergyWarning(true);
+      setShowSuggestions(false);
+      return; // Don't select the medication
+    }
+    
     setForm({
       ...form,
       medication_name: med.name,
@@ -159,6 +168,14 @@ const MedicationManager = ({ patient, language = 'sr', onClose }) => {
     e.preventDefault();
     if (!form.medication_name || !form.dosage) {
       toast.error(language === 'sr' ? 'Unesite ime leka i dozu' : 'Enter medication name and dosage');
+      return;
+    }
+
+    // Final allergy check before submission
+    const match = checkAllergyMatch(form.medication_name);
+    if (match) {
+      setAllergyMatch(match);
+      setShowAllergyWarning(true);
       return;
     }
 
