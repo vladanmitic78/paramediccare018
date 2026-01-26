@@ -493,15 +493,50 @@ const FleetManagement = () => {
         </div>
       </div>
 
+      {/* Search Bar */}
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+        <Input
+          value={vehicleSearch}
+          onChange={(e) => setVehicleSearch(e.target.value)}
+          placeholder={language === 'sr' 
+            ? 'Pretraži vozila po imenu, registraciji, statusu...' 
+            : 'Search vehicles by name, registration, status...'}
+          className="pl-10 h-11"
+          data-testid="vehicle-search-input"
+        />
+        {vehicleSearch && (
+          <button
+            onClick={() => setVehicleSearch('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+
+      {/* Results count when searching */}
+      {vehicleSearch && (
+        <p className="text-sm text-slate-500">
+          {language === 'sr' 
+            ? `Pronađeno ${filteredVehicles.length} od ${vehicles.length} vozila`
+            : `Found ${filteredVehicles.length} of ${vehicles.length} vehicles`}
+        </p>
+      )}
+
       {/* Vehicle Cards */}
-      {vehicles.length === 0 ? (
+      {filteredVehicles.length === 0 ? (
         <div className="text-center py-12 bg-slate-50 rounded-xl">
           <Ambulance className="w-12 h-12 mx-auto text-slate-400 mb-3" />
-          <p className="text-slate-500">{language === 'sr' ? 'Nema vozila. Dodajte prvo vozilo.' : 'No vehicles. Add your first vehicle.'}</p>
+          <p className="text-slate-500">
+            {vehicleSearch 
+              ? (language === 'sr' ? 'Nema rezultata pretrage' : 'No search results')
+              : (language === 'sr' ? 'Nema vozila. Dodajte prvo vozilo.' : 'No vehicles. Add your first vehicle.')}
+          </p>
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {vehicles.map(vehicle => (
+          {filteredVehicles.map(vehicle => (
             <div 
               key={vehicle.id} 
               className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow"
@@ -524,7 +559,21 @@ const FleetManagement = () => {
                       <p className="text-sm text-slate-500">{vehicle.registration_plate}</p>
                     </div>
                   </div>
-                  {getStatusBadge(vehicle.status)}
+                  <div className="flex items-center gap-2">
+                    {getStatusBadge(vehicle.status)}
+                    {/* Delete button (Super Admin only) */}
+                    {isSuperAdmin() && !vehicle.current_mission && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => { setVehicleToDelete(vehicle); setShowDeleteConfirm(true); }}
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
+                        title={language === 'sr' ? 'Obriši vozilo' : 'Delete vehicle'}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -551,13 +600,26 @@ const FleetManagement = () => {
                           {getRoleBadge(member.role, member.is_remote)}
                           <span className="text-sm font-medium">{member.user_name}</span>
                         </div>
-                        {!vehicle.current_mission && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRemoveMember(vehicle.id, member.user_id)}
-                            className="text-red-500 hover:text-red-700 h-7 w-7 p-0"
-                          >
+                        <div className="flex items-center gap-1">
+                          {/* Video call button for remote doctors */}
+                          {member.is_remote && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => startVideoCall(vehicle)}
+                              className="text-indigo-500 hover:text-indigo-700 h-7 w-7 p-0"
+                              title={language === 'sr' ? 'Video poziv' : 'Video call'}
+                            >
+                              <Video className="w-4 h-4" />
+                            </Button>
+                          )}
+                          {!vehicle.current_mission && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveMember(vehicle.id, member.user_id)}
+                              className="text-red-500 hover:text-red-700 h-7 w-7 p-0"
+                            >
                             <UserMinus className="w-4 h-4" />
                           </Button>
                         )}
