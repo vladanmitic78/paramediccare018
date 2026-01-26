@@ -217,8 +217,9 @@ const DraggableVehicleCard = ({ vehicle, language, onAssignClick, onVideoCall, o
         <Button
           variant="outline"
           size="sm"
-          onClick={(e) => { e.stopPropagation(); onAssignClick(vehicle); }}
+          onClick={() => onAssignClick(vehicle)}
           className="flex-1 text-xs h-8"
+          data-testid={`assign-team-btn-${vehicle.id}`}
         >
           <UserPlus className="w-3 h-3 mr-1" />
           {language === 'sr' ? 'Tim' : 'Team'}
@@ -227,7 +228,7 @@ const DraggableVehicleCard = ({ vehicle, language, onAssignClick, onVideoCall, o
           <Button
             variant="outline"
             size="sm"
-            onClick={(e) => { e.stopPropagation(); onVideoCall(vehicle); }}
+            onClick={() => onVideoCall(vehicle)}
             className="text-xs h-8"
           >
             <Video className="w-3 h-3" />
