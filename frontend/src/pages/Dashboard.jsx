@@ -700,9 +700,9 @@ const Dashboard = () => {
     ...(isAdmin() ? [{
       id: 'fleet',
       icon: Ambulance,
-      label: language === 'sr' ? 'Flota' : 'Fleet',
+      label: language === 'sr' ? 'Dispečerski centar' : 'Dispatch Center',
       items: [
-        { id: 'vehicles', icon: Truck, label: language === 'sr' ? 'Vozila & Timovi' : 'Vehicles & Teams' },
+        { id: 'vehicles', icon: Ambulance, label: language === 'sr' ? 'Vozila & Rezervacije' : 'Vehicles & Bookings' },
         { id: 'fleet-history', icon: Clock, label: language === 'sr' ? 'Istorija' : 'History' },
         { id: 'livemap', icon: Map, label: language === 'sr' ? 'Praćenje vozila' : 'Live Tracking' },
       ]
