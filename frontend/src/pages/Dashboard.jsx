@@ -317,10 +317,11 @@ const Dashboard = () => {
     fetchAvailableDrivers();
   }, [user, navigate]);
 
-  // Fetch API keys when api-settings tab is selected
+  // Fetch API keys and incoming APIs when api-settings tab is selected
   useEffect(() => {
     if (activeTab === 'api-settings' && isSuperAdmin()) {
       fetchApiKeys();
+      fetchIncomingApis();
     }
   }, [activeTab]);
 
