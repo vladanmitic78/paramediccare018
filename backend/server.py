@@ -2732,12 +2732,17 @@ async def generate_patient_report(
         
         # Patient Info
         elements.append(Paragraph("Patient Information / Podaci o pacijentu", styles['Heading2']))
+        
+        # Format allergies properly (they are dicts with 'allergen' key)
+        allergies_list = patient.get("allergies", [])
+        allergies_str = ", ".join([a.get("allergen", str(a)) if isinstance(a, dict) else str(a) for a in allergies_list]) if allergies_list else "None"
+        
         patient_data = [
             ["Name / Ime:", patient.get("full_name", "N/A")],
             ["DOB / Datum rođenja:", patient.get("date_of_birth", "N/A")],
             ["Blood Type / Krvna grupa:", patient.get("blood_type", "N/A")],
             ["Phone / Telefon:", patient.get("phone", "N/A")],
-            ["Allergies / Alergije:", ", ".join(patient.get("allergies", [])) or "None"],
+            ["Allergies / Alergije:", allergies_str],
         ]
         t = Table(patient_data, colWidths=[60*mm, 100*mm])
         t.setStyle(TableStyle([
