@@ -30,11 +30,21 @@
         <meta name="keywords" content="medicinski transport, hitna pomoć, sanitet, ambulanta, Niš, Srbija, transport pacijenata" />
         <link rel="canonical" href="https://paramedic-care018.rs/" />
         
-        <!-- PWA Manifest -->
-        <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+        <!-- PWA Manifest (dynamically switched for driver app) -->
+        <link rel="manifest" href="%PUBLIC_URL%/manifest.json" id="pwa-manifest" />
+        <link rel="apple-touch-icon" href="%PUBLIC_URL%/driver-icon-192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="PC018 Medical" />
+        
+        <!-- Dynamic manifest switching for Driver PWA -->
+        <script>
+          if (window.location.pathname.startsWith('/driver')) {
+            document.getElementById('pwa-manifest').href = '/manifest-driver.json';
+            document.querySelector('meta[name="apple-mobile-web-app-title"]').content = 'PC018 Vozač';
+            document.querySelector('meta[name="theme-color"]').content = '#0f172a';
+          }
+        </script>
         
         <!-- Google Fonts: Manrope + Inter -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
