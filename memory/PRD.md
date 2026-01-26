@@ -434,6 +434,8 @@ A comprehensive fleet management system where each ambulance has assigned teams.
 9. **Delete Vehicle** - Super Admin can delete vehicles (with confirmation dialog) (Jan 26, 2026) ✅
 10. **Jitsi Video Calls** - Click video button to start call with remote doctor (Jan 26, 2026) ✅
 11. **Team Assignment Flow** - Checkbox selection + Save Team button + Confirmation dialog (Jan 26, 2026) ✅
+12. **Fleet History Page** - Track completed missions, search, expandable details (Jan 26, 2026) ✅
+13. **Complete Mission Flow** - Mark mission complete, clear team, transfer to history (Jan 26, 2026) ✅
 
 **Edge Cases Handled:**
 - Mission start blocked if required roles not filled
