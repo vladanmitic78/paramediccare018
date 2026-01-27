@@ -843,9 +843,9 @@ const FleetDispatch = () => {
     
     setCheckingAvailability(true);
     try {
-      const { vehicle, driver, bookingDate } = pendingAssignment;
-      const startISO = `${bookingDate}T${assignmentTimeSlot.startTime}:00`;
-      const endISO = `${bookingDate}T${assignmentTimeSlot.endTime}:00`;
+      const { vehicle, driver } = pendingAssignment;
+      const startISO = `${assignmentTimeSlot.startDate}T${assignmentTimeSlot.startTime}:00`;
+      const endISO = `${assignmentTimeSlot.endDate}T${assignmentTimeSlot.endTime}:00`;
       
       const response = await axios.get(
         `${API}/fleet/schedules/conflicts?vehicle_id=${vehicle.id}&start_time=${startISO}&end_time=${endISO}${driver ? `&driver_id=${driver.user_id}` : ''}`
