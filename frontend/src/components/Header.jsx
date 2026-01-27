@@ -38,8 +38,12 @@ export const Header = () => {
   const { language, setLanguage, t } = useLanguage();
   const { user, logout, isAdmin, isStaff } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [headerContent, setHeaderContent] = useState(null);
+  const [userBookings, setUserBookings] = useState([]);
+  const [loadingBookings, setLoadingBookings] = useState(false);
+  const [showBookings, setShowBookings] = useState(false);
 
   // Fetch header content from CMS
   useEffect(() => {
