@@ -809,14 +809,30 @@ const FleetDispatch = () => {
     const bookingDate = booking.booking_date || booking.preferred_date || new Date().toISOString().split('T')[0];
     const bookingTime = booking.booking_time || booking.preferred_time || '09:00';
     
-    // Calculate default end time (2 hours after start)
-    const [hours, minutes] = bookingTime.split(':').map(Number);
-    const endHour = Math.min(hours + 2, 22);
-    const defaultEndTime = `${endHour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    // Check if booking has estimated_arrival for multi-day transports
+    let endDate = bookingDate;
+    let endTime;
+    
+    if (booking.estimated_arrival) {
+      // Parse estimated_arrival datetime
+      const arrivalDate = new Date(booking.estimated_arrival);
+      endDate = arrivalDate.toISOString().split('T')[0];
+      endTime = arrivalDate.toTimeString().slice(0, 5);
+    } else {
+      // Calculate default end time (2 hours after start)
+      const [hours, minutes] = bookingTime.split(':').map(Number);
+      const endHour = Math.min(hours + 2, 22);
+      endTime = `${endHour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    }
     
     // Show time slot modal
     setPendingAssignment({ vehicle, booking, driver, bookingDate });
-    setAssignmentTimeSlot({ startTime: bookingTime, endTime: defaultEndTime });
+    setAssignmentTimeSlot({ 
+      startDate: bookingDate, 
+      startTime: bookingTime, 
+      endDate: endDate, 
+      endTime: endTime 
+    });
     setAvailabilityCheck(null);
     setShowTimeSlotModal(true);
   };
