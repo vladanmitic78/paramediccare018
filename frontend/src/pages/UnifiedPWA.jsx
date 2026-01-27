@@ -268,7 +268,7 @@ const statusConfig = {
 const UnifiedPWA = () => {
   usePWAManifest();
   const pushNotifications = usePushNotifications();
-  const pwaInstall = usePWAInstall();
+  const pwaInstall = usePWA();
   
   const { language, toggleLanguage } = useLanguage();
   const { user, logout, loading: authLoading } = useAuth();
