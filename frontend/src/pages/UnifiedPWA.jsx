@@ -1151,6 +1151,62 @@ const UnifiedPWA = () => {
         </nav>
       )}
 
+      {/* Floating Call Widget - Shows during active call */}
+      {activeCall && (
+        <div 
+          className={`fixed z-[60] transition-all duration-300 ${
+            callMinimized 
+              ? 'bottom-20 right-4 w-auto' 
+              : 'inset-x-4 bottom-20'
+          }`}
+          data-testid="floating-call-widget"
+        >
+          {callMinimized ? (
+            // Minimized pill - floats over map
+            <button
+              onClick={() => setCallMinimized(false)}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 rounded-full shadow-lg animate-pulse hover:bg-green-700 transition-colors"
+            >
+              <Phone className="w-4 h-4" />
+              <span className="font-medium">{formatCallDuration(callDuration)}</span>
+            </button>
+          ) : (
+            // Expanded call card
+            <div className="bg-slate-800 rounded-xl shadow-2xl border border-slate-700 overflow-hidden">
+              <div className="bg-green-600 px-4 py-3 flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                  <Phone className="w-5 h-5" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-bold">{activeCall.contactName || language === 'sr' ? 'Poziv u toku' : 'Call in progress'}</p>
+                  <p className="text-sm text-green-100">{activeCall.phoneNumber}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xl font-mono font-bold">{formatCallDuration(callDuration)}</p>
+                </div>
+              </div>
+              <div className="p-3 flex gap-2">
+                <Button 
+                  onClick={() => setCallMinimized(true)}
+                  variant="outline"
+                  className="flex-1 border-slate-600 hover:bg-slate-700"
+                >
+                  <Navigation className="w-4 h-4 mr-2" />
+                  {language === 'sr' ? 'Nazad na mapu' : 'Back to Map'}
+                </Button>
+                <Button 
+                  onClick={endCall}
+                  className="flex-1 bg-red-600 hover:bg-red-700"
+                >
+                  <Phone className="w-4 h-4 mr-2" />
+                  {language === 'sr' ? 'Završi' : 'End Call'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Assign Modal */}
       {showAssignModal && selectedBooking && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70">
