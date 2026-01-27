@@ -219,6 +219,18 @@ A comprehensive medical transport system including a public website, patient por
 - [ ] Driver rejection reason modal
 - [ ] Migrate image storage to persistent cloud (S3)
 
+## Live Tracking Enhancements (Jan 27, 2026)
+
+**Click-to-Focus on Driver Location:**
+- Clicking on a driver card in the Live Tracking page (`AdminLiveMap.jsx`) now:
+  - Zooms and pans the map to the driver's location
+  - Opens the driver's popup with details (name, status, phone, speed, timestamp)
+  - Highlights the selected driver card with a blue ring
+  - Shows selected driver in header with dismiss button
+- Added `FocusOnDriver` component using Leaflet's `flyTo` animation
+- Cards show "📍 Klikni za lokaciju" hint when driver has GPS location
+- Clicking header dismiss button or another driver clears selection
+
 ### P3 - Future
 - [ ] API integrations (Stripe, SMS, Email)
 - [ ] Advanced reporting and statistics
