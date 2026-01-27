@@ -301,6 +301,69 @@ const UnifiedPWA = () => {
     setCallDuration(0);
   };
 
+  // ============ VIDEO CALL FUNCTIONS ============
+  
+  // Generate a unique room ID for video calls
+  const generateVideoRoomId = (context = 'general') => {
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substring(2, 8);
+    const prefix = 'PC018';
+    return `${prefix}-${context}-${timestamp}-${random}`.toUpperCase();
+  };
+
+  // Start a new video call
+  const startVideoCall = (contextName, participants = []) => {
+    const roomId = generateVideoRoomId(contextName?.replace(/\s+/g, '') || 'call');
+    setVideoCallRoom({
+      id: roomId,
+      name: contextName || (language === 'sr' ? 'Video poziv' : 'Video Call'),
+      startedAt: new Date().toISOString(),
+      startedBy: user?.full_name
+    });
+    setVideoCallParticipants(participants);
+    setShowVideoCallModal(true);
+    
+    // Save to recent calls
+    setRecentVideoCalls(prev => [{
+      id: roomId,
+      name: contextName,
+      startedAt: new Date().toISOString()
+    }, ...prev.slice(0, 4)]);
+  };
+
+  // Join an existing video call
+  const joinVideoCall = (roomId, roomName) => {
+    setVideoCallRoom({
+      id: roomId,
+      name: roomName || (language === 'sr' ? 'Video poziv' : 'Video Call'),
+      joinedAt: new Date().toISOString()
+    });
+    setShowVideoCallModal(true);
+  };
+
+  // Open Jitsi Meet in new window/tab
+  const openJitsiCall = () => {
+    if (!videoCallRoom?.id) return;
+    const displayName = encodeURIComponent(user?.full_name || 'User');
+    const jitsiUrl = `https://meet.jit.si/${videoCallRoom.id}#userInfo.displayName="${displayName}"&config.prejoinPageEnabled=false`;
+    window.open(jitsiUrl, '_blank', 'width=1200,height=800,menubar=no,toolbar=no');
+  };
+
+  // Copy room link to clipboard
+  const copyVideoCallLink = () => {
+    if (!videoCallRoom?.id) return;
+    const link = `https://meet.jit.si/${videoCallRoom.id}`;
+    navigator.clipboard.writeText(link).then(() => {
+      toast.success(language === 'sr' ? 'Link kopiran!' : 'Link copied!');
+    });
+  };
+
+  // Quick video call to a specific person
+  const quickVideoCall = (personName, personRole) => {
+    const contextName = `${personName} - ${personRole}`;
+    startVideoCall(contextName, [{ name: personName, role: personRole }]);
+  };
+
   // Fetch data based on role
   const fetchData = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
