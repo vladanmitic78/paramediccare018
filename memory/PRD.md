@@ -198,6 +198,26 @@ A comprehensive medical transport system including a public website, patient por
 - Only logout on explicit 401 (token invalid/expired)
 - Added `refreshUser()` method for profile updates
 
+## Calendar View (Jan 27, 2026)
+
+**Booking Calendar Component:**
+- New `BookingCalendar.jsx` component with three views:
+  - **Month view**: Grid calendar showing booking counts per day
+  - **Week view**: Time-slot grid for the week (6:00-21:00)
+  - **Day view**: Detailed timeline for a single day
+- Features:
+  - Color-coded booking status (pending=amber, confirmed=sky, completed=emerald, etc.)
+  - Search by patient name or phone
+  - Status filter dropdown
+  - Click on booking to view details modal
+  - "Assign Vehicle" button from booking detail modal
+  - Navigation: Previous/Next buttons and "Today" quick link
+  - Status legend at bottom
+
+**Added to Dashboard:**
+- Calendar tab under "Operacije" section in sidebar
+- Route: `/dashboard?tab=calendar`
+
 ## Pending Tasks
 
 ### P0 - Critical (Completed)
