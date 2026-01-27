@@ -3804,14 +3804,15 @@ async def assign_driver_to_booking(
     user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
 ):
     """Assign a driver to a booking"""
-    # Verify driver exists and is available
+    # Verify driver exists
     driver = await db.users.find_one({"id": driver_id, "role": UserRole.DRIVER})
     if not driver:
         raise HTTPException(status_code=404, detail="Driver not found")
     
-    driver_status = await db.driver_status.find_one({"driver_id": driver_id})
-    if driver_status and driver_status.get("status") not in [DriverStatus.OFFLINE, DriverStatus.AVAILABLE]:
-        raise HTTPException(status_code=400, detail="Driver is not available")
+    # Check if driver is truly available
+    is_available, reason = await is_driver_available_for_booking(driver_id, booking_id)
+    if not is_available:
+        raise HTTPException(status_code=400, detail=f"Driver is not available: {reason}")
     
     # Update booking
     await db.patient_bookings.update_one(
