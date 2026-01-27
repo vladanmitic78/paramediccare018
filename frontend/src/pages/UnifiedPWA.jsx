@@ -160,6 +160,10 @@ const UnifiedPWA = () => {
   const [lastLocation, setLastLocation] = useState(null);
   const [showNewTaskPopup, setShowNewTaskPopup] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [showRouteMap, setShowRouteMap] = useState(false);
+  const [routeCoordinates, setRouteCoordinates] = useState([]);
+  const [nearPickup, setNearPickup] = useState(false);
+  const [distanceToPickup, setDistanceToPickup] = useState(null);
   const prevAssignmentRef = useRef(null);
   const watchIdRef = useRef(null);
   
