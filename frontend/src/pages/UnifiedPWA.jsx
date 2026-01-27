@@ -1202,6 +1202,28 @@ const UnifiedPWA = () => {
         </div>
       )}
 
+      {/* PWA Install Banner - Show if app is installable and not already installed */}
+      {pwaInstall.isInstallable && !pwaInstall.isInstalled && (
+        <div 
+          className="bg-sky-600/20 border-b border-sky-600/30 px-4 py-2 flex items-center gap-3 cursor-pointer hover:bg-sky-600/30"
+          onClick={pwaInstall.promptInstall}
+          data-testid="pwa-install-banner"
+        >
+          <Plus className="w-4 h-4 text-sky-400" />
+          <span className="text-sm text-sky-200 flex-1">
+            {language === 'sr' ? 'Instalirajte aplikaciju za bolji doživljaj' : 'Install app for better experience'}
+          </span>
+          <Button 
+            size="sm" 
+            className="h-7 px-3 bg-sky-600 hover:bg-sky-700 text-white text-xs"
+            onClick={(e) => { e.stopPropagation(); pwaInstall.promptInstall(); }}
+            data-testid="pwa-install-btn"
+          >
+            {language === 'sr' ? 'Instaliraj' : 'Install'}
+          </Button>
+        </div>
+      )}
+
       {/* Stats Bar */}
       <div className="bg-slate-800/50 px-4 py-3 grid grid-cols-3 gap-3 border-b border-slate-700">
         {isDriver ? (
