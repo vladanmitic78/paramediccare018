@@ -3719,10 +3719,10 @@ async def complete_transport(
     return {"success": True, "message": "Transport completed"}
 
 # Helper function to check if driver is truly available for a booking
-async def is_driver_available_for_booking(driver_id: str, target_booking_id: str = None) -> tuple[bool, str]:
+async def is_driver_available_for_booking(driver_id: str, target_booking_id: str = None) -> tuple[bool, str, list]:
     """
     Check if driver is available for assignment.
-    Returns (is_available, reason)
+    Returns (is_available, reason, conflicting_bookings)
     
     A driver is NOT available if:
     1. They are actively transporting (en_route, on_site, transporting)
@@ -3736,24 +3736,24 @@ async def is_driver_available_for_booking(driver_id: str, target_booking_id: str
     
     # No status entry = available
     if not driver_status:
-        return True, "No status entry"
+        return True, "No status entry", []
     
     status = driver_status.get("status")
     
     # Offline or available = available
     if status in [DriverStatus.OFFLINE, DriverStatus.AVAILABLE, None]:
-        return True, "Status is available"
+        return True, "Status is available", []
     
     # Actively transporting = NOT available
     if status in [DriverStatus.EN_ROUTE, DriverStatus.ON_SITE, DriverStatus.TRANSPORTING]:
-        return False, "Driver is actively on a transport"
+        return False, "Driver is actively on a transport", []
     
     # For 'assigned' status, check if the assigned booking is actually active NOW
     if status == DriverStatus.ASSIGNED:
         current_booking_id = driver_status.get("current_booking_id")
         
         if not current_booking_id:
-            return True, "Assigned but no booking ID"
+            return True, "Assigned but no booking ID", []
         
         # Check the assigned booking
         assigned_booking = await db.bookings.find_one({"id": current_booking_id})
@@ -3762,13 +3762,13 @@ async def is_driver_available_for_booking(driver_id: str, target_booking_id: str
         
         if not assigned_booking:
             # Booking doesn't exist anymore - driver is available
-            return True, "Assigned booking not found"
+            return True, "Assigned booking not found", []
         
         booking_status = assigned_booking.get("status")
         
         # If the assigned booking is actively in progress, driver is not available
         if booking_status in ["en_route", "on_site", "transporting"]:
-            return False, f"Driver is on active transport (status: {booking_status})"
+            return False, f"Driver is on active transport (status: {booking_status})", []
         
         # If the assigned booking is just 'confirmed' (scheduled for future), 
         # check if it's happening NOW or in the future
@@ -3782,7 +3782,7 @@ async def is_driver_available_for_booking(driver_id: str, target_booking_id: str
                 
                 # If booking is for a different day, driver is available for today
                 if booking_date != today:
-                    return True, f"Assigned booking is for {booking_date}, not today"
+                    return True, f"Assigned booking is for {booking_date}, not today", []
                 
                 # If booking is today but has a specific time, could still be available
                 # For now, allow multiple same-day assignments (they can manage conflicts)
