@@ -303,6 +303,12 @@ const UnifiedPWA = () => {
   const [fetchError, setFetchError] = useState(null);
   const [showNotificationSetup, setShowNotificationSetup] = useState(false);
   
+  // Burger menu state
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [showFutureBookings, setShowFutureBookings] = useState(false);
+  const [futureBookings, setFutureBookings] = useState([]);
+  const [loadingFutureBookings, setLoadingFutureBookings] = useState(false);
+  
   // Set a timeout to prevent infinite loading - if data doesn't load in 10s, show error state
   useEffect(() => {
     if (loading && user?.role) {
