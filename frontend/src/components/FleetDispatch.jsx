@@ -81,6 +81,114 @@ const openJitsiCall = (roomId, userName) => {
   window.open(jitsiUrl, '_blank', 'width=1200,height=800');
 };
 
+// Mini Timeline Component for Vehicle Cards
+const VehicleTimeline = ({ schedules, language }) => {
+  // Timeline hours (6 AM to 10 PM)
+  const hours = [6, 8, 10, 12, 14, 16, 18, 20, 22];
+  const startHour = 6;
+  const endHour = 22;
+  const totalHours = endHour - startHour;
+  
+  // Get current hour for marker
+  const now = new Date();
+  const currentHour = now.getHours() + now.getMinutes() / 60;
+  const currentPosition = ((currentHour - startHour) / totalHours) * 100;
+  const showCurrentMarker = currentHour >= startHour && currentHour <= endHour;
+  
+  // Calculate schedule blocks
+  const getScheduleBlocks = () => {
+    if (!schedules || schedules.length === 0) return [];
+    
+    return schedules.map(schedule => {
+      const startTime = new Date(schedule.start_time);
+      const endTime = new Date(schedule.end_time);
+      const startPos = ((startTime.getHours() + startTime.getMinutes() / 60 - startHour) / totalHours) * 100;
+      const endPos = ((endTime.getHours() + endTime.getMinutes() / 60 - startHour) / totalHours) * 100;
+      const width = endPos - startPos;
+      
+      return {
+        ...schedule,
+        left: Math.max(0, startPos),
+        width: Math.min(width, 100 - Math.max(0, startPos)),
+        startTimeStr: startTime.toLocaleTimeString('sr-RS', { hour: '2-digit', minute: '2-digit' }),
+        endTimeStr: endTime.toLocaleTimeString('sr-RS', { hour: '2-digit', minute: '2-digit' })
+      };
+    }).filter(s => s.width > 0);
+  };
+  
+  const blocks = getScheduleBlocks();
+  const hasSchedules = blocks.length > 0;
+  
+  return (
+    <div className="mt-2 mb-1" data-testid="vehicle-timeline">
+      {/* Timeline label */}
+      <div className="text-[10px] font-medium text-slate-500 mb-1 flex items-center gap-1">
+        <Clock className="w-3 h-3" />
+        {language === 'sr' ? 'Danas' : 'Today'}
+        {!hasSchedules && (
+          <span className="text-emerald-600 ml-1">
+            ({language === 'sr' ? 'slobodno' : 'free'})
+          </span>
+        )}
+      </div>
+      
+      {/* Timeline bar */}
+      <div className="relative h-6 bg-slate-100 rounded-md overflow-hidden">
+        {/* Hour markers */}
+        <div className="absolute inset-0 flex">
+          {hours.map((hour, idx) => (
+            <div 
+              key={hour} 
+              className="flex-1 border-l border-slate-200 first:border-l-0"
+              style={{ borderColor: hour === 12 ? '#94a3b8' : undefined }}
+            />
+          ))}
+        </div>
+        
+        {/* Schedule blocks */}
+        {blocks.map((block, idx) => (
+          <div
+            key={block.id || idx}
+            className={`absolute top-0.5 bottom-0.5 rounded transition-all cursor-pointer hover:opacity-80 ${
+              block.status === 'in_progress' 
+                ? 'bg-amber-500' 
+                : block.status === 'completed' 
+                  ? 'bg-slate-400' 
+                  : 'bg-sky-500'
+            }`}
+            style={{ left: `${block.left}%`, width: `${block.width}%` }}
+            title={`${block.patient_name || 'Booking'}\n${block.startTimeStr} - ${block.endTimeStr}`}
+          >
+            {block.width > 15 && (
+              <span className="absolute inset-0 flex items-center justify-center text-[8px] text-white font-medium truncate px-1">
+                {block.patient_name?.split(' ')[0] || ''}
+              </span>
+            )}
+          </div>
+        ))}
+        
+        {/* Current time marker */}
+        {showCurrentMarker && (
+          <div 
+            className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-10"
+            style={{ left: `${currentPosition}%` }}
+          >
+            <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-red-500 rounded-full" />
+          </div>
+        )}
+      </div>
+      
+      {/* Hour labels */}
+      <div className="flex justify-between mt-0.5">
+        <span className="text-[8px] text-slate-400">06</span>
+        <span className="text-[8px] text-slate-400">12</span>
+        <span className="text-[8px] text-slate-400">18</span>
+        <span className="text-[8px] text-slate-400">22</span>
+      </div>
+    </div>
+  );
+};
+
 // Draggable Vehicle Card Component
 const DraggableVehicleCard = ({ vehicle, language, onAssignClick, onVideoCall, onCompleteMission, canDelete, onDelete, user }) => {
   const hasDriver = vehicle.team?.some(m => m.role === 'driver');
