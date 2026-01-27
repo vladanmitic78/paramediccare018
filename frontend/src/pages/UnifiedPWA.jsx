@@ -909,6 +909,194 @@ const UnifiedPWA = () => {
           </div>
         </div>
       )}
+
+      {/* Vitals Modal - Full Screen for Medical Staff */}
+      {showVitalsModal && selectedPatient && (
+        <div className="fixed inset-0 z-50 bg-slate-900 flex flex-col" data-testid="vitals-modal">
+          {/* Header */}
+          <div className="bg-purple-900/80 px-4 py-3 flex items-center justify-between border-b border-purple-700">
+            <div>
+              <p className="text-xs text-purple-300">{language === 'sr' ? 'Unos vitalnih znakova' : 'Recording Vitals'}</p>
+              <p className="font-bold text-white">{selectedPatient.patient_name}</p>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => { setShowVitalsModal(false); setSelectedPatient(null); }}
+              className="text-white"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
+
+          {/* Vitals Form - Scrollable */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {/* Critical Alert Banner */}
+            {checkCriticalVitals(vitals).length > 0 && (
+              <div className="bg-red-600/30 border border-red-500 rounded-xl p-3 flex items-center gap-2 animate-pulse">
+                <AlertCircle className="w-5 h-5 text-red-400" />
+                <span className="text-red-200 text-sm font-medium">
+                  {language === 'sr' ? 'KRITIČNE VREDNOSTI: ' : 'CRITICAL VALUES: '}
+                  {checkCriticalVitals(vitals).join(', ')}
+                </span>
+              </div>
+            )}
+
+            {/* Blood Pressure */}
+            <div className="bg-slate-800 rounded-xl p-4">
+              <label className="text-sm text-slate-400 mb-2 flex items-center gap-2">
+                <Activity className="w-4 h-4 text-red-400" />
+                {language === 'sr' ? 'Krvni pritisak (mmHg)' : 'Blood Pressure (mmHg)'}
+              </label>
+              <div className="flex gap-2 items-center">
+                <Input
+                  type="number"
+                  placeholder={language === 'sr' ? 'Sistolni' : 'Systolic'}
+                  value={vitals.blood_pressure_systolic}
+                  onChange={(e) => setVitals({...vitals, blood_pressure_systolic: e.target.value})}
+                  className={`h-14 text-xl text-center bg-slate-700 border-slate-600 ${vitals.blood_pressure_systolic && (vitals.blood_pressure_systolic < 90 || vitals.blood_pressure_systolic > 180) ? 'border-red-500 bg-red-900/30' : ''}`}
+                />
+                <span className="text-2xl text-slate-500">/</span>
+                <Input
+                  type="number"
+                  placeholder={language === 'sr' ? 'Dijastolni' : 'Diastolic'}
+                  value={vitals.blood_pressure_diastolic}
+                  onChange={(e) => setVitals({...vitals, blood_pressure_diastolic: e.target.value})}
+                  className="h-14 text-xl text-center bg-slate-700 border-slate-600"
+                />
+              </div>
+            </div>
+
+            {/* Heart Rate */}
+            <div className="bg-slate-800 rounded-xl p-4">
+              <label className="text-sm text-slate-400 mb-2 flex items-center gap-2">
+                <Heart className="w-4 h-4 text-pink-400" />
+                {language === 'sr' ? 'Puls (bpm)' : 'Heart Rate (bpm)'}
+              </label>
+              <Input
+                type="number"
+                placeholder="75"
+                value={vitals.heart_rate}
+                onChange={(e) => setVitals({...vitals, heart_rate: e.target.value})}
+                className={`h-14 text-xl text-center bg-slate-700 border-slate-600 ${vitals.heart_rate && (vitals.heart_rate < 50 || vitals.heart_rate > 120) ? 'border-red-500 bg-red-900/30' : ''}`}
+              />
+            </div>
+
+            {/* SpO2 */}
+            <div className="bg-slate-800 rounded-xl p-4">
+              <label className="text-sm text-slate-400 mb-2 flex items-center gap-2">
+                <Activity className="w-4 h-4 text-blue-400" />
+                {language === 'sr' ? 'Saturacija kiseonikom (%)' : 'Oxygen Saturation (%)'}
+              </label>
+              <Input
+                type="number"
+                placeholder="98"
+                value={vitals.oxygen_saturation}
+                onChange={(e) => setVitals({...vitals, oxygen_saturation: e.target.value})}
+                className={`h-14 text-xl text-center bg-slate-700 border-slate-600 ${vitals.oxygen_saturation && vitals.oxygen_saturation < 92 ? 'border-red-500 bg-red-900/30' : ''}`}
+              />
+            </div>
+
+            {/* Temperature */}
+            <div className="bg-slate-800 rounded-xl p-4">
+              <label className="text-sm text-slate-400 mb-2 flex items-center gap-2">
+                <Thermometer className="w-4 h-4 text-orange-400" />
+                {language === 'sr' ? 'Temperatura (°C)' : 'Temperature (°C)'}
+              </label>
+              <Input
+                type="number"
+                step="0.1"
+                placeholder="36.6"
+                value={vitals.temperature}
+                onChange={(e) => setVitals({...vitals, temperature: e.target.value})}
+                className={`h-14 text-xl text-center bg-slate-700 border-slate-600 ${vitals.temperature && (vitals.temperature < 35 || vitals.temperature > 39) ? 'border-red-500 bg-red-900/30' : ''}`}
+              />
+            </div>
+
+            {/* Respiratory Rate */}
+            <div className="bg-slate-800 rounded-xl p-4">
+              <label className="text-sm text-slate-400 mb-2 flex items-center gap-2">
+                <Activity className="w-4 h-4 text-cyan-400" />
+                {language === 'sr' ? 'Disanje (udaha/min)' : 'Respiratory Rate (/min)'}
+              </label>
+              <Input
+                type="number"
+                placeholder="16"
+                value={vitals.respiratory_rate}
+                onChange={(e) => setVitals({...vitals, respiratory_rate: e.target.value})}
+                className="h-14 text-xl text-center bg-slate-700 border-slate-600"
+              />
+            </div>
+
+            {/* Notes */}
+            <div className="bg-slate-800 rounded-xl p-4">
+              <label className="text-sm text-slate-400 mb-2 flex items-center gap-2">
+                <ClipboardList className="w-4 h-4 text-slate-400" />
+                {language === 'sr' ? 'Napomene' : 'Notes'}
+              </label>
+              <textarea
+                placeholder={language === 'sr' ? 'Dodatne napomene o stanju pacijenta...' : 'Additional notes about patient condition...'}
+                value={vitals.notes}
+                onChange={(e) => setVitals({...vitals, notes: e.target.value})}
+                rows={3}
+                className="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+            </div>
+
+            {/* Quick Presets */}
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 border-slate-600 text-slate-300"
+                onClick={() => setVitals({
+                  heart_rate: '75',
+                  blood_pressure_systolic: '120',
+                  blood_pressure_diastolic: '80',
+                  temperature: '36.6',
+                  oxygen_saturation: '98',
+                  respiratory_rate: '16',
+                  notes: vitals.notes
+                })}
+              >
+                {language === 'sr' ? 'Normalne vrednosti' : 'Normal Values'}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 border-slate-600 text-slate-300"
+                onClick={() => setVitals({
+                  heart_rate: '',
+                  blood_pressure_systolic: '',
+                  blood_pressure_diastolic: '',
+                  temperature: '',
+                  oxygen_saturation: '',
+                  respiratory_rate: '',
+                  notes: ''
+                })}
+              >
+                {language === 'sr' ? 'Obriši sve' : 'Clear All'}
+              </Button>
+            </div>
+          </div>
+
+          {/* Save Button - Fixed at bottom */}
+          <div className="p-4 bg-slate-800 border-t border-slate-700">
+            <Button
+              onClick={saveVitals}
+              disabled={savingVitals || (!vitals.heart_rate && !vitals.blood_pressure_systolic && !vitals.oxygen_saturation)}
+              className="w-full h-16 bg-purple-600 hover:bg-purple-700 text-xl font-bold gap-3"
+            >
+              {savingVitals ? (
+                <Loader2 className="w-6 h-6 animate-spin" />
+              ) : (
+                <CheckCircle className="w-6 h-6" />
+              )}
+              {language === 'sr' ? 'SAČUVAJ VITALE' : 'SAVE VITALS'}
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
