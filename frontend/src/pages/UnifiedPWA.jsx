@@ -1259,6 +1259,141 @@ const UnifiedPWA = () => {
           </div>
         </div>
       )}
+
+      {/* Full-Screen Route Map - for Driver en_route */}
+      {isDriver && showRouteMap && assignment && (
+        <div className="fixed inset-0 z-50 bg-slate-900 flex flex-col" data-testid="route-map-fullscreen">
+          {/* Header */}
+          <div className="bg-purple-900/90 px-4 py-3 flex items-center justify-between border-b border-purple-700 z-10">
+            <div className="flex-1">
+              <p className="text-xs text-purple-300">{language === 'sr' ? 'Navigacija do' : 'Navigating to'}</p>
+              <p className="font-bold text-white truncate">{assignment.pickup_address || assignment.start_point}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              {distanceToPickup !== null && (
+                <div className={`px-3 py-1 rounded-full text-sm font-bold ${nearPickup ? 'bg-green-500' : 'bg-slate-700'}`}>
+                  {distanceToPickup < 1000 ? `${distanceToPickup}m` : `${(distanceToPickup / 1000).toFixed(1)}km`}
+                </div>
+              )}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setShowRouteMap(false)}
+                className="text-white hover:bg-purple-800"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Map */}
+          <div className="flex-1 relative">
+            <MapContainer
+              center={[
+                lastLocation?.lat || assignment.start_coords?.lat || assignment.pickup_lat || 43.32,
+                lastLocation?.lng || assignment.start_coords?.lng || assignment.pickup_lng || 21.89
+              ]}
+              zoom={14}
+              style={{ height: '100%', width: '100%' }}
+              zoomControl={false}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; OpenStreetMap'
+              />
+              
+              {/* Driver current location */}
+              {lastLocation && (
+                <Marker 
+                  position={[lastLocation.lat, lastLocation.lng]}
+                  icon={L.divIcon({
+                    className: 'driver-marker',
+                    html: `<div style="background: #3b82f6; border: 3px solid white; border-radius: 50%; width: 24px; height: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;">
+                      <div style="width: 8px; height: 8px; background: white; border-radius: 50%;"></div>
+                    </div>`,
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                  })}
+                >
+                  <Popup>{language === 'sr' ? 'Vaša lokacija' : 'Your location'}</Popup>
+                </Marker>
+              )}
+              
+              {/* Pickup location */}
+              {(assignment.start_coords?.lat || assignment.pickup_lat) && (
+                <Marker 
+                  position={[
+                    assignment.start_coords?.lat || assignment.pickup_lat,
+                    assignment.start_coords?.lng || assignment.pickup_lng
+                  ]}
+                  icon={L.divIcon({
+                    className: 'pickup-marker',
+                    html: `<div style="background: #22c55e; border: 3px solid white; border-radius: 50%; width: 32px; height: 32px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;">
+                      <span style="color: white; font-size: 16px; font-weight: bold;">P</span>
+                    </div>`,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
+                  })}
+                >
+                  <Popup>
+                    <strong>{language === 'sr' ? 'Preuzimanje' : 'Pickup'}</strong><br/>
+                    {assignment.pickup_address || assignment.start_point}
+                  </Popup>
+                </Marker>
+              )}
+              
+              {/* Route line */}
+              {routeCoordinates.length > 0 && (
+                <Polyline 
+                  positions={routeCoordinates} 
+                  color="#8b5cf6" 
+                  weight={5} 
+                  opacity={0.8}
+                />
+              )}
+            </MapContainer>
+
+            {/* Near pickup notification overlay */}
+            {nearPickup && (
+              <div className="absolute top-4 left-4 right-4 bg-green-600 text-white px-4 py-3 rounded-xl shadow-lg animate-pulse z-[1000]">
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="w-6 h-6" />
+                  <div>
+                    <p className="font-bold">{language === 'sr' ? 'Stigli ste!' : "You've arrived!"}</p>
+                    <p className="text-sm opacity-90">{language === 'sr' ? 'Pritisnite dugme ispod kada budete spremni' : 'Press the button below when ready'}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Bottom Action Bar */}
+          <div className="bg-slate-800 p-4 border-t border-slate-700 z-10">
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1 h-14 border-slate-600"
+                onClick={() => {
+                  const lat = assignment.start_coords?.lat || assignment.pickup_lat;
+                  const lng = assignment.start_coords?.lng || assignment.pickup_lng;
+                  openNavigation(lat, lng, assignment.pickup_address || assignment.start_point);
+                }}
+              >
+                <Navigation className="w-5 h-5 mr-2" />
+                Google Maps
+              </Button>
+              <Button 
+                onClick={() => { updateDriverStatus('on_site'); setShowRouteMap(false); }} 
+                disabled={updatingStatus}
+                className={`flex-1 h-14 text-lg font-bold ${nearPickup ? 'bg-green-600 hover:bg-green-700' : 'bg-orange-600 hover:bg-orange-700'}`}
+              >
+                {updatingStatus ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <MapPin className="w-5 h-5 mr-2" />}
+                {language === 'sr' ? 'STIGAO' : 'ARRIVED'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
