@@ -836,9 +836,9 @@ const UnifiedPWA = () => {
       const pickupLat = assignment.start_coords?.lat || assignment.pickup_lat;
       const pickupLng = assignment.start_coords?.lng || assignment.pickup_lng;
       
-      if (pickupLat && pickupLng) {
+      if (pickupLat && pickupLng && lastLocation.latitude && lastLocation.longitude) {
         const distance = calculateDistance(
-          lastLocation.lat, lastLocation.lng,
+          lastLocation.latitude, lastLocation.longitude,
           pickupLat, pickupLng
         );
         setDistanceToPickup(Math.round(distance));
@@ -863,12 +863,12 @@ const UnifiedPWA = () => {
       const pickupLat = assignment.start_coords?.lat || assignment.pickup_lat;
       const pickupLng = assignment.start_coords?.lng || assignment.pickup_lng;
       
-      if (pickupLat && pickupLng) {
+      if (pickupLat && pickupLng && lastLocation.latitude && lastLocation.longitude) {
         // Throttle route updates - only fetch every 30 seconds
         const now = Date.now();
         if (!window.lastRouteUpdate || now - window.lastRouteUpdate > 30000) {
           window.lastRouteUpdate = now;
-          fetchRoute(lastLocation.lat, lastLocation.lng, pickupLat, pickupLng);
+          fetchRoute(lastLocation.latitude, lastLocation.longitude, pickupLat, pickupLng);
         }
       }
     }
