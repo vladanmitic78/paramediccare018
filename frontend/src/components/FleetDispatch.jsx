@@ -2217,16 +2217,27 @@ const FleetDispatch = () => {
                   </div>
                 </div>
 
-                {/* Time Selection */}
+                {/* Time Selection - Supports Multi-Day Transports */}
                 <div className="space-y-3">
                   <label className="text-sm font-medium text-slate-700">
-                    {language === 'sr' ? 'Vreme transporta' : 'Transport Time'}
+                    {language === 'sr' ? 'Period transporta' : 'Transport Period'}
                   </label>
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1">
-                      <label className="text-xs text-slate-500 mb-1 block">
-                        {language === 'sr' ? 'Početak' : 'Start'}
-                      </label>
+                  
+                  {/* Start Date/Time */}
+                  <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-200">
+                    <label className="text-xs font-semibold text-emerald-700 mb-2 block">
+                      {language === 'sr' ? '🚑 Polazak' : '🚑 Departure'}
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="date"
+                        value={assignmentTimeSlot.startDate}
+                        onChange={(e) => {
+                          setAssignmentTimeSlot(prev => ({ ...prev, startDate: e.target.value }));
+                          setAvailabilityCheck(null);
+                        }}
+                        className="flex-1"
+                      />
                       <Input
                         type="time"
                         value={assignmentTimeSlot.startTime}
@@ -2234,14 +2245,26 @@ const FleetDispatch = () => {
                           setAssignmentTimeSlot(prev => ({ ...prev, startTime: e.target.value }));
                           setAvailabilityCheck(null);
                         }}
-                        className="text-center"
+                        className="w-28"
                       />
                     </div>
-                    <span className="text-slate-400 mt-5">→</span>
-                    <div className="flex-1">
-                      <label className="text-xs text-slate-500 mb-1 block">
-                        {language === 'sr' ? 'Kraj' : 'End'}
-                      </label>
+                  </div>
+                  
+                  {/* End Date/Time */}
+                  <div className="bg-sky-50 p-3 rounded-lg border border-sky-200">
+                    <label className="text-xs font-semibold text-sky-700 mb-2 block">
+                      {language === 'sr' ? '🏁 Procenjeni dolazak (ETA)' : '🏁 Estimated Arrival (ETA)'}
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="date"
+                        value={assignmentTimeSlot.endDate}
+                        onChange={(e) => {
+                          setAssignmentTimeSlot(prev => ({ ...prev, endDate: e.target.value }));
+                          setAvailabilityCheck(null);
+                        }}
+                        className="flex-1"
+                      />
                       <Input
                         type="time"
                         value={assignmentTimeSlot.endTime}
@@ -2249,15 +2272,47 @@ const FleetDispatch = () => {
                           setAssignmentTimeSlot(prev => ({ ...prev, endTime: e.target.value }));
                           setAvailabilityCheck(null);
                         }}
-                        className="text-center"
+                        className="w-28"
                       />
                     </div>
                   </div>
+                  
+                  {/* Duration Display */}
+                  {assignmentTimeSlot.startDate && assignmentTimeSlot.endDate && assignmentTimeSlot.startTime && assignmentTimeSlot.endTime && (
+                    <div className="text-center py-2">
+                      {(() => {
+                        const start = new Date(`${assignmentTimeSlot.startDate}T${assignmentTimeSlot.startTime}`);
+                        const end = new Date(`${assignmentTimeSlot.endDate}T${assignmentTimeSlot.endTime}`);
+                        const diffMs = end - start;
+                        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                        const diffDays = Math.floor(diffHours / 24);
+                        const remainingHours = diffHours % 24;
+                        
+                        if (diffHours < 0) {
+                          return <span className="text-red-500 text-sm">⚠️ {language === 'sr' ? 'Kraj mora biti posle početka' : 'End must be after start'}</span>;
+                        }
+                        
+                        if (diffDays > 0) {
+                          return (
+                            <span className="text-slate-600 text-sm">
+                              ⏱️ {language === 'sr' ? 'Trajanje:' : 'Duration:'} <strong>{diffDays}</strong> {language === 'sr' ? 'dana' : 'days'} {remainingHours > 0 && `i ${remainingHours}h`}
+                            </span>
+                          );
+                        }
+                        return (
+                          <span className="text-slate-600 text-sm">
+                            ⏱️ {language === 'sr' ? 'Trajanje:' : 'Duration:'} <strong>{diffHours}</strong>h
+                          </span>
+                        );
+                      })()}
+                    </div>
+                  )}
+                  
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={checkTimeSlotAvailability}
-                    disabled={checkingAvailability || !assignmentTimeSlot.startTime || !assignmentTimeSlot.endTime}
+                    disabled={checkingAvailability || !assignmentTimeSlot.startTime || !assignmentTimeSlot.endTime || !assignmentTimeSlot.startDate || !assignmentTimeSlot.endDate}
                     className="w-full"
                   >
                     {checkingAvailability ? (
