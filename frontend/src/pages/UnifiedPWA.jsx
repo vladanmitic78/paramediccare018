@@ -877,6 +877,16 @@ const UnifiedPWA = () => {
             </div>
           </div>
           <div className="flex items-center gap-1">
+            {/* Video Call Button - Quick Access */}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setShowVideoCallModal(true)} 
+              className="text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/20 relative"
+              data-testid="video-call-header-btn"
+            >
+              <Video className="w-5 h-5" />
+            </Button>
             <Button variant="ghost" size="sm" onClick={() => fetchData(true)} disabled={refreshing} className="text-slate-400">
               <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
             </Button>
