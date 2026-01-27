@@ -9,6 +9,7 @@ import VitalSignsGraph from '../components/VitalSignsGraph';
 import TransportVitalsDialog from '../components/TransportVitalsDialog';
 import CriticalAlertsPanel from '../components/CriticalAlertsPanel';
 import MedicationManager from '../components/MedicationManager';
+import TransportTimeline from '../components/TransportTimeline';
 import {
   Select,
   SelectContent,
