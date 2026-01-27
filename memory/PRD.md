@@ -587,6 +587,7 @@ A comprehensive fleet management system where each ambulance has assigned teams.
 - [x] **European Address Search** (Expanded manual booking address search to all of Europe) (FIXED - Dec 2025) ✅
 - [x] **Medical Staff Vitals in Unified PWA** (Full vital signs entry form for doctors/nurses) (NEW - Dec 2025) ✅
 - [x] **Code Cleanup** (Deleted redundant AdminPWA.jsx, DriverDashboard.jsx, uninstalled react-helmet-async) (Dec 2025) ✅
+- [x] **Backend Refactoring Phase 1** (Extracted fleet routes to /app/backend/routes/fleet.py - reduced server.py by ~950 lines) (Dec 2025) ✅
 
 ### P1 (Next Up)
 - [ ] Emergency Transport Timeline (chronological event log)
