@@ -879,8 +879,8 @@ const UnifiedPWA = () => {
   // Check proximity to pickup location
   useEffect(() => {
     if (isDriver && driverStatus === 'en_route' && lastLocation && assignment) {
-      const pickupLat = assignment.start_coords?.lat || assignment.pickup_lat;
-      const pickupLng = assignment.start_coords?.lng || assignment.pickup_lng;
+      const pickupLat = assignment.start_lat || assignment.start_coords?.lat || assignment.pickup_lat;
+      const pickupLng = assignment.start_lng || assignment.start_coords?.lng || assignment.pickup_lng;
       
       if (pickupLat && pickupLng && lastLocation.latitude && lastLocation.longitude) {
         const distance = calculateDistance(
@@ -906,8 +906,8 @@ const UnifiedPWA = () => {
   // Update route when location changes during en_route
   useEffect(() => {
     if (isDriver && driverStatus === 'en_route' && showRouteMap && lastLocation && assignment) {
-      const pickupLat = assignment.start_coords?.lat || assignment.pickup_lat;
-      const pickupLng = assignment.start_coords?.lng || assignment.pickup_lng;
+      const pickupLat = assignment.start_lat || assignment.start_coords?.lat || assignment.pickup_lat;
+      const pickupLng = assignment.start_lng || assignment.start_coords?.lng || assignment.pickup_lng;
       
       if (pickupLat && pickupLng && lastLocation.latitude && lastLocation.longitude) {
         // Throttle route updates - only fetch every 30 seconds
