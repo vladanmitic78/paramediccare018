@@ -918,14 +918,24 @@ const FleetDispatch = () => {
                   {language === 'sr' ? 'Flota vozila' : 'Vehicle Fleet'}
                   <Badge variant="secondary" className="ml-2">{vehicles.length}</Badge>
                 </h3>
-                <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <Input
-                    placeholder={language === 'sr' ? 'Pretraži...' : 'Search...'}
-                    value={vehicleSearch}
-                    onChange={(e) => setVehicleSearch(e.target.value)}
-                    className="pl-9 h-8 w-48 text-sm"
-                  />
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={() => setShowAddVehicle(true)}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white h-8 px-3 text-xs"
+                    size="sm"
+                  >
+                    <Plus className="w-3 h-3 mr-1" />
+                    {language === 'sr' ? 'Novo vozilo' : 'Add Vehicle'}
+                  </Button>
+                  <div className="relative">
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <Input
+                      placeholder={language === 'sr' ? 'Pretraži...' : 'Search...'}
+                      value={vehicleSearch}
+                      onChange={(e) => setVehicleSearch(e.target.value)}
+                      className="pl-9 h-8 w-48 text-sm"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
