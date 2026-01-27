@@ -190,6 +190,12 @@ const UnifiedPWA = () => {
   const prevAssignmentRef = useRef(null);
   const watchIdRef = useRef(null);
   
+  // Call state - for floating call interface
+  const [activeCall, setActiveCall] = useState(null);
+  const [callMinimized, setCallMinimized] = useState(false);
+  const [callDuration, setCallDuration] = useState(0);
+  const callTimerRef = useRef(null);
+  
   // Admin-specific state
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showAssignModal, setShowAssignModal] = useState(false);
@@ -216,7 +222,7 @@ const UnifiedPWA = () => {
   const isMedical = ['doctor', 'nurse'].includes(user?.role);
   const isAdmin = ['admin', 'superadmin'].includes(user?.role);
   
-  // Keep screen awake during active transport (driver)
+  // Keep screen awake during active transport (driver) or during a call
   const isActiveTransport = ['en_route', 'on_site', 'transporting'].includes(driverStatus);
   useWakeLock(isDriver && isActiveTransport);
 
