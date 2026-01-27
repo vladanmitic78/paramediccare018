@@ -277,15 +277,13 @@ const AdminLiveMap = () => {
             </Button>
           )}
           
-          {/* Connection status */}
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm ${
-            wsConnected ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-          }`}>
-            {wsConnected ? <Wifi className="w-4 h-4" /> : <WifiOff className="w-4 h-4" />}
-            {wsConnected 
-              ? (language === 'sr' ? 'Uživo' : 'Live')
-              : (language === 'sr' ? 'Nije povezano' : 'Disconnected')}
-          </div>
+          {/* Connection status - only show when connected */}
+          {wsConnected && (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm bg-green-100 text-green-700">
+              <Wifi className="w-4 h-4" />
+              {language === 'sr' ? 'Uživo' : 'Live'}
+            </div>
+          )}
           
           {/* Refresh button */}
           <Button variant="outline" size="sm" onClick={fetchDrivers}>
