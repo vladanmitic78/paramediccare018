@@ -2190,16 +2190,54 @@ const FleetDispatch = () => {
                             {language === 'sr' ? 'Pronađeni konflikti' : 'Conflicts found'}
                           </span>
                         </div>
-                        <div className="space-y-2 max-h-32 overflow-y-auto">
-                          {availabilityCheck.conflicts.map((conflict, idx) => (
-                            <div key={idx} className="bg-white rounded-lg p-2 text-sm">
-                              <p className="font-medium text-slate-800">{conflict.patient_name || 'Booking'}</p>
-                              <p className="text-xs text-slate-500">
-                                {conflict.start_time?.slice(11, 16)} - {conflict.end_time?.slice(11, 16)}
-                              </p>
+                        
+                        {/* Staff Unavailability - Show first as it's more important */}
+                        {availabilityCheck.staffUnavailable?.length > 0 && (
+                          <div className="mb-3">
+                            <p className="text-xs font-medium text-red-700 mb-2 flex items-center gap-1">
+                              <User className="w-3 h-3" />
+                              {language === 'sr' ? 'Osoblje nije dostupno:' : 'Staff unavailable:'}
+                            </p>
+                            <div className="space-y-2">
+                              {availabilityCheck.staffUnavailable.map((staff, idx) => (
+                                <div key={idx} className="bg-red-50 border border-red-200 rounded-lg p-2 text-sm">
+                                  <p className="font-medium text-red-800">{staff.user_name}</p>
+                                  <p className="text-xs text-red-600">
+                                    {staff.start_time} - {staff.end_time} • 
+                                    <span className="ml-1 capitalize">
+                                      {staff.status === 'on_leave' ? (language === 'sr' ? 'Na odmoru' : 'On leave') :
+                                       staff.status === 'sick' ? (language === 'sr' ? 'Bolovanje' : 'Sick') :
+                                       (language === 'sr' ? 'Nedostupan' : 'Unavailable')}
+                                    </span>
+                                  </p>
+                                  {staff.notes && (
+                                    <p className="text-xs text-red-500 mt-1 italic">{staff.notes}</p>
+                                  )}
+                                </div>
+                              ))}
                             </div>
-                          ))}
-                        </div>
+                          </div>
+                        )}
+                        
+                        {/* Schedule Conflicts */}
+                        {availabilityCheck.conflicts?.length > 0 && (
+                          <div>
+                            <p className="text-xs font-medium text-amber-700 mb-2 flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              {language === 'sr' ? 'Postojeće rezervacije:' : 'Existing bookings:'}
+                            </p>
+                            <div className="space-y-2 max-h-32 overflow-y-auto">
+                              {availabilityCheck.conflicts.map((conflict, idx) => (
+                                <div key={idx} className="bg-white rounded-lg p-2 text-sm">
+                                  <p className="font-medium text-slate-800">{conflict.patient_name || 'Booking'}</p>
+                                  <p className="text-xs text-slate-500">
+                                    {conflict.start_time?.slice(11, 16)} - {conflict.end_time?.slice(11, 16)}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
