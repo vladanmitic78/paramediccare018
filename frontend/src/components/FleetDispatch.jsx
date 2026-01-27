@@ -940,30 +940,61 @@ const FleetDispatch = () => {
           {/* LEFT: Vehicles */}
           <div className="w-1/2 flex flex-col">
             <div className="bg-slate-100 rounded-t-xl px-4 py-3 border-b border-slate-200">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-2">
                 <h3 className="font-semibold text-slate-800 flex items-center gap-2">
                   <Ambulance className="w-4 h-4" />
                   {language === 'sr' ? 'Flota vozila' : 'Vehicle Fleet'}
                   <Badge variant="secondary" className="ml-2">{vehicles.length}</Badge>
                 </h3>
-                <div className="flex items-center gap-2">
-                  <Button
-                    onClick={() => setShowAddVehicle(true)}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white h-8 px-3 text-xs"
-                    size="sm"
-                  >
-                    <Plus className="w-3 h-3 mr-1" />
-                    {language === 'sr' ? 'Novo vozilo' : 'Add Vehicle'}
-                  </Button>
-                  <div className="relative">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <Input
-                      placeholder={language === 'sr' ? 'Pretraži...' : 'Search...'}
-                      value={vehicleSearch}
-                      onChange={(e) => setVehicleSearch(e.target.value)}
-                      className="pl-9 h-8 w-48 text-sm"
-                    />
-                  </div>
+                <Button
+                  onClick={() => setShowAddVehicle(true)}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white h-7 px-2 text-xs"
+                  size="sm"
+                >
+                  <Plus className="w-3 h-3 mr-1" />
+                  {language === 'sr' ? 'Novo vozilo' : 'Add Vehicle'}
+                </Button>
+              </div>
+              <div className="flex gap-2 items-center">
+                <div className="relative flex-1">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <Input
+                    placeholder={language === 'sr' ? 'Pretraži (naziv, registracija, vozač...)' : 'Search (name, plate, driver...)'}
+                    value={vehicleSearch}
+                    onChange={(e) => setVehicleSearch(e.target.value)}
+                    className="pl-9 h-8 text-sm"
+                    data-testid="vehicle-search-input"
+                  />
+                  {vehicleSearch && (
+                    <button
+                      onClick={() => setVehicleSearch('')}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                <div className="flex gap-1">
+                  {[
+                    { key: 'all', label: language === 'sr' ? 'Sva' : 'All' },
+                    { key: 'ready', label: language === 'sr' ? 'Spremna' : 'Ready', count: readyVehicles },
+                    { key: 'busy', label: language === 'sr' ? 'Zauzeta' : 'Busy', count: vehicles.filter(v => v.current_mission).length },
+                  ].map(tab => (
+                    <button
+                      key={tab.key}
+                      onClick={() => setVehicleFilter(tab.key)}
+                      className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                        vehicleFilter === tab.key 
+                          ? 'bg-slate-900 text-white' 
+                          : 'bg-white text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      {tab.label}
+                      {tab.count !== undefined && tab.count > 0 && (
+                        <span className="ml-1 opacity-70">({tab.count})</span>
+                      )}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
@@ -971,7 +1002,15 @@ const FleetDispatch = () => {
               {filteredVehicles.length === 0 ? (
                 <div className="text-center py-12 text-slate-400">
                   <Ambulance className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-                  <p>{language === 'sr' ? 'Nema vozila' : 'No vehicles'}</p>
+                  <p>{language === 'sr' ? (vehicleSearch ? 'Nema rezultata pretrage' : 'Nema vozila') : (vehicleSearch ? 'No search results' : 'No vehicles')}</p>
+                  {vehicleSearch && (
+                    <button
+                      onClick={() => setVehicleSearch('')}
+                      className="mt-2 text-sm text-sky-600 hover:underline"
+                    >
+                      {language === 'sr' ? 'Očisti pretragu' : 'Clear search'}
+                    </button>
+                  )}
                 </div>
               ) : (
                 filteredVehicles.map(vehicle => (
