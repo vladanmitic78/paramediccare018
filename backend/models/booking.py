@@ -54,6 +54,7 @@ class BookingResponse(BaseModel):
     documents: List[str] = []
     status: str
     assigned_driver: Optional[str] = None
+    assigned_driver_name: Optional[str] = None
     assigned_medical: Optional[str] = None
     created_at: str
     user_id: Optional[str] = None
