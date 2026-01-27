@@ -1707,6 +1707,139 @@ const UnifiedPWA = () => {
         </div>
       )}
 
+      {/* Push Notification Setup Modal */}
+      {showNotificationSetup && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70" data-testid="notification-setup-modal">
+          <div className="bg-slate-800 rounded-t-2xl w-full max-w-lg overflow-hidden">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-amber-600 to-orange-600 px-4 py-6 text-center">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Bell className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-bold">{language === 'sr' ? 'Push Obaveštenja' : 'Push Notifications'}</h3>
+              <p className="text-amber-100 text-sm mt-1">
+                {language === 'sr' ? 'Dobijajte obaveštenja o novim zadacima' : 'Get notified about new tasks'}
+              </p>
+            </div>
+
+            {/* Content */}
+            <div className="p-4 space-y-4">
+              {/* Current Status */}
+              <div className="bg-slate-700/50 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-slate-400">{language === 'sr' ? 'Status' : 'Status'}</span>
+                  <Badge className={
+                    pushNotifications.permission === 'granted' ? 'bg-emerald-600' :
+                    pushNotifications.permission === 'denied' ? 'bg-red-600' :
+                    'bg-amber-600'
+                  }>
+                    {pushNotifications.permission === 'granted' ? (language === 'sr' ? 'Aktivno' : 'Enabled') :
+                     pushNotifications.permission === 'denied' ? (language === 'sr' ? 'Blokirano' : 'Blocked') :
+                     (language === 'sr' ? 'Nije podešeno' : 'Not set up')}
+                  </Badge>
+                </div>
+                
+                {/* iOS specific info */}
+                {pushNotifications.isIOS && (
+                  <div className={`text-sm p-3 rounded-lg mt-2 ${pushNotifications.isStandalone ? 'bg-emerald-600/20 text-emerald-300' : 'bg-amber-600/20 text-amber-300'}`}>
+                    {pushNotifications.isStandalone ? (
+                      <>
+                        <CheckCircle className="w-4 h-4 inline mr-2" />
+                        {language === 'sr' ? 'Aplikacija je instalirana!' : 'App is installed!'}
+                      </>
+                    ) : (
+                      <>
+                        <AlertCircle className="w-4 h-4 inline mr-2" />
+                        {language === 'sr' 
+                          ? 'Za push obaveštenja na iOS-u, dodajte aplikaciju na početni ekran' 
+                          : 'For push notifications on iOS, add this app to your home screen'}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* iOS Installation Instructions */}
+              {pushNotifications.isIOS && !pushNotifications.isStandalone && (
+                <div className="bg-slate-700/50 rounded-xl p-4">
+                  <h4 className="font-semibold mb-3">{language === 'sr' ? 'Kako instalirati:' : 'How to install:'}</h4>
+                  <ol className="space-y-2 text-sm text-slate-300">
+                    <li className="flex items-start gap-2">
+                      <span className="bg-amber-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0">1</span>
+                      {language === 'sr' ? 'Pritisnite dugme za deljenje (Share) u Safari-ju' : 'Tap the Share button in Safari'}
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="bg-amber-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0">2</span>
+                      {language === 'sr' ? 'Izaberite "Dodaj na početni ekran"' : 'Select "Add to Home Screen"'}
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="bg-amber-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0">3</span>
+                      {language === 'sr' ? 'Otvorite aplikaciju sa početnog ekrana' : 'Open the app from your home screen'}
+                    </li>
+                  </ol>
+                </div>
+              )}
+
+              {/* Enable Button */}
+              {pushNotifications.canRequestPermission && pushNotifications.permission !== 'granted' && (
+                <Button 
+                  onClick={async () => {
+                    const result = await pushNotifications.requestPermission();
+                    if (result.success) {
+                      toast.success(language === 'sr' ? 'Obaveštenja su omogućena!' : 'Notifications enabled!');
+                    } else if (result.reason === 'denied') {
+                      toast.error(language === 'sr' ? 'Obaveštenja su blokirana u podešavanjima' : 'Notifications blocked in settings');
+                    }
+                  }}
+                  className="w-full h-14 bg-amber-600 hover:bg-amber-700 text-lg font-semibold"
+                  disabled={pushNotifications.permission === 'denied'}
+                >
+                  <Bell className="w-5 h-5 mr-2" />
+                  {language === 'sr' ? 'Omogući obaveštenja' : 'Enable Notifications'}
+                </Button>
+              )}
+
+              {/* Test Button (if already enabled) */}
+              {pushNotifications.permission === 'granted' && (
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={async () => {
+                      const result = await pushNotifications.sendTestNotification();
+                      if (result.success) {
+                        toast.success(language === 'sr' ? 'Test obaveštenje poslato!' : 'Test notification sent!');
+                      }
+                    }}
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                  >
+                    <Bell className="w-4 h-4 mr-2" />
+                    {language === 'sr' ? 'Test obaveštenje' : 'Test Notification'}
+                  </Button>
+                </div>
+              )}
+
+              {/* Denied State */}
+              {pushNotifications.permission === 'denied' && (
+                <div className="bg-red-600/20 text-red-300 p-3 rounded-lg text-sm">
+                  <AlertCircle className="w-4 h-4 inline mr-2" />
+                  {language === 'sr' 
+                    ? 'Obaveštenja su blokirana. Promenite u podešavanjima pregledača.' 
+                    : 'Notifications are blocked. Change this in your browser settings.'}
+                </div>
+              )}
+
+              {/* Close Button */}
+              <Button 
+                variant="outline" 
+                onClick={() => setShowNotificationSetup(false)}
+                className="w-full border-slate-600"
+              >
+                {language === 'sr' ? 'Zatvori' : 'Close'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Video Call Modal */}
       {showVideoCallModal && (
         <div className="fixed inset-0 z-50 bg-slate-900 flex flex-col" data-testid="video-call-modal">
