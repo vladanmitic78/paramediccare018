@@ -2350,6 +2350,7 @@ const FleetDispatch = () => {
                           setAvailabilityCheck(null);
                         }}
                         className="w-28"
+                        step="60"
                       />
                     </div>
                   </div>
@@ -2377,6 +2378,7 @@ const FleetDispatch = () => {
                           setAvailabilityCheck(null);
                         }}
                         className="w-28"
+                        step="60"
                       />
                     </div>
                   </div>
