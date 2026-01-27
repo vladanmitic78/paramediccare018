@@ -2323,7 +2323,7 @@ const UnifiedPWA = () => {
               )}
               
               {/* Pickup location */}
-              {(assignment.start_coords?.lat || assignment.pickup_lat) && (
+              {((assignment.start_coords?.lat && assignment.start_coords?.lng) || (assignment.pickup_lat && assignment.pickup_lng)) && (
                 <Marker 
                   position={[
                     assignment.start_coords?.lat || assignment.pickup_lat,
