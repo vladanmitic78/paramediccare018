@@ -2020,6 +2020,9 @@ const FleetDispatch = () => {
                       value={newBooking.pickup_time}
                       onChange={(e) => setNewBooking({...newBooking, pickup_time: e.target.value})}
                       data-testid="booking-pickup-time"
+                      step="60"
+                      className="[&::-webkit-calendar-picker-indicator]:hidden"
+                      style={{ fontVariantNumeric: 'tabular-nums' }}
                     />
                   </div>
                 </div>
@@ -2051,6 +2054,9 @@ const FleetDispatch = () => {
                       value={newBooking.arrival_time}
                       onChange={(e) => setNewBooking({...newBooking, arrival_time: e.target.value})}
                       data-testid="booking-arrival-time"
+                      step="60"
+                      className="[&::-webkit-calendar-picker-indicator]:hidden"
+                      style={{ fontVariantNumeric: 'tabular-nums' }}
                     />
                   </div>
                 </div>
