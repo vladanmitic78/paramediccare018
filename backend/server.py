@@ -45,7 +45,7 @@ from models import (
     UserRole, UserCreate, UserLogin, UserResponse, TokenResponse,
     RoleUpdate, StatusUpdate,
     BookingStatus, MobilityStatus, BookingCreate, BookingResponse,
-    BookingStatusUpdate, PatientBookingCreate, PatientBookingResponse,
+    BookingStatusUpdate, BookingFullUpdate, PatientBookingCreate, PatientBookingResponse,
     SavedAddress, EmergencyContact, PatientProfileUpdate,
     InvoiceResponse, NotificationResponse, ContactCreate, ContactResponse,
     MedicalCondition, Medication, Allergy, MedicalEmergencyContact,
