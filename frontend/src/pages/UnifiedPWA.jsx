@@ -913,6 +913,59 @@ const UnifiedPWA = () => {
   );
 };
 
+// Medical Booking Card Component - for doctors/nurses
+const MedicalBookingCard = ({ booking, language, onVitals }) => {
+  const status = statusConfig[booking.status] || statusConfig.pending;
+  
+  return (
+    <div className={`rounded-xl p-4 mb-3 bg-gradient-to-r from-slate-800 to-slate-800/80 border-l-4 ${status.border}`}>
+      <div className="flex items-start justify-between mb-3">
+        <div>
+          <p className="font-semibold text-white text-lg">{booking.patient_name}</p>
+          <div className="flex items-center gap-2 mt-1">
+            <Badge className={`text-[10px] ${status.color} text-white flex items-center gap-1`}>
+              {status.pulse && <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
+              {status.label[language]}
+            </Badge>
+            {booking.assigned_driver_name && (
+              <span className="text-xs text-slate-400">• <Truck className="w-3 h-3 inline" /> {booking.assigned_driver_name}</span>
+            )}
+          </div>
+        </div>
+        <Button 
+          size="sm" 
+          className="bg-purple-600 hover:bg-purple-700 h-10 px-4 gap-2"
+          onClick={onVitals}
+        >
+          <Heart className="w-4 h-4" />
+          {language === 'sr' ? 'Vitali' : 'Vitals'}
+        </Button>
+      </div>
+      <div className="space-y-2 text-sm text-slate-300">
+        <p className="flex items-center gap-2">
+          <MapPin className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+          <span className="truncate">{booking.start_point || booking.pickup_address}</span>
+        </p>
+        <p className="flex items-center gap-2">
+          <Navigation className="w-4 h-4 text-red-400 flex-shrink-0" />
+          <span className="truncate">{booking.end_point || booking.destination_address}</span>
+        </p>
+        <div className="flex items-center gap-4 pt-2 text-xs text-slate-500 border-t border-slate-700 mt-2">
+          <span><Clock className="w-3 h-3 inline mr-1" />{booking.booking_time}</span>
+          {booking.contact_phone && (
+            <a href={`tel:${booking.contact_phone}`} className="text-sky-400 hover:text-sky-300">
+              <Phone className="w-3 h-3 inline mr-1" />{booking.contact_phone}
+            </a>
+          )}
+          {booking.mobility_status && (
+            <span className="text-amber-400">{booking.mobility_status}</span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Booking Card Component
 const BookingCard = ({ booking, language, onAssign }) => {
   const status = statusConfig[booking.status] || statusConfig.pending;
