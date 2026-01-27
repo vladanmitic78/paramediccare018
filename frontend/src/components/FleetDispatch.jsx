@@ -1639,6 +1639,154 @@ const FleetDispatch = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Edit Booking Dialog */}
+        <Dialog open={showEditBooking} onOpenChange={setShowEditBooking}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit2 className="w-5 h-5" />
+                {language === 'sr' ? 'Uredi rezervaciju' : 'Edit Booking'}
+              </DialogTitle>
+            </DialogHeader>
+            {bookingToEdit && (
+              <div className="grid gap-4 py-4">
+                {/* Patient Name */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700">
+                      {language === 'sr' ? 'Ime pacijenta' : 'Patient Name'} *
+                    </label>
+                    <Input
+                      value={bookingToEdit.patient_name}
+                      onChange={(e) => setBookingToEdit({...bookingToEdit, patient_name: e.target.value})}
+                      placeholder={language === 'sr' ? 'Unesite ime' : 'Enter name'}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700">
+                      {language === 'sr' ? 'Telefon' : 'Phone'} *
+                    </label>
+                    <Input
+                      value={bookingToEdit.contact_phone}
+                      onChange={(e) => setBookingToEdit({...bookingToEdit, contact_phone: e.target.value})}
+                      placeholder="+381..."
+                    />
+                  </div>
+                </div>
+                
+                {/* Email */}
+                <div>
+                  <label className="text-sm font-medium text-slate-700">
+                    {language === 'sr' ? 'Email' : 'Email'}
+                  </label>
+                  <Input
+                    type="email"
+                    value={bookingToEdit.contact_email}
+                    onChange={(e) => setBookingToEdit({...bookingToEdit, contact_email: e.target.value})}
+                    placeholder="email@example.com"
+                  />
+                </div>
+                
+                {/* Pickup Address */}
+                <div>
+                  <label className="text-sm font-medium text-slate-700">
+                    {language === 'sr' ? 'Adresa preuzimanja' : 'Pickup Address'} *
+                  </label>
+                  <Input
+                    value={bookingToEdit.pickup_address}
+                    onChange={(e) => setBookingToEdit({...bookingToEdit, pickup_address: e.target.value})}
+                    placeholder={language === 'sr' ? 'Unesite adresu' : 'Enter address'}
+                  />
+                </div>
+                
+                {/* Destination Address */}
+                <div>
+                  <label className="text-sm font-medium text-slate-700">
+                    {language === 'sr' ? 'Adresa destinacije' : 'Destination Address'} *
+                  </label>
+                  <Input
+                    value={bookingToEdit.destination_address}
+                    onChange={(e) => setBookingToEdit({...bookingToEdit, destination_address: e.target.value})}
+                    placeholder={language === 'sr' ? 'Unesite adresu' : 'Enter address'}
+                  />
+                </div>
+                
+                {/* Date & Time */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700">
+                      {language === 'sr' ? 'Datum' : 'Date'}
+                    </label>
+                    <Input
+                      type="date"
+                      value={bookingToEdit.booking_date}
+                      onChange={(e) => setBookingToEdit({...bookingToEdit, booking_date: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700">
+                      {language === 'sr' ? 'Vreme' : 'Time'}
+                    </label>
+                    <Input
+                      type="time"
+                      value={bookingToEdit.booking_time}
+                      onChange={(e) => setBookingToEdit({...bookingToEdit, booking_time: e.target.value})}
+                    />
+                  </div>
+                </div>
+                
+                {/* Mobility Status */}
+                <div>
+                  <label className="text-sm font-medium text-slate-700">
+                    {language === 'sr' ? 'Status pokretljivosti' : 'Mobility Status'}
+                  </label>
+                  <Select 
+                    value={bookingToEdit.mobility_status} 
+                    onValueChange={(v) => setBookingToEdit({...bookingToEdit, mobility_status: v})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="walking">{language === 'sr' ? 'Pokretan - hoda' : 'Walking'}</SelectItem>
+                      <SelectItem value="wheelchair">{language === 'sr' ? 'Invalidska kolica' : 'Wheelchair'}</SelectItem>
+                      <SelectItem value="stretcher">{language === 'sr' ? 'Nosilica' : 'Stretcher'}</SelectItem>
+                      <SelectItem value="bedridden">{language === 'sr' ? 'Nepokretan' : 'Bedridden'}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {/* Notes */}
+                <div>
+                  <label className="text-sm font-medium text-slate-700">
+                    {language === 'sr' ? 'Napomene' : 'Notes'}
+                  </label>
+                  <Textarea
+                    value={bookingToEdit.notes}
+                    onChange={(e) => setBookingToEdit({...bookingToEdit, notes: e.target.value})}
+                    placeholder={language === 'sr' ? 'Dodatne informacije...' : 'Additional information...'}
+                    rows={3}
+                  />
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowEditBooking(false); setBookingToEdit(null); }}>
+                {language === 'sr' ? 'Otkaži' : 'Cancel'}
+              </Button>
+              <Button 
+                onClick={handleEditBooking} 
+                disabled={editingBooking || !bookingToEdit?.patient_name || !bookingToEdit?.contact_phone || !bookingToEdit?.pickup_address || !bookingToEdit?.destination_address}
+                className="bg-emerald-600 hover:bg-emerald-700"
+              >
+                {editingBooking && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                <Save className="w-4 h-4 mr-2" />
+                {language === 'sr' ? 'Sačuvaj izmene' : 'Save Changes'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </DndContext>
   );
