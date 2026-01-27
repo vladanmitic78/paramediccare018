@@ -1374,6 +1374,17 @@ const MedicalDashboard = () => {
         darkMode={darkMode}
         onSuccess={() => fetchDashboard()}
       />
+
+      {/* Transport Timeline Dialog */}
+      <TransportTimeline
+        bookingId={selectedTransportId}
+        isOpen={timelineOpen}
+        onClose={() => {
+          setTimelineOpen(false);
+          setSelectedTransportId(null);
+        }}
+        patientName={selectedTransportPatient}
+      />
     </div>
   );
 };
