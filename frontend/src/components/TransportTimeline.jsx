@@ -86,7 +86,7 @@ const TransportTimeline = ({ bookingId, isOpen, onClose, patientName }) => {
     if (isOpen && bookingId) {
       fetchTimeline();
     }
-  }, [isOpen, bookingId]);
+  }, [isOpen, bookingId, fetchTimeline]);
 
   const handleAddNote = async () => {
     if (!newNote.trim()) return;
