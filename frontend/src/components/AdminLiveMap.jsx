@@ -218,6 +218,20 @@ const AdminLiveMap = () => {
     };
   }, [fetchDrivers, connectWebSocket]);
 
+  // Handle driver card click - focus on driver's location
+  const handleDriverClick = (driver) => {
+    if (driver.last_location?.latitude && driver.last_location?.longitude) {
+      setSelectedDriver(driver);
+    }
+  };
+
+  // Open marker popup after map flies to driver
+  const openDriverPopup = () => {
+    if (selectedDriver && markerRefs.current[selectedDriver.id]) {
+      markerRefs.current[selectedDriver.id].openPopup();
+    }
+  };
+
   // Get active drivers count
   const activeDrivers = drivers.filter(d => d.driver_status !== 'offline');
   const driversWithLocation = drivers.filter(d => d.last_location?.latitude);
