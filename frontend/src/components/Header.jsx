@@ -62,6 +62,83 @@ export const Header = () => {
     fetchHeaderContent();
   }, []);
 
+  // Fetch user's future bookings when menu opens
+  const fetchUserBookings = async () => {
+    if (!user) return;
+    setLoadingBookings(true);
+    try {
+      // For patients, fetch their bookings; for staff, fetch all upcoming
+      const endpoint = user.role === 'patient' 
+        ? `${API}/api/patient/bookings`
+        : `${API}/api/bookings`;
+      
+      const response = await axios.get(endpoint);
+      const bookings = Array.isArray(response.data) ? response.data : [];
+      
+      // Filter for future/active bookings only
+      const now = new Date();
+      const futureBookings = bookings.filter(b => {
+        const bookingDate = new Date(b.scheduled_date || b.created_at);
+        const isUpcoming = bookingDate >= now || ['pending', 'confirmed', 'en_route', 'on_site', 'transporting'].includes(b.status);
+        return isUpcoming;
+      }).slice(0, 5); // Limit to 5 bookings
+      
+      setUserBookings(futureBookings);
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
+      setUserBookings([]);
+    } finally {
+      setLoadingBookings(false);
+    }
+  };
+
+  // Fetch bookings when showing the bookings panel
+  useEffect(() => {
+    if (showBookings && user) {
+      fetchUserBookings();
+    }
+  }, [showBookings, user]);
+
+  // Format date for display
+  const formatBookingDate = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString(language === 'sr' ? 'sr-RS' : 'en-US', {
+      day: 'numeric',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  // Get status badge color
+  const getStatusColor = (status) => {
+    const colors = {
+      pending: 'bg-amber-100 text-amber-700',
+      confirmed: 'bg-blue-100 text-blue-700',
+      en_route: 'bg-purple-100 text-purple-700',
+      on_site: 'bg-orange-100 text-orange-700',
+      transporting: 'bg-emerald-100 text-emerald-700',
+      completed: 'bg-slate-100 text-slate-600',
+      cancelled: 'bg-red-100 text-red-600'
+    };
+    return colors[status] || 'bg-slate-100 text-slate-600';
+  };
+
+  // Get status label
+  const getStatusLabel = (status) => {
+    const labels = {
+      pending: language === 'sr' ? 'Na čekanju' : 'Pending',
+      confirmed: language === 'sr' ? 'Potvrđeno' : 'Confirmed',
+      en_route: language === 'sr' ? 'Na putu' : 'En Route',
+      on_site: language === 'sr' ? 'Na lokaciji' : 'On Site',
+      transporting: language === 'sr' ? 'U transportu' : 'Transporting',
+      completed: language === 'sr' ? 'Završeno' : 'Completed',
+      cancelled: language === 'sr' ? 'Otkazano' : 'Cancelled'
+    };
+    return labels[status] || status;
+  };
+
   // Get logo URL from CMS or use default
   const logoUrl = headerContent?.logo?.image_url || 
     'https://customer-assets.emergentagent.com/job_433955cc-2ea1-4976-bce7-1cf9f8ad9654/artifacts/j7ye45w5_Paramedic%20Care%20018%20Logo.jpg';
