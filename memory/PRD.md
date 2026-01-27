@@ -196,16 +196,16 @@ A comprehensive medical transport system including a public website, patient por
 - [x] PWA Install Prompt - Allow users to install the app on mobile devices
 - [x] Timeline-Based Vehicle Scheduling - Phase 1: Data Model & Backend APIs
 - [x] Timeline-Based Vehicle Scheduling - Phase 2: Vehicle Card UI
+- [x] Timeline-Based Vehicle Scheduling - Phase 3: Booking Flow Integration
 - [x] Fix logout on refresh issue - Extended session duration
 
 ### P1 - High Priority
-- [ ] Timeline-Based Vehicle Scheduling - Phase 3: Booking Flow Integration
+- [ ] Timeline-Based Vehicle Scheduling - Phase 4: Admin Gantt View
 - [ ] Continue backend refactoring (extract medical, driver, users, bookings routes from server.py)
 - [ ] Doctor Decision Panel - live instructions from Medical Dashboard
 - [ ] Refactor UnifiedPWA.jsx (~2,200 lines) into smaller components
 
 ### P2 - Medium Priority
-- [ ] Timeline-Based Vehicle Scheduling - Phase 4: Admin Gantt View
 - [ ] Calendar view for bookings (`OPERACIJE -> Kalendar`)
 - [ ] Persist sidebar state with localStorage
 - [ ] Driver rejection reason modal
