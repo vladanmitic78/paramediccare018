@@ -830,7 +830,8 @@ const FleetDispatch = () => {
       
       setAvailabilityCheck({
         available: !response.data.has_conflict,
-        conflicts: response.data.conflicting_schedules || []
+        conflicts: response.data.conflicting_schedules || [],
+        staffUnavailable: response.data.staff_unavailable || []
       });
     } catch (error) {
       console.error('Error checking availability:', error);
