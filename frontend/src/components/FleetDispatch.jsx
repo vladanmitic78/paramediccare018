@@ -303,8 +303,8 @@ const DroppableBookingCard = ({ booking, language, isOver, onEdit, onDetach }) =
 
   const currentStatus = statusLabels[booking.status] || { sr: booking.status, en: booking.status, color: 'bg-slate-100 text-slate-700' };
 
-  // Only pending bookings without driver are droppable
-  const isDroppable = booking.status === 'pending' && !booking.assigned_driver;
+  // Droppable for new assignment OR reassignment (pending/confirmed only)
+  const isDroppable = ['pending', 'confirmed'].includes(booking.status);
   
   // Can edit if pending or active (not completed/cancelled)
   const canEdit = ['pending', 'confirmed', 'in_progress', 'en_route', 'on_site', 'transporting'].includes(booking.status);
