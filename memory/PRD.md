@@ -591,6 +591,7 @@ A comprehensive fleet management system where each ambulance has assigned teams.
 - [x] **Driver PWA Route Navigation** (Auto-open map on Start Route, route display with OSRM, proximity detection with arrival notification) (Dec 2025) ✅
 - [x] **Call Interface Enhancement** (Floating call widget with minimize/expand, state persistence during calls, wake lock during calls) (Dec 2025) ✅
 - [x] **Video Call Integration** (Jitsi Meet video calls with room creation, quick-call buttons, team member calling, copy link sharing) (Dec 2025) ✅
+- [x] **iOS Push Notifications** (Service worker with push support, notification setup modal, iOS installation guide, test notification feature) (Dec 2025) ✅
 
 ### P1 (Next Up)
 - [ ] Emergency Transport Timeline (chronological event log)
