@@ -152,19 +152,39 @@ A comprehensive medical transport system including a public website, patient por
 - Enriched responses with vehicle name, driver name, patient details
 - Status transitions: scheduled → in_progress → completed
 
+### Phase 2: Vehicle Card UI (COMPLETED Jan 27, 2026)
+
+**Mini Timeline Strip on Vehicle Cards:**
+- Added `VehicleTimeline` component to FleetDispatch.jsx
+- Shows 6:00 AM to 10:00 PM timeline with hour markers
+- Schedule blocks displayed in different colors:
+  - Sky blue = Scheduled
+  - Amber = In Progress
+  - Gray = Completed
+- Red vertical line shows current time
+- "Danas (slobodno)" = Free all day indicator
+- Hover tooltip shows patient name and time range
+- Clicking on blocks shows booking details
+
 ### Remaining Phases:
-- **Phase 2:** Vehicle Card UI (Mini timeline strip on vehicle cards)
 - **Phase 3:** Booking Flow Integration (Time picker, availability filter)
 - **Phase 4:** Admin Gantt View (Master timeline grid)
+
+## Session & Auth Improvements (Jan 27, 2026)
+- Extended JWT token expiration from 24 hours to 7 days
+- Improved AuthContext to not logout on network/server errors
+- Only logout on explicit 401 (token invalid/expired)
+- Added `refreshUser()` method for profile updates
 
 ## Pending Tasks
 
 ### P0 - Critical (Completed)
 - [x] PWA Install Prompt - Allow users to install the app on mobile devices
 - [x] Timeline-Based Vehicle Scheduling - Phase 1: Data Model & Backend APIs
+- [x] Timeline-Based Vehicle Scheduling - Phase 2: Vehicle Card UI
+- [x] Fix logout on refresh issue - Extended session duration
 
 ### P1 - High Priority
-- [ ] Timeline-Based Vehicle Scheduling - Phase 2: Vehicle Card UI
 - [ ] Timeline-Based Vehicle Scheduling - Phase 3: Booking Flow Integration
 - [ ] Continue backend refactoring (extract medical, driver, users, bookings routes from server.py)
 - [ ] Doctor Decision Panel - live instructions from Medical Dashboard
