@@ -596,7 +596,7 @@ const UnifiedPWA = () => {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [isDriver, language, user?.role]);
+  }, [isDriver, isAdmin, language, user?.role]);
 
   useEffect(() => {
     // Don't fetch until we know the user's role
