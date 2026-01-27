@@ -181,6 +181,14 @@ A comprehensive medical transport system including a public website, patient por
 - Creates schedule entry in `vehicle_schedules` collection
 - Option to force assignment despite conflicts ("Zakaži svejedno")
 
+**Staff Availability Integration (COMPLETED Jan 27, 2026):**
+- Schedule conflict check now also queries `staff_availability` collection
+- Detects when driver or team members are marked as unavailable, on_leave, or sick
+- Displays "Osoblje nije dostupno:" (Staff unavailable) section in red
+- Shows staff name, unavailable time range, status (On Leave/Sick/Unavailable), and notes
+- Staff unavailability is a stronger warning (red) than schedule conflicts (amber)
+- Works for both driver and all team members assigned to the vehicle
+
 ### Remaining Phases:
 - **Phase 4:** Admin Gantt View (Master timeline grid)
 
