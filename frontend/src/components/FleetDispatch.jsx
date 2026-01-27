@@ -63,7 +63,8 @@ import {
   GripVertical,
   Calendar,
   ArrowRight,
-  Edit2
+  Edit2,
+  Truck
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
