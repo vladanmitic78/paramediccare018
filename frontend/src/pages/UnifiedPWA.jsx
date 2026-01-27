@@ -950,8 +950,34 @@ const UnifiedPWA = () => {
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto p-4">
+        {/* Loading State */}
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-12">
+            <Loader2 className="w-10 h-10 text-sky-400 animate-spin mb-4" />
+            <p className="text-slate-400">{language === 'sr' ? 'Učitavanje...' : 'Loading...'}</p>
+          </div>
+        )}
+
+        {/* Error State with Retry */}
+        {!loading && fetchError && (
+          <div className="text-center py-12">
+            <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-400" />
+            <h3 className="text-lg font-semibold text-red-400 mb-2">
+              {language === 'sr' ? 'Greška pri učitavanju' : 'Failed to load'}
+            </h3>
+            <p className="text-slate-400 mb-4 text-sm">{fetchError}</p>
+            <Button 
+              onClick={() => fetchData(true)}
+              className="bg-sky-600 hover:bg-sky-700"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              {language === 'sr' ? 'Pokušaj ponovo' : 'Try Again'}
+            </Button>
+          </div>
+        )}
+
         {/* DRIVER VIEW */}
-        {isDriver && (
+        {!loading && !fetchError && isDriver && (
           <>
             {/* Driver Status Toggle */}
             {!assignment && (
