@@ -796,8 +796,8 @@ const FleetDispatch = () => {
     
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`,
-        { headers: { 'Accept-Language': 'sr-Latn,en' } }
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`,
+        { headers: { 'Accept-Language': 'en,sr-Latn,de,fr,it,es' } }
       );
       const data = await response.json();
       
