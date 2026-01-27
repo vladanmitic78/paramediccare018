@@ -636,6 +636,81 @@ const UnifiedPWA = () => {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [isDriver, isActiveTransport, activeCall, fetchData]);
 
+  // Fetch future bookings for the menu
+  const fetchFutureBookings = async () => {
+    setLoadingFutureBookings(true);
+    try {
+      const response = await axios.get(`${API}/api/bookings`);
+      const allBookings = Array.isArray(response.data) ? response.data : [];
+      
+      // Filter for upcoming/active bookings
+      const now = new Date();
+      const upcoming = allBookings.filter(b => {
+        const bookingDate = new Date(b.scheduled_date || b.created_at);
+        const isUpcoming = bookingDate >= now || ['pending', 'confirmed', 'en_route', 'on_site', 'transporting'].includes(b.status);
+        return isUpcoming;
+      }).sort((a, b) => {
+        const dateA = new Date(a.scheduled_date || a.created_at);
+        const dateB = new Date(b.scheduled_date || b.created_at);
+        return dateA - dateB;
+      }).slice(0, 10);
+      
+      setFutureBookings(upcoming);
+    } catch (error) {
+      console.error('Error fetching future bookings:', error);
+      setFutureBookings([]);
+    } finally {
+      setLoadingFutureBookings(false);
+    }
+  };
+
+  // Fetch future bookings when menu section is expanded
+  useEffect(() => {
+    if (showFutureBookings && menuOpen) {
+      fetchFutureBookings();
+    }
+  }, [showFutureBookings, menuOpen]);
+
+  // Format booking date for display
+  const formatBookingDateTime = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString(language === 'sr' ? 'sr-RS' : 'en-US', {
+      day: 'numeric',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  // Get booking status color for menu
+  const getBookingStatusColor = (status) => {
+    const colors = {
+      pending: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+      confirmed: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+      en_route: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+      on_site: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+      transporting: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+      completed: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
+      cancelled: 'bg-red-500/20 text-red-400 border-red-500/30'
+    };
+    return colors[status] || 'bg-slate-500/20 text-slate-400 border-slate-500/30';
+  };
+
+  // Get booking status label
+  const getBookingStatusLabel = (status) => {
+    const labels = {
+      pending: language === 'sr' ? 'Na čekanju' : 'Pending',
+      confirmed: language === 'sr' ? 'Potvrđeno' : 'Confirmed',
+      en_route: language === 'sr' ? 'Na putu' : 'En Route',
+      on_site: language === 'sr' ? 'Na lokaciji' : 'On Site',
+      transporting: language === 'sr' ? 'U transportu' : 'Transporting',
+      completed: language === 'sr' ? 'Završeno' : 'Completed',
+      cancelled: language === 'sr' ? 'Otkazano' : 'Cancelled'
+    };
+    return labels[status] || status;
+  };
+
   // Driver actions
   const acceptAssignment = async () => {
     if (!assignment) return;
