@@ -118,6 +118,11 @@ const MedicalDashboard = () => {
   });
   const [savingPatient, setSavingPatient] = useState(false);
   
+  // Transport Timeline
+  const [timelineOpen, setTimelineOpen] = useState(false);
+  const [selectedTransportId, setSelectedTransportId] = useState(null);
+  const [selectedTransportPatient, setSelectedTransportPatient] = useState('');
+  
   // Vital entry
   const [vitalDialogOpen, setVitalDialogOpen] = useState(false);
   const [vitalForm, setVitalForm] = useState({
