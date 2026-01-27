@@ -585,6 +585,8 @@ A comprehensive fleet management system where each ambulance has assigned teams.
 - [x] **Fleet Management Module** (Vehicle-centric team assignment) (NEW - Jan 26, 2026) ✅
 - [x] **Driver PWA Installability Fix** (Dynamic manifest switching for mobile install) (FIXED - Jan 26, 2026) ✅
 - [x] **European Address Search** (Expanded manual booking address search to all of Europe) (FIXED - Dec 2025) ✅
+- [x] **Medical Staff Vitals in Unified PWA** (Full vital signs entry form for doctors/nurses) (NEW - Dec 2025) ✅
+- [x] **Code Cleanup** (Deleted redundant AdminPWA.jsx, DriverDashboard.jsx, uninstalled react-helmet-async) (Dec 2025) ✅
 
 ### P1 (Next Up)
 - [ ] Emergency Transport Timeline (chronological event log)
