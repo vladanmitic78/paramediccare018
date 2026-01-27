@@ -592,6 +592,8 @@ A comprehensive fleet management system where each ambulance has assigned teams.
 - [x] **Call Interface Enhancement** (Floating call widget with minimize/expand, state persistence during calls, wake lock during calls) (Dec 2025) ✅
 - [x] **Video Call Integration** (Jitsi Meet video calls with room creation, quick-call buttons, team member calling, copy link sharing) (Dec 2025) ✅
 - [x] **iOS Push Notifications** (Service worker with push support, notification setup modal, iOS installation guide, test notification feature) (Dec 2025) ✅
+- [x] **Emergency Transport Timeline** (Chronological event log API and component for Medical Dashboard) (Dec 2025) ✅
+- [x] **Backend Refactoring Phase 2** (Extracted auth routes to /app/backend/routes/auth.py) (Dec 2025) ✅
 
 ### P1 (Next Up)
 - [ ] Emergency Transport Timeline (chronological event log)
