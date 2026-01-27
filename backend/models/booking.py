@@ -27,10 +27,14 @@ class BookingCreate(BaseModel):
     end_point: str
     end_lat: Optional[float] = None
     end_lng: Optional[float] = None
-    booking_date: str
+    booking_date: str  # Legacy field - kept for compatibility
+    booking_time: Optional[str] = None  # Legacy field
+    pickup_datetime: Optional[str] = None  # ISO datetime for pickup start
+    estimated_arrival: Optional[str] = None  # ISO datetime for estimated arrival
     contact_phone: str
     contact_email: EmailStr
     patient_name: str
+    mobility_status: Optional[str] = None
     notes: Optional[str] = None
     documents: Optional[List[str]] = []
     booking_type: str = "transport"
