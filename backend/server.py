@@ -2747,6 +2747,173 @@ async def get_medical_dashboard(
         "recent_checks": recent_checks
     }
 
+@api_router.get("/transport/timeline/{booking_id}")
+async def get_transport_timeline(
+    booking_id: str,
+    user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.DRIVER]))
+):
+    """Get chronological timeline of events for a transport"""
+    events = []
+    
+    # Find the booking in either collection
+    booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
+    if not booking:
+        booking = await db.patient_bookings.find_one({"id": booking_id}, {"_id": 0})
+    
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    # Event 1: Booking created
+    events.append({
+        "id": f"{booking_id}-created",
+        "type": "booking_created",
+        "title": "Transport Created",
+        "title_sr": "Transport kreiran",
+        "description": f"Patient: {booking.get('patient_name', 'N/A')}",
+        "description_sr": f"Pacijent: {booking.get('patient_name', 'N/A')}",
+        "timestamp": booking.get("created_at") or booking.get("booking_time"),
+        "icon": "plus",
+        "color": "blue"
+    })
+    
+    # Event 2: Driver assigned
+    if booking.get("assigned_driver_id") or booking.get("assigned_driver"):
+        driver_name = booking.get("assigned_driver_name") or booking.get("assigned_driver")
+        events.append({
+            "id": f"{booking_id}-assigned",
+            "type": "driver_assigned",
+            "title": "Driver Assigned",
+            "title_sr": "Vozač dodeljen",
+            "description": f"Driver: {driver_name}",
+            "description_sr": f"Vozač: {driver_name}",
+            "timestamp": booking.get("assigned_at") or booking.get("updated_at"),
+            "icon": "truck",
+            "color": "purple"
+        })
+    
+    # Event 3: Status changes - check driver status history
+    status_history = await db.driver_status_history.find(
+        {"booking_id": booking_id},
+        {"_id": 0}
+    ).sort("timestamp", 1).to_list(100)
+    
+    status_labels = {
+        "en_route": {"en": "En Route to Pickup", "sr": "Na putu do preuzimanja"},
+        "on_site": {"en": "Arrived at Pickup", "sr": "Stigao na lokaciju"},
+        "transporting": {"en": "Transport Started", "sr": "Transport započet"},
+        "picked_up": {"en": "Patient Picked Up", "sr": "Pacijent preuzet"},
+        "completed": {"en": "Transport Completed", "sr": "Transport završen"},
+        "cancelled": {"en": "Transport Cancelled", "sr": "Transport otkazan"}
+    }
+    
+    status_colors = {
+        "en_route": "amber",
+        "on_site": "orange",
+        "transporting": "emerald",
+        "picked_up": "emerald",
+        "completed": "green",
+        "cancelled": "red"
+    }
+    
+    for status_entry in status_history:
+        status = status_entry.get("status")
+        if status in status_labels:
+            events.append({
+                "id": f"{booking_id}-status-{status}-{status_entry.get('timestamp', '')}",
+                "type": f"status_{status}",
+                "title": status_labels[status]["en"],
+                "title_sr": status_labels[status]["sr"],
+                "description": f"By: {status_entry.get('driver_name', 'Driver')}",
+                "description_sr": f"Od: {status_entry.get('driver_name', 'Vozač')}",
+                "timestamp": status_entry.get("timestamp"),
+                "icon": "navigation" if status == "en_route" else "map-pin" if status == "on_site" else "ambulance",
+                "color": status_colors.get(status, "gray"),
+                "location": status_entry.get("location")
+            })
+    
+    # Event 4: Vitals recorded
+    vitals = await db.transport_vitals.find(
+        {"booking_id": booking_id},
+        {"_id": 0}
+    ).sort("recorded_at", 1).to_list(100)
+    
+    for vital in vitals:
+        vital_summary = []
+        if vital.get("heart_rate"):
+            vital_summary.append(f"HR: {vital['heart_rate']}")
+        if vital.get("blood_pressure_systolic"):
+            vital_summary.append(f"BP: {vital['blood_pressure_systolic']}/{vital.get('blood_pressure_diastolic', '?')}")
+        if vital.get("oxygen_saturation"):
+            vital_summary.append(f"SpO2: {vital['oxygen_saturation']}%")
+        
+        events.append({
+            "id": f"{booking_id}-vitals-{vital.get('id', '')}",
+            "type": "vitals_recorded",
+            "title": "Vitals Recorded",
+            "title_sr": "Vitali zabeleženi",
+            "description": ", ".join(vital_summary) if vital_summary else "Vitals recorded",
+            "description_sr": ", ".join(vital_summary) if vital_summary else "Vitali zabeleženi",
+            "timestamp": vital.get("recorded_at"),
+            "icon": "heart",
+            "color": "red" if vital.get("is_critical") else "pink",
+            "data": vital
+        })
+    
+    # Event 5: Notes added
+    notes = await db.transport_notes.find(
+        {"booking_id": booking_id},
+        {"_id": 0}
+    ).sort("created_at", 1).to_list(100)
+    
+    for note in notes:
+        events.append({
+            "id": f"{booking_id}-note-{note.get('id', '')}",
+            "type": "note_added",
+            "title": "Note Added",
+            "title_sr": "Napomena dodata",
+            "description": note.get("content", "")[:100],
+            "description_sr": note.get("content", "")[:100],
+            "timestamp": note.get("created_at"),
+            "icon": "clipboard",
+            "color": "slate",
+            "author": note.get("author_name")
+        })
+    
+    # Sort all events by timestamp
+    events.sort(key=lambda x: x.get("timestamp") or "", reverse=False)
+    
+    return {
+        "booking_id": booking_id,
+        "patient_name": booking.get("patient_name"),
+        "status": booking.get("status"),
+        "events": events,
+        "total_events": len(events)
+    }
+
+@api_router.post("/transport/notes")
+async def add_transport_note(
+    booking_id: str,
+    content: str,
+    user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.DRIVER]))
+):
+    """Add a note to transport timeline"""
+    note_id = str(uuid.uuid4())
+    now = datetime.now(timezone.utc).isoformat()
+    
+    note_doc = {
+        "id": note_id,
+        "booking_id": booking_id,
+        "content": content,
+        "author_id": user["id"],
+        "author_name": user["full_name"],
+        "author_role": user["role"],
+        "created_at": now
+    }
+    
+    await db.transport_notes.insert_one(note_doc)
+    
+    return {"message": "Note added", "note_id": note_id}
+
 @api_router.get("/medical/alerts")
 async def get_medical_alerts(
     user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.ADMIN, UserRole.SUPERADMIN]))
