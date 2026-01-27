@@ -920,6 +920,32 @@ const FleetDispatch = () => {
     }
   };
 
+  // Handle detach driver from booking
+  const handleDetachDriver = async (booking) => {
+    if (!window.confirm(language === 'sr' 
+      ? `Da li ste sigurni da želite da uklonite vozača "${booking.assigned_driver_name}" sa ove rezervacije?` 
+      : `Are you sure you want to remove driver "${booking.assigned_driver_name}" from this booking?`
+    )) {
+      return;
+    }
+    
+    try {
+      await axios.put(`${API}/api/bookings/${booking.id}`, {
+        assigned_driver: null,
+        assigned_driver_name: null,
+        status: 'pending'
+      });
+      
+      toast.success(language === 'sr' ? 'Vozač uklonjen sa rezervacije' : 'Driver removed from booking');
+      fetchData();
+    } catch (error) {
+      const errMsg = typeof error.response?.data?.detail === 'string' 
+        ? error.response.data.detail 
+        : (language === 'sr' ? 'Greška pri uklanjanju vozača' : 'Error removing driver');
+      toast.error(errMsg);
+    }
+  };
+
   // Video call
   const startVideoCall = (vehicle) => {
     const roomId = generateJitsiRoomId(vehicle.id, vehicle.current_mission?.id);
