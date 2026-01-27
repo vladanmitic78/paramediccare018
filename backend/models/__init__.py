@@ -7,7 +7,7 @@ from .user import (
 )
 from .booking import (
     BookingStatus, MobilityStatus, BookingCreate, BookingResponse,
-    BookingStatusUpdate, PatientBookingCreate, PatientBookingResponse,
+    BookingStatusUpdate, BookingFullUpdate, PatientBookingCreate, PatientBookingResponse,
     SavedAddress, EmergencyContact, PatientProfileUpdate,
     InvoiceResponse, NotificationResponse, ContactCreate, ContactResponse
 )
