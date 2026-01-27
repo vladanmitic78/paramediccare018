@@ -1966,6 +1966,38 @@ const UnifiedPWA = () => {
                 </div>
               )}
 
+              {/* Android/Chrome Install Button */}
+              {pwaInstall.isInstallable && !pwaInstall.isInstalled && (
+                <div className="bg-sky-600/20 rounded-xl p-4" data-testid="pwa-install-section">
+                  <h4 className="font-semibold mb-2 text-sky-300">
+                    {language === 'sr' ? 'Instaliraj aplikaciju' : 'Install App'}
+                  </h4>
+                  <p className="text-sm text-slate-400 mb-3">
+                    {language === 'sr' 
+                      ? 'Instalirajte PC018 na vaš uređaj za brži pristup i rad bez mreže.' 
+                      : 'Install PC018 on your device for faster access and offline use.'}
+                  </p>
+                  <Button 
+                    onClick={pwaInstall.promptInstall}
+                    className="w-full bg-sky-600 hover:bg-sky-700"
+                    data-testid="pwa-install-modal-btn"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    {language === 'sr' ? 'Instaliraj aplikaciju' : 'Install App'}
+                  </Button>
+                </div>
+              )}
+
+              {/* App Installed Success */}
+              {pwaInstall.isInstalled && (
+                <div className="bg-emerald-600/20 text-emerald-300 p-3 rounded-lg text-sm">
+                  <CheckCircle className="w-4 h-4 inline mr-2" />
+                  {language === 'sr' 
+                    ? 'Aplikacija je instalirana na vašem uređaju!' 
+                    : 'App is installed on your device!'}
+                </div>
+              )}
+
               {/* Enable Button */}
               {pushNotifications.canRequestPermission && pushNotifications.permission !== 'granted' && (
                 <Button 
