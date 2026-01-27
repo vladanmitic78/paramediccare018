@@ -546,6 +546,7 @@ const FleetDispatch = () => {
 
   // Vehicles state
   const [vehicles, setVehicles] = useState([]);
+  const [vehicleSchedules, setVehicleSchedules] = useState({});  // Map of vehicle_id -> schedules
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [vehicleSearch, setVehicleSearch] = useState('');
