@@ -817,6 +817,68 @@ const FleetDispatch = () => {
     }
   };
 
+  // Open edit booking modal
+  const openEditBooking = (booking) => {
+    setBookingToEdit({
+      id: booking.id,
+      patient_name: booking.patient_name || '',
+      contact_phone: booking.contact_phone || '',
+      contact_email: booking.contact_email || '',
+      pickup_address: booking.start_point || booking.pickup_address || '',
+      pickup_lat: booking.start_lat || booking.pickup_lat,
+      pickup_lng: booking.start_lng || booking.pickup_lng,
+      destination_address: booking.end_point || booking.destination_address || '',
+      destination_lat: booking.end_lat || booking.destination_lat,
+      destination_lng: booking.end_lng || booking.destination_lng,
+      booking_date: booking.booking_date || booking.preferred_date || '',
+      booking_time: booking.booking_time || booking.preferred_time || '',
+      mobility_status: booking.mobility_status || 'walking',
+      notes: booking.notes || '',
+      status: booking.status
+    });
+    setShowEditBooking(true);
+  };
+
+  // Handle edit booking submission
+  const handleEditBooking = async () => {
+    if (!bookingToEdit.patient_name || !bookingToEdit.contact_phone || !bookingToEdit.pickup_address || !bookingToEdit.destination_address) {
+      toast.error(language === 'sr' ? 'Popunite sva obavezna polja' : 'Please fill all required fields');
+      return;
+    }
+    
+    setEditingBooking(true);
+    try {
+      await axios.put(`${API}/api/bookings/${bookingToEdit.id}`, {
+        patient_name: bookingToEdit.patient_name,
+        contact_phone: bookingToEdit.contact_phone,
+        contact_email: bookingToEdit.contact_email || 'nema@email.com',
+        start_point: bookingToEdit.pickup_address,
+        end_point: bookingToEdit.destination_address,
+        start_lat: bookingToEdit.pickup_lat,
+        start_lng: bookingToEdit.pickup_lng,
+        end_lat: bookingToEdit.destination_lat,
+        end_lng: bookingToEdit.destination_lng,
+        booking_date: bookingToEdit.booking_date,
+        booking_time: bookingToEdit.booking_time,
+        mobility_status: bookingToEdit.mobility_status,
+        notes: bookingToEdit.notes || '',
+        status: bookingToEdit.status
+      });
+      
+      toast.success(language === 'sr' ? 'Rezervacija ažurirana!' : 'Booking updated!');
+      setShowEditBooking(false);
+      setBookingToEdit(null);
+      fetchData();
+    } catch (error) {
+      const errMsg = typeof error.response?.data?.detail === 'string' 
+        ? error.response.data.detail 
+        : (language === 'sr' ? 'Greška pri ažuriranju rezervacije' : 'Error updating booking');
+      toast.error(errMsg);
+    } finally {
+      setEditingBooking(false);
+    }
+  };
+
   // Video call
   const startVideoCall = (vehicle) => {
     const roomId = generateJitsiRoomId(vehicle.id, vehicle.current_mission?.id);
