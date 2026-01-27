@@ -904,14 +904,6 @@ const FleetDispatch = () => {
             >
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
             </Button>
-            <Button
-              onClick={() => setShowAddVehicle(true)}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white"
-              size="sm"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              {language === 'sr' ? 'Novo vozilo' : 'Add Vehicle'}
-            </Button>
           </div>
         </div>
 
