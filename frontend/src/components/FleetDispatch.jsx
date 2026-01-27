@@ -979,7 +979,7 @@ const FleetDispatch = () => {
                     data-testid="create-booking-btn"
                   >
                     <Plus className="w-3 h-3 mr-1" />
-                    {language === 'sr' ? 'Nova' : 'New'}
+                    {language === 'sr' ? 'Nova Rezervacija' : 'New Booking'}
                   </Button>
                   {[
                     { key: 'pending', label: language === 'sr' ? 'Čekaju' : 'Pending', count: pendingCount },
