@@ -1,8 +1,21 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
-import { Menu, X, ChevronDown, Phone } from 'lucide-react';
+import { 
+  Menu, 
+  X, 
+  ChevronDown, 
+  Phone, 
+  CalendarDays, 
+  Clock, 
+  MapPin, 
+  User,
+  LogOut,
+  LayoutDashboard,
+  ChevronRight,
+  Loader2
+} from 'lucide-react';
 import { Button } from './ui/button';
 import {
   DropdownMenu,
@@ -10,6 +23,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from './ui/sheet';
 import axios from 'axios';
 
 const API = process.env.REACT_APP_BACKEND_URL;
