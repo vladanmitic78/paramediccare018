@@ -1210,6 +1210,9 @@ async def get_booking(booking_id: str):
 
 @api_router.put("/bookings/{booking_id}", response_model=BookingResponse)
 async def update_booking(booking_id: str, update: BookingStatusUpdate, user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.DRIVER, UserRole.DOCTOR, UserRole.NURSE]))):
+    # Get booking to check for assigned driver
+    existing_booking = await db.bookings.find_one({"id": booking_id})
+    
     update_doc = {"status": update.status}
     if update.assigned_driver:
         update_doc["assigned_driver"] = update.assigned_driver
@@ -1217,6 +1220,20 @@ async def update_booking(booking_id: str, update: BookingStatusUpdate, user: dic
         update_doc["assigned_medical"] = update.assigned_medical
     
     await db.bookings.update_one({"id": booking_id}, {"$set": update_doc})
+    
+    # Reset driver status if booking is cancelled or completed
+    if update.status in ["cancelled", "completed"] and existing_booking:
+        assigned_driver = existing_booking.get("assigned_driver")
+        if assigned_driver:
+            await db.driver_status.update_one(
+                {"driver_id": assigned_driver, "current_booking_id": booking_id},
+                {"$set": {
+                    "status": DriverStatus.AVAILABLE,
+                    "current_booking_id": None,
+                    "last_updated": datetime.now(timezone.utc).isoformat()
+                }}
+            )
+    
     booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
     return BookingResponse(**booking)
 
