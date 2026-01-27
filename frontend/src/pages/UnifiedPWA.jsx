@@ -342,6 +342,129 @@ const UnifiedPWA = () => {
     }
   };
 
+  // Calculate distance between two points in meters
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371e3; // Earth's radius in meters
+    const φ1 = lat1 * Math.PI / 180;
+    const φ2 = lat2 * Math.PI / 180;
+    const Δφ = (lat2 - lat1) * Math.PI / 180;
+    const Δλ = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
+
+  // Fetch route from OSRM
+  const fetchRoute = async (startLat, startLng, endLat, endLng) => {
+    try {
+      const response = await fetch(
+        `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson`
+      );
+      const data = await response.json();
+      if (data.routes && data.routes[0]) {
+        const coords = data.routes[0].geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+        setRouteCoordinates(coords);
+        return coords;
+      }
+    } catch (error) {
+      console.error('Error fetching route:', error);
+    }
+    return [];
+  };
+
+  // Start route with map - called when driver clicks "Start Route"
+  const startRouteWithMap = async () => {
+    if (!assignment) return;
+    
+    setUpdatingStatus(true);
+    try {
+      // Update status to en_route
+      await axios.put(`${API}/api/driver/status`, {
+        status: 'en_route',
+        booking_id: assignment?.id
+      });
+      setDriverStatus('en_route');
+      
+      // Get current location and fetch route
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const { latitude, longitude } = position.coords;
+            setLastLocation({ lat: latitude, lng: longitude });
+            
+            // Get pickup coordinates
+            const pickupLat = assignment.start_coords?.lat || assignment.pickup_lat;
+            const pickupLng = assignment.start_coords?.lng || assignment.pickup_lng;
+            
+            if (pickupLat && pickupLng) {
+              await fetchRoute(latitude, longitude, pickupLat, pickupLng);
+            }
+            
+            // Show full-screen map
+            setShowRouteMap(true);
+          },
+          (error) => {
+            console.error('Geolocation error:', error);
+            setShowRouteMap(true); // Still show map even without location
+          },
+          { enableHighAccuracy: true }
+        );
+      } else {
+        setShowRouteMap(true);
+      }
+      
+      fetchData();
+    } catch (error) {
+      toast.error(language === 'sr' ? 'Greška' : 'Error');
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  // Check proximity to pickup location
+  useEffect(() => {
+    if (isDriver && driverStatus === 'en_route' && lastLocation && assignment) {
+      const pickupLat = assignment.start_coords?.lat || assignment.pickup_lat;
+      const pickupLng = assignment.start_coords?.lng || assignment.pickup_lng;
+      
+      if (pickupLat && pickupLng) {
+        const distance = calculateDistance(
+          lastLocation.lat, lastLocation.lng,
+          pickupLat, pickupLng
+        );
+        setDistanceToPickup(Math.round(distance));
+        
+        // Consider "near" if within 100 meters
+        if (distance < 100) {
+          setNearPickup(true);
+          // Vibrate to alert driver
+          if ('vibrate' in navigator) {
+            navigator.vibrate([200, 100, 200]);
+          }
+        } else {
+          setNearPickup(false);
+        }
+      }
+    }
+  }, [isDriver, driverStatus, lastLocation, assignment]);
+
+  // Update route when location changes during en_route
+  useEffect(() => {
+    if (isDriver && driverStatus === 'en_route' && showRouteMap && lastLocation && assignment) {
+      const pickupLat = assignment.start_coords?.lat || assignment.pickup_lat;
+      const pickupLng = assignment.start_coords?.lng || assignment.pickup_lng;
+      
+      if (pickupLat && pickupLng) {
+        // Throttle route updates - only fetch every 30 seconds
+        const now = Date.now();
+        if (!window.lastRouteUpdate || now - window.lastRouteUpdate > 30000) {
+          window.lastRouteUpdate = now;
+          fetchRoute(lastLocation.lat, lastLocation.lng, pickupLat, pickupLng);
+        }
+      }
+    }
+  }, [isDriver, driverStatus, showRouteMap, lastLocation, assignment]);
+
   const openNavigation = (lat, lng, address) => {
     let url;
     if (lat && lng) {
