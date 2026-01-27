@@ -930,7 +930,7 @@ const FleetDispatch = () => {
     }
     
     try {
-      await axios.put(`${API}/api/bookings/${booking.id}`, {
+      await axios.put(`${API}/bookings/${booking.id}`, {
         assigned_driver: null,
         assigned_driver_name: null,
         status: 'pending'
