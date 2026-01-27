@@ -268,19 +268,19 @@ const UnifiedPWA = () => {
   const pushNotifications = usePushNotifications();
   
   const { language, toggleLanguage } = useLanguage();
-  const { user, logout } = useAuth();
+  const { user, logout, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   
-  // Redirect to login if not authenticated
+  // Redirect to login if not authenticated (after auth has loaded)
   useEffect(() => {
-    // Wait a moment for auth to load from storage
-    const timeout = setTimeout(() => {
-      if (user === null) {
-        navigate('/login');
-      }
-    }, 2000);
-    return () => clearTimeout(timeout);
-  }, [user, navigate]);
+    // Don't redirect while auth is still loading
+    if (authLoading) return;
+    
+    // If no user after auth finished loading, redirect to login
+    if (user === null) {
+      navigate('/login');
+    }
+  }, [user, navigate, authLoading]);
   
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
