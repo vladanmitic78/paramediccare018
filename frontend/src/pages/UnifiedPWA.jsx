@@ -10,6 +10,7 @@ import {
   MapPin,
   Navigation,
   Phone,
+  PhoneOff,
   User,
   Clock,
   CheckCircle,
@@ -34,7 +35,8 @@ import {
   Settings,
   ClipboardList,
   Stethoscope,
-  Plus
+  Plus,
+  Minimize2
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
