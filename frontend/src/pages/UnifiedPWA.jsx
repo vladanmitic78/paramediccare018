@@ -894,10 +894,15 @@ const UnifiedPWA = () => {
                     </button>
                   </div>
                   {assignment.contact_phone && (
-                    <a href={`tel:${assignment.contact_phone}`} className="flex items-center gap-3 p-3 bg-sky-600/20 rounded-xl">
+                    <button 
+                      onClick={() => startCall(assignment.contact_phone, assignment.patient_name)}
+                      className="w-full flex items-center gap-3 p-3 bg-sky-600/20 rounded-xl hover:bg-sky-600/30 transition-colors"
+                      data-testid="call-patient-btn"
+                    >
                       <Phone className="w-5 h-5 text-sky-400" />
-                      <span>{assignment.contact_phone}</span>
-                    </a>
+                      <span className="flex-1 text-left">{assignment.contact_phone}</span>
+                      <span className="text-xs text-sky-400">{language === 'sr' ? 'POZOVI' : 'CALL'}</span>
+                    </button>
                   )}
                   
                   {/* Action Buttons based on status */}
