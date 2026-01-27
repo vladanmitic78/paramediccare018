@@ -99,8 +99,10 @@ async def check_conflicts(
     exclude_schedule_id: Optional[str] = None,
     driver_id: Optional[str] = None
 ) -> ScheduleConflict:
-    """Check for scheduling conflicts for a vehicle and optionally a driver"""
+    """Check for scheduling conflicts for a vehicle and optionally a driver.
+    Also checks staff availability to ensure staff is not marked as unavailable."""
     conflicts = []
+    staff_unavailable = []
     
     # Build query for vehicle conflicts
     query = {
@@ -128,8 +130,9 @@ async def check_conflicts(
         enriched = await enrich_schedule(conflict)
         conflicts.append(VehicleScheduleResponse(**enriched))
     
-    # Check driver conflicts if driver_id provided
+    # Check driver conflicts and availability if driver_id provided
     if driver_id:
+        # Check schedule conflicts for driver
         driver_query = {
             "driver_id": driver_id,
             "status": {"$in": [ScheduleStatus.SCHEDULED, ScheduleStatus.IN_PROGRESS]},
@@ -153,15 +156,103 @@ async def check_conflicts(
             if not any(c.id == conflict["id"] for c in conflicts):
                 enriched = await enrich_schedule(conflict)
                 conflicts.append(VehicleScheduleResponse(**enriched))
+        
+        # Check staff availability - is the driver marked as unavailable?
+        schedule_date = start_time.strftime("%Y-%m-%d")
+        schedule_start_time = start_time.strftime("%H:%M")
+        schedule_end_time = end_time.strftime("%H:%M")
+        
+        # Query for unavailability on the same date with overlapping time
+        availability_query = {
+            "user_id": driver_id,
+            "date": schedule_date,
+            "status": {"$in": UNAVAILABLE_STATUSES}
+        }
+        
+        unavailable_slots = await db.staff_availability.find(availability_query, {"_id": 0}).to_list(50)
+        
+        for slot in unavailable_slots:
+            slot_start = slot.get("start_time", "00:00")
+            slot_end = slot.get("end_time", "23:59")
+            
+            # Check if time ranges overlap
+            # Overlap if: slot_start < schedule_end AND slot_end > schedule_start
+            if slot_start < schedule_end_time and slot_end > schedule_start_time:
+                # Get driver name
+                driver = await db.users.find_one(
+                    {"id": driver_id},
+                    {"_id": 0, "full_name": 1}
+                )
+                driver_name = driver.get("full_name", "Unknown") if driver else "Unknown"
+                
+                staff_unavailable.append(StaffUnavailability(
+                    user_id=driver_id,
+                    user_name=driver_name,
+                    date=schedule_date,
+                    start_time=slot_start,
+                    end_time=slot_end,
+                    status=slot.get("status", "unavailable"),
+                    notes=slot.get("notes")
+                ))
     
-    has_conflict = len(conflicts) > 0
+    # Also check availability for all team members assigned to the vehicle
+    vehicle = await db.vehicles.find_one({"id": vehicle_id}, {"_id": 0})
+    if vehicle:
+        team = await db.vehicle_teams.find({"vehicle_id": vehicle_id}, {"_id": 0}).to_list(20)
+        schedule_date = start_time.strftime("%Y-%m-%d")
+        schedule_start_time = start_time.strftime("%H:%M")
+        schedule_end_time = end_time.strftime("%H:%M")
+        
+        for member in team:
+            member_id = member.get("user_id")
+            if member_id and member_id != driver_id:  # Skip driver, already checked
+                availability_query = {
+                    "user_id": member_id,
+                    "date": schedule_date,
+                    "status": {"$in": UNAVAILABLE_STATUSES}
+                }
+                
+                unavailable_slots = await db.staff_availability.find(availability_query, {"_id": 0}).to_list(50)
+                
+                for slot in unavailable_slots:
+                    slot_start = slot.get("start_time", "00:00")
+                    slot_end = slot.get("end_time", "23:59")
+                    
+                    if slot_start < schedule_end_time and slot_end > schedule_start_time:
+                        # Get member name
+                        member_user = await db.users.find_one(
+                            {"id": member_id},
+                            {"_id": 0, "full_name": 1}
+                        )
+                        member_name = member_user.get("full_name", "Unknown") if member_user else "Unknown"
+                        
+                        # Avoid duplicates
+                        if not any(u.user_id == member_id and u.date == schedule_date 
+                                   and u.start_time == slot_start for u in staff_unavailable):
+                            staff_unavailable.append(StaffUnavailability(
+                                user_id=member_id,
+                                user_name=member_name,
+                                date=schedule_date,
+                                start_time=slot_start,
+                                end_time=slot_end,
+                                status=slot.get("status", "unavailable"),
+                                notes=slot.get("notes")
+                            ))
+    
+    has_conflict = len(conflicts) > 0 or len(staff_unavailable) > 0
     message = None
     if has_conflict:
-        message = f"Found {len(conflicts)} conflicting schedule(s)"
+        parts = []
+        if conflicts:
+            parts.append(f"{len(conflicts)} conflicting schedule(s)")
+        if staff_unavailable:
+            parts.append(f"{len(staff_unavailable)} staff unavailable")
+        message = "Found " + " and ".join(parts)
     
     return ScheduleConflict(
         has_conflict=has_conflict,
         conflicting_schedules=conflicts,
+        staff_unavailable=staff_unavailable,
         message=message
     )
 
