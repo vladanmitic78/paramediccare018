@@ -2,31 +2,35 @@ import { createContext, useContext, useState, useEffect } from 'react';
 
 const PWAContext = createContext(null);
 
+// Helper functions to get initial values (run only once during initialization)
+const getInitialDismissed = () => {
+  try {
+    return sessionStorage.getItem('pwa-banner-dismissed') === 'true';
+  } catch {
+    return false;
+  }
+};
+
+const getIsIOS = () => {
+  if (typeof window === 'undefined') return false;
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+};
+
+const getIsStandalone = () => {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(display-mode: standalone)').matches || 
+         window.navigator.standalone === true;
+};
+
 export const PWAProvider = ({ children }) => {
   const [installPrompt, setInstallPrompt] = useState(null);
   const [isInstallable, setIsInstallable] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(getIsStandalone);
+  const [isIOS] = useState(getIsIOS);
+  const [isStandalone] = useState(getIsStandalone);
+  const [isDismissed, setIsDismissed] = useState(getInitialDismissed);
 
   useEffect(() => {
-    // Check if already dismissed this session
-    const dismissed = sessionStorage.getItem('pwa-banner-dismissed');
-    if (dismissed) {
-      setIsDismissed(true);
-    }
-
-    // Detect iOS
-    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    setIsIOS(iOS);
-
-    // Check if running as standalone (already installed)
-    const standalone = window.matchMedia('(display-mode: standalone)').matches || 
-                      window.navigator.standalone === true;
-    setIsStandalone(standalone);
-    setIsInstalled(standalone);
-
     // Listen for beforeinstallprompt (Chrome, Edge, etc.)
     const handleBeforeInstall = (e) => {
       console.log('[PWA Context] beforeinstallprompt event captured');
