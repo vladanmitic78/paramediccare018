@@ -2660,9 +2660,9 @@ const UnifiedPWA = () => {
                 variant="outline"
                 className="flex-1 h-14 border-slate-600"
                 onClick={() => {
-                  const lat = assignment.start_coords?.lat || assignment.pickup_lat;
-                  const lng = assignment.start_coords?.lng || assignment.pickup_lng;
-                  openNavigation(lat, lng, assignment.pickup_address || assignment.start_point);
+                  const lat = assignment.start_lat || assignment.start_coords?.lat || assignment.pickup_lat;
+                  const lng = assignment.start_lng || assignment.start_coords?.lng || assignment.pickup_lng;
+                  openNavigation(lat, lng, assignment.start_point || assignment.pickup_address);
                 }}
               >
                 <Navigation className="w-5 h-5 mr-2" />
