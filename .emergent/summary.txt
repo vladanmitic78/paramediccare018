@@ -4,151 +4,157 @@
 The user is building a comprehensive medical transport system named Paramedic Care 018. The system has evolved to include a public website, a patient portal, real-time mobile applications for admins and drivers, invoice management, location tracking, a live map, staff availability management, a full EMR-style medical dashboard, and a vehicle-centric team assignment module.
 
 **Recent PRODUCT REQUIREMENTS:**
-1.  **Unified PWA:** Consolidate the separate mobile apps for Drivers, Admins, and Medical staff into a single, role-aware Progressive Web App (PWA).
-2.  **Manual Booking Creation:** Allow admins to create new bookings manually from the main dispatch console.
-3.  **Address Autocomplete:** Implement address autocomplete for the manual booking form.
-4.  **European Address Search:** The address search for manual bookings must work for all of Europe.
-5.  **Live Status Sync:** Driver actions in their PWA must reflect in real-time on the admin dashboard.
-6.  **Improved Driver PWA UX:** The driver app's map should open full-screen automatically during transport, and the screen should not go to sleep. Proximity detection should alert the driver on arrival.
-7.  **In-App Communication:** Implement phone and video calls that do not interrupt the app's workflow.
-8.  **iOS Compatibility:** Ensure the PWA installs and functions correctly on iOS devices, including push notifications.
-9.  **Emergency Transport Timeline:** Add a chronological event log to the Medical Dashboard.
-10. **Backend Refactoring:** Break down the monolithic  into smaller, domain-specific modules.
+1.  **Unified PWA:** Consolidate the separate mobile apps into a single, role-aware Progressive Web App (PWA).
+2.  **Dispatch Console UI/UX:**
+    *   Allow admins to create/edit bookings.
+    *   Add search and filtering to vehicle and booking lists.
+    *   Improve the layout for consistency.
+    *   Allow detaching and reassigning vehicles from bookings.
+3.  **Advanced Scheduling Logic:**
+    *   A driver assigned to a future booking should still be available for bookings today.
+    *   Provide a warning popup if a driver is assigned to a new booking that conflicts with an existing one on the same day.
+4.  **PWA Installation:** The PWA should be easily installable on mobile devices.
+5.  **Future: Timeline-Based Availability:** The user has proposed a major architectural shift to a time-slot-based vehicle scheduling system, moving away from a simple busy/available status.
+6.  **Backend Refactoring:** Continue breaking down the monolithic  into smaller modules.
 
 **User's preferred language**: The user communicates in English. The agent MUST respond in **English**.
 
 **what currently exists?**
-A full-stack application with a React frontend, a partially-refactored FastAPI backend, and a MongoDB database. A single, role-aware Progressive Web App (PWA) at the  route serves a mobile-optimized UI for Drivers, Admins, and Medical staff. The Driver PWA includes advanced features like automatic routing, arrival detection, and non-intrusive in-app phone/video calling. The Medical Dashboard now features a transport event timeline. The backend refactoring has begun, with  and  routes extracted from the main  file.
+A full-stack application with a React frontend, a partially-refactored FastAPI backend, and a MongoDB database. The core of the application is a dispatch console () for managing vehicles and bookings, and a unified Progressive Web App () for mobile users (Drivers, Admins, Medical staff).
+
+Recent work has heavily focused on improving the dispatch console's functionality, adding booking editing, vehicle detachment/reassignment, and a time-conflict warning system. The PWA's stability was improved by fixing a critical infinite loading bug.
 
 **Last working item**:
-- **Last item agent was working:** The user asked why the driver Marija Vujic is not available for assignment. The agent began investigating the backend logic for driver availability.
-- **Status:** IN PROGRESS
-- **Agent Testing Done:** N
-- **Which testing method agent to use?** Manual testing by  or . The agent needs to query the database and inspect the backend code to understand how driver availability is determined.
-- **User Testing Done:** N
+-   **Last item agent was working:** The user reported they were not getting prompted to install the PWA on their mobile device. The agent identified that the PWA install prompt event () was not being handled and began implementing a custom hook () to manage and display a custom Install App banner/button within the PWA.
+-   **Status:** IN PROGRESS
+-   **Agent Testing Done:** N
+-   **Which testing method agent to use?** Frontend testing agent or screenshot tool. The agent needs to verify that a custom Install App UI element appears on the  page and that clicking it triggers the browser's native installation dialog.
+-   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-- **Issue 1: (P0) Driver Marija Vujic is not available.**
-    - **Description:** A specific driver is not appearing in the available for assignment list, despite their user account being active. The agent discovered that the  MongoDB collection, which was thought to track availability, is completely empty for all drivers. This points to a systemic issue or a misunderstanding of how driver availability is calculated.
-    - **Attempted fixes:**
-        - Verified the user Marija Vujic exists in the  collection.
-        - Queried the  collection and found it empty.
-    - **Next debug checklist:**
-        1.  Identify the backend API endpoint that the Assign modal calls to fetch the list of available drivers.
-        2.  Examine the code for that endpoint (likely still in ) to understand its logic. It probably determines availability by checking which drivers (from the  collection) are NOT linked to a booking with an 'active' status (e.g., , , ).
-        3.  Investigate why the  collection is empty and whether it's deprecated or if a background process meant to populate it is failing.
-        4.  Inspect the user document for Marija Vujic for any flags that might mark her as inactive.
-    - **Why fix this issue and what will be achieved with the fix?** This is a blocker for core dispatch functionality. Resolving it will ensure all available drivers can be assigned to transports.
-    - **Status:** IN PROGRESS
-    - **Is recurring issue?** N
-    - **Should Test frontend/backend/both after fix?** Backend.
+-   **Issue 1: (P0) PWA install prompt is not showing.**
+    -   **Description:** The browser's automatic Add to Home Screen prompt is not appearing for the user. The current implementation lacks a handler for the  event, which is necessary to provide a reliable, user-triggered installation flow.
+    -   **Attempted fixes:** The agent started creating a  custom hook in  to capture the browser's install event.
+    -   **Next debug checklist:**
+        1.  Complete the implementation of the  hook in .
+        2.  Add a UI element (e.g., a banner or button) in the  render method that is conditionally displayed when the install prompt event has been captured.
+        3.  Ensure the button's  handler calls the  method on the saved event object to trigger the native installation dialog.
+        4.  Thoroughly test on a compatible browser (e.g., Chrome on Android or desktop) by navigating to the  route and verifying the custom install button appears and functions correctly.
+    -   **Why fix this issue and what will be achieved with the fix?** To provide a clear and reliable way for users to install the PWA on their mobile devices, improving accessibility and user experience.
+    -   **Status:** IN PROGRESS
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** Frontend.
 
-- **Issue 2: (P2) Ephemeral Image Storage**
-    - **Description:** User-uploaded files and images are stored on the local filesystem (), which is not persistent and results in data loss between sessions.
-    - **Next debug checklist:** Plan and implement a migration to a persistent cloud storage service like AWS S3.
-    - **Why fix this issue and what will be achieved with the fix?** To ensure data durability and prevent data loss.
-    - **Status:** NOT STARTED
-    - **Is recurring issue?** Y
-    - **Should Test frontend/backend/both after fix?** Both.
+-   **Issue 2: (P2) Ephemeral Image Storage**
+    -   **Description:** User-uploaded files and images are stored on the local filesystem (), which is not persistent and results in data loss between sessions.
+    -   **Next debug checklist:** Plan and implement a migration to a persistent cloud storage service like AWS S3.
+    -   **Why fix this issue and what will be achieved with the fix?** To ensure data durability for user-uploaded content.
+    -   **Status:** NOT STARTED
+    -   **Is recurring issue?** Y
+    -   **Should Test frontend/backend/both after fix?** Both.
 
 **In progress Task List**:
-- **Task 1: (P1) Backend Refactoring**
-    - **Where to resume:**  and  have been extracted from . The next step is to continue this process by creating new route files for other domains (e.g., , , , ) and moving the corresponding endpoints out of .
-    - **What will be achieved with this?** A more modular, scalable, and maintainable backend architecture.
-    - **Status:** IN PROGRESS
-    - **Should Test frontend/backend/both after fix?** Backend.
-    - **Blocked on something:** None.
+-   **Task 1: (P1) Backend Refactoring**
+    -   **Where to resume:**  and  have been extracted from . Continue this process by creating new route files for other domains (e.g., , , , ) and moving the corresponding endpoints out of .
+    -   **What will be achieved with this?** A more modular, scalable, and maintainable backend architecture, reducing technical debt.
+    -   **Status:** IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?** Backend.
+    -   **Blocked on something:** None.
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks:**
+    *   **(P0) Implement Full Time-Slot Based Vehicle Scheduling System:** The user has provided a detailed specification for a timeline-based vehicle availability system. This is a major architectural change and the ideal long-term solution to scheduling complexity. Phased implementation is recommended:
+        1.  **Phase 1:** Data Model & Backend (Create  collection and APIs).
+        2.  **Phase 2:** Vehicle Card UI (Add mini-timeline strip to vehicle cards).
+        3.  **Phase 3:** Booking Flow (Update booking process to use time-slot selection).
+        4.  **Phase 4:** Admin Gantt View (Build a master timeline grid).
     *   **(P1) Doctor Decision Panel:** Enable doctors to give live instructions from the Medical Dashboard.
-    *   **(P1) Implement Incoming API Integrations:** Build the backend logic for Stripe, SMS, and Email integrations using the  tool.
+    *   **(P1) Implement Incoming API Integrations:** Build backend logic for Stripe, SMS, and Email integrations using the  tool.
 *   **Future Tasks:**
+    *   **(P1) Refactor :** This component is extremely large and complex. It must be broken down into smaller, single-responsibility components and custom hooks to improve maintainability.
     *   **(P2) Persist Collapsible Sidebar State:** Use  to save the state of the sidebar in the desktop dashboard.
-    -   **(P2) Calendar View for Bookings:** Implement the  view.
-    -   **(P2) Implement Driver Rejection Reason:** Add a modal to capture the reason when a driver rejects a task.
+    *   **(P2) Calendar View for Bookings:** Implement the  view.
+    *   **(P2) Implement Driver Rejection Reason:** Add a modal to capture the reason when a driver rejects a task.
 
 **Completed work in this session**
-- **European Address Search:** Enabled Europe-wide address search in the manual booking form by modifying the Nominatim API call header.
-- **Unified PWA Refactor & Cleanup:** Fully implemented the medical staff view in , deleted the old  and  files, and removed the unused  package.
-- **Driver PWA Navigation UX:**
-    - Implemented a feature where the map automatically opens with a calculated route when a driver starts a transport.
-    - Added proximity detection that vibrates the device and activates an Arrived button when the driver is near the pickup location.
-- **In-App Communication:**
-    - Implemented a non-intrusive, floating UI for phone calls that allows the app to remain fully functional in the background.
-    - Integrated Jitsi for in-app video calls, with UI entry points in the header and on booking cards.
-- **PWA & iOS Bug Fixes:**
-    - Resolved a major bug causing a blank content area on iOS by adding robust loading, error, and retry states to the data fetching logic.
-    - Implemented full PWA push notification support for iOS and Android, including an enhanced service worker and a UI for users to grant permissions.
-    - Fixed a critical 403  error for drivers on login, which was caused by a race condition.
-    - Fixed an infinite loading screen by redirecting unauthenticated users from the  route to the  page.
-- **Backend Refactoring (Phase 1):** Extracted all  (~950 lines) and  (~260 lines) routes from  into new  and  modules.
-- **Medical Dashboard Timeline:** Added a new API endpoint and a  component to display a chronological event log for active transports on the .
+-   **Bug Fix: PWA Infinite Loading Loop:** Resolved a race condition in  between its local loading state and the  loading state, which caused the app to get stuck.
+-   **Bug Fix: Incorrect Driver Availability:** Fixed a critical bug where a driver assigned to a future booking was marked as unavailable for all current-day bookings. The logic was updated to only block drivers who are actively on a transport.
+-   **Bug Fix: Detach Driver Not Working:** Fixed a bug in the dispatch console where detaching a driver failed due to a malformed API URL (a double  prefix).
+-   **Feature: Dispatch Console UI/UX Overhaul:**
+    *   The Add Vehicle button was moved into the vehicle section header.
+    *   The New Booking button text was updated.
+    *   The entire vehicle card was made draggable.
+    *   Search bars were added to both the vehicle and booking sections.
+    *   The layout of the vehicle and booking sections was unified for a consistent look and feel.
+-   **Feature: Edit Bookings:** Implemented functionality to edit existing bookings via a modal in the dispatch console, including backend support for full object updates.
+-   **Feature: Detach & Reassign Vehicles:** Implemented the ability to remove a vehicle/driver from a booking (detach) and to assign a new vehicle to an already-confirmed booking (reassign).
+-   **Feature: Driver Time Conflict Warning:**
+    *   When assigning a driver who already has bookings on the same day, the backend now detects this and returns a warning.
+    *   The frontend displays a detailed, styled modal dialog (replacing the browser's default ) listing the conflicting bookings and asking the dispatcher for confirmation to proceed.
 
 **Earlier issues found/mentioned but not fixed**
-- **Ephemeral Image Storage:** This remains a known issue and is tracked in the pending list.
+-   **Ephemeral Image Storage:** This remains a known issue and is tracked in the pending list.
 
 **Known issue recurrence from previous fork**
-- None.
+-   None.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-*   **Backend Router Refactoring:** Decomposing a monolithic FastAPI application into modular  files for better organization and scalability.
-*   **PWA Push Notifications:** Using VAPID keys, an updated service worker (), and a revised manifest to enable native push notifications.
-*   **Jitsi Meet Integration:** Launching video call rooms with dynamically generated, unique room names from a React component.
-*   **Geolocation & Proximity Detection:** Using  to track a user's location and calculating the Haversine distance to a target coordinate to trigger UI events.
-*   **OSRM (Open Source Routing Machine):** Fetching route geometry from the public OSRM API to draw polylines on a Leaflet map.
-*   **React Race Condition Handling:** Preventing API calls from firing before the user's authentication context is established by checking if the  object is loaded.
-*   **Non-Intrusive Call UI:** Using a floating UI element to manage in-app calls without interrupting the main application flow, and persisting state across browser visibility changes.
+*   **Stateful Time-Conflict Validation:** Backend logic that checks for scheduling overlaps by parsing dates and comparing existing bookings for a given driver.
+*   **Conditional UI for Dispatch:** Complex frontend logic in  to show different UI elements (e.g., detach button vs. drag here prompt) based on a booking's  and .
+*   **Custom Modal Dialogs:** Replacing  with styled React components ( from shadcn/ui) to provide a better user experience for critical confirmations, like schedule conflicts.
+*   **PWA Install Prompt Handling:** Intercepting the browser's  event to store it in state and allow a custom UI element to trigger the installation.
+*   **Robust State Management:** Fixing a race condition by correctly using multiple loading flags ( from a context and a local  state for data fetching) to create a reliable UI.
 
 **key DB schema**
-- **transport_events:** A new collection was implicitly created to log events for the transport timeline feature. It stores records with , , , and .
+-   No new collections were created.
+-   **bookings:** The schema was implicitly updated. Bookings now consistently store  (ID) and . The cancellation/completion logic was fixed to prevent stale assignments.
+-   **driver_status:** The logic relying on this collection was made more robust, but it remains a potential source of inconsistencies. It gets updated when bookings are cancelled or drivers are assigned/detached.
 
 **changes in tech stack**
-- The  package was uninstalled as it was unused.
+-   None.
 
 **All files of reference**
-*   **/app/frontend/src/pages/UnifiedPWA.jsx**: The monolithic component for the entire mobile PWA. All recent frontend features (navigation, calling, video, bug fixes) were added here.
-*   **/app/backend/server.py**: The main backend file, now partially refactored. Still contains most of the application's business logic.
-*   **/app/backend/routes/fleet.py**: New file containing all fleet management API endpoints.
-*   **/app/backend/routes/auth.py**: New file containing all authentication API endpoints.
-*   **/app/frontend/src/pages/MedicalDashboard.jsx**: Modified to integrate the new transport timeline feature.
-*   **/app/frontend/src/components/TransportTimeline.jsx**: New component to display the transport event log.
+*   **/app/frontend/src/components/FleetDispatch.jsx**: The central component for all new dispatch features. It now contains logic for editing, detaching, reassigning, searching, filtering, and conflict warnings.
+*   **/app/backend/server.py**: Modified to fix all driver availability and scheduling bugs. Contains the new  helper function.
+*   **/app/frontend/src/pages/UnifiedPWA.jsx**: The core mobile component. Modified to fix the loading loop and where the PWA install prompt is being implemented.
+*   **/app/backend/models/booking.py**: Updated to support full booking edits () and to ensure the API response includes the assigned driver's name ().
 
 **Areas that need refactoring**:
-*   **CRITICAL:**  has grown to over 2,200 lines. It urgently needs to be broken down into smaller, single-responsibility components and custom hooks (e.g., , , , ) to manage complexity and improve maintainability.
-*   **HIGH:** The backend refactoring of  must continue. It still contains over 4,400 lines of code. The next priorities should be extracting , , and  routes.
+*   **CRITICAL:**  is becoming very large and complex due to the addition of multiple features, modals, and state management logic. It should be broken down into smaller components and hooks (e.g., , ).
+*   **CRITICAL:**  remains over 2,200 lines and urgently needs to be refactored into smaller components and custom hooks.
+*   **HIGH:** The backend refactoring of  must continue. It is the source of most business logic and is hard to maintain.
 
 **key api endpoints**
-*    (GET): **NEW** endpoint that returns a chronological event log for a specific booking.
-*    (All methods): These routes (e.g., , ) have been moved to .
-*    (All methods): These routes (e.g., , ) have been moved to .
+*   : Overhauled to accept a  model, allowing full edits and detaching drivers by setting  to .
+*   : The response was updated. It can now return a  and a list of  if a time overlap is detected, requiring a  parameter to override.
 
 **Critical Info for New Agent**
-*   **Your immediate task is to solve the P0 issue:** Debug why driver Marija Vujic is unavailable. The investigation has revealed that the  collection is empty. You need to investigate the backend logic that determines driver availability for assignments; it's likely in  and depends on joining  and  collections, not the empty status collection.
-*   The frontend PWA logic is almost entirely contained within the massive  file. Be aware that this file is very complex and is a high-priority candidate for refactoring after the current bug is fixed.
-*   The backend refactoring is an ongoing, high-priority task. After fixing the driver availability issue, you should resume extracting modules (like  and ) from .
+*   Your immediate task is to **finish the PWA install prompt feature**. This involves adding the UI banner/button in  and triggering the saved prompt event.
+*   The user is very interested in the **timeline-based scheduling system**. After fixing the PWA install, you should propose starting Phase 1 of this major feature. It is the correct long-term solution to the scheduling complexities that have been repeatedly patched.
+*   The bug fixes around driver availability have made the system more robust, but they are patches on a fragile model. Be aware that the root cause is the lack of a proper time-slot-based availability system.
+*   Technical debt in  and  is high. Any new feature work in these files should be paired with some refactoring if possible.
 
 **documents and test reports created in this job**
-- None.
+-    was updated with the latest progress.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Why is driver Marija Vujic not available? **Status: IN PROGRESS**
-2.  **User:** Shared a video showing the installed PWA is a blank screen. **Status: RESOLVED**
-3.  **User:** Shared a screenshot of a 403 error after logging in as a driver. **Status: RESOLVED**
-4.  **User:** Asked for the Emergency Transport Timeline feature. **Status: COMPLETED**
-5.  **User:** Asked to check push notifications on iOS for app installation. **Status: COMPLETED**
-6.  **User:** Shared a screenshot of the PWA UI looking broken on an iOS device. **Status: RESOLVED**
-7.  **User:** Requested video call functionality be added to the PWA. **Status: COMPLETED**
-8.  **User:** Requested that phone calls should not interrupt the app's operation. **Status: COMPLETED**
-9.  **User:** Requested Driver PWA improvements: auto-map on start route and an arrival button. **Status: COMPLETED**
-10. **User:** Requested backend refactoring. **Status: IN PROGRESS**
+1.  **User:** Why am I not getting a push notification to download the app? **Status: IN PROGRESS**
+2.  **User:** Requested a better UI for the time conflict warning dialog. **Status: COMPLETED**
+3.  **User:** Pointed out two issues: 1) a pop-up should appear for time conflicts, and 2) the detach driver functionality was not working. **Status: COMPLETED**
+4.  **User:** Asked for clarification on the proposed timeline-based scheduling system and pointed out a critical bug: a driver busy tomorrow is unavailable today. **Status: COMPLETED** (Bug fixed, discussion on timeline system is ongoing).
+5.  **User:** Proposed a detailed, timeline-based solution for vehicle/driver availability management. **Status: Acknowledged, pending implementation.**
+6.  **User:** Asked how to detach/reassign a vehicle from a booking. **Status: COMPLETED**
+7.  **User:** Requested an edit functionality for bookings in the dispatch console. **Status: COMPLETED**
+8.  **User:** Requested that the UI for the Vehicle Fleet and Bookings sections be made consistent. **Status: COMPLETED**
+9.  **User:** Requested a search bar for the Bookings section. **Status: COMPLETED**
+10. **User:** Requested UI improvements for the dispatch console (move button, rename button, make whole card draggable). **Status: COMPLETED**
 
 **Project Health Check:**
 *   **Broken:**
-    *   The logic determining driver availability seems to be malfunctioning, preventing at least one driver (Marija Vujic) from being assigned tasks.
+    *   The PWA installation prompt is not being shown to the user, hindering mobile app adoption.
 *   **Mocked:**
     *   Desktop Admin Dashboard sections: , , and the  view are still placeholders.
 
@@ -161,17 +167,17 @@ A full-stack application with a React frontend, a partially-refactored FastAPI b
 *   **@dnd-kit:** Used for drag-and-drop in the desktop dispatch console.
 
 **Testing status**
-- **Testing agent used after significant changes:** NO
-- **Troubleshoot agent used after agent stuck in loop:** NO
-- **Test files created:** None
-- **Known regressions:** None
+-   **Testing agent used after significant changes:** NO
+-   **Troubleshoot agent used after agent stuck in loop:** NO
+-   **Test files created:** None
+-   **Known regressions:** None
 
 **Credentials to test flow:**
 *   **Admin/Super Admin:**  / 
-*   **Driver (User's account):**  / 
-*   **Driver (Test account):**  / 
+*   **Driver (Djoka Stroka):**  / 
+*   **Driver (Marko Vozač):**  / 
+*   **Driver (Marija Vujic):**  / 
 *   **Doctor (Test account):**  / 
 
 **What agent forgot to execute**
-*   The agent did not continue the backend refactoring for  routes as planned, instead adding a new timeline endpoint directly to .
-*   The agent added significant functionality to , dramatically increasing its complexity, without refactoring it into smaller components. This has created significant technical debt.</analysis>
+*   The major refactoring tasks ( and ) continue to be postponed in favor of implementing new features and urgent bug fixes requested by the user. While this has delivered value, it has also increased the technical debt in core components.</analysis>
