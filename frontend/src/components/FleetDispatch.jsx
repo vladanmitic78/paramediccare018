@@ -277,7 +277,7 @@ const VehicleOverlay = ({ vehicle, language }) => (
 );
 
 // Droppable Booking Card Component
-const DroppableBookingCard = ({ booking, language, isOver, onEdit }) => {
+const DroppableBookingCard = ({ booking, language, isOver, onEdit, onDetach }) => {
   const { setNodeRef, isOver: dropIsOver } = useDroppable({
     id: `booking-${booking.id}`,
     data: { booking }
