@@ -998,6 +998,19 @@ const UnifiedPWA = () => {
             >
               <Video className="w-5 h-5" />
             </Button>
+            {/* Notification Bell */}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setShowNotificationSetup(true)}
+              className={`relative ${pushNotifications.permission === 'granted' ? 'text-emerald-400' : 'text-amber-400'}`}
+              data-testid="notification-btn"
+            >
+              <Bell className="w-5 h-5" />
+              {pushNotifications.permission !== 'granted' && (
+                <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full" />
+              )}
+            </Button>
             <Button variant="ghost" size="sm" onClick={() => fetchData(true)} disabled={refreshing} className="text-slate-400">
               <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
             </Button>
@@ -1010,6 +1023,20 @@ const UnifiedPWA = () => {
           </div>
         </div>
       </header>
+
+      {/* Push Notification Setup Banner - Show if not granted */}
+      {pushNotifications.canRequestPermission && pushNotifications.permission !== 'granted' && !showNotificationSetup && (
+        <div 
+          className="bg-amber-600/20 border-b border-amber-600/30 px-4 py-2 flex items-center gap-3 cursor-pointer hover:bg-amber-600/30"
+          onClick={() => setShowNotificationSetup(true)}
+        >
+          <Bell className="w-4 h-4 text-amber-400" />
+          <span className="text-sm text-amber-200 flex-1">
+            {language === 'sr' ? 'Omogućite obaveštenja za nove zadatke' : 'Enable notifications for new tasks'}
+          </span>
+          <ChevronRight className="w-4 h-4 text-amber-400" />
+        </div>
+      )}
 
       {/* Stats Bar */}
       <div className="bg-slate-800/50 px-4 py-3 grid grid-cols-3 gap-3 border-b border-slate-700">
