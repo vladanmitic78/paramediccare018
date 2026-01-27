@@ -611,12 +611,25 @@ const UnifiedPWA = () => {
   useEffect(() => {
     if (isDriver && isActiveTransport && 'geolocation' in navigator) {
       watchIdRef.current = navigator.geolocation.watchPosition(
-        (position) => {
-          setLastLocation({
+        async (position) => {
+          const newLocation = {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
             speed: position.coords.speed ? position.coords.speed * 3.6 : null
-          });
+          };
+          setLastLocation(newLocation);
+          
+          // Update ETA for active booking when location changes significantly
+          if (currentBooking?.id && newLocation.latitude && newLocation.longitude) {
+            try {
+              await axios.post(
+                `${API}/api/bookings/${currentBooking.id}/update-eta?current_lat=${newLocation.latitude}&current_lng=${newLocation.longitude}`
+              );
+            } catch (error) {
+              // Silently fail - ETA update is not critical
+              console.log('ETA update skipped:', error.message);
+            }
+          }
         },
         (error) => console.error('GPS error:', error),
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
@@ -625,7 +638,7 @@ const UnifiedPWA = () => {
         if (watchIdRef.current) navigator.geolocation.clearWatch(watchIdRef.current);
       };
     }
-  }, [isDriver, isActiveTransport]);
+  }, [isDriver, isActiveTransport, currentBooking?.id]);
 
   // Handle visibility change - restore wake lock and refresh data when coming back from a call
   useEffect(() => {
