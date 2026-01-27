@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pc018-mobile-v3';
+const CACHE_NAME = 'pc018-mobile-v4';
 const STATIC_ASSETS = [
   '/app',
   '/logo.jpg',
