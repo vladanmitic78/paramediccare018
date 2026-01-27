@@ -656,6 +656,16 @@ const Dashboard = () => {
     return <Badge className={styles[role] || styles.regular}>{role}</Badge>;
   };
 
+  // Show loading while auth is checking
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-sky-600" />
+        <span className="ml-3 text-slate-600">{language === 'sr' ? 'Provera sesije...' : 'Checking session...'}</span>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
