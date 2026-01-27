@@ -1,13 +1,12 @@
-const CACHE_NAME = 'pc018-mobile-v4';
+const CACHE_NAME = 'pc018-mobile-v5';
 const STATIC_ASSETS = [
-  '/app',
   '/logo.jpg',
   '/manifest-mobile.json'
 ];
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing service worker...');
+  console.log('[SW] Installing service worker v5...');
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log('[SW] Caching static assets');
@@ -19,30 +18,39 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean old caches
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating service worker...');
+  console.log('[SW] Activating service worker v5...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames
           .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
+          .map((name) => {
+            console.log('[SW] Deleting old cache:', name);
+            return caches.delete(name);
+          })
       );
     })
   );
   self.clients.claim();
 });
 
-// Fetch event - network first, fallback to cache
+// Fetch event - network first for app and API, cache for static assets
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') {
     return;
   }
 
-  // For API requests, try network first
-  if (event.request.url.includes('/api/')) {
+  const url = new URL(event.request.url);
+  
+  // For API requests and app routes - ALWAYS network first
+  if (event.request.url.includes('/api/') || url.pathname === '/app' || url.pathname.startsWith('/app/')) {
     event.respondWith(
       fetch(event.request)
         .catch(() => {
+          // For app route, return offline page or let it fail naturally
+          if (url.pathname === '/app' || url.pathname.startsWith('/app/')) {
+            return caches.match(event.request);
+          }
           return new Response(
             JSON.stringify({ offline: true, message: 'You are offline' }),
             { headers: { 'Content-Type': 'application/json' } }
@@ -52,7 +60,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // For static assets, cache first then network
+  // For static assets only - cache first then network
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
