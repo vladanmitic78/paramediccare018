@@ -1583,6 +1583,19 @@ async def update_patient_booking_status(
         {"$set": {"status": status, "updated_at": datetime.now(timezone.utc).isoformat()}}
     )
     
+    # Reset driver status if booking is cancelled or completed
+    if status in [BookingStatus.CANCELLED, BookingStatus.COMPLETED]:
+        assigned_driver_id = booking.get("assigned_driver_id")
+        if assigned_driver_id:
+            await db.driver_status.update_one(
+                {"driver_id": assigned_driver_id, "current_booking_id": booking_id},
+                {"$set": {
+                    "status": DriverStatus.AVAILABLE,
+                    "current_booking_id": None,
+                    "last_updated": datetime.now(timezone.utc).isoformat()
+                }}
+            )
+    
     # Create notification for patient
     status_messages = {
         BookingStatus.CONFIRMED: ("Rezervacija potvrđena", "Booking Confirmed", 
