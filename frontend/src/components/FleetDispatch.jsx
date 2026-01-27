@@ -868,7 +868,7 @@ const FleetDispatch = () => {
   const confirmTimeSlotAssignment = async (force = false) => {
     if (!pendingAssignment) return;
     
-    const { vehicle, booking, driver, bookingDate } = pendingAssignment;
+    const { vehicle, booking, driver } = pendingAssignment;
     
     setAssigning(true);
     try {
@@ -877,9 +877,9 @@ const FleetDispatch = () => {
         `${API}/admin/assign-driver-public?booking_id=${booking.id}&driver_id=${driver.user_id}&force=true`
       );
       
-      // Then, create schedule entry
-      const startISO = `${bookingDate}T${assignmentTimeSlot.startTime}:00Z`;
-      const endISO = `${bookingDate}T${assignmentTimeSlot.endTime}:00Z`;
+      // Then, create schedule entry (supports multi-day)
+      const startISO = `${assignmentTimeSlot.startDate}T${assignmentTimeSlot.startTime}:00Z`;
+      const endISO = `${assignmentTimeSlot.endDate}T${assignmentTimeSlot.endTime}:00Z`;
       
       await axios.post(`${API}/fleet/schedules${force ? '?force=true' : ''}`, {
         vehicle_id: vehicle.id,
@@ -890,10 +890,16 @@ const FleetDispatch = () => {
         end_time: endISO
       });
       
+      // Format display message
+      const isMultiDay = assignmentTimeSlot.startDate !== assignmentTimeSlot.endDate;
+      const displayMsg = isMultiDay
+        ? `${assignmentTimeSlot.startDate} ${assignmentTimeSlot.startTime} → ${assignmentTimeSlot.endDate} ${assignmentTimeSlot.endTime}`
+        : `${assignmentTimeSlot.startTime} - ${assignmentTimeSlot.endTime}`;
+      
       toast.success(
         language === 'sr' 
-          ? `✅ ${vehicle.name} zakazan ${assignmentTimeSlot.startTime}-${assignmentTimeSlot.endTime}` 
-          : `✅ ${vehicle.name} scheduled ${assignmentTimeSlot.startTime}-${assignmentTimeSlot.endTime}`,
+          ? `✅ ${vehicle.name} zakazan: ${displayMsg}` 
+          : `✅ ${vehicle.name} scheduled: ${displayMsg}`,
         { duration: 5000 }
       );
       
