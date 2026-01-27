@@ -87,12 +87,15 @@ class BookingFullUpdate(BaseModel):
     end_lng: Optional[float] = None
     booking_date: Optional[str] = None
     booking_time: Optional[str] = None
+    pickup_datetime: Optional[str] = None  # ISO datetime for pickup start
+    estimated_arrival: Optional[str] = None  # ISO datetime for estimated arrival
     mobility_status: Optional[str] = None
     notes: Optional[str] = None
     status: Optional[str] = None
     assigned_driver: Optional[str] = None
     assigned_driver_name: Optional[str] = None
     assigned_medical: Optional[str] = None
+    assigned_vehicle: Optional[str] = None
 
 
 class PatientBookingCreate(BaseModel):
