@@ -59,6 +59,76 @@ import axios from 'axios';
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
+// PWA Install Prompt Hook
+const usePWAInstall = () => {
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [isInstallable, setIsInstallable] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
+
+  useEffect(() => {
+    // Check if already installed (standalone mode)
+    const checkInstalled = () => {
+      const standalone = window.matchMedia('(display-mode: standalone)').matches ||
+                        window.navigator.standalone === true;
+      setIsInstalled(standalone);
+    };
+    checkInstalled();
+
+    // Listen for beforeinstallprompt event
+    const handleBeforeInstall = (e) => {
+      console.log('[PWA] beforeinstallprompt event fired');
+      e.preventDefault();
+      setInstallPrompt(e);
+      setIsInstallable(true);
+    };
+
+    // Listen for app installed event
+    const handleAppInstalled = () => {
+      console.log('[PWA] App was installed');
+      setIsInstalled(true);
+      setIsInstallable(false);
+      setInstallPrompt(null);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  const promptInstall = async () => {
+    if (!installPrompt) {
+      console.log('[PWA] No install prompt available');
+      return false;
+    }
+
+    try {
+      installPrompt.prompt();
+      const result = await installPrompt.userChoice;
+      console.log('[PWA] User choice:', result.outcome);
+      
+      if (result.outcome === 'accepted') {
+        setIsInstalled(true);
+        setIsInstallable(false);
+      }
+      setInstallPrompt(null);
+      return result.outcome === 'accepted';
+    } catch (error) {
+      console.error('[PWA] Install prompt error:', error);
+      return false;
+    }
+  };
+
+  return {
+    isInstallable,
+    isInstalled,
+    promptInstall
+  };
+};
+
 // Push notification utilities
 const usePushNotifications = () => {
   // Check iOS and standalone on initial render
