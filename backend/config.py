@@ -23,7 +23,8 @@ db = client[os.environ['DB_NAME']]
 # JWT Settings
 JWT_SECRET = os.environ.get('JWT_SECRET', 'paramedic-care-018-secret-key-2024')
 JWT_ALGORITHM = "HS256"
-JWT_EXPIRATION_HOURS = 24
+# JWT Configuration
+JWT_EXPIRATION_HOURS = 168  # 7 days for longer sessions
 
 # Email Settings
 SMTP_HOST = os.environ.get('SMTP_HOST', 'mailcluster.loopia.se')
