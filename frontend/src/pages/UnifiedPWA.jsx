@@ -204,6 +204,12 @@ const UnifiedPWA = () => {
   const [callDuration, setCallDuration] = useState(0);
   const callTimerRef = useRef(null);
   
+  // Video call state
+  const [showVideoCallModal, setShowVideoCallModal] = useState(false);
+  const [videoCallRoom, setVideoCallRoom] = useState(null);
+  const [videoCallParticipants, setVideoCallParticipants] = useState([]);
+  const [recentVideoCalls, setRecentVideoCalls] = useState([]);
+  
   // Admin-specific state
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showAssignModal, setShowAssignModal] = useState(false);
