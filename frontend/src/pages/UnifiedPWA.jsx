@@ -366,8 +366,10 @@ const UnifiedPWA = () => {
   };
 
   // Fetch data based on role
-  const fetchData = useCallback(async (isRefresh = false) => {
+  const fetchData = useCallback(async (isRefresh = false, retryCount = 0) => {
     if (isRefresh) setRefreshing(true);
+    setFetchError(null);
+    
     try {
       if (isDriver) {
         // Driver: fetch profile and assignment
@@ -407,13 +409,23 @@ const UnifiedPWA = () => {
           axios.get(`${API}/api/users`)
         ]);
         
-        setBookings(bookingsRes.data);
-        setDrivers(usersRes.data.filter(u => u.role === 'driver'));
+        const bookingsData = Array.isArray(bookingsRes.data) ? bookingsRes.data : [];
+        const usersData = Array.isArray(usersRes.data) ? usersRes.data : [];
+        
+        setBookings(bookingsData);
+        setDrivers(usersData.filter(u => u.role === 'driver'));
       }
       
       if (isRefresh) toast.success(language === 'sr' ? 'Osveženo!' : 'Refreshed!');
     } catch (error) {
       console.error('Error fetching data:', error);
+      setFetchError(error.message || 'Failed to load data');
+      
+      // Retry up to 3 times with exponential backoff
+      if (retryCount < 3 && !isRefresh) {
+        const delay = Math.pow(2, retryCount) * 1000;
+        setTimeout(() => fetchData(false, retryCount + 1), delay);
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
