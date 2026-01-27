@@ -1543,6 +1543,198 @@ const UnifiedPWA = () => {
         </div>
       )}
 
+      {/* Video Call Modal */}
+      {showVideoCallModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900 flex flex-col" data-testid="video-call-modal">
+          {/* Header */}
+          <div className="bg-indigo-900/90 px-4 py-3 flex items-center justify-between border-b border-indigo-700">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center">
+                <Video className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-bold text-white">
+                  {videoCallRoom?.name || (language === 'sr' ? 'Video poziv' : 'Video Call')}
+                </p>
+                <p className="text-xs text-indigo-300">
+                  {videoCallRoom ? (language === 'sr' ? 'Soba aktivna' : 'Room active') : (language === 'sr' ? 'Kreirajte ili se pridružite pozivu' : 'Create or join a call')}
+                </p>
+              </div>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => { setShowVideoCallModal(false); setVideoCallRoom(null); }}
+              className="text-white hover:bg-indigo-800"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {!videoCallRoom ? (
+              <>
+                {/* Create New Call */}
+                <div className="bg-slate-800 rounded-xl p-4">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <Plus className="w-4 h-4 text-indigo-400" />
+                    {language === 'sr' ? 'Novi video poziv' : 'New Video Call'}
+                  </h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button 
+                      onClick={() => startVideoCall(language === 'sr' ? 'Tim sastanak' : 'Team Meeting')}
+                      className="h-16 bg-indigo-600 hover:bg-indigo-700 flex-col gap-1"
+                    >
+                      <Users className="w-5 h-5" />
+                      <span className="text-xs">{language === 'sr' ? 'Tim' : 'Team'}</span>
+                    </Button>
+                    <Button 
+                      onClick={() => startVideoCall(language === 'sr' ? 'Medicinska konsultacija' : 'Medical Consultation')}
+                      className="h-16 bg-purple-600 hover:bg-purple-700 flex-col gap-1"
+                    >
+                      <Stethoscope className="w-5 h-5" />
+                      <span className="text-xs">{language === 'sr' ? 'Medicinski' : 'Medical'}</span>
+                    </Button>
+                    <Button 
+                      onClick={() => startVideoCall(language === 'sr' ? 'Vozač poziv' : 'Driver Call')}
+                      className="h-16 bg-emerald-600 hover:bg-emerald-700 flex-col gap-1"
+                    >
+                      <Truck className="w-5 h-5" />
+                      <span className="text-xs">{language === 'sr' ? 'Vozač' : 'Driver'}</span>
+                    </Button>
+                    <Button 
+                      onClick={() => startVideoCall(language === 'sr' ? 'Hitni poziv' : 'Emergency Call')}
+                      className="h-16 bg-red-600 hover:bg-red-700 flex-col gap-1"
+                    >
+                      <AlertCircle className="w-5 h-5" />
+                      <span className="text-xs">{language === 'sr' ? 'Hitno' : 'Emergency'}</span>
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Quick Call to Team Members */}
+                {(isAdmin || isMedical) && availableDrivers.length > 0 && (
+                  <div className="bg-slate-800 rounded-xl p-4">
+                    <h3 className="font-semibold mb-3 flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-emerald-400" />
+                      {language === 'sr' ? 'Pozovi člana tima' : 'Call Team Member'}
+                    </h3>
+                    <div className="space-y-2">
+                      {availableDrivers.slice(0, 4).map(driver => (
+                        <button
+                          key={driver.id}
+                          onClick={() => quickVideoCall(driver.full_name, language === 'sr' ? 'Vozač' : 'Driver')}
+                          className="w-full flex items-center gap-3 p-3 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors"
+                        >
+                          <div className="w-8 h-8 bg-emerald-600/30 rounded-full flex items-center justify-center">
+                            <User className="w-4 h-4 text-emerald-400" />
+                          </div>
+                          <span className="flex-1 text-left">{driver.full_name}</span>
+                          <Video className="w-4 h-4 text-indigo-400" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Recent Calls */}
+                {recentVideoCalls.length > 0 && (
+                  <div className="bg-slate-800 rounded-xl p-4">
+                    <h3 className="font-semibold mb-3 flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-slate-400" />
+                      {language === 'sr' ? 'Nedavni pozivi' : 'Recent Calls'}
+                    </h3>
+                    <div className="space-y-2">
+                      {recentVideoCalls.map(call => (
+                        <button
+                          key={call.id}
+                          onClick={() => joinVideoCall(call.id, call.name)}
+                          className="w-full flex items-center gap-3 p-3 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors"
+                        >
+                          <Video className="w-4 h-4 text-indigo-400" />
+                          <span className="flex-1 text-left truncate">{call.name}</span>
+                          <span className="text-xs text-slate-500">
+                            {new Date(call.startedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              /* Active Call Room */
+              <>
+                <div className="bg-indigo-900/30 border border-indigo-600/50 rounded-xl p-6 text-center">
+                  <div className="w-20 h-20 bg-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Video className="w-10 h-10" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">{videoCallRoom.name}</h3>
+                  <p className="text-indigo-300 text-sm mb-4">
+                    {language === 'sr' ? 'Soba je spremna' : 'Room is ready'}
+                  </p>
+                  <div className="bg-slate-800 rounded-lg p-3 mb-4">
+                    <p className="text-xs text-slate-400 mb-1">{language === 'sr' ? 'ID sobe' : 'Room ID'}</p>
+                    <p className="font-mono text-sm text-white break-all">{videoCallRoom.id}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={copyVideoCallLink}
+                      variant="outline"
+                      className="flex-1 border-indigo-600"
+                    >
+                      <Copy className="w-4 h-4 mr-2" />
+                      {language === 'sr' ? 'Kopiraj link' : 'Copy Link'}
+                    </Button>
+                    <Button 
+                      onClick={openJitsiCall}
+                      className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+                    >
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      {language === 'sr' ? 'Otvori' : 'Open'}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Instructions */}
+                <div className="bg-slate-800 rounded-xl p-4">
+                  <h4 className="font-semibold mb-2">{language === 'sr' ? 'Kako se pridružiti?' : 'How to join?'}</h4>
+                  <ul className="text-sm text-slate-400 space-y-2">
+                    <li className="flex items-start gap-2">
+                      <span className="bg-indigo-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0">1</span>
+                      {language === 'sr' ? 'Pritisnite "Otvori" da pokrenete video poziv' : 'Press "Open" to start the video call'}
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="bg-indigo-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0">2</span>
+                      {language === 'sr' ? 'Podelite link sa ostalim učesnicima' : 'Share the link with other participants'}
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="bg-indigo-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0">3</span>
+                      {language === 'sr' ? 'Poziv radi i na mobilnim uređajima' : 'The call works on mobile devices too'}
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => setVideoCallRoom(null)}
+                    variant="outline"
+                    className="flex-1 border-slate-600"
+                  >
+                    {language === 'sr' ? 'Nova soba' : 'New Room'}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Bottom Safe Area */}
+          <div className="h-4 bg-slate-900" />
+        </div>
+      )}
+
       {/* Full-Screen Route Map - for Driver en_route */}
       {isDriver && showRouteMap && assignment && (
         <div className="fixed inset-0 z-50 bg-slate-900 flex flex-col" data-testid="route-map-fullscreen">
