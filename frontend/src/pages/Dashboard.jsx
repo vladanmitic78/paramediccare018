@@ -8,6 +8,7 @@ import { Textarea } from '../components/ui/textarea';
 import CriticalAlertsPanel from '../components/CriticalAlertsPanel';
 import FleetDispatch from '../components/FleetDispatch';
 import FleetHistory from '../components/FleetHistory';
+import BookingCalendar from '../components/BookingCalendar';
 import {
   Select,
   SelectContent,
