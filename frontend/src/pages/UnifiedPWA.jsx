@@ -217,7 +217,9 @@ const UnifiedPWA = () => {
                 if ('vibrate' in navigator) navigator.vibrate([200, 100, 200, 100, 200]);
                 const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2Onp2ZkYV6c3N8iJOcn5uTiHxxbnJ+jJifoJqRhXlwb3WCj5qfopmQhHlwcHaEkZyhn5mPgndvcnmHlJ6in5eNf3Zwc3yKl6CinpWLfXRydYCOmqGhnpOIfHNzeIWSmaCgnZGFeXN0e4mWn6GemY5/d3R3gY+boaCblol7dHV6h5OdoJ6Yj4J4dXd+jZmfn5yVi397d3l/kZqfnpqTiH15eHyDlJyfnZiQg3t4en+Hl56dnJWOgXp5e4KMmp2cm5OLfnl6fIWQm52blo+Cfnp7f4mUm5yalI2AfHt8goyYm5uYko5/fHx9hY+ZmpqWkIx+fHx+iJOZmpiUj4p9fH1/i5WZmZaTjoh9fH2Bj5aYl5WRi4Z+fX6DkpWXlpOPiYR+fn+FlZWVlJGNh4F/f4GIk5WUk5CMhoJ/gIOKkpOTkY6KhIF/gYWNkZKRj4uIg4CAg4iPkZCPjImFgYCChYuOj4+MioeDgYGEiIyOjYuJhoOBgYOGio2MjIqHhIKBg4aJi4uKiIaEgoKEh4mKiYiGhIOCg4WHiYiIh4WDg4OEhoeHh4aFhIODhIWGh4aGhYSDg4SEhYaGhYWEg4ODhIWFhYWEhIODg4SEhYWFhISDg4OEhIWEhISEg4ODhISEhISEhIODg4SEhISEhISDg4OEhISEhISDg4ODg4SEhISDg4ODg4OEhISDg4ODg4ODhISDg4ODg4ODg4SDg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4OD');
                 audio.play();
-              } catch (e) {}
+              } catch (e) {
+                // Audio playback failed - ignore
+              }
             }
             prevAssignmentRef.current = newAssignment;
           }
