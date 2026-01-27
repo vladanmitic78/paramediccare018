@@ -5,10 +5,28 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const AuthContext = createContext();
 
+// Helper to safely get stored user data
+const getStoredUser = () => {
+  try {
+    const stored = localStorage.getItem('user');
+    return stored ? JSON.parse(stored) : null;
+  } catch {
+    return null;
+  }
+};
+
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  // Initialize user from localStorage for immediate access (avoids flash/redirect)
+  const [user, setUser] = useState(getStoredUser);
   const [token, setToken] = useState(() => localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
+
+  // Set axios default header on mount if token exists
+  useEffect(() => {
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+  }, []);
 
   const fetchUser = useCallback(async () => {
     if (!token) {
@@ -19,7 +37,10 @@ export const AuthProvider = ({ children }) => {
     try {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       const response = await axios.get(`${API}/auth/me`);
-      setUser(response.data);
+      const userData = response.data;
+      setUser(userData);
+      // Store user in localStorage for persistence across refreshes
+      localStorage.setItem('user', JSON.stringify(userData));
     } catch (error) {
       console.error('Failed to fetch user:', error);
       // Only logout if token is explicitly invalid/expired (401)
@@ -28,8 +49,13 @@ export const AuthProvider = ({ children }) => {
         console.log('Token invalid or expired, logging out');
         logout();
       } else {
-        // Network error or server error - keep token, user might reconnect
+        // Network error or server error - keep token and cached user
         console.log('Network/server error, keeping session');
+        // If we have cached user data, keep using it
+        const cachedUser = getStoredUser();
+        if (cachedUser && !user) {
+          setUser(cachedUser);
+        }
       }
     } finally {
       setLoading(false);
@@ -44,6 +70,7 @@ export const AuthProvider = ({ children }) => {
     const response = await axios.post(`${API}/auth/login`, { email, password });
     const { access_token, user: userData } = response.data;
     localStorage.setItem('token', access_token);
+    localStorage.setItem('user', JSON.stringify(userData));
     setToken(access_token);
     setUser(userData);
     axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
@@ -57,10 +84,11 @@ export const AuthProvider = ({ children }) => {
       full_name, 
       phone,
       role: 'regular',
-      language  // Include language for email template
+      language
     });
     const { access_token, user: userData } = response.data;
     localStorage.setItem('token', access_token);
+    localStorage.setItem('user', JSON.stringify(userData));
     setToken(access_token);
     setUser(userData);
     axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
@@ -69,6 +97,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setToken(null);
     setUser(null);
     delete axios.defaults.headers.common['Authorization'];
@@ -82,7 +111,6 @@ export const AuthProvider = ({ children }) => {
     return ['doctor', 'nurse', 'driver', 'admin', 'superadmin'].includes(user?.role);
   };
 
-  // Refresh user data (useful after profile updates)
   const refreshUser = () => {
     return fetchUser();
   };
