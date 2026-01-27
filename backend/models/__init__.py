@@ -36,7 +36,7 @@ from .cms import (
 from .schedule import (
     ScheduleStatus, VehicleScheduleCreate, VehicleScheduleUpdate,
     VehicleScheduleResponse, AvailabilityQuery, TimeSlot,
-    VehicleAvailability, ScheduleConflict
+    VehicleAvailability, ScheduleConflict, StaffUnavailability
 )
 
 __all__ = [
