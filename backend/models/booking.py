@@ -81,6 +81,7 @@ class BookingFullUpdate(BaseModel):
     notes: Optional[str] = None
     status: Optional[str] = None
     assigned_driver: Optional[str] = None
+    assigned_driver_name: Optional[str] = None
     assigned_medical: Optional[str] = None
 
 
