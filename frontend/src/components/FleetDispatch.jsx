@@ -1300,13 +1300,26 @@ const FleetDispatch = () => {
 
   // Select address from suggestions
   const selectPickupAddress = (suggestion) => {
-    setNewBooking({
+    const updatedBooking = {
       ...newBooking,
       pickup_address: suggestion.display_name,
       pickup_lat: suggestion.lat,
       pickup_lng: suggestion.lng
-    });
+    };
+    setNewBooking(updatedBooking);
     setPickupSuggestions([]);
+    
+    // Auto-calculate ETA if destination coordinates are already available
+    if (newBooking.destination_lat && newBooking.destination_lng) {
+      calculateETA(
+        suggestion.lat, 
+        suggestion.lng, 
+        newBooking.destination_lat, 
+        newBooking.destination_lng,
+        newBooking.pickup_date,
+        newBooking.pickup_time
+      );
+    }
   };
 
   // Calculate ETA when both addresses are selected
