@@ -1,87 +1,41 @@
-import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { X, Download, Smartphone } from 'lucide-react';
+import { usePWA } from '../contexts/PWAContext';
 
 /**
  * PWA Install Banner - Shows on mobile devices when app is installable
  * Can be used on any page (public or private)
+ * Uses global PWAContext to share the beforeinstallprompt event across pages
  */
 const PWAInstallBanner = ({ language = 'en' }) => {
-  const [installPrompt, setInstallPrompt] = useState(null);
-  const [isInstallable, setIsInstallable] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
-
-  useEffect(() => {
-    // Check if already dismissed this session
-    const dismissed = sessionStorage.getItem('pwa-banner-dismissed');
-    if (dismissed) {
-      setIsDismissed(true);
-    }
-
-    // Detect iOS
-    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    setIsIOS(iOS);
-
-    // Check if running as standalone (already installed)
-    const standalone = window.matchMedia('(display-mode: standalone)').matches || 
-                      window.navigator.standalone === true;
-    setIsStandalone(standalone);
-    setIsInstalled(standalone);
-
-    // Listen for beforeinstallprompt (Chrome, Edge, etc.)
-    const handleBeforeInstall = (e) => {
-      e.preventDefault();
-      setInstallPrompt(e);
-      setIsInstallable(true);
-    };
-
-    // Listen for appinstalled
-    const handleAppInstalled = () => {
-      setIsInstalled(true);
-      setIsInstallable(false);
-      setInstallPrompt(null);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
-    window.addEventListener('appinstalled', handleAppInstalled);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
-      window.removeEventListener('appinstalled', handleAppInstalled);
-    };
-  }, []);
+  const { 
+    isInstallable, 
+    isInstalled, 
+    isIOS, 
+    isStandalone, 
+    isDismissed,
+    promptInstall,
+    dismissBanner
+  } = usePWA();
 
   const handleInstall = async () => {
-    if (!installPrompt) return;
-
-    try {
-      const result = await installPrompt.prompt();
-      if (result.outcome === 'accepted') {
-        setIsInstalled(true);
-      }
-    } catch (error) {
-      console.error('Install error:', error);
-    }
-    
-    setInstallPrompt(null);
-    setIsInstallable(false);
+    await promptInstall();
   };
 
   const handleDismiss = () => {
-    setIsDismissed(true);
-    sessionStorage.setItem('pwa-banner-dismissed', 'true');
+    dismissBanner();
   };
 
-  // Don't show if already installed, dismissed, or not on mobile
+  // Don't show if already installed, dismissed, or running standalone
   if (isInstalled || isStandalone || isDismissed) return null;
 
   // Show iOS-specific instructions
   if (isIOS) {
     return (
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-sky-600 to-indigo-600 text-white p-4 shadow-lg animate-slide-up">
+      <div 
+        className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-sky-600 to-indigo-600 text-white p-4 shadow-lg animate-slide-up"
+        data-testid="pwa-install-banner-ios"
+      >
         <div className="max-w-lg mx-auto">
           <div className="flex items-start gap-3">
             <div className="bg-white/20 rounded-full p-2">
@@ -105,6 +59,7 @@ const PWAInstallBanner = ({ language = 'en' }) => {
               onClick={handleDismiss}
               className="text-white/70 hover:text-white p-1"
               aria-label="Dismiss"
+              data-testid="pwa-banner-dismiss-ios"
             >
               <X className="w-5 h-5" />
             </button>
@@ -117,7 +72,10 @@ const PWAInstallBanner = ({ language = 'en' }) => {
   // Show install button for Chrome/Edge (Android, Desktop)
   if (isInstallable) {
     return (
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-sky-600 to-indigo-600 text-white p-4 shadow-lg animate-slide-up">
+      <div 
+        className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-sky-600 to-indigo-600 text-white p-4 shadow-lg animate-slide-up"
+        data-testid="pwa-install-banner"
+      >
         <div className="max-w-lg mx-auto">
           <div className="flex items-center gap-3">
             <div className="bg-white/20 rounded-full p-2">
@@ -136,6 +94,7 @@ const PWAInstallBanner = ({ language = 'en' }) => {
             <Button 
               onClick={handleInstall}
               className="bg-white text-sky-600 hover:bg-white/90 font-semibold"
+              data-testid="pwa-install-btn"
             >
               {language === 'sr' ? 'Instaliraj' : 'Install'}
             </Button>
@@ -143,6 +102,7 @@ const PWAInstallBanner = ({ language = 'en' }) => {
               onClick={handleDismiss}
               className="text-white/70 hover:text-white p-1"
               aria-label="Dismiss"
+              data-testid="pwa-banner-dismiss"
             >
               <X className="w-5 h-5" />
             </button>
