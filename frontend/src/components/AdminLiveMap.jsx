@@ -107,8 +107,10 @@ const AdminLiveMap = () => {
   const [loading, setLoading] = useState(true);
   const [wsConnected, setWsConnected] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(null);
+  const [selectedDriver, setSelectedDriver] = useState(null);
   const wsRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
+  const markerRefs = useRef({});
 
   // Status labels
   const statusLabels = {
