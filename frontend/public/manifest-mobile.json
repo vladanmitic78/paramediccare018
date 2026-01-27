@@ -1,6 +1,7 @@
 {
-  "short_name": "PC018 Mobile",
-  "name": "Paramedic Care 018 - Mobile",
+  "short_name": "PC018",
+  "name": "Paramedic Care 018",
+  "description": "Medical transport management app",
   "icons": [
     {
       "src": "/logo.jpg",
@@ -20,5 +21,7 @@
   "display": "standalone",
   "theme_color": "#0f172a",
   "background_color": "#0f172a",
-  "orientation": "portrait"
+  "orientation": "portrait",
+  "prefer_related_applications": false,
+  "categories": ["medical", "health", "business"]
 }
