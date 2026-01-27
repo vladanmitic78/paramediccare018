@@ -1214,6 +1214,7 @@ const FleetDispatch = () => {
                     key={booking.id}
                     booking={booking}
                     language={language}
+                    onEdit={openEditBooking}
                   />
                 ))
               )}
