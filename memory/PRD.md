@@ -166,8 +166,22 @@ A comprehensive medical transport system including a public website, patient por
 - Hover tooltip shows patient name and time range
 - Clicking on blocks shows booking details
 
+### Phase 3: Booking Flow Integration (COMPLETED Jan 27, 2026)
+
+**Time-Slot Assignment Modal:**
+- When dragging a vehicle to a booking, a modal appears to configure the time slot
+- Shows vehicle info (name, driver) and booking info (patient, date)
+- Time pickers for start and end time (defaults: booking time + 2 hours)
+- "Proveri dostupnost" (Check Availability) button queries `/api/fleet/schedules/conflicts`
+- Availability status display:
+  - Green checkmark: "Termin je slobodan!" (Time slot available)
+  - Amber warning: Shows conflicting schedules with patient names and times
+- Mini timeline preview of the vehicle's existing schedule
+- Two-step confirmation: Check availability → Confirm assignment
+- Creates schedule entry in `vehicle_schedules` collection
+- Option to force assignment despite conflicts ("Zakaži svejedno")
+
 ### Remaining Phases:
-- **Phase 3:** Booking Flow Integration (Time picker, availability filter)
 - **Phase 4:** Admin Gantt View (Master timeline grid)
 
 ## Session & Auth Improvements (Jan 27, 2026)
