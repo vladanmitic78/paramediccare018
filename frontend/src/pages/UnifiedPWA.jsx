@@ -2177,6 +2177,8 @@ const UnifiedPWA = () => {
           </div>
         </div>
       )}
+        </>
+      )}
     </div>
   );
 };
