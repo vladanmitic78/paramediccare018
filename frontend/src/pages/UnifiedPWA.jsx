@@ -44,7 +44,12 @@ import {
   MicOff,
   Copy,
   ExternalLink,
-  Download
+  Download,
+  Menu,
+  CalendarDays,
+  LayoutDashboard,
+  FileText,
+  Car
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
@@ -56,6 +61,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '../components/ui/sheet';
 import { toast } from 'sonner';
 import axios from 'axios';
 
