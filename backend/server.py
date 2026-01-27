@@ -3786,14 +3786,62 @@ async def is_driver_available_for_booking(driver_id: str, target_booking_id: str
                 
                 # If booking is today but has a specific time, could still be available
                 # For now, allow multiple same-day assignments (they can manage conflicts)
-                return True, "Assigned to confirmed booking, allowing new assignment"
+                return True, "Assigned to confirmed booking, allowing new assignment", []
         
         # Completed or cancelled booking = available
         if booking_status in ["completed", "cancelled", "pending"]:
-            return True, f"Assigned booking status is {booking_status}"
+            return True, f"Assigned booking status is {booking_status}", []
     
     # Default: allow assignment (better to over-allow than block incorrectly)
-    return True, f"Default allow for status: {status}"
+    return True, f"Default allow for status: {status}", []
+
+
+# Helper function to get all conflicting bookings for a driver on a specific date/time
+async def get_driver_conflicts(driver_id: str, target_date: str, target_time: str = None) -> list:
+    """
+    Get all bookings that may conflict with a new assignment.
+    Returns list of conflicting bookings with their details.
+    """
+    conflicts = []
+    
+    # Find all active/confirmed bookings for this driver
+    query = {
+        "$or": [
+            {"assigned_driver": driver_id},
+            {"assigned_driver_id": driver_id}
+        ],
+        "status": {"$in": ["confirmed", "en_route", "on_site", "transporting"]}
+    }
+    
+    # Check public bookings
+    public_bookings = await db.bookings.find(query, {"_id": 0}).to_list(100)
+    for b in public_bookings:
+        booking_date = b.get("booking_date") or b.get("preferred_date")
+        if booking_date == target_date:
+            conflicts.append({
+                "id": b.get("id"),
+                "patient_name": b.get("patient_name"),
+                "booking_date": booking_date,
+                "booking_time": b.get("booking_time") or b.get("preferred_time"),
+                "status": b.get("status"),
+                "pickup": b.get("start_point") or b.get("pickup_address")
+            })
+    
+    # Check patient bookings
+    patient_bookings = await db.patient_bookings.find(query, {"_id": 0}).to_list(100)
+    for b in patient_bookings:
+        booking_date = b.get("preferred_date") or b.get("booking_date")
+        if booking_date == target_date:
+            conflicts.append({
+                "id": b.get("id"),
+                "patient_name": b.get("patient_name"),
+                "booking_date": booking_date,
+                "booking_time": b.get("preferred_time") or b.get("booking_time"),
+                "status": b.get("status"),
+                "pickup": b.get("pickup_address") or b.get("start_point")
+            })
+    
+    return conflicts
 
 
 # Admin endpoint to assign driver to booking
