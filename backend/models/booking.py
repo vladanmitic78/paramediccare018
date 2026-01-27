@@ -51,15 +51,20 @@ class BookingResponse(BaseModel):
     end_lat: Optional[float] = None
     end_lng: Optional[float] = None
     booking_date: str
+    booking_time: Optional[str] = None
+    pickup_datetime: Optional[str] = None  # ISO datetime for pickup start
+    estimated_arrival: Optional[str] = None  # ISO datetime for estimated arrival
     contact_phone: str
     contact_email: str
     patient_name: str
+    mobility_status: Optional[str] = None
     notes: Optional[str] = None
     documents: List[str] = []
     status: str
     assigned_driver: Optional[str] = None
     assigned_driver_name: Optional[str] = None
     assigned_medical: Optional[str] = None
+    assigned_vehicle: Optional[str] = None
     created_at: str
     user_id: Optional[str] = None
 
