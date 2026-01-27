@@ -1153,6 +1153,18 @@ const UnifiedPWA = () => {
             </div>
           </div>
           <div className="flex items-center gap-1">
+            {/* PWA Install Button - Show only when installable */}
+            {pwaInstall.isInstallable && !pwaInstall.isInstalled && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={pwaInstall.promptInstall}
+                className="text-sky-400 hover:text-sky-300 hover:bg-sky-500/20 relative animate-pulse"
+                data-testid="pwa-install-header-btn"
+              >
+                <Download className="w-5 h-5" />
+              </Button>
+            )}
             {/* Video Call Button - Quick Access */}
             <Button 
               variant="ghost" 
