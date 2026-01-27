@@ -2077,6 +2077,173 @@ const FleetDispatch = () => {
           </DialogContent>
         </Dialog>
 
+        {/* Time Slot Assignment Modal */}
+        <Dialog open={showTimeSlotModal} onOpenChange={(open) => {
+          if (!open) {
+            setShowTimeSlotModal(false);
+            setPendingAssignment(null);
+            setAvailabilityCheck(null);
+          }
+        }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center">
+                  <Clock className="w-5 h-5 text-sky-600" />
+                </div>
+                {language === 'sr' ? 'Zakazivanje transporta' : 'Schedule Transport'}
+              </DialogTitle>
+            </DialogHeader>
+            
+            {pendingAssignment && (
+              <div className="py-4 space-y-4">
+                {/* Assignment Summary */}
+                <div className="bg-slate-50 rounded-xl p-4 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Truck className="w-5 h-5 text-sky-600" />
+                    <div>
+                      <p className="font-semibold text-slate-800">{pendingAssignment.vehicle.name}</p>
+                      <p className="text-xs text-slate-500">{pendingAssignment.driver?.name}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <User className="w-5 h-5 text-emerald-600" />
+                    <div>
+                      <p className="font-semibold text-slate-800">{pendingAssignment.booking.patient_name}</p>
+                      <p className="text-xs text-slate-500">{pendingAssignment.bookingDate}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Time Selection */}
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-slate-700">
+                    {language === 'sr' ? 'Vreme transporta' : 'Transport Time'}
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1">
+                      <label className="text-xs text-slate-500 mb-1 block">
+                        {language === 'sr' ? 'Početak' : 'Start'}
+                      </label>
+                      <Input
+                        type="time"
+                        value={assignmentTimeSlot.startTime}
+                        onChange={(e) => {
+                          setAssignmentTimeSlot(prev => ({ ...prev, startTime: e.target.value }));
+                          setAvailabilityCheck(null);
+                        }}
+                        className="text-center"
+                      />
+                    </div>
+                    <span className="text-slate-400 mt-5">→</span>
+                    <div className="flex-1">
+                      <label className="text-xs text-slate-500 mb-1 block">
+                        {language === 'sr' ? 'Kraj' : 'End'}
+                      </label>
+                      <Input
+                        type="time"
+                        value={assignmentTimeSlot.endTime}
+                        onChange={(e) => {
+                          setAssignmentTimeSlot(prev => ({ ...prev, endTime: e.target.value }));
+                          setAvailabilityCheck(null);
+                        }}
+                        className="text-center"
+                      />
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={checkTimeSlotAvailability}
+                    disabled={checkingAvailability || !assignmentTimeSlot.startTime || !assignmentTimeSlot.endTime}
+                    className="w-full"
+                  >
+                    {checkingAvailability ? (
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {language === 'sr' ? 'Proveravam...' : 'Checking...'}</>
+                    ) : (
+                      <><RefreshCw className="w-4 h-4 mr-2" /> {language === 'sr' ? 'Proveri dostupnost' : 'Check Availability'}</>
+                    )}
+                  </Button>
+                </div>
+
+                {/* Availability Status */}
+                {availabilityCheck && (
+                  <div className={`rounded-xl p-4 ${
+                    availabilityCheck.available 
+                      ? 'bg-emerald-50 border border-emerald-200' 
+                      : 'bg-amber-50 border border-amber-200'
+                  }`}>
+                    {availabilityCheck.available ? (
+                      <div className="flex items-center gap-3 text-emerald-700">
+                        <CheckCircle className="w-5 h-5" />
+                        <span className="font-medium">
+                          {language === 'sr' ? 'Termin je slobodan!' : 'Time slot is available!'}
+                        </span>
+                      </div>
+                    ) : (
+                      <div>
+                        <div className="flex items-center gap-3 text-amber-700 mb-3">
+                          <AlertTriangle className="w-5 h-5" />
+                          <span className="font-medium">
+                            {language === 'sr' ? 'Pronađeni konflikti' : 'Conflicts found'}
+                          </span>
+                        </div>
+                        <div className="space-y-2 max-h-32 overflow-y-auto">
+                          {availabilityCheck.conflicts.map((conflict, idx) => (
+                            <div key={idx} className="bg-white rounded-lg p-2 text-sm">
+                              <p className="font-medium text-slate-800">{conflict.patient_name || 'Booking'}</p>
+                              <p className="text-xs text-slate-500">
+                                {conflict.start_time?.slice(11, 16)} - {conflict.end_time?.slice(11, 16)}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Mini Timeline Preview */}
+                <div className="bg-slate-100 rounded-xl p-3">
+                  <p className="text-xs font-medium text-slate-600 mb-2">
+                    {language === 'sr' ? 'Raspored za danas' : 'Today\'s Schedule'}
+                  </p>
+                  <VehicleTimeline 
+                    schedules={vehicleSchedules[pendingAssignment.vehicle.id] || []} 
+                    language={language} 
+                  />
+                </div>
+              </div>
+            )}
+            
+            <DialogFooter className="gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowTimeSlotModal(false);
+                  setPendingAssignment(null);
+                }}
+              >
+                {language === 'sr' ? 'Otkaži' : 'Cancel'}
+              </Button>
+              <Button 
+                onClick={() => confirmTimeSlotAssignment(availabilityCheck && !availabilityCheck.available)}
+                disabled={assigning || !assignmentTimeSlot.startTime || !assignmentTimeSlot.endTime}
+                className={availabilityCheck && !availabilityCheck.available 
+                  ? 'bg-amber-600 hover:bg-amber-700' 
+                  : 'bg-emerald-600 hover:bg-emerald-700'
+                }
+              >
+                {assigning && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                {availabilityCheck && !availabilityCheck.available 
+                  ? (language === 'sr' ? 'Zakaži svejedno' : 'Schedule Anyway')
+                  : (language === 'sr' ? 'Potvrdi' : 'Confirm')
+                }
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         {/* Conflict Warning Modal */}
         <Dialog open={showConflictWarning} onOpenChange={setShowConflictWarning}>
           <DialogContent className="max-w-lg">
