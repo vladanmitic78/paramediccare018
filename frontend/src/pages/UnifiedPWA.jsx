@@ -545,18 +545,27 @@ const UnifiedPWA = () => {
           prevAssignmentRef.current = null;
         }
       } else {
-        // Admin/Medical: fetch bookings and drivers
-        const [bookingsRes, usersRes] = await Promise.all([
-          axios.get(`${API}/api/bookings`),
-          axios.get(`${API}/api/users`)
-        ]);
+        // Admin/Medical: fetch bookings and optionally drivers
+        // Note: /api/users requires admin role, so medical staff only get bookings
+        const fetchPromises = [axios.get(`${API}/api/bookings`)];
         
-        console.log('[PWA] Bookings count:', bookingsRes.data?.length);
-        const bookingsData = Array.isArray(bookingsRes.data) ? bookingsRes.data : [];
-        const usersData = Array.isArray(usersRes.data) ? usersRes.data : [];
+        // Only admins can fetch all users
+        if (isAdmin) {
+          fetchPromises.push(axios.get(`${API}/api/users`));
+        }
         
+        const results = await Promise.all(fetchPromises);
+        
+        const bookingsData = Array.isArray(results[0].data) ? results[0].data : [];
         setBookings(bookingsData);
-        setDrivers(usersData.filter(u => u.role === 'driver'));
+        
+        // Set drivers only if admin fetched users
+        if (isAdmin && results[1]) {
+          const usersData = Array.isArray(results[1].data) ? results[1].data : [];
+          setDrivers(usersData.filter(u => u.role === 'driver'));
+        } else {
+          setDrivers([]);
+        }
       }
       
       if (isRefresh) toast.success(language === 'sr' ? 'Osveženo!' : 'Refreshed!');
