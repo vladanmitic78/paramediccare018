@@ -40,7 +40,7 @@ __all__ = [
     'RoleUpdate', 'StatusUpdate',
     # Booking models
     'BookingStatus', 'MobilityStatus', 'BookingCreate', 'BookingResponse',
-    'BookingStatusUpdate', 'PatientBookingCreate', 'PatientBookingResponse',
+    'BookingStatusUpdate', 'BookingFullUpdate', 'PatientBookingCreate', 'PatientBookingResponse',
     'SavedAddress', 'EmergencyContact', 'PatientProfileUpdate',
     'InvoiceResponse', 'NotificationResponse', 'ContactCreate', 'ContactResponse',
     # Medical models
