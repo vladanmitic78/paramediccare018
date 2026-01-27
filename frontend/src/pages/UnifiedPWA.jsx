@@ -1083,11 +1083,13 @@ const UnifiedPWA = () => {
             zoomControl={false}
           >
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-            {lastLocation && <Marker position={[lastLocation.latitude, lastLocation.longitude]} icon={driverIcon} />}
+            {lastLocation?.latitude && lastLocation?.longitude && (
+              <Marker position={[lastLocation.latitude, lastLocation.longitude]} icon={driverIcon} />
+            )}
             {assignment.destination_lat && assignment.destination_lng && (
               <Marker position={[assignment.destination_lat, assignment.destination_lng]} icon={destinationIcon} />
             )}
-            {lastLocation && assignment.destination_lat && (
+            {lastLocation?.latitude && lastLocation?.longitude && assignment.destination_lat && assignment.destination_lng && (
               <Polyline positions={[[lastLocation.latitude, lastLocation.longitude], [assignment.destination_lat, assignment.destination_lng]]} color="#3b82f6" weight={4} dashArray="10, 10" />
             )}
           </MapContainer>
