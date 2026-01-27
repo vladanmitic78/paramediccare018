@@ -478,6 +478,10 @@ const FleetDispatch = () => {
   const [completingMission, setCompletingMission] = useState(false);
   const [missionNotes, setMissionNotes] = useState('');
   
+  // Conflict warning modal state
+  const [showConflictWarning, setShowConflictWarning] = useState(false);
+  const [conflictData, setConflictData] = useState(null);
+  
   // Manual booking creation state
   const [showCreateBooking, setShowCreateBooking] = useState(false);
   const [creatingBooking, setCreatingBooking] = useState(false);
