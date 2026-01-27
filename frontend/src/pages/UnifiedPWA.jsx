@@ -491,6 +491,8 @@ const UnifiedPWA = () => {
     setFetchError(null);
     
     try {
+      console.log('[PWA] Fetching data for role:', user?.role, 'isDriver:', isDriver);
+      
       if (isDriver) {
         // Driver: fetch profile and assignment
         const [profileRes, assignmentRes] = await Promise.all([
@@ -498,6 +500,7 @@ const UnifiedPWA = () => {
           axios.get(`${API}/api/driver/assignment`)
         ]);
         
+        console.log('[PWA] Driver profile response:', profileRes.data);
         setDriverStatus(profileRes.data.status?.status || 'offline');
         
         if (assignmentRes.data.has_assignment) {
@@ -509,10 +512,8 @@ const UnifiedPWA = () => {
               // Audio/vibration alert
               try {
                 if ('vibrate' in navigator) navigator.vibrate([200, 100, 200, 100, 200]);
-                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2Onp2ZkYV6c3N8iJOcn5uTiHxxbnJ+jJifoJqRhXlwb3WCj5qfopmQhHlwcHaEkZyhn5mPgndvcnmHlJ6in5eNf3Zwc3yKl6CinpWLfXRydYCOmqGhnpOIfHNzeIWSmaCgnZGFeXN0e4mWn6GemY5/d3R3gY+boaCblol7dHV6h5OdoJ6Yj4J4dXd+jZmfn5yVi397d3l/kZqfnpqTiH15eHyDlJyfnZiQg3t4en+Hl56dnJWOgXp5e4KMmp2cm5OLfnl6fIWQm52blo+Cfnp7f4mUm5yalI2AfHt8goyYm5uYko5/fHx9hY+ZmpqWkIx+fHx+iJOZmpiUj4p9fH1/i5WZmZaTjoh9fH2Bj5aYl5WRi4Z+fX6DkpWXlpOPiYR+fn+FlZWVlJGNh4F/f4GIk5WUk5CMhoJ/gIOKkpOTkY6KhIF/gYWNkZKRj4uIg4CAg4iPkZCPjImFgYCChYuOj4+MioeDgYGEiIyOjYuJhoOBgYOGio2MjIqHhIKBg4aJi4uKiIaEgoKEh4mKiYiGhIOCg4WHiYiIh4WDg4OEhoeHh4aFhIODhIWGh4aGhYSDg4SEhYaGhYWEg4ODhIWFhYWEhIODg4SEhYWFhISDg4OEhIWEhISEg4ODhISEhISEhIODg4SEhISEhISDg4OEhISEhISDg4ODg4SEhISDg4ODg4OEhISDg4ODg4ODhISDg4ODg4ODg4SDg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4OD');
-                audio.play();
               } catch (e) {
-                // Audio playback failed - ignore
+                // Vibration failed - ignore
               }
             }
             prevAssignmentRef.current = newAssignment;
@@ -529,6 +530,7 @@ const UnifiedPWA = () => {
           axios.get(`${API}/api/users`)
         ]);
         
+        console.log('[PWA] Bookings count:', bookingsRes.data?.length);
         const bookingsData = Array.isArray(bookingsRes.data) ? bookingsRes.data : [];
         const usersData = Array.isArray(usersRes.data) ? usersRes.data : [];
         
@@ -538,19 +540,33 @@ const UnifiedPWA = () => {
       
       if (isRefresh) toast.success(language === 'sr' ? 'Osveženo!' : 'Refreshed!');
     } catch (error) {
-      console.error('Error fetching data:', error);
-      setFetchError(error.message || 'Failed to load data');
+      console.error('[PWA] Error fetching data:', error);
       
-      // Retry up to 3 times with exponential backoff
-      if (retryCount < 3 && !isRefresh) {
+      // More descriptive error messages
+      let errorMsg = 'Failed to load data';
+      if (error.code === 'ERR_NETWORK' || !navigator.onLine) {
+        errorMsg = language === 'sr' ? 'Nema internet konekcije' : 'No internet connection';
+      } else if (error.response?.status === 401) {
+        errorMsg = language === 'sr' ? 'Sesija je istekla' : 'Session expired';
+      } else if (error.response?.status === 403) {
+        errorMsg = language === 'sr' ? 'Pristup odbijen' : 'Access denied';
+      } else if (error.message) {
+        errorMsg = error.message;
+      }
+      
+      setFetchError(errorMsg);
+      
+      // Retry up to 3 times with exponential backoff (only for network errors)
+      if (retryCount < 3 && !isRefresh && (error.code === 'ERR_NETWORK' || error.message?.includes('Network'))) {
         const delay = Math.pow(2, retryCount) * 1000;
+        console.log(`[PWA] Retrying in ${delay}ms (attempt ${retryCount + 1})`);
         setTimeout(() => fetchData(false, retryCount + 1), delay);
       }
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [isDriver, language]);
+  }, [isDriver, language, user?.role]);
 
   useEffect(() => {
     // Don't fetch until we know the user's role
