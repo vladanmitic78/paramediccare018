@@ -906,21 +906,32 @@ const UnifiedPWA = () => {
     return colors[driverStatus] || 'bg-slate-500';
   };
 
-  // Show loading spinner while auth is loading or data is being fetched
-  if (authLoading || (loading && user?.role)) {
+  // Show loading spinner while auth is loading
+  if (authLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center">
         <Loader2 className="w-10 h-10 animate-spin text-sky-400" />
+        <p className="text-slate-400 mt-4 text-sm">{language === 'sr' ? 'Provera prijave...' : 'Checking login...'}</p>
       </div>
     );
   }
   
   // If auth finished but no user, we'll be redirected by the useEffect above
-  // Just show loading briefly
   if (!user) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center">
         <Loader2 className="w-10 h-10 animate-spin text-sky-400" />
+        <p className="text-slate-400 mt-4 text-sm">{language === 'sr' ? 'Preusmeravanje...' : 'Redirecting...'}</p>
+      </div>
+    );
+  }
+  
+  // Show loading while fetching data (but only if we haven't hit an error)
+  if (loading && !fetchError) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center">
+        <Loader2 className="w-10 h-10 animate-spin text-sky-400" />
+        <p className="text-slate-400 mt-4 text-sm">{language === 'sr' ? 'Učitavanje podataka...' : 'Loading data...'}</p>
       </div>
     );
   }
