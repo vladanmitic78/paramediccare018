@@ -456,6 +456,11 @@ const FleetDispatch = () => {
     notes: ''
   });
   
+  // Edit booking state
+  const [showEditBooking, setShowEditBooking] = useState(false);
+  const [editingBooking, setEditingBooking] = useState(false);
+  const [bookingToEdit, setBookingToEdit] = useState(null);
+  
   // Address search state
   const [pickupSuggestions, setPickupSuggestions] = useState([]);
   const [destinationSuggestions, setDestinationSuggestions] = useState([]);
