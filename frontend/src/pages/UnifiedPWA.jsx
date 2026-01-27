@@ -1217,12 +1217,247 @@ const UnifiedPWA = () => {
             <Button variant="ghost" size="sm" onClick={() => fetchData(true)} disabled={refreshing} className="text-slate-400">
               <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
             </Button>
-            <Button variant="ghost" size="sm" onClick={toggleLanguage} className="text-slate-400">
-              <Globe className="w-5 h-5" />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-slate-400">
-              <LogOut className="w-5 h-5" />
-            </Button>
+            
+            {/* Burger Menu */}
+            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+              <SheetTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-slate-400 hover:text-white"
+                  data-testid="pwa-burger-menu"
+                >
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[320px] bg-slate-900 border-slate-700 p-0 text-white">
+                <SheetHeader className="p-4 border-b border-slate-700 bg-slate-800">
+                  <SheetTitle className="flex items-center gap-3 text-white">
+                    <div className="w-10 h-10 rounded-lg overflow-hidden">
+                      <img src="/logo.jpg" alt="PC018" className="w-full h-full object-cover" />
+                    </div>
+                    <div>
+                      <p className="text-lg font-bold">PC018</p>
+                      <p className="text-xs text-slate-400 font-normal">{language === 'sr' ? 'Mobilna aplikacija' : 'Mobile App'}</p>
+                    </div>
+                  </SheetTitle>
+                </SheetHeader>
+                
+                <div className="flex flex-col h-[calc(100vh-80px)] overflow-y-auto">
+                  {/* User Profile Section */}
+                  <div className="p-4 bg-gradient-to-r from-sky-900/50 to-indigo-900/50 border-b border-slate-700">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-sky-600 flex items-center justify-center">
+                        <span className="text-xl font-bold text-white">
+                          {user?.full_name?.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-white">{user?.full_name}</p>
+                        <Badge className={`text-[10px] mt-1 ${isDriver ? getStatusColor() : 'bg-sky-600'}`}>
+                          {isDriver ? getDriverStatusLabel() : getRoleLabel()}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Quick Actions */}
+                  <div className="p-4 border-b border-slate-700">
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+                      {language === 'sr' ? 'Brze akcije' : 'Quick Actions'}
+                    </p>
+                    <div className="space-y-2">
+                      {/* Future Bookings */}
+                      <button
+                        onClick={() => setShowFutureBookings(!showFutureBookings)}
+                        className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors"
+                        data-testid="pwa-menu-bookings"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-sky-600/20 flex items-center justify-center">
+                            <CalendarDays className="w-5 h-5 text-sky-400" />
+                          </div>
+                          <div className="text-left">
+                            <p className="font-medium text-white">
+                              {language === 'sr' ? 'Buduće rezervacije' : 'Future Bookings'}
+                            </p>
+                            <p className="text-xs text-slate-400">
+                              {language === 'sr' ? 'Pregled zakazanih vožnji' : 'View scheduled transports'}
+                            </p>
+                          </div>
+                        </div>
+                        <ChevronRight className={`w-5 h-5 text-slate-500 transition-transform ${showFutureBookings ? 'rotate-90' : ''}`} />
+                      </button>
+
+                      {/* Future Bookings Panel */}
+                      {showFutureBookings && (
+                        <div className="ml-4 pl-4 border-l-2 border-sky-600/30 space-y-2 py-2">
+                          {loadingFutureBookings ? (
+                            <div className="flex items-center justify-center py-4">
+                              <Loader2 className="w-5 h-5 animate-spin text-sky-400" />
+                            </div>
+                          ) : futureBookings.length > 0 ? (
+                            <>
+                              {futureBookings.map((booking, idx) => (
+                                <div 
+                                  key={booking.id || idx}
+                                  className="p-3 bg-slate-800/50 rounded-lg border border-slate-700"
+                                >
+                                  <div className="flex items-start justify-between mb-2">
+                                    <p className="font-medium text-white text-sm truncate flex-1 mr-2">
+                                      {booking.patient_name || 'Transport'}
+                                    </p>
+                                    <span className={`text-[10px] px-2 py-0.5 rounded-full border ${getBookingStatusColor(booking.status)}`}>
+                                      {getBookingStatusLabel(booking.status)}
+                                    </span>
+                                  </div>
+                                  {(booking.scheduled_date || booking.pickup_time) && (
+                                    <div className="flex items-center gap-1.5 text-xs text-slate-400 mb-1">
+                                      <Clock className="w-3 h-3" />
+                                      {formatBookingDateTime(booking.scheduled_date || booking.pickup_time)}
+                                    </div>
+                                  )}
+                                  {(booking.pickup_address || booking.start_point) && (
+                                    <div className="flex items-start gap-1.5 text-xs text-slate-400">
+                                      <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0 text-emerald-400" />
+                                      <span className="line-clamp-1">{booking.pickup_address || booking.start_point}</span>
+                                    </div>
+                                  )}
+                                  {(booking.destination_address || booking.end_point) && (
+                                    <div className="flex items-start gap-1.5 text-xs text-slate-400 mt-1">
+                                      <Navigation className="w-3 h-3 mt-0.5 flex-shrink-0 text-red-400" />
+                                      <span className="line-clamp-1">{booking.destination_address || booking.end_point}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                              <button 
+                                onClick={() => { setMenuOpen(false); setActiveTab('home'); }}
+                                className="w-full text-center text-sm text-sky-400 hover:text-sky-300 font-medium py-2"
+                              >
+                                {language === 'sr' ? 'Prikaži sve →' : 'View all →'}
+                              </button>
+                            </>
+                          ) : (
+                            <p className="text-sm text-slate-500 py-3 text-center">
+                              {language === 'sr' ? 'Nema zakazanih rezervacija' : 'No scheduled bookings'}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Dashboard - for admin/staff */}
+                      {(isAdmin || isMedical) && (
+                        <button
+                          onClick={() => { setMenuOpen(false); navigate('/dashboard'); }}
+                          className="w-full flex items-center gap-3 p-3 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors"
+                        >
+                          <div className="w-10 h-10 rounded-full bg-indigo-600/20 flex items-center justify-center">
+                            <LayoutDashboard className="w-5 h-5 text-indigo-400" />
+                          </div>
+                          <div className="text-left">
+                            <p className="font-medium text-white">
+                              {language === 'sr' ? 'Kontrolna tabla' : 'Dashboard'}
+                            </p>
+                            <p className="text-xs text-slate-400">
+                              {language === 'sr' ? 'Desktop verzija' : 'Desktop version'}
+                            </p>
+                          </div>
+                        </button>
+                      )}
+
+                      {/* Fleet Status - for admin */}
+                      {isAdmin && (
+                        <button
+                          onClick={() => { setMenuOpen(false); setActiveTab('drivers'); }}
+                          className="w-full flex items-center gap-3 p-3 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors"
+                        >
+                          <div className="w-10 h-10 rounded-full bg-emerald-600/20 flex items-center justify-center">
+                            <Car className="w-5 h-5 text-emerald-400" />
+                          </div>
+                          <div className="text-left">
+                            <p className="font-medium text-white">
+                              {language === 'sr' ? 'Status vozila' : 'Fleet Status'}
+                            </p>
+                            <p className="text-xs text-slate-400">
+                              {language === 'sr' ? 'Pregled vozača' : 'View drivers'}
+                            </p>
+                          </div>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Settings Section */}
+                  <div className="p-4 border-b border-slate-700">
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+                      {language === 'sr' ? 'Podešavanja' : 'Settings'}
+                    </p>
+                    <div className="space-y-2">
+                      {/* Language Toggle */}
+                      <button
+                        onClick={toggleLanguage}
+                        className="w-full flex items-center gap-3 p-3 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-purple-600/20 flex items-center justify-center">
+                          <Globe className="w-5 h-5 text-purple-400" />
+                        </div>
+                        <div className="text-left flex-1">
+                          <p className="font-medium text-white">
+                            {language === 'sr' ? 'Jezik' : 'Language'}
+                          </p>
+                          <p className="text-xs text-slate-400">
+                            {language === 'sr' ? 'Srpski' : 'English'}
+                          </p>
+                        </div>
+                        <img 
+                          src={language === 'sr' 
+                            ? 'https://flagcdn.com/w40/rs.png'
+                            : 'https://flagcdn.com/w40/gb.png'
+                          }
+                          alt={language === 'sr' ? 'Serbian' : 'English'}
+                          className="w-6 h-4 object-cover rounded-sm"
+                        />
+                      </button>
+
+                      {/* Notifications */}
+                      <button
+                        onClick={() => { setMenuOpen(false); setShowNotificationSetup(true); }}
+                        className="w-full flex items-center gap-3 p-3 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-amber-600/20 flex items-center justify-center">
+                          <Bell className="w-5 h-5 text-amber-400" />
+                        </div>
+                        <div className="text-left flex-1">
+                          <p className="font-medium text-white">
+                            {language === 'sr' ? 'Obaveštenja' : 'Notifications'}
+                          </p>
+                          <p className="text-xs text-slate-400">
+                            {pushNotifications.permission === 'granted' 
+                              ? (language === 'sr' ? 'Omogućeno' : 'Enabled')
+                              : (language === 'sr' ? 'Onemogućeno' : 'Disabled')
+                            }
+                          </p>
+                        </div>
+                        <div className={`w-3 h-3 rounded-full ${pushNotifications.permission === 'granted' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Logout Section */}
+                  <div className="p-4 mt-auto">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start gap-3 text-red-400 hover:text-red-300 hover:bg-red-500/10 border-red-500/30"
+                      onClick={() => { setMenuOpen(false); handleLogout(); }}
+                    >
+                      <LogOut className="w-5 h-5" />
+                      {language === 'sr' ? 'Odjavi se' : 'Logout'}
+                    </Button>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
