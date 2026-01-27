@@ -528,10 +528,13 @@ const UnifiedPWA = () => {
   }, [isDriver, language]);
 
   useEffect(() => {
+    // Don't fetch until we know the user's role
+    if (!user?.role) return;
+    
     fetchData();
     const interval = setInterval(() => fetchData(), 5000);
     return () => clearInterval(interval);
-  }, [fetchData]);
+  }, [fetchData, user?.role]);
 
   // GPS tracking for drivers
   useEffect(() => {
