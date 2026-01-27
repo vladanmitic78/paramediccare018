@@ -190,7 +190,7 @@ const VehicleTimeline = ({ schedules, language }) => {
 };
 
 // Draggable Vehicle Card Component
-const DraggableVehicleCard = ({ vehicle, language, onAssignClick, onVideoCall, onCompleteMission, canDelete, onDelete, user }) => {
+const DraggableVehicleCard = ({ vehicle, language, onAssignClick, onVideoCall, onCompleteMission, canDelete, onDelete, user, schedules }) => {
   const hasDriver = vehicle.team?.some(m => m.role === 'driver');
   const isDraggable = hasDriver && !vehicle.current_mission;
   
