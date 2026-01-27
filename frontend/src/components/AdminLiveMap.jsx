@@ -80,6 +80,27 @@ const FitBounds = ({ drivers }) => {
   return null;
 };
 
+// Component to focus map on selected driver
+const FocusOnDriver = ({ driver, onFocused }) => {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (driver?.last_location?.latitude && driver?.last_location?.longitude) {
+      map.flyTo(
+        [driver.last_location.latitude, driver.last_location.longitude],
+        16, // Zoom level
+        { duration: 1 } // Animation duration in seconds
+      );
+      // Open the popup for this driver
+      if (onFocused) {
+        setTimeout(() => onFocused(), 1000);
+      }
+    }
+  }, [driver, map, onFocused]);
+  
+  return null;
+};
+
 const AdminLiveMap = () => {
   const { language } = useLanguage();
   const [drivers, setDrivers] = useState([]);
