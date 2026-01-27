@@ -25,14 +25,18 @@ DEFAULT_SCHEDULE_DURATION_HOURS = 2
 # ============ HELPER FUNCTIONS ============
 
 def parse_datetime(dt_string: str) -> datetime:
-    """Parse ISO datetime string to datetime object"""
+    """Parse ISO datetime string to timezone-aware datetime object"""
     try:
         # Handle various formats
         if 'T' in dt_string:
             if dt_string.endswith('Z'):
                 return datetime.fromisoformat(dt_string.replace('Z', '+00:00'))
-            return datetime.fromisoformat(dt_string)
-        # If just a date, assume start of day
+            dt = datetime.fromisoformat(dt_string)
+            # Ensure timezone-aware
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            return dt
+        # If just a date, assume start of day UTC
         return datetime.fromisoformat(f"{dt_string}T00:00:00+00:00")
     except Exception as e:
         logger.error(f"Error parsing datetime {dt_string}: {e}")
