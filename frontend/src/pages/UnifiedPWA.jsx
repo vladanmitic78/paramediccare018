@@ -971,8 +971,16 @@ const UnifiedPWA = () => {
         </div>
       )}
 
-      {/* Show loading while user role is being determined */}
-      {!user?.role && (
+      {/* Redirect to login if not authenticated */}
+      {user === null && (
+        <div className="flex-1 flex flex-col items-center justify-center bg-slate-900 min-h-screen">
+          <Loader2 className="w-12 h-12 text-sky-500 animate-spin mb-4" />
+          <p className="text-slate-400">{language === 'sr' ? 'Učitavanje...' : 'Loading...'}</p>
+        </div>
+      )}
+
+      {/* Show loading while user role is being determined (user exists but role not yet loaded) */}
+      {user && !user.role && (
         <div className="flex-1 flex flex-col items-center justify-center bg-slate-900 min-h-screen">
           <Loader2 className="w-12 h-12 text-sky-500 animate-spin mb-4" />
           <p className="text-slate-400">{language === 'sr' ? 'Učitavanje...' : 'Loading...'}</p>
