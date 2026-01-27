@@ -26,8 +26,7 @@ import PatientInvoices from "./pages/PatientInvoices";
 import PatientProfile from "./pages/PatientProfile";
 import PatientNotifications from "./pages/PatientNotifications";
 
-// Driver App
-import DriverDashboard from "./pages/DriverDashboard";
+// Driver App - DEPRECATED: Now uses UnifiedPWA at /app
 
 // Medical Dashboard
 import MedicalDashboard from "./pages/MedicalDashboard";
@@ -35,8 +34,7 @@ import MedicalDashboard from "./pages/MedicalDashboard";
 // Medical Staff PWA
 import MedicalStaffPWA from "./pages/MedicalStaffPWA";
 
-// Admin PWA
-import AdminPWA from "./pages/AdminPWA";
+// Admin PWA - DEPRECATED: Now uses UnifiedPWA at /app
 
 // Unified PWA
 import UnifiedPWA from "./pages/UnifiedPWA";
