@@ -645,14 +645,9 @@ const FleetDispatch = () => {
 
     if (!vehicle || !booking) return;
 
-    // Validate
-    if (booking.status !== 'pending') {
-      toast.error(language === 'sr' ? 'Ova rezervacija je već dodeljena' : 'This booking is already assigned');
-      return;
-    }
-
-    if (booking.assigned_driver) {
-      toast.error(language === 'sr' ? 'Rezervacija već ima vozača' : 'Booking already has a driver');
+    // Validate - allow pending AND confirmed for reassignment
+    if (!['pending', 'confirmed'].includes(booking.status)) {
+      toast.error(language === 'sr' ? 'Rezervacija je već u toku i ne može se menjati' : 'Booking is already in progress and cannot be changed');
       return;
     }
 
@@ -665,7 +660,36 @@ const FleetDispatch = () => {
 
     setAssigning(true);
     try {
-      await axios.post(`${API}/admin/assign-driver-public?booking_id=${bookingId}&driver_id=${driver.user_id}`);
+      const response = await axios.post(`${API}/admin/assign-driver-public?booking_id=${bookingId}&driver_id=${driver.user_id}`);
+      
+      // Check if there's a conflict warning
+      if (response.data.warning && response.data.require_confirmation) {
+        setAssigning(false);
+        
+        // Build conflict message
+        const conflicts = response.data.conflicts || [];
+        const conflictList = conflicts.map(c => 
+          `• ${c.patient_name} (${c.booking_time || 'N/A'}) - ${c.status}`
+        ).join('\n');
+        
+        const confirmMsg = language === 'sr'
+          ? `⚠️ Upozorenje: Vozač ${driver.name} već ima ${conflicts.length} rezervacija na isti datum:\n\n${conflictList}\n\nDa li želite da nastavite?`
+          : `⚠️ Warning: Driver ${driver.name} already has ${conflicts.length} booking(s) on the same date:\n\n${conflictList}\n\nDo you want to continue?`;
+        
+        if (window.confirm(confirmMsg)) {
+          // Re-send with force=true
+          setAssigning(true);
+          await axios.post(`${API}/admin/assign-driver-public?booking_id=${bookingId}&driver_id=${driver.user_id}&force=true`);
+          toast.success(
+            language === 'sr' 
+              ? `✅ ${vehicle.name} dodeljen pacijentu ${booking.patient_name}` 
+              : `✅ ${vehicle.name} assigned to ${booking.patient_name}`,
+            { duration: 5000 }
+          );
+          fetchData();
+        }
+        return;
+      }
       
       toast.success(
         language === 'sr' 
