@@ -111,6 +111,7 @@ function App() {
   return (
     <LanguageProvider>
       <AuthProvider>
+        <PWAProvider>
         <BrowserRouter>
           <div className="min-h-screen flex flex-col bg-slate-50">
             <Routes>
