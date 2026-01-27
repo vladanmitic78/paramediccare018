@@ -983,14 +983,40 @@ const UnifiedPWA = () => {
                   {assignment.contact_phone && (
                     <button 
                       onClick={() => startCall(assignment.contact_phone, assignment.patient_name)}
-                      className="w-full flex items-center gap-3 p-3 bg-sky-600/20 rounded-xl hover:bg-sky-600/30 transition-colors"
+                      className="flex-1 flex items-center gap-3 p-3 bg-sky-600/20 rounded-xl hover:bg-sky-600/30 transition-colors"
                       data-testid="call-patient-btn"
                     >
                       <Phone className="w-5 h-5 text-sky-400" />
-                      <span className="flex-1 text-left">{assignment.contact_phone}</span>
-                      <span className="text-xs text-sky-400">{language === 'sr' ? 'POZOVI' : 'CALL'}</span>
+                      <span className="flex-1 text-left truncate">{assignment.contact_phone}</span>
                     </button>
+                    <button 
+                      onClick={() => quickVideoCall(assignment.patient_name, language === 'sr' ? 'Pacijent' : 'Patient')}
+                      className="p-3 bg-indigo-600/20 rounded-xl hover:bg-indigo-600/30 transition-colors"
+                      data-testid="video-call-patient-btn"
+                      title={language === 'sr' ? 'Video poziv' : 'Video call'}
+                    >
+                      <Video className="w-5 h-5 text-indigo-400" />
+                    </button>
+                  </div>
                   )}
+                  
+                  {/* Quick call buttons row */}
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => quickVideoCall(language === 'sr' ? 'Dispečer' : 'Dispatch', language === 'sr' ? 'Centar' : 'Center')}
+                      className="flex-1 flex items-center justify-center gap-2 p-2 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors text-sm"
+                    >
+                      <Video className="w-4 h-4 text-indigo-400" />
+                      <span className="text-slate-300">{language === 'sr' ? 'Dispečer' : 'Dispatch'}</span>
+                    </button>
+                    <button 
+                      onClick={() => quickVideoCall(language === 'sr' ? 'Medicinski tim' : 'Medical Team', language === 'sr' ? 'Lekar' : 'Doctor')}
+                      className="flex-1 flex items-center justify-center gap-2 p-2 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors text-sm"
+                    >
+                      <Video className="w-4 h-4 text-purple-400" />
+                      <span className="text-slate-300">{language === 'sr' ? 'Lekar' : 'Doctor'}</span>
+                    </button>
+                  </div>
                   
                   {/* Action Buttons based on status */}
                   <div className="space-y-2 pt-2">
