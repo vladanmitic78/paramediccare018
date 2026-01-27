@@ -370,6 +370,24 @@ const UnifiedPWA = () => {
     }
   }, [isDriver, isActiveTransport]);
 
+  // Handle visibility change - restore wake lock and refresh data when coming back from a call
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // App is back in foreground (e.g., after a phone call)
+        fetchData();
+        // Re-request wake lock
+        if ((isDriver && isActiveTransport) || activeCall !== null) {
+          if ('wakeLock' in navigator) {
+            navigator.wakeLock.request('screen').catch(() => {});
+          }
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [isDriver, isActiveTransport, activeCall, fetchData]);
+
   // Driver actions
   const acceptAssignment = async () => {
     if (!assignment) return;
