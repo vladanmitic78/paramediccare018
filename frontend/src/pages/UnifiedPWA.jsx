@@ -848,8 +848,8 @@ const UnifiedPWA = () => {
             setLastLocation({ latitude, longitude });
             
             // Get pickup coordinates
-            const pickupLat = assignment.start_coords?.lat || assignment.pickup_lat;
-            const pickupLng = assignment.start_coords?.lng || assignment.pickup_lng;
+            const pickupLat = assignment.start_lat || assignment.start_coords?.lat || assignment.pickup_lat;
+            const pickupLng = assignment.start_lng || assignment.start_coords?.lng || assignment.pickup_lng;
             
             if (pickupLat && pickupLng) {
               await fetchRoute(latitude, longitude, pickupLat, pickupLng);
