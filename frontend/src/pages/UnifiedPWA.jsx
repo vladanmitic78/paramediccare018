@@ -1609,19 +1609,19 @@ const UnifiedPWA = () => {
                 </div>
                 <div className="p-4 space-y-4">
                   <div className="space-y-2">
-                    <button onClick={() => openNavigation(assignment.pickup_lat, assignment.pickup_lng, assignment.pickup_address)} className="w-full flex items-start gap-3 p-3 bg-slate-700/50 rounded-xl hover:bg-slate-700 transition-colors text-left">
+                    <button onClick={() => openNavigation(assignment.start_lat || assignment.pickup_lat, assignment.start_lng || assignment.pickup_lng, assignment.start_point || assignment.pickup_address)} className="w-full flex items-start gap-3 p-3 bg-slate-700/50 rounded-xl hover:bg-slate-700 transition-colors text-left">
                       <MapPin className="w-5 h-5 text-emerald-400 mt-0.5 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-xs text-slate-400">{language === 'sr' ? 'Preuzimanje' : 'Pickup'}</p>
-                        <p className="text-sm">{assignment.pickup_address || assignment.start_point}</p>
+                        <p className="text-sm">{assignment.start_point || assignment.pickup_address || (language === 'sr' ? 'Adresa nije dostupna' : 'Address not available')}</p>
                       </div>
                       <ChevronRight className="w-5 h-5 text-slate-500" />
                     </button>
-                    <button onClick={() => openNavigation(assignment.destination_lat, assignment.destination_lng, assignment.destination_address)} className="w-full flex items-start gap-3 p-3 bg-slate-700/50 rounded-xl hover:bg-slate-700 transition-colors text-left">
+                    <button onClick={() => openNavigation(assignment.end_lat || assignment.destination_lat, assignment.end_lng || assignment.destination_lng, assignment.end_point || assignment.destination_address)} className="w-full flex items-start gap-3 p-3 bg-slate-700/50 rounded-xl hover:bg-slate-700 transition-colors text-left">
                       <Navigation className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-xs text-slate-400">{language === 'sr' ? 'Odredište' : 'Destination'}</p>
-                        <p className="text-sm">{assignment.destination_address || assignment.end_point}</p>
+                        <p className="text-sm">{assignment.end_point || assignment.destination_address || (language === 'sr' ? 'Adresa nije dostupna' : 'Address not available')}</p>
                       </div>
                       <ChevronRight className="w-5 h-5 text-slate-500" />
                     </button>
