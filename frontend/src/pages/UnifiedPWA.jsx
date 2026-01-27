@@ -268,6 +268,7 @@ const statusConfig = {
 
 const UnifiedPWA = () => {
   usePWAManifest();
+  const pushNotifications = usePushNotifications();
   
   const { language, toggleLanguage } = useLanguage();
   const { user, logout } = useAuth();
@@ -277,6 +278,7 @@ const UnifiedPWA = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
   const [fetchError, setFetchError] = useState(null);
+  const [showNotificationSetup, setShowNotificationSetup] = useState(false);
   
   // Shared state
   const [bookings, setBookings] = useState([]);
