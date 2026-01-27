@@ -33,6 +33,11 @@ from .cms import (
     PageContentCreate, PageContentResponse,
     ServiceCreate, ServiceResponse
 )
+from .schedule import (
+    ScheduleStatus, VehicleScheduleCreate, VehicleScheduleUpdate,
+    VehicleScheduleResponse, AvailabilityQuery, TimeSlot,
+    VehicleAvailability, ScheduleConflict
+)
 
 __all__ = [
     # User models
