@@ -3922,6 +3922,7 @@ async def assign_driver_to_booking(
 async def assign_driver_to_public_booking(
     booking_id: str,
     driver_id: str,
+    force: bool = False,
     user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
 ):
     """Assign a driver to a public booking"""
@@ -3931,9 +3932,32 @@ async def assign_driver_to_public_booking(
         raise HTTPException(status_code=404, detail="Driver not found")
     
     # Check if driver is truly available
-    is_available, reason = await is_driver_available_for_booking(driver_id, booking_id)
+    is_available, reason, _ = await is_driver_available_for_booking(driver_id, booking_id)
     if not is_available:
         raise HTTPException(status_code=400, detail=f"Driver is not available: {reason}")
+    
+    # Get the target booking to check for conflicts
+    target_booking = await db.bookings.find_one({"id": booking_id})
+    if not target_booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    target_date = target_booking.get("booking_date") or target_booking.get("preferred_date")
+    target_time = target_booking.get("booking_time") or target_booking.get("preferred_time")
+    
+    # Check for conflicts
+    if not force and target_date:
+        conflicts = await get_driver_conflicts(driver_id, target_date, target_time)
+        # Filter out the booking we're assigning to
+        conflicts = [c for c in conflicts if c["id"] != booking_id]
+        
+        if conflicts:
+            return {
+                "success": False,
+                "warning": True,
+                "message": f"Driver has {len(conflicts)} other booking(s) on {target_date}",
+                "conflicts": conflicts,
+                "require_confirmation": True
+            }
     
     # Update public booking
     result = await db.bookings.update_one(
