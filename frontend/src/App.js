@@ -170,6 +170,7 @@ function App() {
             <Toaster position="top-right" richColors />
           </div>
         </BrowserRouter>
+        </PWAProvider>
       </AuthProvider>
     </LanguageProvider>
   );
