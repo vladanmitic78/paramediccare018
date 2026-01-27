@@ -263,6 +263,20 @@ const AdminLiveMap = () => {
         </div>
         
         <div className="flex items-center gap-3">
+          {/* Selected driver indicator */}
+          {selectedDriver && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setSelectedDriver(null)}
+              className="text-sky-600 border-sky-300 hover:bg-sky-50"
+            >
+              <MapPin className="w-4 h-4 mr-2" />
+              {selectedDriver.full_name}
+              <span className="ml-2 text-slate-400">✕</span>
+            </Button>
+          )}
+          
           {/* Connection status */}
           <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm ${
             wsConnected ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
