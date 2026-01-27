@@ -61,30 +61,27 @@ const API = process.env.REACT_APP_BACKEND_URL;
 
 // Push notification utilities
 const usePushNotifications = () => {
-  const [permission, setPermission] = useState('default');
-  const [isSupported, setIsSupported] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
+  // Check iOS and standalone on initial render
+  const isIOS = typeof window !== 'undefined' && (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  );
+  
+  const isStandalone = typeof window !== 'undefined' && (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true
+  );
+  
+  const isSupported = typeof window !== 'undefined' && 
+    'Notification' in window && 
+    'serviceWorker' in navigator;
 
-  useEffect(() => {
-    // Check iOS
-    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    setIsIOS(iOS);
-    
-    // Check if running as standalone PWA
-    const standalone = window.matchMedia('(display-mode: standalone)').matches ||
-      window.navigator.standalone === true;
-    setIsStandalone(standalone);
-    
-    // Check if push notifications are supported
-    const supported = 'Notification' in window && 'serviceWorker' in navigator;
-    setIsSupported(supported);
-    
-    if (supported) {
-      setPermission(Notification.permission);
+  const [permission, setPermission] = useState(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      return Notification.permission;
     }
-  }, []);
+    return 'default';
+  });
 
   const requestPermission = async () => {
     if (!isSupported) {
