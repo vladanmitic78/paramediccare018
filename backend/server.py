@@ -76,9 +76,15 @@ from utils.email import (
     get_internal_notification_template
 )
 
+# Import extracted routers
+from routes.fleet import router as fleet_router
+
 # Create the main app
 app = FastAPI(title="Paramedic Care 018 API")
 api_router = APIRouter(prefix="/api")
+
+# Include extracted routers
+api_router.include_router(fleet_router)
 
 # WebSocket connection manager instance
 manager = ConnectionManager()
