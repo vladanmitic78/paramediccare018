@@ -378,13 +378,39 @@ const DroppableBookingCard = ({ booking, language, isOver, onEdit }) => {
                 {booking.assigned_driver_name}
               </span>
             </div>
-            {['en_route', 'on_site', 'transporting'].includes(booking.status) && (
-              <span className="text-xs text-slate-500 flex items-center gap-1">
-                <Activity className="w-3 h-3 animate-pulse" />
-                LIVE
-              </span>
-            )}
+            <div className="flex items-center gap-2">
+              {['en_route', 'on_site', 'transporting'].includes(booking.status) && (
+                <span className="text-xs text-slate-500 flex items-center gap-1">
+                  <Activity className="w-3 h-3 animate-pulse" />
+                  LIVE
+                </span>
+              )}
+              {/* Detach button - only show for pending/confirmed status */}
+              {['pending', 'confirmed'].includes(booking.status) && onDetach && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onDetach(booking); }}
+                  className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                  title={language === 'sr' ? 'Ukloni vozača' : 'Remove driver'}
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
           </div>
+          {/* Show drop zone for reassignment */}
+          {['pending', 'confirmed'].includes(booking.status) && (
+            <div className={`
+              mt-2 pt-2 border-t border-dashed transition-all text-center
+              ${dropIsOver ? 'border-amber-400 bg-amber-50' : 'border-slate-200'}
+            `}>
+              <p className="text-xs text-slate-400">
+                {dropIsOver 
+                  ? (language === 'sr' ? '🔄 Otpusti za zamenu!' : '🔄 Drop to replace!')
+                  : (language === 'sr' ? '↔ Prevuci drugo vozilo za zamenu' : '↔ Drag another vehicle to replace')
+                }
+              </p>
+            </div>
+          )}
         </div>
       ) : isDroppable ? (
         <div className={`
