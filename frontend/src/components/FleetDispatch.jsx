@@ -629,6 +629,13 @@ const FleetDispatch = () => {
   // Drag state
   const [activeVehicle, setActiveVehicle] = useState(null);
   const [assigning, setAssigning] = useState(false);
+  
+  // Time-slot assignment modal state
+  const [showTimeSlotModal, setShowTimeSlotModal] = useState(false);
+  const [pendingAssignment, setPendingAssignment] = useState(null);  // {vehicle, booking, driver}
+  const [assignmentTimeSlot, setAssignmentTimeSlot] = useState({ startTime: '', endTime: '' });
+  const [availabilityCheck, setAvailabilityCheck] = useState(null);  // {available, conflicts}
+  const [checkingAvailability, setCheckingAvailability] = useState(false);
 
   const canDeleteVehicle = () => user?.role === 'superadmin' || user?.role === 'admin';
 
