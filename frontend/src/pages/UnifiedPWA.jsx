@@ -59,6 +59,102 @@ import axios from 'axios';
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
+// Push notification utilities
+const usePushNotifications = () => {
+  const [permission, setPermission] = useState('default');
+  const [isSupported, setIsSupported] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  useEffect(() => {
+    // Check iOS
+    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    setIsIOS(iOS);
+    
+    // Check if running as standalone PWA
+    const standalone = window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone === true;
+    setIsStandalone(standalone);
+    
+    // Check if push notifications are supported
+    const supported = 'Notification' in window && 'serviceWorker' in navigator;
+    setIsSupported(supported);
+    
+    if (supported) {
+      setPermission(Notification.permission);
+    }
+  }, []);
+
+  const requestPermission = async () => {
+    if (!isSupported) {
+      return { success: false, reason: 'not_supported' };
+    }
+
+    // iOS requires PWA to be installed first
+    if (isIOS && !isStandalone) {
+      return { success: false, reason: 'ios_not_installed' };
+    }
+
+    try {
+      const result = await Notification.requestPermission();
+      setPermission(result);
+      
+      if (result === 'granted') {
+        // Register service worker if not already
+        await registerServiceWorker();
+        return { success: true };
+      }
+      
+      return { success: false, reason: result };
+    } catch (error) {
+      console.error('Push permission error:', error);
+      return { success: false, reason: 'error', error };
+    }
+  };
+
+  const registerServiceWorker = async () => {
+    if ('serviceWorker' in navigator) {
+      try {
+        const registration = await navigator.serviceWorker.register('/sw.js');
+        console.log('Service Worker registered:', registration.scope);
+        return registration;
+      } catch (error) {
+        console.error('Service Worker registration failed:', error);
+      }
+    }
+  };
+
+  const sendTestNotification = async () => {
+    if (permission !== 'granted') {
+      const result = await requestPermission();
+      if (!result.success) return result;
+    }
+
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      registration.active.postMessage({
+        type: 'TEST_NOTIFICATION',
+        body: 'Push notifications are working! 🚑'
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Test notification error:', error);
+      return { success: false, error };
+    }
+  };
+
+  return {
+    permission,
+    isSupported,
+    isIOS,
+    isStandalone,
+    requestPermission,
+    sendTestNotification,
+    canRequestPermission: isSupported && (!isIOS || isStandalone)
+  };
+};
+
 // Custom hook for PWA manifest
 const usePWAManifest = () => {
   useEffect(() => {
