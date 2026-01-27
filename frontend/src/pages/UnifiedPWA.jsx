@@ -981,23 +981,24 @@ const UnifiedPWA = () => {
                     </button>
                   </div>
                   {assignment.contact_phone && (
-                    <button 
-                      onClick={() => startCall(assignment.contact_phone, assignment.patient_name)}
-                      className="flex-1 flex items-center gap-3 p-3 bg-sky-600/20 rounded-xl hover:bg-sky-600/30 transition-colors"
-                      data-testid="call-patient-btn"
-                    >
-                      <Phone className="w-5 h-5 text-sky-400" />
-                      <span className="flex-1 text-left truncate">{assignment.contact_phone}</span>
-                    </button>
-                    <button 
-                      onClick={() => quickVideoCall(assignment.patient_name, language === 'sr' ? 'Pacijent' : 'Patient')}
-                      className="p-3 bg-indigo-600/20 rounded-xl hover:bg-indigo-600/30 transition-colors"
-                      data-testid="video-call-patient-btn"
-                      title={language === 'sr' ? 'Video poziv' : 'Video call'}
-                    >
-                      <Video className="w-5 h-5 text-indigo-400" />
-                    </button>
-                  </div>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => startCall(assignment.contact_phone, assignment.patient_name)}
+                        className="flex-1 flex items-center gap-3 p-3 bg-sky-600/20 rounded-xl hover:bg-sky-600/30 transition-colors"
+                        data-testid="call-patient-btn"
+                      >
+                        <Phone className="w-5 h-5 text-sky-400" />
+                        <span className="flex-1 text-left truncate">{assignment.contact_phone}</span>
+                      </button>
+                      <button 
+                        onClick={() => quickVideoCall(assignment.patient_name, language === 'sr' ? 'Pacijent' : 'Patient')}
+                        className="p-3 bg-indigo-600/20 rounded-xl hover:bg-indigo-600/30 transition-colors"
+                        data-testid="video-call-patient-btn"
+                        title={language === 'sr' ? 'Video poziv' : 'Video call'}
+                      >
+                        <Video className="w-5 h-5 text-indigo-400" />
+                      </button>
+                    </div>
                   )}
                   
                   {/* Quick call buttons row */}
