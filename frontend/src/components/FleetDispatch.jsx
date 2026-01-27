@@ -319,6 +319,9 @@ const DraggableVehicleCard = ({ vehicle, language, onAssignClick, onVideoCall, o
         </div>
       </div>
 
+      {/* Mini Timeline - Today's Schedule */}
+      <VehicleTimeline schedules={schedules} language={language} />
+
       {/* Actions */}
       <div className="flex items-center gap-2 pt-2 border-t border-slate-200">
         <Button
