@@ -62,6 +62,10 @@ __all__ = [
     'ShiftSchedule', 'VehicleCreate', 'VehicleUpdate', 'VehicleResponse',
     'TeamAssignmentCreate', 'TeamAssignmentUpdate', 'MissionTeamLock',
     'TeamAuditEntry', 'MissionTeamValidation',
+    # Schedule models (Timeline-Based Scheduling)
+    'ScheduleStatus', 'VehicleScheduleCreate', 'VehicleScheduleUpdate',
+    'VehicleScheduleResponse', 'AvailabilityQuery', 'TimeSlot',
+    'VehicleAvailability', 'ScheduleConflict',
     # CMS models
     'ContentCreate', 'ContentResponse',
     'PageContentCreate', 'PageContentResponse',
