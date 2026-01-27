@@ -82,11 +82,11 @@
 
   "rca_of_the_issue": {
     "issue": "Hero image not loading from CMS uploads",
-    "root_cause": "Static files are mounted at /uploads in FastAPI, but the Kubernetes ingress only routes /api/* to the backend service. When accessing https://ambutrack.preview.emergentagent.com/uploads/filename.jpg, the request goes to the frontend (port 3000) instead of the backend (port 8001).",
+    "root_cause": "Static files are mounted at /uploads in FastAPI, but the Kubernetes ingress only routes /api/* to the backend service. When accessing https://paramedicapp.preview.emergentagent.com/uploads/filename.jpg, the request goes to the frontend (port 3000) instead of the backend (port 8001).",
     "reproduction_steps": [
       "1. Upload an image via CMS (creates file in /app/backend/uploads/)",
       "2. Image URL is stored as /uploads/filename.jpg",
-      "3. Frontend tries to load https://ambutrack.preview.emergentagent.com/uploads/filename.jpg",
+      "3. Frontend tries to load https://paramedicapp.preview.emergentagent.com/uploads/filename.jpg",
       "4. Ingress routes this to frontend (not /api/* prefix)",
       "5. Frontend returns HTML instead of image"
     ],
