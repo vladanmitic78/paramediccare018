@@ -643,12 +643,28 @@ const FleetDispatch = () => {
   const fetchData = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
     try {
-      const [vehiclesRes, bookingsRes] = await Promise.all([
+      // Get today's date in YYYY-MM-DD format
+      const today = new Date().toISOString().split('T')[0];
+      
+      const [vehiclesRes, bookingsRes, schedulesRes] = await Promise.all([
         axios.get(`${API}/fleet/vehicles`),
-        axios.get(`${API}/bookings`)
+        axios.get(`${API}/bookings`),
+        axios.get(`${API}/fleet/schedules?date=${today}`)
       ]);
+      
       setVehicles(vehiclesRes.data);
       setBookings(bookingsRes.data);
+      
+      // Group schedules by vehicle_id
+      const schedulesByVehicle = {};
+      schedulesRes.data.forEach(schedule => {
+        if (!schedulesByVehicle[schedule.vehicle_id]) {
+          schedulesByVehicle[schedule.vehicle_id] = [];
+        }
+        schedulesByVehicle[schedule.vehicle_id].push(schedule);
+      });
+      setVehicleSchedules(schedulesByVehicle);
+      
       if (isRefresh) toast.success(language === 'sr' ? 'Osveženo!' : 'Refreshed!');
     } catch (error) {
       console.error('Error fetching data:', error);
