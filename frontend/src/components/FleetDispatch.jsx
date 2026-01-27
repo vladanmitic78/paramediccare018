@@ -276,7 +276,7 @@ const VehicleOverlay = ({ vehicle, language }) => (
 );
 
 // Droppable Booking Card Component
-const DroppableBookingCard = ({ booking, language, isOver }) => {
+const DroppableBookingCard = ({ booking, language, isOver, onEdit }) => {
   const { setNodeRef, isOver: dropIsOver } = useDroppable({
     id: `booking-${booking.id}`,
     data: { booking }
@@ -304,6 +304,9 @@ const DroppableBookingCard = ({ booking, language, isOver }) => {
 
   // Only pending bookings without driver are droppable
   const isDroppable = booking.status === 'pending' && !booking.assigned_driver;
+  
+  // Can edit if pending or active (not completed/cancelled)
+  const canEdit = ['pending', 'confirmed', 'in_progress', 'en_route', 'on_site', 'transporting'].includes(booking.status);
 
   return (
     <div
@@ -323,12 +326,23 @@ const DroppableBookingCard = ({ booking, language, isOver }) => {
             {booking.patient_name}
           </span>
         </div>
-        <Badge className={`text-[10px] px-2 py-0.5 flex items-center gap-1 ${currentStatus.color}`}>
-          {currentStatus.pulse && (
-            <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
+        <div className="flex items-center gap-2">
+          {canEdit && onEdit && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onEdit(booking); }}
+              className="p-1.5 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+              title={language === 'sr' ? 'Uredi' : 'Edit'}
+            >
+              <Edit2 className="w-4 h-4" />
+            </button>
           )}
-          {currentStatus[language] || booking.status}
-        </Badge>
+          <Badge className={`text-[10px] px-2 py-0.5 flex items-center gap-1 ${currentStatus.color}`}>
+            {currentStatus.pulse && (
+              <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
+            )}
+            {currentStatus[language] || booking.status}
+          </Badge>
+        </div>
       </div>
 
       <div className="space-y-2 text-sm text-slate-600">
