@@ -587,12 +587,27 @@ const MedicalDashboard = () => {
                           </p>
                         </div>
                       </div>
-                      <Badge className={
-                        transport.status === 'en_route' ? 'bg-amber-500' : 
-                        transport.status === 'picked_up' ? 'bg-sky-500' : 'bg-green-500'
-                      }>
-                        {transport.status}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedTransportId(transport.id);
+                            setSelectedTransportPatient(transport.patient_name);
+                            setTimelineOpen(true);
+                          }}
+                          className={`${darkMode ? 'hover:bg-slate-600' : ''}`}
+                          title={language === 'sr' ? 'Vremenska linija' : 'Timeline'}
+                        >
+                          <Clock className="w-4 h-4" />
+                        </Button>
+                        <Badge className={
+                          transport.status === 'en_route' ? 'bg-amber-500' : 
+                          transport.status === 'picked_up' ? 'bg-sky-500' : 'bg-green-500'
+                        }>
+                          {transport.status}
+                        </Badge>
+                      </div>
                     </div>
                   ))}
                 </div>
