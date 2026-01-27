@@ -799,7 +799,7 @@ const UnifiedPWA = () => {
         navigator.geolocation.getCurrentPosition(
           async (position) => {
             const { latitude, longitude } = position.coords;
-            setLastLocation({ lat: latitude, lng: longitude });
+            setLastLocation({ latitude, longitude });
             
             // Get pickup coordinates
             const pickupLat = assignment.start_coords?.lat || assignment.pickup_lat;
