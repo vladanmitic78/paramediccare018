@@ -2293,8 +2293,8 @@ const UnifiedPWA = () => {
           <div className="flex-1 relative">
             <MapContainer
               center={[
-                lastLocation?.lat || assignment.start_coords?.lat || assignment.pickup_lat || 43.32,
-                lastLocation?.lng || assignment.start_coords?.lng || assignment.pickup_lng || 21.89
+                lastLocation?.latitude || assignment.start_coords?.lat || assignment.pickup_lat || 43.32,
+                lastLocation?.longitude || assignment.start_coords?.lng || assignment.pickup_lng || 21.89
               ]}
               zoom={14}
               style={{ height: '100%', width: '100%' }}
@@ -2306,9 +2306,9 @@ const UnifiedPWA = () => {
               />
               
               {/* Driver current location */}
-              {lastLocation && (
+              {lastLocation?.latitude && lastLocation?.longitude && (
                 <Marker 
-                  position={[lastLocation.lat, lastLocation.lng]}
+                  position={[lastLocation.latitude, lastLocation.longitude]}
                   icon={L.divIcon({
                     className: 'driver-marker',
                     html: `<div style="background: #3b82f6; border: 3px solid white; border-radius: 50%; width: 24px; height: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;">
