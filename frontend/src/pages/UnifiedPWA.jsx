@@ -288,6 +288,20 @@ const UnifiedPWA = () => {
   const [fetchError, setFetchError] = useState(null);
   const [showNotificationSetup, setShowNotificationSetup] = useState(false);
   
+  // Set a timeout to prevent infinite loading - if data doesn't load in 10s, show error state
+  useEffect(() => {
+    if (loading && user?.role) {
+      const timeout = setTimeout(() => {
+        if (loading) {
+          console.error('Loading timeout - data fetch took too long');
+          setLoading(false);
+          setFetchError('Connection timeout. Please check your internet connection.');
+        }
+      }, 10000);
+      return () => clearTimeout(timeout);
+    }
+  }, [loading, user?.role]);
+  
   // Shared state
   const [bookings, setBookings] = useState([]);
   const [drivers, setDrivers] = useState([]);
