@@ -1309,14 +1309,65 @@ const FleetDispatch = () => {
     setPickupSuggestions([]);
   };
 
+  // Calculate ETA when both addresses are selected
+  const calculateETA = async (pickupLat, pickupLng, destLat, destLng, pickupDate, pickupTime) => {
+    if (!pickupLat || !pickupLng || !destLat || !destLng) return;
+    
+    try {
+      const startTime = pickupDate && pickupTime 
+        ? `${pickupDate}T${pickupTime}:00` 
+        : new Date().toISOString();
+      
+      const response = await axios.post(`${API}/route/calculate?start_time=${encodeURIComponent(startTime)}`, {
+        start_lat: parseFloat(pickupLat),
+        start_lng: parseFloat(pickupLng),
+        end_lat: parseFloat(destLat),
+        end_lng: parseFloat(destLng)
+      });
+      
+      if (response.data.estimated_arrival) {
+        const eta = new Date(response.data.estimated_arrival);
+        setNewBooking(prev => ({
+          ...prev,
+          arrival_date: eta.toISOString().split('T')[0],
+          arrival_time: eta.toTimeString().slice(0, 5),
+          route_distance_km: response.data.distance_km,
+          route_duration: response.data.duration_formatted
+        }));
+        
+        toast.info(
+          language === 'sr' 
+            ? `📍 Ruta: ${response.data.distance_km}km, ${response.data.duration_formatted}` 
+            : `📍 Route: ${response.data.distance_km}km, ${response.data.duration_formatted}`,
+          { duration: 4000 }
+        );
+      }
+    } catch (error) {
+      console.error('Error calculating ETA:', error);
+    }
+  };
+
   const selectDestinationAddress = (suggestion) => {
-    setNewBooking({
+    const updatedBooking = {
       ...newBooking,
       destination_address: suggestion.display_name,
       destination_lat: suggestion.lat,
       destination_lng: suggestion.lng
-    });
+    };
+    setNewBooking(updatedBooking);
     setDestinationSuggestions([]);
+    
+    // Auto-calculate ETA if pickup coordinates are available
+    if (newBooking.pickup_lat && newBooking.pickup_lng) {
+      calculateETA(
+        newBooking.pickup_lat, 
+        newBooking.pickup_lng, 
+        suggestion.lat, 
+        suggestion.lng,
+        newBooking.pickup_date,
+        newBooking.pickup_time
+      );
+    }
   };
 
   if (loading) {
