@@ -291,40 +291,206 @@ export const Header = () => {
               </Link>
             )}
 
-            {/* Mobile Menu Button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="lg:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              data-testid="mobile-menu-btn"
-            >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </Button>
+            {/* Mobile Menu Button - Using Sheet for better UX */}
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="lg:hidden"
+                  data-testid="mobile-menu-btn"
+                >
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[300px] sm:w-[350px] p-0">
+                <SheetHeader className="p-4 border-b bg-slate-50">
+                  <SheetTitle className="flex items-center gap-3">
+                    <img 
+                      src={logoUrl}
+                      alt="PC018"
+                      className="h-8 w-auto object-contain"
+                    />
+                    <span className="text-lg font-bold text-slate-900">PC018</span>
+                  </SheetTitle>
+                </SheetHeader>
+                
+                <div className="flex flex-col h-[calc(100vh-80px)] overflow-y-auto">
+                  {/* User Info Section */}
+                  {user && (
+                    <div className="p-4 bg-gradient-to-r from-sky-50 to-indigo-50 border-b">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-sky-600 flex items-center justify-center">
+                          <span className="text-lg font-bold text-white">
+                            {user.full_name?.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-900">{user.full_name}</p>
+                          <p className="text-xs text-slate-500 capitalize">{user.role}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Quick Actions for Logged-in Users */}
+                  {user && (
+                    <div className="p-4 border-b">
+                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+                        {language === 'sr' ? 'Brze akcije' : 'Quick Actions'}
+                      </p>
+                      <div className="space-y-1">
+                        {/* My Bookings Button */}
+                        <button
+                          onClick={() => setShowBookings(!showBookings)}
+                          className="w-full flex items-center justify-between p-3 rounded-lg bg-sky-50 hover:bg-sky-100 transition-colors"
+                          data-testid="menu-my-bookings"
+                        >
+                          <div className="flex items-center gap-3">
+                            <CalendarDays className="w-5 h-5 text-sky-600" />
+                            <span className="font-medium text-slate-900">
+                              {language === 'sr' ? 'Moje rezervacije' : 'My Bookings'}
+                            </span>
+                          </div>
+                          <ChevronRight className={`w-4 h-4 text-slate-400 transition-transform ${showBookings ? 'rotate-90' : ''}`} />
+                        </button>
+
+                        {/* Bookings Panel */}
+                        {showBookings && (
+                          <div className="mt-2 ml-2 pl-4 border-l-2 border-sky-200">
+                            {loadingBookings ? (
+                              <div className="flex items-center justify-center py-4">
+                                <Loader2 className="w-5 h-5 animate-spin text-sky-600" />
+                              </div>
+                            ) : userBookings.length > 0 ? (
+                              <div className="space-y-2">
+                                {userBookings.map((booking, idx) => (
+                                  <div 
+                                    key={booking.id || idx}
+                                    className="p-3 bg-white rounded-lg border border-slate-200 shadow-sm"
+                                  >
+                                    <div className="flex items-start justify-between mb-2">
+                                      <p className="font-medium text-slate-900 text-sm">
+                                        {booking.patient_name || booking.service_type || 'Transport'}
+                                      </p>
+                                      <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(booking.status)}`}>
+                                        {getStatusLabel(booking.status)}
+                                      </span>
+                                    </div>
+                                    {(booking.scheduled_date || booking.pickup_time) && (
+                                      <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-1">
+                                        <Clock className="w-3.5 h-3.5" />
+                                        {formatBookingDate(booking.scheduled_date || booking.pickup_time)}
+                                      </div>
+                                    )}
+                                    {(booking.pickup_address || booking.start_point) && (
+                                      <div className="flex items-start gap-1.5 text-xs text-slate-500">
+                                        <MapPin className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                                        <span className="line-clamp-1">{booking.pickup_address || booking.start_point}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                                {user.role === 'patient' && (
+                                  <Link
+                                    to="/patient/bookings"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="block text-center text-sm text-sky-600 hover:text-sky-700 font-medium py-2"
+                                  >
+                                    {language === 'sr' ? 'Prikaži sve →' : 'View all →'}
+                                  </Link>
+                                )}
+                              </div>
+                            ) : (
+                              <p className="text-sm text-slate-500 py-3">
+                                {language === 'sr' ? 'Nema aktivnih rezervacija' : 'No active bookings'}
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Dashboard Link for Staff */}
+                        {isStaff() && (
+                          <Link
+                            to="/dashboard"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100 transition-colors"
+                          >
+                            <LayoutDashboard className="w-5 h-5 text-indigo-600" />
+                            <span className="font-medium text-slate-900">
+                              {language === 'sr' ? 'Kontrolna tabla' : 'Dashboard'}
+                            </span>
+                          </Link>
+                        )}
+
+                        {/* Patient Portal for Patients */}
+                        {user.role === 'patient' && (
+                          <Link
+                            to="/patient"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100 transition-colors"
+                          >
+                            <User className="w-5 h-5 text-emerald-600" />
+                            <span className="font-medium text-slate-900">
+                              {language === 'sr' ? 'Moj portal' : 'My Portal'}
+                            </span>
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Navigation Links */}
+                  <div className="p-4 flex-1">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+                      {language === 'sr' ? 'Navigacija' : 'Navigation'}
+                    </p>
+                    <div className="space-y-1">
+                      {navItems.map((item) => (
+                        <Link
+                          key={item.path}
+                          to={item.path}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
+                            isActive(item.path)
+                              ? 'bg-slate-100 text-slate-900'
+                              : `text-slate-600 hover:bg-slate-50 ${item.color || ''}`
+                          }`}
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Bottom Section - Login/Logout */}
+                  <div className="p-4 border-t mt-auto">
+                    {user ? (
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start gap-3 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                        onClick={() => {
+                          logout();
+                          setMobileMenuOpen(false);
+                          navigate('/');
+                        }}
+                      >
+                        <LogOut className="w-4 h-4" />
+                        {language === 'sr' ? 'Odjavi se' : 'Logout'}
+                      </Button>
+                    ) : (
+                      <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                        <Button className="w-full btn-primary">
+                          {t('nav_login')}
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
-
-        {/* Mobile Navigation */}
-        {mobileMenuOpen && (
-          <nav className="lg:hidden py-4 border-t border-slate-100" data-testid="mobile-menu">
-            <div className="flex flex-col gap-1">
-              {navItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                    isActive(item.path)
-                      ? 'bg-slate-100 text-slate-900'
-                      : `text-slate-600 hover:bg-slate-50 ${item.color || ''}`
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          </nav>
-        )}
       </div>
     </header>
   );
