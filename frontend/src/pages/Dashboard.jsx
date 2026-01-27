@@ -974,6 +974,11 @@ const Dashboard = () => {
             <FleetHistory language={language} />
           )}
 
+          {/* Booking Calendar */}
+          {activeTab === 'calendar' && isAdmin() && (
+            <BookingCalendar />
+          )}
+
           {/* CMS - Page Management */}
           {activeTab === 'cms' && isAdmin() && (
             <CMSManager />
