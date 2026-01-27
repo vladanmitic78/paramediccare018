@@ -309,6 +309,9 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
+    // Wait for auth to finish loading before checking user
+    if (authLoading) return;
+    
     if (!user) {
       navigate('/login');
       return;
@@ -316,7 +319,7 @@ const Dashboard = () => {
     fetchData();
     fetchPatientBookings();
     fetchAvailableDrivers();
-  }, [user, navigate]);
+  }, [user, navigate, authLoading]);
 
   // Fetch API keys and incoming APIs when api-settings tab is selected
   useEffect(() => {
