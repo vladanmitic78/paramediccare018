@@ -12,7 +12,8 @@ from config import db, logger
 from models import (
     UserRole, ScheduleStatus,
     VehicleScheduleCreate, VehicleScheduleUpdate, VehicleScheduleResponse,
-    AvailabilityQuery, TimeSlot, VehicleAvailability, ScheduleConflict
+    AvailabilityQuery, TimeSlot, VehicleAvailability, ScheduleConflict,
+    StaffUnavailability
 )
 from utils.auth import get_current_user, require_roles
 
@@ -20,6 +21,9 @@ router = APIRouter(prefix="/fleet/schedules", tags=["Vehicle Schedules"])
 
 # Default schedule duration in hours
 DEFAULT_SCHEDULE_DURATION_HOURS = 2
+
+# Staff availability statuses that indicate unavailability
+UNAVAILABLE_STATUSES = ["unavailable", "on_leave", "sick"]
 
 
 # ============ HELPER FUNCTIONS ============
