@@ -608,8 +608,10 @@ const FleetDispatch = () => {
     destination_address: '',
     destination_lat: null,
     destination_lng: null,
-    booking_date: '',
-    booking_time: '',
+    pickup_date: '',
+    pickup_time: '',
+    arrival_date: '',
+    arrival_time: '',
     mobility_status: 'walking',
     notes: ''
   });
