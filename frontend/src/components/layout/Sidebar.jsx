@@ -55,8 +55,7 @@ const getNavigationItems = (language) => [
         label: language === 'sr' ? 'Kalendar' : 'Calendar', 
         icon: CalendarDays, 
         href: '/dashboard?tab=calendar',
-        roles: ['superadmin', 'admin', 'doctor', 'nurse'],
-        badge: language === 'sr' ? 'Uskoro' : 'Soon'
+        roles: ['superadmin', 'admin', 'doctor', 'nurse']
       }
     ]
   },
