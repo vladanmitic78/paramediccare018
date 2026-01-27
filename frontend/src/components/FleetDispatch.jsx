@@ -522,11 +522,38 @@ const FleetDispatch = () => {
            v.registration_plate?.toLowerCase().includes(search);
   });
 
-  // Filter bookings
+  // Filter bookings by status and search
   const filteredBookings = bookings.filter(b => {
-    if (bookingFilter === 'all') return b.status !== 'completed' && b.status !== 'cancelled';
-    if (bookingFilter === 'pending') return b.status === 'pending';
-    if (bookingFilter === 'active') return ['confirmed', 'in_progress', 'en_route', 'on_site', 'transporting'].includes(b.status);
+    // First filter by status
+    let statusMatch = true;
+    if (bookingFilter === 'all') statusMatch = b.status !== 'completed' && b.status !== 'cancelled';
+    else if (bookingFilter === 'pending') statusMatch = b.status === 'pending';
+    else if (bookingFilter === 'active') statusMatch = ['confirmed', 'in_progress', 'en_route', 'on_site', 'transporting'].includes(b.status);
+    
+    if (!statusMatch) return false;
+    
+    // Then filter by search (search any parameter)
+    if (bookingSearch.trim()) {
+      const search = bookingSearch.toLowerCase();
+      const searchableFields = [
+        b.patient_name,
+        b.contact_phone,
+        b.contact_email,
+        b.pickup_address,
+        b.destination_address,
+        b.assigned_driver,
+        b.assigned_driver_name,
+        b.status,
+        b.booking_date,
+        b.booking_time,
+        b.notes,
+        b.id
+      ];
+      return searchableFields.some(field => 
+        field && String(field).toLowerCase().includes(search)
+      );
+    }
+    
     return true;
   });
 
