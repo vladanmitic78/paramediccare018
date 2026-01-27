@@ -859,12 +859,19 @@ const UnifiedPWA = () => {
 
       {/* Bottom Navigation - Only for Admin/Medical */}
       {(isAdmin || isMedical) && (
-        <nav className="bg-slate-800 border-t border-slate-700 grid grid-cols-3">
+        <nav className={`bg-slate-800 border-t border-slate-700 grid ${isMedical ? 'grid-cols-4' : 'grid-cols-3'}`}>
           <button onClick={() => setActiveTab('home')} className={`py-4 flex flex-col items-center gap-1 relative ${activeTab === 'home' ? 'text-sky-400' : 'text-slate-500'}`}>
             <Home className="w-5 h-5" />
             <span className="text-xs">{language === 'sr' ? 'Početna' : 'Home'}</span>
             {pendingBookings.length > 0 && <span className="absolute top-2 right-1/4 w-5 h-5 bg-red-500 rounded-full text-[10px] flex items-center justify-center">{pendingBookings.length}</span>}
           </button>
+          {isMedical && (
+            <button onClick={() => setActiveTab('vitals')} className={`py-4 flex flex-col items-center gap-1 relative ${activeTab === 'vitals' ? 'text-purple-400' : 'text-slate-500'}`}>
+              <Heart className="w-5 h-5" />
+              <span className="text-xs">{language === 'sr' ? 'Vitali' : 'Vitals'}</span>
+              {activeBookings.length > 0 && <span className="absolute top-2 right-1/4 w-4 h-4 bg-purple-500 rounded-full text-[10px] flex items-center justify-center">{activeBookings.length}</span>}
+            </button>
+          )}
           <button onClick={() => setActiveTab('map')} className={`py-4 flex flex-col items-center gap-1 ${activeTab === 'map' ? 'text-sky-400' : 'text-slate-500'}`}>
             <MapPin className="w-5 h-5" />
             <span className="text-xs">{language === 'sr' ? 'Mapa' : 'Map'}</span>
