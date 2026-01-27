@@ -1047,6 +1047,17 @@ const FleetDispatch = () => {
       return;
     }
     
+    // Build pickup and arrival datetimes
+    const pickupDate = newBooking.pickup_date || new Date().toISOString().split('T')[0];
+    const pickupTime = newBooking.pickup_time || '09:00';
+    const pickupDatetime = `${pickupDate}T${pickupTime}:00`;
+    
+    let estimatedArrival = null;
+    if (newBooking.arrival_date) {
+      const arrivalTime = newBooking.arrival_time || '18:00';
+      estimatedArrival = `${newBooking.arrival_date}T${arrivalTime}:00`;
+    }
+    
     setCreatingBooking(true);
     try {
       await axios.post(`${API}/bookings`, {
@@ -1059,8 +1070,10 @@ const FleetDispatch = () => {
         start_lng: newBooking.pickup_lng,
         end_lat: newBooking.destination_lat,
         end_lng: newBooking.destination_lng,
-        booking_date: newBooking.booking_date || new Date().toISOString().split('T')[0],
-        booking_time: newBooking.booking_time || '09:00',
+        booking_date: pickupDate,
+        booking_time: pickupTime,
+        pickup_datetime: pickupDatetime,
+        estimated_arrival: estimatedArrival,
         mobility_status: newBooking.mobility_status,
         notes: newBooking.notes || '',
         booking_type: 'transport',
@@ -1079,8 +1092,10 @@ const FleetDispatch = () => {
         destination_address: '',
         destination_lat: null,
         destination_lng: null,
-        booking_date: '',
-        booking_time: '',
+        pickup_date: '',
+        pickup_time: '',
+        arrival_date: '',
+        arrival_time: '',
         mobility_status: 'walking',
         notes: ''
       });
