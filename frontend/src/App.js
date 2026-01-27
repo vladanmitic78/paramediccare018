@@ -128,8 +128,8 @@ function App() {
               <Route path="/patient/profile" element={<PatientRoute><PatientProfile /></PatientRoute>} />
               <Route path="/patient/notifications" element={<PatientRoute><PatientNotifications /></PatientRoute>} />
               
-              {/* Driver App without header/footer */}
-              <Route path="/driver" element={<DriverRoute><DriverDashboard /></DriverRoute>} />
+              {/* Driver App - Redirect to Unified PWA */}
+              <Route path="/driver" element={<DriverRoute><UnifiedPWA /></DriverRoute>} />
               
               {/* Medical Dashboard without header/footer */}
               <Route path="/medical" element={<MedicalRoute><MedicalDashboard /></MedicalRoute>} />
@@ -137,8 +137,8 @@ function App() {
               {/* Medical Staff PWA without header/footer */}
               <Route path="/medical-pwa" element={<MedicalRoute><MedicalStaffPWA /></MedicalRoute>} />
               
-              {/* Admin PWA without header/footer */}
-              <Route path="/admin-app" element={<AdminPWA />} />
+              {/* Admin PWA - Redirect to Unified PWA */}
+              <Route path="/admin-app" element={<UnifiedPWA />} />
               
               {/* Unified PWA - adapts to user role */}
               <Route path="/app" element={<UnifiedPWA />} />
