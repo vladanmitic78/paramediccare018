@@ -78,6 +78,7 @@ from utils.email import (
 
 # Import extracted routers
 from routes.fleet import router as fleet_router
+from routes.schedule import router as schedule_router
 
 # Create the main app
 app = FastAPI(title="Paramedic Care 018 API")
@@ -85,6 +86,7 @@ api_router = APIRouter(prefix="/api")
 
 # Include extracted routers
 api_router.include_router(fleet_router)
+api_router.include_router(schedule_router)
 
 # WebSocket connection manager instance
 manager = ConnectionManager()
