@@ -620,10 +620,10 @@ const UnifiedPWA = () => {
           setLastLocation(newLocation);
           
           // Update ETA for active booking when location changes significantly
-          if (currentBooking?.id && newLocation.latitude && newLocation.longitude) {
+          if (assignment?.id && newLocation.latitude && newLocation.longitude) {
             try {
               await axios.post(
-                `${API}/api/bookings/${currentBooking.id}/update-eta?current_lat=${newLocation.latitude}&current_lng=${newLocation.longitude}`
+                `${API}/api/bookings/${assignment.id}/update-eta?current_lat=${newLocation.latitude}&current_lng=${newLocation.longitude}`
               );
             } catch (error) {
               // Silently fail - ETA update is not critical
@@ -638,7 +638,7 @@ const UnifiedPWA = () => {
         if (watchIdRef.current) navigator.geolocation.clearWatch(watchIdRef.current);
       };
     }
-  }, [isDriver, isActiveTransport, currentBooking?.id]);
+  }, [isDriver, isActiveTransport, assignment?.id]);
 
   // Handle visibility change - restore wake lock and refresh data when coming back from a call
   useEffect(() => {
