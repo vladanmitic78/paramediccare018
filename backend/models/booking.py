@@ -65,6 +65,25 @@ class BookingStatusUpdate(BaseModel):
     assigned_medical: Optional[str] = None
 
 
+class BookingFullUpdate(BaseModel):
+    patient_name: Optional[str] = None
+    contact_phone: Optional[str] = None
+    contact_email: Optional[str] = None
+    start_point: Optional[str] = None
+    end_point: Optional[str] = None
+    start_lat: Optional[float] = None
+    start_lng: Optional[float] = None
+    end_lat: Optional[float] = None
+    end_lng: Optional[float] = None
+    booking_date: Optional[str] = None
+    booking_time: Optional[str] = None
+    mobility_status: Optional[str] = None
+    notes: Optional[str] = None
+    status: Optional[str] = None
+    assigned_driver: Optional[str] = None
+    assigned_medical: Optional[str] = None
+
+
 class PatientBookingCreate(BaseModel):
     patient_name: str
     patient_age: int
