@@ -39,6 +39,24 @@ A comprehensive medical transport system including a public website, patient por
 
 ## Recent Bug Fixes (January 27, 2026)
 
+### PWA Install Prompt - FIXED (Latest)
+**Problem:** Users on mobile devices were not getting prompted to install the PWA.
+
+**Root Cause:** The `beforeinstallprompt` event was not being handled, and there was no UI to trigger the installation.
+
+**Fix Applied:**
+1. Added `usePWAInstall` custom hook to capture the browser's install prompt event
+2. Added PWA install banner (sky-blue) that appears when the app is installable
+3. Added download icon in header (with pulse animation) for quick install access
+4. Added "Install App" section in the notification settings modal
+5. Added "App Installed" success message when installation completes
+6. iOS users still see manual installation instructions (Safari doesn't support `beforeinstallprompt`)
+
+**Test:** On Android Chrome or Desktop Chrome/Edge, navigate to `/app` and look for:
+- Sky-blue install banner below the notification banner
+- Download icon (pulsing) in the header
+- "Install App" button in the notification settings modal
+
 ### Driver Availability Issue - FIXED
 **Problem:** Driver "Marija Vujic" (and others) appeared as "not available" when trying to assign via drag-drop in Vehicles & Bookings.
 
