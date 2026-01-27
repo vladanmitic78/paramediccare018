@@ -83,11 +83,20 @@ A comprehensive medical transport system including a public website, patient por
 ## Backend Route Structure
 ```
 /app/backend/
+├── models/
+│   ├── __init__.py
+│   ├── booking.py
+│   ├── driver.py
+│   ├── medical.py
+│   ├── schedule.py     # NEW - Timeline-based scheduling models
+│   ├── user.py
+│   └── vehicle.py
 ├── routes/
 │   ├── __init__.py
-│   ├── auth.py        # Authentication routes (~260 lines)
-│   └── fleet.py       # Fleet management routes (~950 lines)
-└── server.py          # Main server (~4,600 lines) - needs further refactoring
+│   ├── auth.py         # Authentication routes (~260 lines)
+│   ├── fleet.py        # Fleet management routes (~950 lines)
+│   └── schedule.py     # NEW - Vehicle scheduling routes (~600 lines)
+└── server.py           # Main server (~4,600 lines) - needs further refactoring
 ```
 
 ## Database Schema
@@ -97,21 +106,72 @@ A comprehensive medical transport system including a public website, patient por
 - **driver_status**: Driver availability and current assignment
 - **vehicles**: Fleet vehicles
 - **vehicle_teams**: Vehicle-to-staff assignments
+- **vehicle_schedules**: NEW - Timeline-based vehicle scheduling
 - **transport_events**: Timeline events for transports
 - **invoices**: Patient invoices
+
+## Timeline-Based Vehicle Scheduling System (NEW)
+
+### Phase 1: Data Model & Backend APIs (COMPLETED Jan 27, 2026)
+
+**New Collection: `vehicle_schedules`**
+```javascript
+{
+  "id": "uuid",
+  "vehicle_id": "vehicle-uuid",
+  "booking_id": "booking-uuid",
+  "booking_type": "patient_booking|booking",
+  "driver_id": "driver-uuid (optional)",
+  "start_time": "2026-01-27T09:00:00+00:00",
+  "end_time": "2026-01-27T11:00:00+00:00",
+  "status": "scheduled|in_progress|completed|cancelled",
+  "created_at": "...",
+  "created_by": "admin-uuid"
+}
+```
+
+**New API Endpoints:**
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/fleet/schedules` | GET | Get all schedules (with date/vehicle/driver/status filters) |
+| `/api/fleet/schedules/vehicle/{id}` | GET | Get schedules for a specific vehicle |
+| `/api/fleet/schedules/driver/{id}` | GET | Get schedules for a specific driver |
+| `/api/fleet/schedules/availability` | GET | Check vehicle availability for a date/time range |
+| `/api/fleet/schedules/conflicts` | GET | Check for scheduling conflicts |
+| `/api/fleet/schedules` | POST | Create a new schedule (with conflict detection) |
+| `/api/fleet/schedules/{id}` | GET | Get specific schedule |
+| `/api/fleet/schedules/{id}` | PUT | Update schedule |
+| `/api/fleet/schedules/{id}` | DELETE | Cancel schedule (soft delete) |
+| `/api/fleet/schedules/{id}/start` | POST | Mark schedule as in_progress |
+| `/api/fleet/schedules/{id}/complete` | POST | Mark schedule as completed |
+
+**Key Features:**
+- Time-slot conflict detection - prevents double-booking
+- Availability queries - "Which vehicles are free from 10:00-12:00?"
+- Force parameter to override conflicts for admin use
+- Enriched responses with vehicle name, driver name, patient details
+- Status transitions: scheduled → in_progress → completed
+
+### Remaining Phases:
+- **Phase 2:** Vehicle Card UI (Mini timeline strip on vehicle cards)
+- **Phase 3:** Booking Flow Integration (Time picker, availability filter)
+- **Phase 4:** Admin Gantt View (Master timeline grid)
 
 ## Pending Tasks
 
 ### P0 - Critical (Completed)
 - [x] PWA Install Prompt - Allow users to install the app on mobile devices
+- [x] Timeline-Based Vehicle Scheduling - Phase 1: Data Model & Backend APIs
 
 ### P1 - High Priority
+- [ ] Timeline-Based Vehicle Scheduling - Phase 2: Vehicle Card UI
+- [ ] Timeline-Based Vehicle Scheduling - Phase 3: Booking Flow Integration
 - [ ] Continue backend refactoring (extract medical, driver, users, bookings routes from server.py)
-- [ ] Timeline-Based Vehicle Scheduling System (Phase 1: Data Model & Backend)
 - [ ] Doctor Decision Panel - live instructions from Medical Dashboard
 - [ ] Refactor UnifiedPWA.jsx (~2,200 lines) into smaller components
 
 ### P2 - Medium Priority
+- [ ] Timeline-Based Vehicle Scheduling - Phase 4: Admin Gantt View
 - [ ] Calendar view for bookings (`OPERACIJE -> Kalendar`)
 - [ ] Persist sidebar state with localStorage
 - [ ] Driver rejection reason modal
