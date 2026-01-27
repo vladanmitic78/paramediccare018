@@ -1880,6 +1880,96 @@ const FleetDispatch = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Conflict Warning Modal */}
+        <Dialog open={showConflictWarning} onOpenChange={setShowConflictWarning}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3 text-amber-600">
+                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                {language === 'sr' ? 'Upozorenje o sukobu rasporeda' : 'Schedule Conflict Warning'}
+              </DialogTitle>
+            </DialogHeader>
+            
+            {conflictData && (
+              <div className="py-4">
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
+                  <p className="text-slate-700 mb-2">
+                    {language === 'sr' 
+                      ? <>Vozač <span className="font-bold text-amber-700">{conflictData.driverName}</span> već ima {conflictData.conflicts.length} rezervacija na isti datum:</>
+                      : <>Driver <span className="font-bold text-amber-700">{conflictData.driverName}</span> already has {conflictData.conflicts.length} booking(s) on the same date:</>
+                    }
+                  </p>
+                </div>
+                
+                <div className="space-y-3 max-h-60 overflow-y-auto">
+                  {conflictData.conflicts.map((conflict, idx) => (
+                    <div 
+                      key={idx}
+                      className="bg-slate-50 border border-slate-200 rounded-lg p-3 flex items-start gap-3"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
+                        <Calendar className="w-4 h-4 text-red-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-slate-800 truncate">{conflict.patient_name}</p>
+                        <div className="flex items-center gap-3 mt-1 text-sm text-slate-500">
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {conflict.booking_time || 'N/A'}
+                          </span>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                            conflict.status === 'confirmed' ? 'bg-blue-100 text-blue-700' :
+                            conflict.status === 'en_route' ? 'bg-purple-100 text-purple-700' :
+                            'bg-slate-100 text-slate-600'
+                          }`}>
+                            {conflict.status}
+                          </span>
+                        </div>
+                        {conflict.pickup && (
+                          <p className="text-xs text-slate-400 mt-1 truncate flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            {conflict.pickup}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="mt-4 p-3 bg-slate-100 rounded-lg">
+                  <p className="text-sm text-slate-600">
+                    {language === 'sr' 
+                      ? 'Da li želite da nastavite sa dodelom? Vozač će imati više rezervacija istog dana.'
+                      : 'Do you want to proceed with the assignment? The driver will have multiple bookings on the same day.'
+                    }
+                  </p>
+                </div>
+              </div>
+            )}
+            
+            <DialogFooter className="gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => { setShowConflictWarning(false); setConflictData(null); }}
+                className="flex-1"
+              >
+                <X className="w-4 h-4 mr-2" />
+                {language === 'sr' ? 'Otkaži' : 'Cancel'}
+              </Button>
+              <Button 
+                onClick={handleConflictConfirm}
+                disabled={assigning}
+                className="flex-1 bg-amber-600 hover:bg-amber-700"
+              >
+                {assigning ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle className="w-4 h-4 mr-2" />}
+                {language === 'sr' ? 'Nastavi svakako' : 'Proceed Anyway'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </DndContext>
   );
