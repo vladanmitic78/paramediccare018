@@ -797,41 +797,101 @@ const FleetDispatch = () => {
       return;
     }
 
+    // Get booking date and time for default values
+    const bookingDate = booking.booking_date || booking.preferred_date || new Date().toISOString().split('T')[0];
+    const bookingTime = booking.booking_time || booking.preferred_time || '09:00';
+    
+    // Calculate default end time (2 hours after start)
+    const [hours, minutes] = bookingTime.split(':').map(Number);
+    const endHour = Math.min(hours + 2, 22);
+    const defaultEndTime = `${endHour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    
+    // Show time slot modal
+    setPendingAssignment({ vehicle, booking, driver, bookingDate });
+    setAssignmentTimeSlot({ startTime: bookingTime, endTime: defaultEndTime });
+    setAvailabilityCheck(null);
+    setShowTimeSlotModal(true);
+  };
+
+  // Check availability for selected time slot
+  const checkTimeSlotAvailability = async () => {
+    if (!pendingAssignment || !assignmentTimeSlot.startTime || !assignmentTimeSlot.endTime) return;
+    
+    setCheckingAvailability(true);
+    try {
+      const { vehicle, driver, bookingDate } = pendingAssignment;
+      const startISO = `${bookingDate}T${assignmentTimeSlot.startTime}:00`;
+      const endISO = `${bookingDate}T${assignmentTimeSlot.endTime}:00`;
+      
+      const response = await axios.get(
+        `${API}/fleet/schedules/conflicts?vehicle_id=${vehicle.id}&start_time=${startISO}&end_time=${endISO}${driver ? `&driver_id=${driver.user_id}` : ''}`
+      );
+      
+      setAvailabilityCheck({
+        available: !response.data.has_conflict,
+        conflicts: response.data.conflicting_schedules || []
+      });
+    } catch (error) {
+      console.error('Error checking availability:', error);
+      toast.error(language === 'sr' ? 'Greška pri proveri dostupnosti' : 'Error checking availability');
+    } finally {
+      setCheckingAvailability(false);
+    }
+  };
+
+  // Confirm assignment with time slot (creates schedule)
+  const confirmTimeSlotAssignment = async (force = false) => {
+    if (!pendingAssignment) return;
+    
+    const { vehicle, booking, driver, bookingDate } = pendingAssignment;
+    
     setAssigning(true);
     try {
-      const response = await axios.post(`${API}/admin/assign-driver-public?booking_id=${bookingId}&driver_id=${driver.user_id}`);
+      // First, assign driver to booking (existing flow)
+      const assignResponse = await axios.post(
+        `${API}/admin/assign-driver-public?booking_id=${booking.id}&driver_id=${driver.user_id}&force=true`
+      );
       
-      // Check if there's a conflict warning
-      if (response.data.warning && response.data.require_confirmation) {
-        setAssigning(false);
-        
-        // Store conflict data and show modal
-        setConflictData({
-          driverName: driver.name,
-          driverId: driver.user_id,
-          bookingId: bookingId,
-          vehicleName: vehicle.name,
-          patientName: booking.patient_name,
-          conflicts: response.data.conflicts || [],
-          message: response.data.message
-        });
-        setShowConflictWarning(true);
-        return;
-      }
+      // Then, create schedule entry
+      const startISO = `${bookingDate}T${assignmentTimeSlot.startTime}:00Z`;
+      const endISO = `${bookingDate}T${assignmentTimeSlot.endTime}:00Z`;
+      
+      await axios.post(`${API}/fleet/schedules${force ? '?force=true' : ''}`, {
+        vehicle_id: vehicle.id,
+        booking_id: booking.id,
+        booking_type: 'booking',
+        driver_id: driver.user_id,
+        start_time: startISO,
+        end_time: endISO
+      });
       
       toast.success(
         language === 'sr' 
-          ? `✅ ${vehicle.name} dodeljen pacijentu ${booking.patient_name}` 
-          : `✅ ${vehicle.name} assigned to ${booking.patient_name}`,
+          ? `✅ ${vehicle.name} zakazan ${assignmentTimeSlot.startTime}-${assignmentTimeSlot.endTime}` 
+          : `✅ ${vehicle.name} scheduled ${assignmentTimeSlot.startTime}-${assignmentTimeSlot.endTime}`,
         { duration: 5000 }
       );
       
+      setShowTimeSlotModal(false);
+      setPendingAssignment(null);
       fetchData();
     } catch (error) {
-      const errMsg = typeof error.response?.data?.detail === 'string' 
-        ? error.response.data.detail 
-        : (language === 'sr' ? 'Greška pri dodeli' : 'Assignment error');
-      toast.error(errMsg);
+      // If there's a conflict, show the conflict data
+      if (error.response?.status === 409) {
+        const conflicts = error.response.data.detail?.conflicts || [];
+        setAvailabilityCheck({
+          available: false,
+          conflicts: conflicts
+        });
+        if (!force) {
+          toast.error(language === 'sr' ? 'Postoji konflikt u rasporedu' : 'Schedule conflict detected');
+        }
+      } else {
+        const errMsg = typeof error.response?.data?.detail === 'string' 
+          ? error.response.data.detail 
+          : (language === 'sr' ? 'Greška pri dodeli' : 'Assignment error');
+        toast.error(errMsg);
+      }
     } finally {
       setAssigning(false);
     }
