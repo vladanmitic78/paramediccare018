@@ -1,9 +1,10 @@
 """
 Authentication routes - /auth/*
-Extracted from server.py for modular backend architecture
+Handles: User registration, login, email verification, profile
 """
 from fastapi import APIRouter, HTTPException, Depends
 from datetime import datetime, timezone, timedelta
+from typing import List
 import jwt
 import uuid
 
@@ -12,10 +13,10 @@ from config import (
     VERIFICATION_TOKEN_HOURS, FRONTEND_URL
 )
 from models import UserRole, UserCreate, UserLogin, UserResponse, TokenResponse
-from utils.auth import hash_password, verify_password, create_token, get_current_user
+from utils.auth import hash_password, verify_password, create_token, get_current_user, require_roles
 from utils.email import send_email, get_email_header, get_email_footer
 
-router = APIRouter(prefix="/auth", tags=["Authentication"])
+router = APIRouter(tags=["Authentication"])
 
 
 def create_verification_token(user_id: str) -> str:
@@ -50,19 +51,13 @@ def get_verification_email_template(full_name: str, verification_link: str, lang
         <body style="font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background-color: #f0f4f8;">
             {get_email_header()}
             <div style="padding: 40px 30px; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
-                <div style="text-align: center; margin-bottom: 30px;">
-                    <div style="display: inline-block; background-color: #dbeafe; border-radius: 50%; padding: 20px;">
-                        <span style="font-size: 40px;">📧</span>
-                    </div>
-                </div>
-                <h2 style="color: #0f172a; margin-bottom: 20px; text-align: center; font-size: 24px;">Verify Your Email Address</h2>
-                <p style="color: #475569; line-height: 1.8; text-align: center; font-size: 16px;">Hello <strong>{full_name}</strong>,</p>
-                <p style="color: #475569; line-height: 1.8; text-align: center; font-size: 16px;">Please click the button below to verify your email address and activate your account:</p>
+                <h2 style="color: #0f172a; margin-bottom: 20px; text-align: center;">Verify Your Email Address</h2>
+                <p style="color: #475569; line-height: 1.8; text-align: center;">Hello <strong>{full_name}</strong>,</p>
+                <p style="color: #475569; line-height: 1.8; text-align: center;">Please click the button below to verify your email:</p>
                 <div style="text-align: center; margin: 35px 0;">
-                    <a href="{verification_link}" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);">VERIFY EMAIL</a>
+                    <a href="{verification_link}" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: bold;">VERIFY EMAIL</a>
                 </div>
-                <p style="color: #94a3b8; font-size: 13px; text-align: center; line-height: 1.6;">This link will expire in {VERIFICATION_TOKEN_HOURS} hours.</p>
-                <p style="color: #94a3b8; font-size: 13px; text-align: center; line-height: 1.6;">If you did not create an account, please ignore this email.</p>
+                <p style="color: #94a3b8; font-size: 13px; text-align: center;">This link will expire in {VERIFICATION_TOKEN_HOURS} hours.</p>
             </div>
             {get_email_footer("en")}
         </body>
@@ -75,19 +70,13 @@ def get_verification_email_template(full_name: str, verification_link: str, lang
         <body style="font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background-color: #f0f4f8;">
             {get_email_header()}
             <div style="padding: 40px 30px; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
-                <div style="text-align: center; margin-bottom: 30px;">
-                    <div style="display: inline-block; background-color: #dbeafe; border-radius: 50%; padding: 20px;">
-                        <span style="font-size: 40px;">📧</span>
-                    </div>
-                </div>
-                <h2 style="color: #0f172a; margin-bottom: 20px; text-align: center; font-size: 24px;">Potvrdite svoju email adresu</h2>
-                <p style="color: #475569; line-height: 1.8; text-align: center; font-size: 16px;">Poštovani <strong>{full_name}</strong>,</p>
-                <p style="color: #475569; line-height: 1.8; text-align: center; font-size: 16px;">Kliknite na dugme ispod da biste potvrdili svoju email adresu i aktivirali nalog:</p>
+                <h2 style="color: #0f172a; margin-bottom: 20px; text-align: center;">Potvrdite svoju email adresu</h2>
+                <p style="color: #475569; line-height: 1.8; text-align: center;">Poštovani <strong>{full_name}</strong>,</p>
+                <p style="color: #475569; line-height: 1.8; text-align: center;">Kliknite na dugme ispod da biste potvrdili svoju email adresu:</p>
                 <div style="text-align: center; margin: 35px 0;">
-                    <a href="{verification_link}" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);">POTVRDI EMAIL</a>
+                    <a href="{verification_link}" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: bold;">POTVRDI EMAIL</a>
                 </div>
-                <p style="color: #94a3b8; font-size: 13px; text-align: center; line-height: 1.6;">Link ističe za {VERIFICATION_TOKEN_HOURS} sati.</p>
-                <p style="color: #94a3b8; font-size: 13px; text-align: center; line-height: 1.6;">Ako niste kreirali nalog, molimo ignorišite ovaj email.</p>
+                <p style="color: #94a3b8; font-size: 13px; text-align: center;">Link ističe za {VERIFICATION_TOKEN_HOURS} sati.</p>
             </div>
             {get_email_footer("sr")}
         </body>
@@ -97,7 +86,7 @@ def get_verification_email_template(full_name: str, verification_link: str, lang
 
 
 def get_registration_email_template(full_name: str, email: str, language: str = "sr"):
-    """Welcome email template after successful registration"""
+    """Welcome email template after successful verification"""
     if language == "en":
         subject = "Welcome to Paramedic Care 018!"
         body = f"""
@@ -106,8 +95,7 @@ def get_registration_email_template(full_name: str, email: str, language: str = 
             {get_email_header()}
             <div style="padding: 40px 30px; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
                 <h2 style="color: #0f172a; margin-bottom: 20px;">Welcome, {full_name}!</h2>
-                <p style="color: #475569; line-height: 1.8;">Your account has been successfully verified and activated.</p>
-                <p style="color: #475569; line-height: 1.8;">You can now log in to access our medical transport services.</p>
+                <p style="color: #475569; line-height: 1.8;">Your account has been successfully verified.</p>
                 <div style="text-align: center; margin: 30px 0;">
                     <a href="{FRONTEND_URL}/login" style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 14px 35px; text-decoration: none; border-radius: 8px; font-weight: bold;">LOGIN NOW</a>
                 </div>
@@ -124,8 +112,7 @@ def get_registration_email_template(full_name: str, email: str, language: str = 
             {get_email_header()}
             <div style="padding: 40px 30px; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
                 <h2 style="color: #0f172a; margin-bottom: 20px;">Dobrodošli, {full_name}!</h2>
-                <p style="color: #475569; line-height: 1.8;">Vaš nalog je uspešno verifikovan i aktiviran.</p>
-                <p style="color: #475569; line-height: 1.8;">Sada se možete prijaviti i koristiti naše usluge medicinskog transporta.</p>
+                <p style="color: #475569; line-height: 1.8;">Vaš nalog je uspešno verifikovan.</p>
                 <div style="text-align: center; margin: 30px 0;">
                     <a href="{FRONTEND_URL}/login" style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 14px 35px; text-decoration: none; border-radius: 8px; font-weight: bold;">PRIJAVI SE</a>
                 </div>
@@ -162,7 +149,7 @@ def get_admin_new_user_notification_template(full_name: str, email: str, phone: 
     return subject, body
 
 
-@router.post("/register")
+@router.post("/auth/register")
 async def register(user_data: UserCreate):
     """Register a new user with email verification"""
     existing = await db.users.find_one({"email": user_data.email})
@@ -207,7 +194,7 @@ async def register(user_data: UserCreate):
     return {"message": "Registration successful. Please check your email to verify your account.", "requires_verification": True}
 
 
-@router.get("/verify-email")
+@router.get("/auth/verify-email")
 async def verify_email(token: str):
     """Verify user's email address"""
     payload = verify_verification_token(token)
@@ -231,7 +218,7 @@ async def verify_email(token: str):
     return {"message": "Email verified successfully! Welcome email has been sent.", "verified": True}
 
 
-@router.post("/login", response_model=TokenResponse)
+@router.post("/auth/login", response_model=TokenResponse)
 async def login(credentials: UserLogin):
     """Login with email and password"""
     email = credentials.email.strip().lower()
@@ -250,7 +237,27 @@ async def login(credentials: UserLogin):
     return TokenResponse(access_token=token, user=UserResponse(**user_response))
 
 
-@router.get("/me", response_model=UserResponse)
+@router.get("/auth/me", response_model=UserResponse)
 async def get_me(user: dict = Depends(get_current_user)):
     """Get current user profile"""
     return UserResponse(**{k: v for k, v in user.items() if k != "password"})
+
+
+# ============ USER MANAGEMENT (Admin) ============
+
+@router.get("/users", response_model=List[UserResponse])
+async def get_users(user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))):
+    """Get all users (admin only)"""
+    users = await db.users.find({}, {"_id": 0, "password": 0}).to_list(1000)
+    return [UserResponse(**u) for u in users]
+
+
+@router.get("/users/staff", response_model=List[UserResponse])
+async def get_staff(user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.DOCTOR, UserRole.NURSE]))):
+    """Get staff members (drivers, nurses, doctors)"""
+    staff_roles = [UserRole.DRIVER, UserRole.NURSE, UserRole.DOCTOR, UserRole.ADMIN]
+    users = await db.users.find(
+        {"role": {"$in": staff_roles}, "is_active": True},
+        {"_id": 0, "password": 0}
+    ).to_list(1000)
+    return [UserResponse(**u) for u in users]
