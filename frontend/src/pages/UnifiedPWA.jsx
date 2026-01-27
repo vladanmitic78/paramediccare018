@@ -2553,7 +2553,7 @@ const UnifiedPWA = () => {
           <div className="bg-purple-900/90 px-4 py-3 flex items-center justify-between border-b border-purple-700 z-10">
             <div className="flex-1">
               <p className="text-xs text-purple-300">{language === 'sr' ? 'Navigacija do' : 'Navigating to'}</p>
-              <p className="font-bold text-white truncate">{assignment.pickup_address || assignment.start_point}</p>
+              <p className="font-bold text-white truncate">{assignment.start_point || assignment.pickup_address}</p>
             </div>
             <div className="flex items-center gap-2">
               {distanceToPickup !== null && (
@@ -2576,8 +2576,8 @@ const UnifiedPWA = () => {
           <div className="flex-1 relative">
             <MapContainer
               center={[
-                lastLocation?.latitude || assignment.start_coords?.lat || assignment.pickup_lat || 43.32,
-                lastLocation?.longitude || assignment.start_coords?.lng || assignment.pickup_lng || 21.89
+                lastLocation?.latitude || assignment.start_coords?.lat || assignment.start_lat || assignment.pickup_lat || 43.32,
+                lastLocation?.longitude || assignment.start_coords?.lng || assignment.start_lng || assignment.pickup_lng || 21.89
               ]}
               zoom={14}
               style={{ height: '100%', width: '100%' }}
@@ -2606,11 +2606,11 @@ const UnifiedPWA = () => {
               )}
               
               {/* Pickup location */}
-              {((assignment.start_coords?.lat && assignment.start_coords?.lng) || (assignment.pickup_lat && assignment.pickup_lng)) && (
+              {((assignment.start_coords?.lat && assignment.start_coords?.lng) || (assignment.start_lat && assignment.start_lng) || (assignment.pickup_lat && assignment.pickup_lng)) && (
                 <Marker 
                   position={[
-                    assignment.start_coords?.lat || assignment.pickup_lat,
-                    assignment.start_coords?.lng || assignment.pickup_lng
+                    assignment.start_coords?.lat || assignment.start_lat || assignment.pickup_lat,
+                    assignment.start_coords?.lng || assignment.start_lng || assignment.pickup_lng
                   ]}
                   icon={L.divIcon({
                     className: 'pickup-marker',
