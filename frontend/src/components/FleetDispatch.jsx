@@ -670,28 +670,17 @@ const FleetDispatch = () => {
       if (response.data.warning && response.data.require_confirmation) {
         setAssigning(false);
         
-        // Build conflict message
-        const conflicts = response.data.conflicts || [];
-        const conflictList = conflicts.map(c => 
-          `• ${c.patient_name} (${c.booking_time || 'N/A'}) - ${c.status}`
-        ).join('\n');
-        
-        const confirmMsg = language === 'sr'
-          ? `⚠️ Upozorenje: Vozač ${driver.name} već ima ${conflicts.length} rezervacija na isti datum:\n\n${conflictList}\n\nDa li želite da nastavite?`
-          : `⚠️ Warning: Driver ${driver.name} already has ${conflicts.length} booking(s) on the same date:\n\n${conflictList}\n\nDo you want to continue?`;
-        
-        if (window.confirm(confirmMsg)) {
-          // Re-send with force=true
-          setAssigning(true);
-          await axios.post(`${API}/admin/assign-driver-public?booking_id=${bookingId}&driver_id=${driver.user_id}&force=true`);
-          toast.success(
-            language === 'sr' 
-              ? `✅ ${vehicle.name} dodeljen pacijentu ${booking.patient_name}` 
-              : `✅ ${vehicle.name} assigned to ${booking.patient_name}`,
-            { duration: 5000 }
-          );
-          fetchData();
-        }
+        // Store conflict data and show modal
+        setConflictData({
+          driverName: driver.name,
+          driverId: driver.user_id,
+          bookingId: bookingId,
+          vehicleName: vehicle.name,
+          patientName: booking.patient_name,
+          conflicts: response.data.conflicts || [],
+          message: response.data.message
+        });
+        setShowConflictWarning(true);
         return;
       }
       
@@ -710,6 +699,29 @@ const FleetDispatch = () => {
       toast.error(errMsg);
     } finally {
       setAssigning(false);
+    }
+  };
+
+  // Handle conflict confirmation (proceed with assignment despite conflicts)
+  const handleConflictConfirm = async () => {
+    if (!conflictData) return;
+    
+    setAssigning(true);
+    try {
+      await axios.post(`${API}/admin/assign-driver-public?booking_id=${conflictData.bookingId}&driver_id=${conflictData.driverId}&force=true`);
+      toast.success(
+        language === 'sr' 
+          ? `✅ ${conflictData.vehicleName} dodeljen pacijentu ${conflictData.patientName}` 
+          : `✅ ${conflictData.vehicleName} assigned to ${conflictData.patientName}`,
+        { duration: 5000 }
+      );
+      fetchData();
+    } catch (error) {
+      toast.error(language === 'sr' ? 'Greška pri dodeli' : 'Assignment error');
+    } finally {
+      setAssigning(false);
+      setShowConflictWarning(false);
+      setConflictData(null);
     }
   };
 
