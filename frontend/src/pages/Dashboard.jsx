@@ -669,6 +669,7 @@ const Dashboard = () => {
       label: language === 'sr' ? 'Operacije' : 'Operations',
       items: [
         { id: 'overview', icon: LayoutDashboard, label: language === 'sr' ? 'Kontrolna tabla' : 'Dashboard' },
+        ...(isAdmin() ? [{ id: 'calendar', icon: Calendar, label: language === 'sr' ? 'Kalendar' : 'Calendar' }] : []),
       ]
     },
     ...(isAdmin() ? [{
