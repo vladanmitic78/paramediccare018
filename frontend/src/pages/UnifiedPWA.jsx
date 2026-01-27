@@ -224,7 +224,86 @@ const UnifiedPWA = () => {
   
   // Keep screen awake during active transport (driver) or during a call
   const isActiveTransport = ['en_route', 'on_site', 'transporting'].includes(driverStatus);
-  useWakeLock(isDriver && isActiveTransport);
+  useWakeLock((isDriver && isActiveTransport) || activeCall !== null);
+
+  // Persist critical state to survive phone calls and app switches
+  useStatePersistence('pwa_driver_state', {
+    driverStatus,
+    assignment,
+    showRouteMap,
+    routeCoordinates,
+    lastLocation
+  }, isDriver && isActiveTransport);
+
+  // Restore state on mount (after coming back from a phone call)
+  useEffect(() => {
+    if (isDriver) {
+      const savedState = getPersistedState('pwa_driver_state');
+      if (savedState) {
+        if (savedState.showRouteMap) setShowRouteMap(true);
+        if (savedState.routeCoordinates?.length > 0) setRouteCoordinates(savedState.routeCoordinates);
+        if (savedState.lastLocation) setLastLocation(savedState.lastLocation);
+      }
+    }
+  }, [isDriver]);
+
+  // Handle visibility change - restore wake lock and refresh data when coming back from a call
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // App is back in foreground (e.g., after a phone call)
+        fetchData();
+        // Re-request wake lock
+        if ((isDriver && isActiveTransport) || activeCall !== null) {
+          if ('wakeLock' in navigator) {
+            navigator.wakeLock.request('screen').catch(() => {});
+          }
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [isDriver, isActiveTransport, activeCall]);
+
+  // Call timer
+  useEffect(() => {
+    if (activeCall && !callTimerRef.current) {
+      callTimerRef.current = setInterval(() => {
+        setCallDuration(prev => prev + 1);
+      }, 1000);
+    } else if (!activeCall && callTimerRef.current) {
+      clearInterval(callTimerRef.current);
+      callTimerRef.current = null;
+      setCallDuration(0);
+    }
+    return () => {
+      if (callTimerRef.current) {
+        clearInterval(callTimerRef.current);
+      }
+    };
+  }, [activeCall]);
+
+  // Format call duration
+  const formatCallDuration = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Start in-app call (minimizable)
+  const startCall = (phoneNumber, contactName) => {
+    setActiveCall({ phoneNumber, contactName, startTime: Date.now() });
+    setCallMinimized(true);
+    // Open native phone dialer
+    window.location.href = `tel:${phoneNumber}`;
+  };
+
+  // End call
+  const endCall = () => {
+    setActiveCall(null);
+    setCallMinimized(false);
+    setCallDuration(0);
+  };
 
   // Fetch data based on role
   const fetchData = useCallback(async (isRefresh = false) => {
