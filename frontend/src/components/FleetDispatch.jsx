@@ -515,12 +515,32 @@ const FleetDispatch = () => {
     return () => clearInterval(interval);
   }, [fetchData, fetchAvailableStaff]);
 
-  // Filter vehicles
+  // Filter vehicles by status and search
   const filteredVehicles = vehicles.filter(v => {
-    if (!vehicleSearch.trim()) return true;
-    const search = vehicleSearch.toLowerCase();
-    return v.name?.toLowerCase().includes(search) ||
-           v.registration_plate?.toLowerCase().includes(search);
+    // First filter by status
+    const hasDriver = v.team?.some(m => m.role === 'driver');
+    let statusMatch = true;
+    if (vehicleFilter === 'ready') statusMatch = hasDriver && !v.current_mission;
+    else if (vehicleFilter === 'busy') statusMatch = !!v.current_mission;
+    
+    if (!statusMatch) return false;
+    
+    // Then filter by search (search any parameter)
+    if (vehicleSearch.trim()) {
+      const search = vehicleSearch.toLowerCase();
+      const searchableFields = [
+        v.name,
+        v.registration_plate,
+        v.type,
+        ...(v.team || []).map(m => m.name),
+        ...(v.team || []).map(m => m.role)
+      ];
+      return searchableFields.some(field => 
+        field && String(field).toLowerCase().includes(search)
+      );
+    }
+    
+    return true;
   });
 
   // Filter bookings by status and search
