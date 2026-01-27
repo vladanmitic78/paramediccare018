@@ -613,7 +613,9 @@ const FleetDispatch = () => {
     arrival_date: '',
     arrival_time: '',
     mobility_status: 'walking',
-    notes: ''
+    notes: '',
+    route_distance_km: null,
+    route_duration: null
   });
   
   // Edit booking state
