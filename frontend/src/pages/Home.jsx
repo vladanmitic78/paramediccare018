@@ -337,7 +337,7 @@ const Home = () => {
       </section>
 
       {/* PWA Install Banner - Shows on supported browsers */}
-      <PWAInstallBanner language={language} />
+      <PWAInstallBanner language={language} forceShow={true} />
     </div>
   );
 };
