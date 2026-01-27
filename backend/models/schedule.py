@@ -86,8 +86,20 @@ class VehicleAvailability(BaseModel):
     is_available_all_day: bool = False
 
 
+class StaffUnavailability(BaseModel):
+    """Staff unavailability information"""
+    user_id: str
+    user_name: str
+    date: str
+    start_time: str
+    end_time: str
+    status: str  # unavailable, on_leave, sick
+    notes: Optional[str] = None
+
+
 class ScheduleConflict(BaseModel):
     """Conflict information when scheduling overlaps"""
     has_conflict: bool
     conflicting_schedules: List[VehicleScheduleResponse] = []
+    staff_unavailable: List[StaffUnavailability] = []
     message: Optional[str] = None
