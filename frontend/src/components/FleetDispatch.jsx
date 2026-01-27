@@ -1854,30 +1854,86 @@ const FleetDispatch = () => {
                 )}
               </div>
               
-              {/* Date and Time */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-sm font-medium text-slate-700">
-                    {language === 'sr' ? 'Datum' : 'Date'}
-                  </label>
-                  <Input
-                    type="date"
-                    value={newBooking.booking_date}
-                    onChange={(e) => setNewBooking({...newBooking, booking_date: e.target.value})}
-                    data-testid="booking-date"
-                  />
+              {/* Pickup Date and Time */}
+              <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-200">
+                <label className="text-sm font-semibold text-emerald-700 mb-2 block">
+                  {language === 'sr' ? '🚑 Polazak (Pickup)' : '🚑 Pickup Start'}
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-medium text-slate-600">
+                      {language === 'sr' ? 'Datum' : 'Date'}
+                    </label>
+                    <Input
+                      type="date"
+                      value={newBooking.pickup_date}
+                      onChange={(e) => setNewBooking({...newBooking, pickup_date: e.target.value})}
+                      data-testid="booking-pickup-date"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-slate-600">
+                      {language === 'sr' ? 'Vreme' : 'Time'}
+                    </label>
+                    <Input
+                      type="time"
+                      value={newBooking.pickup_time}
+                      onChange={(e) => setNewBooking({...newBooking, pickup_time: e.target.value})}
+                      data-testid="booking-pickup-time"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="text-sm font-medium text-slate-700">
-                    {language === 'sr' ? 'Vreme' : 'Time'}
-                  </label>
-                  <Input
-                    type="time"
-                    value={newBooking.booking_time}
-                    onChange={(e) => setNewBooking({...newBooking, booking_time: e.target.value})}
-                    data-testid="booking-time"
-                  />
+              </div>
+              
+              {/* Estimated Arrival Date and Time */}
+              <div className="bg-sky-50 p-3 rounded-lg border border-sky-200">
+                <label className="text-sm font-semibold text-sky-700 mb-2 block">
+                  {language === 'sr' ? '🏁 Procenjeni dolazak (ETA)' : '🏁 Estimated Arrival (ETA)'}
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-medium text-slate-600">
+                      {language === 'sr' ? 'Datum' : 'Date'}
+                    </label>
+                    <Input
+                      type="date"
+                      value={newBooking.arrival_date}
+                      onChange={(e) => setNewBooking({...newBooking, arrival_date: e.target.value})}
+                      data-testid="booking-arrival-date"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-slate-600">
+                      {language === 'sr' ? 'Vreme' : 'Time'}
+                    </label>
+                    <Input
+                      type="time"
+                      value={newBooking.arrival_time}
+                      onChange={(e) => setNewBooking({...newBooking, arrival_time: e.target.value})}
+                      data-testid="booking-arrival-time"
+                    />
+                  </div>
                 </div>
+                {newBooking.pickup_date && newBooking.arrival_date && (
+                  <p className="text-xs text-sky-600 mt-2">
+                    {(() => {
+                      const pickup = new Date(`${newBooking.pickup_date}T${newBooking.pickup_time || '00:00'}`);
+                      const arrival = new Date(`${newBooking.arrival_date}T${newBooking.arrival_time || '00:00'}`);
+                      const diffMs = arrival - pickup;
+                      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                      const diffDays = Math.floor(diffHours / 24);
+                      const remainingHours = diffHours % 24;
+                      if (diffDays > 0) {
+                        return language === 'sr' 
+                          ? `⏱️ Trajanje: ${diffDays} dana i ${remainingHours}h`
+                          : `⏱️ Duration: ${diffDays} days and ${remainingHours}h`;
+                      }
+                      return language === 'sr' 
+                        ? `⏱️ Trajanje: ${diffHours}h`
+                        : `⏱️ Duration: ${diffHours}h`;
+                    })()}
+                  </p>
+                )}
               </div>
               
               {/* Mobility Status */}
