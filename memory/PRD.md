@@ -102,8 +102,12 @@ A comprehensive medical transport system including a public website, patient por
 
 ## Pending Tasks
 
+### P0 - Critical (Completed)
+- [x] PWA Install Prompt - Allow users to install the app on mobile devices
+
 ### P1 - High Priority
 - [ ] Continue backend refactoring (extract medical, driver, users, bookings routes from server.py)
+- [ ] Timeline-Based Vehicle Scheduling System (Phase 1: Data Model & Backend)
 - [ ] Doctor Decision Panel - live instructions from Medical Dashboard
 - [ ] Refactor UnifiedPWA.jsx (~2,200 lines) into smaller components
 
