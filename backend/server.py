@@ -1399,6 +1399,18 @@ async def cancel_patient_booking(booking_id: str, user: dict = Depends(get_curre
     if booking["status"] not in [BookingStatus.REQUESTED, BookingStatus.CONFIRMED]:
         raise HTTPException(status_code=400, detail="Cannot cancel booking that is already in progress")
     
+    # Reset driver status if a driver was assigned
+    assigned_driver_id = booking.get("assigned_driver_id")
+    if assigned_driver_id:
+        await db.driver_status.update_one(
+            {"driver_id": assigned_driver_id, "current_booking_id": booking_id},
+            {"$set": {
+                "status": DriverStatus.AVAILABLE,
+                "current_booking_id": None,
+                "last_updated": datetime.now(timezone.utc).isoformat()
+            }}
+        )
+    
     await db.patient_bookings.update_one(
         {"id": booking_id},
         {"$set": {"status": BookingStatus.CANCELLED, "updated_at": datetime.now(timezone.utc).isoformat()}}
