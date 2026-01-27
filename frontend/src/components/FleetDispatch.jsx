@@ -120,18 +120,16 @@ const DraggableVehicleCard = ({ vehicle, language, onAssignClick, onVideoCall, o
         rounded-xl border-2 p-4 transition-all duration-200 mb-4
         ${getStatusColor()}
         ${isDragging ? 'shadow-2xl ring-2 ring-slate-900 ring-offset-2 opacity-90' : 'shadow-sm'}
+        ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}
       `}
       data-testid={`vehicle-card-${vehicle.id}`}
+      {...(isDraggable ? { ...attributes, ...listeners } : {})}
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
           {isDraggable && (
-            <div 
-              className="cursor-grab active:cursor-grabbing p-1 hover:bg-slate-100 rounded"
-              {...attributes}
-              {...listeners}
-            >
+            <div className="p-1">
               <GripVertical className="w-4 h-4 text-slate-400" />
             </div>
           )}
