@@ -1347,6 +1347,7 @@ const FleetDispatch = () => {
                     canDelete={canDeleteVehicle()}
                     onDelete={(v) => { setVehicleToDelete(v); setShowDeleteConfirm(true); }}
                     user={user}
+                    schedules={vehicleSchedules[vehicle.id] || []}
                   />
                 ))
               )}
