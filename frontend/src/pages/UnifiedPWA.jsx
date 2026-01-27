@@ -971,13 +971,24 @@ const UnifiedPWA = () => {
         </div>
       )}
 
-      {/* Header */}
-      <header className="bg-slate-800 border-b border-slate-700 px-4 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg overflow-hidden">
-              <img src="/logo.jpg" alt="PC018" className="w-full h-full object-cover" />
-            </div>
+      {/* Show loading while user role is being determined */}
+      {!user?.role && (
+        <div className="flex-1 flex flex-col items-center justify-center bg-slate-900 min-h-screen">
+          <Loader2 className="w-12 h-12 text-sky-500 animate-spin mb-4" />
+          <p className="text-slate-400">{language === 'sr' ? 'Učitavanje...' : 'Loading...'}</p>
+        </div>
+      )}
+
+      {/* Only render main UI when user role is known */}
+      {user?.role && (
+        <>
+          {/* Header */}
+          <header className="bg-slate-800 border-b border-slate-700 px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg overflow-hidden">
+                  <img src="/logo.jpg" alt="PC018" className="w-full h-full object-cover" />
+                </div>
             <div>
               <p className="font-semibold text-sm">{user?.full_name}</p>
               <div className="flex items-center gap-2">
