@@ -352,58 +352,75 @@ const AdminLiveMap = () => {
 
       {/* Driver List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {drivers.map(driver => (
-          <div
-            key={driver.id}
-            className={`p-4 rounded-xl border ${
-              driver.driver_status === 'offline' 
-                ? 'bg-slate-50 border-slate-200' 
-                : 'bg-white border-slate-200 shadow-sm'
-            }`}
-            data-testid={`driver-card-${driver.id}`}
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                  statusLabels[driver.driver_status]?.color || 'bg-slate-500'
-                } text-white`}>
-                  <Truck className="w-5 h-5" />
+        {drivers.map(driver => {
+          const hasLocation = driver.last_location?.latitude && driver.last_location?.longitude;
+          const isSelected = selectedDriver?.id === driver.id;
+          
+          return (
+            <div
+              key={driver.id}
+              onClick={() => handleDriverClick(driver)}
+              className={`p-4 rounded-xl border transition-all ${
+                driver.driver_status === 'offline' 
+                  ? 'bg-slate-50 border-slate-200' 
+                  : hasLocation
+                    ? `bg-white border-slate-200 shadow-sm cursor-pointer hover:shadow-md hover:border-sky-300 ${
+                        isSelected ? 'ring-2 ring-sky-500 border-sky-500' : ''
+                      }`
+                    : 'bg-white border-slate-200 shadow-sm'
+              }`}
+              data-testid={`driver-card-${driver.id}`}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    statusLabels[driver.driver_status]?.color || 'bg-slate-500'
+                  } text-white`}>
+                    <Truck className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-slate-900">{driver.full_name}</h3>
+                    <p className="text-sm text-slate-500">{driver.phone}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-slate-900">{driver.full_name}</h3>
-                  <p className="text-sm text-slate-500">{driver.phone}</p>
-                </div>
+                
+                <Badge className={`${statusLabels[driver.driver_status]?.color || 'bg-slate-500'} text-white`}>
+                  {statusLabels[driver.driver_status]?.[language] || driver.driver_status}
+                </Badge>
               </div>
               
-              <Badge className={`${statusLabels[driver.driver_status]?.color || 'bg-slate-500'} text-white`}>
-                {statusLabels[driver.driver_status]?.[language] || driver.driver_status}
-              </Badge>
-            </div>
-            
-            {driver.last_location && (
-              <div className="mt-3 pt-3 border-t border-slate-100 text-sm text-slate-600">
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-slate-400" />
-                  <span>
-                    {driver.last_location.latitude?.toFixed(4)}, {driver.last_location.longitude?.toFixed(4)}
-                  </span>
-                </div>
-                {driver.last_location.speed && (
-                  <div className="flex items-center gap-2 mt-1">
-                    <Navigation className="w-4 h-4 text-slate-400" />
-                    <span>{Math.round(driver.last_location.speed)} km/h</span>
+              {driver.last_location && (
+                <div className="mt-3 pt-3 border-t border-slate-100 text-sm text-slate-600">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-slate-400" />
+                      <span>
+                        {driver.last_location.latitude?.toFixed(4)}, {driver.last_location.longitude?.toFixed(4)}
+                      </span>
+                    </div>
+                    {hasLocation && (
+                      <span className="text-xs text-sky-600 font-medium">
+                        {language === 'sr' ? '📍 Klikni za lokaciju' : '📍 Click for location'}
+                      </span>
+                    )}
                   </div>
-                )}
-              </div>
-            )}
-            
-            {!driver.last_location && driver.driver_status !== 'offline' && (
-              <div className="mt-3 pt-3 border-t border-slate-100 text-sm text-slate-400 italic">
-                {language === 'sr' ? 'Čeka se GPS signal...' : 'Waiting for GPS signal...'}
-              </div>
-            )}
-          </div>
-        ))}
+                  {driver.last_location.speed && (
+                    <div className="flex items-center gap-2 mt-1">
+                      <Navigation className="w-4 h-4 text-slate-400" />
+                      <span>{Math.round(driver.last_location.speed)} km/h</span>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {!driver.last_location && driver.driver_status !== 'offline' && (
+                <div className="mt-3 pt-3 border-t border-slate-100 text-sm text-slate-400 italic">
+                  {language === 'sr' ? 'Čeka se GPS signal...' : 'Waiting for GPS signal...'}
+                </div>
+              )}
+            </div>
+          );
+        })}
         
         {drivers.length === 0 && (
           <div className="col-span-full text-center py-12 text-slate-500">
