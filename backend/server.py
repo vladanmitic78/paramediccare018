@@ -1209,20 +1209,30 @@ async def get_booking(booking_id: str):
     return BookingResponse(**booking)
 
 @api_router.put("/bookings/{booking_id}", response_model=BookingResponse)
-async def update_booking(booking_id: str, update: BookingStatusUpdate, user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.DRIVER, UserRole.DOCTOR, UserRole.NURSE]))):
+async def update_booking(booking_id: str, update: BookingFullUpdate, user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.DRIVER, UserRole.DOCTOR, UserRole.NURSE]))):
     # Get booking to check for assigned driver
     existing_booking = await db.bookings.find_one({"id": booking_id})
+    if not existing_booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
     
-    update_doc = {"status": update.status}
-    if update.assigned_driver:
-        update_doc["assigned_driver"] = update.assigned_driver
-    if update.assigned_medical:
-        update_doc["assigned_medical"] = update.assigned_medical
+    # Build update document with only provided fields
+    update_doc = {}
+    update_dict = update.model_dump(exclude_unset=True)
+    
+    for key, value in update_dict.items():
+        if value is not None:
+            update_doc[key] = value
+    
+    if not update_doc:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    
+    # Add update timestamp
+    update_doc["updated_at"] = datetime.now(timezone.utc).isoformat()
     
     await db.bookings.update_one({"id": booking_id}, {"$set": update_doc})
     
     # Reset driver status if booking is cancelled or completed
-    if update.status in ["cancelled", "completed"] and existing_booking:
+    if update.status in ["cancelled", "completed"]:
         assigned_driver = existing_booking.get("assigned_driver")
         if assigned_driver:
             await db.driver_status.update_one(
