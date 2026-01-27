@@ -1267,6 +1267,7 @@ const FleetDispatch = () => {
                     booking={booking}
                     language={language}
                     onEdit={openEditBooking}
+                    onDetach={handleDetachDriver}
                   />
                 ))
               )}
