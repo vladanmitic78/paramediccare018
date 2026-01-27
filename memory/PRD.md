@@ -584,6 +584,7 @@ A comprehensive fleet management system where each ambulance has assigned teams.
 - [x] **User Registration Role Bug Fix** (Roles doctor/nurse/driver now correctly assigned) (NEW - Jan 23, 2026) ✅
 - [x] **Fleet Management Module** (Vehicle-centric team assignment) (NEW - Jan 26, 2026) ✅
 - [x] **Driver PWA Installability Fix** (Dynamic manifest switching for mobile install) (FIXED - Jan 26, 2026) ✅
+- [x] **European Address Search** (Expanded manual booking address search to all of Europe) (FIXED - Dec 2025) ✅
 
 ### P1 (Next Up)
 - [ ] Emergency Transport Timeline (chronological event log)
