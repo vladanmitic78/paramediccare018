@@ -783,7 +783,7 @@ const FleetDispatch = () => {
   const activeCount = bookings.filter(b => ['confirmed', 'in_progress', 'en_route', 'on_site', 'transporting'].includes(b.status)).length;
   const readyVehicles = vehicles.filter(v => !v.current_mission && v.team?.some(m => m.role === 'driver')).length;
 
-  // Address search using Nominatim (OpenStreetMap)
+  // Address search using Nominatim (OpenStreetMap) - Europe-wide
   const searchAddress = async (query, type) => {
     if (!query || query.length < 3) {
       if (type === 'pickup') setPickupSuggestions([]);
@@ -796,7 +796,7 @@ const FleetDispatch = () => {
     
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=rs&limit=5`,
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`,
         { headers: { 'Accept-Language': 'sr-Latn,en' } }
       );
       const data = await response.json();
