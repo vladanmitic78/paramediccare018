@@ -1962,6 +1962,38 @@ const FleetDispatch = () => {
                 )}
               </div>
               
+              {/* Route Info - Show when calculated */}
+              {newBooking.route_distance_km && (
+                <div className="bg-indigo-50 p-3 rounded-lg border border-indigo-200 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Navigation className="w-5 h-5 text-indigo-600" />
+                    <div>
+                      <p className="text-sm font-semibold text-indigo-700">
+                        {language === 'sr' ? 'Izračunata ruta' : 'Calculated Route'}
+                      </p>
+                      <p className="text-xs text-indigo-600">
+                        {newBooking.route_distance_km} km • {newBooking.route_duration}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => calculateETA(
+                      newBooking.pickup_lat,
+                      newBooking.pickup_lng,
+                      newBooking.destination_lat,
+                      newBooking.destination_lng,
+                      newBooking.pickup_date,
+                      newBooking.pickup_time
+                    )}
+                    className="text-indigo-600 hover:text-indigo-700"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+              
               {/* Pickup Date and Time */}
               <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-200">
                 <label className="text-sm font-semibold text-emerald-700 mb-2 block">
