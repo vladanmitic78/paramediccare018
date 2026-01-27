@@ -265,7 +265,7 @@ const UnifiedPWA = () => {
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [isDriver, isActiveTransport, activeCall]);
+  }, [isDriver, isActiveTransport, activeCall, fetchData]);
 
   // Call timer
   useEffect(() => {
