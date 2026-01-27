@@ -1,13 +1,15 @@
+import { useState } from 'react';
 import { Button } from './ui/button';
-import { X, Download, Smartphone } from 'lucide-react';
+import { X, Download, Smartphone, Monitor } from 'lucide-react';
 import { usePWA } from '../contexts/PWAContext';
 
 /**
- * PWA Install Banner - Shows on mobile devices when app is installable
- * Can be used on any page (public or private)
- * Uses global PWAContext to share the beforeinstallprompt event across pages
+ * PWA Install Banner - Shows on the landing page to encourage app installation
+ * - On supported mobile browsers: Shows native install prompt
+ * - On iOS: Shows manual installation instructions
+ * - On desktop: Shows instructions for mobile installation
  */
-const PWAInstallBanner = ({ language = 'en' }) => {
+const PWAInstallBanner = ({ language = 'en', forceShow = false }) => {
   const { 
     isInstallable, 
     isInstalled, 
@@ -17,17 +19,23 @@ const PWAInstallBanner = ({ language = 'en' }) => {
     promptInstall,
     dismissBanner
   } = usePWA();
+  
+  const [localDismissed, setLocalDismissed] = useState(false);
 
   const handleInstall = async () => {
     await promptInstall();
   };
 
   const handleDismiss = () => {
+    setLocalDismissed(true);
     dismissBanner();
   };
 
-  // Don't show if already installed, dismissed, or running standalone
-  if (isInstalled || isStandalone || isDismissed) return null;
+  // Don't show if already installed or running standalone
+  if (isInstalled || isStandalone) return null;
+  
+  // Don't show if dismissed (either from context or local state)
+  if (isDismissed || localDismissed) return null;
 
   // Show iOS-specific instructions
   if (isIOS) {
@@ -69,7 +77,7 @@ const PWAInstallBanner = ({ language = 'en' }) => {
     );
   }
 
-  // Show install button for Chrome/Edge (Android, Desktop)
+  // Show native install button for Chrome/Edge (Android, some desktops)
   if (isInstallable) {
     return (
       <div 
@@ -106,6 +114,49 @@ const PWAInstallBanner = ({ language = 'en' }) => {
             >
               <X className="w-5 h-5" />
             </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show promotional banner on desktop/unsupported browsers when forceShow is true
+  if (forceShow) {
+    return (
+      <div 
+        className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-sky-600 to-indigo-600 text-white p-4 shadow-lg animate-slide-up"
+        data-testid="pwa-install-banner-promo"
+      >
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-center gap-4">
+            <div className="bg-white/20 rounded-full p-2.5 hidden sm:flex">
+              <Smartphone className="w-7 h-7" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-lg">
+                {language === 'sr' ? 'Preuzmite PC018 mobilnu aplikaciju' : 'Get the PC018 Mobile App'}
+              </h3>
+              <p className="text-sm text-white/80 mt-0.5">
+                {language === 'sr' 
+                  ? 'Otvorite ovu stranicu na mobilnom telefonu za brzu instalaciju aplikacije'
+                  : 'Open this page on your mobile phone to install the app instantly'}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="hidden md:flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
+                <Monitor className="w-4 h-4 text-white/60" />
+                <span className="text-xs text-white/70">→</span>
+                <Smartphone className="w-4 h-4 text-white" />
+              </div>
+              <button 
+                onClick={handleDismiss}
+                className="text-white/70 hover:text-white p-1"
+                aria-label="Dismiss"
+                data-testid="pwa-banner-dismiss-promo"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
