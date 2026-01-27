@@ -67,7 +67,7 @@ const TransportTimeline = ({ bookingId, isOpen, onClose, patientName }) => {
   const [newNote, setNewNote] = useState('');
   const [addingNote, setAddingNote] = useState(false);
 
-  const fetchTimeline = async () => {
+  const fetchTimeline = useCallback(async () => {
     if (!bookingId) return;
     
     setLoading(true);
@@ -80,7 +80,7 @@ const TransportTimeline = ({ bookingId, isOpen, onClose, patientName }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [bookingId, language]);
 
   useEffect(() => {
     if (isOpen && bookingId) {
