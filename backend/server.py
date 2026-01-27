@@ -1219,8 +1219,14 @@ async def update_booking(booking_id: str, update: BookingFullUpdate, user: dict 
     update_doc = {}
     update_dict = update.model_dump(exclude_unset=True)
     
+    # Fields that can be explicitly set to None (for detaching driver)
+    nullable_fields = ['assigned_driver', 'assigned_driver_name', 'assigned_medical']
+    
     for key, value in update_dict.items():
-        if value is not None:
+        if key in nullable_fields:
+            # Allow setting to None explicitly
+            update_doc[key] = value
+        elif value is not None:
             update_doc[key] = value
     
     if not update_doc:
@@ -1229,20 +1235,22 @@ async def update_booking(booking_id: str, update: BookingFullUpdate, user: dict 
     # Add update timestamp
     update_doc["updated_at"] = datetime.now(timezone.utc).isoformat()
     
-    await db.bookings.update_one({"id": booking_id}, {"$set": update_doc})
+    # Reset driver status if driver is being removed or booking is cancelled/completed
+    old_driver = existing_booking.get("assigned_driver")
+    new_driver = update_dict.get("assigned_driver", old_driver)
     
-    # Reset driver status if booking is cancelled or completed
-    if update.status in ["cancelled", "completed"]:
-        assigned_driver = existing_booking.get("assigned_driver")
-        if assigned_driver:
-            await db.driver_status.update_one(
-                {"driver_id": assigned_driver, "current_booking_id": booking_id},
-                {"$set": {
-                    "status": DriverStatus.AVAILABLE,
-                    "current_booking_id": None,
-                    "last_updated": datetime.now(timezone.utc).isoformat()
-                }}
-            )
+    # If driver is being detached (set to None) or booking is cancelled/completed
+    if old_driver and (new_driver is None or update.status in ["cancelled", "completed"]):
+        await db.driver_status.update_one(
+            {"driver_id": old_driver, "current_booking_id": booking_id},
+            {"$set": {
+                "status": DriverStatus.AVAILABLE,
+                "current_booking_id": None,
+                "last_updated": datetime.now(timezone.utc).isoformat()
+            }}
+        )
+    
+    await db.bookings.update_one({"id": booking_id}, {"$set": update_doc})
     
     booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
     return BookingResponse(**booking)
