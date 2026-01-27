@@ -180,6 +180,7 @@ const UnifiedPWA = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
+  const [fetchError, setFetchError] = useState(null);
   
   // Shared state
   const [bookings, setBookings] = useState([]);
