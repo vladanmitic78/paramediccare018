@@ -935,6 +935,36 @@ const UnifiedPWA = () => {
       </div>
     );
   }
+  
+  // Show full-screen error if initial data fetch failed
+  if (fetchError && !bookings.length && !assignment) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4">
+        <AlertCircle className="w-16 h-16 mb-4 text-red-400" />
+        <h3 className="text-lg font-semibold text-red-400 mb-2 text-center">
+          {language === 'sr' ? 'Greška pri učitavanju' : 'Failed to load'}
+        </h3>
+        <p className="text-slate-400 mb-6 text-sm text-center max-w-xs">{fetchError}</p>
+        <div className="flex gap-3">
+          <Button 
+            onClick={() => { setFetchError(null); setLoading(true); fetchData(); }}
+            className="bg-sky-600 hover:bg-sky-700"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            {language === 'sr' ? 'Pokušaj ponovo' : 'Try Again'}
+          </Button>
+          <Button 
+            variant="outline"
+            onClick={handleLogout}
+            className="border-slate-600"
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            {language === 'sr' ? 'Odjava' : 'Logout'}
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   // Driver full-screen map during transport
   if (isDriver && driverStatus === 'transporting' && assignment) {
