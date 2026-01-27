@@ -65,7 +65,7 @@ __all__ = [
     # Schedule models (Timeline-Based Scheduling)
     'ScheduleStatus', 'VehicleScheduleCreate', 'VehicleScheduleUpdate',
     'VehicleScheduleResponse', 'AvailabilityQuery', 'TimeSlot',
-    'VehicleAvailability', 'ScheduleConflict',
+    'VehicleAvailability', 'ScheduleConflict', 'StaffUnavailability',
     # CMS models
     'ContentCreate', 'ContentResponse',
     'PageContentCreate', 'PageContentResponse',
