@@ -1128,7 +1128,7 @@ const UnifiedPWA = () => {
         )}
 
         {/* ADMIN/MEDICAL VIEW */}
-        {(isAdmin || isMedical) && (
+        {!loading && !fetchError && (isAdmin || isMedical) && (
           <>
             {activeTab === 'home' && (
               <div className="space-y-4">
