@@ -294,13 +294,18 @@ const AdminLiveMap = () => {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           
-          {driversWithLocation.length > 0 && <FitBounds drivers={driversWithLocation} />}
+          {driversWithLocation.length > 0 && !selectedDriver && <FitBounds drivers={driversWithLocation} />}
+          
+          {selectedDriver && (
+            <FocusOnDriver driver={selectedDriver} onFocused={openDriverPopup} />
+          )}
           
           {driversWithLocation.map(driver => (
             <Marker
               key={driver.id}
               position={[driver.last_location.latitude, driver.last_location.longitude]}
               icon={createDriverIcon(driver.driver_status)}
+              ref={(ref) => { markerRefs.current[driver.id] = ref; }}
             >
               <Popup>
                 <div className="min-w-[200px]">
