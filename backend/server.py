@@ -22,6 +22,7 @@ import shutil
 import io
 import asyncio
 import json
+import httpx  # For making HTTP requests to OSRM
 
 # PDF Generation
 from reportlab.lib import colors
