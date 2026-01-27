@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -10,26 +10,35 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      fetchUser();
-    } else {
+  const fetchUser = useCallback(async () => {
+    if (!token) {
       setLoading(false);
+      return;
     }
-  }, [token]);
-
-  const fetchUser = async () => {
+    
     try {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       const response = await axios.get(`${API}/auth/me`);
       setUser(response.data);
     } catch (error) {
       console.error('Failed to fetch user:', error);
-      logout();
+      // Only logout if token is explicitly invalid/expired (401)
+      // Don't logout on network errors or server issues (5xx)
+      if (error.response?.status === 401) {
+        console.log('Token invalid or expired, logging out');
+        logout();
+      } else {
+        // Network error or server error - keep token, user might reconnect
+        console.log('Network/server error, keeping session');
+      }
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
 
   const login = async (email, password) => {
     const response = await axios.post(`${API}/auth/login`, { email, password });
@@ -73,6 +82,11 @@ export const AuthProvider = ({ children }) => {
     return ['doctor', 'nurse', 'driver', 'admin', 'superadmin'].includes(user?.role);
   };
 
+  // Refresh user data (useful after profile updates)
+  const refreshUser = () => {
+    return fetchUser();
+  };
+
   return (
     <AuthContext.Provider value={{ 
       user, 
@@ -83,7 +97,8 @@ export const AuthProvider = ({ children }) => {
       register, 
       logout, 
       isAdmin, 
-      isStaff 
+      isStaff,
+      refreshUser
     }}>
       {children}
     </AuthContext.Provider>
