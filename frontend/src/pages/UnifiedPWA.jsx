@@ -892,7 +892,18 @@ const UnifiedPWA = () => {
     return colors[driverStatus] || 'bg-slate-500';
   };
 
-  if (loading) {
+  // Show loading spinner while auth is loading or data is being fetched
+  if (authLoading || (loading && user?.role)) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <Loader2 className="w-10 h-10 animate-spin text-sky-400" />
+      </div>
+    );
+  }
+  
+  // If auth finished but no user, we'll be redirected by the useEffect above
+  // Just show loading briefly
+  if (!user) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <Loader2 className="w-10 h-10 animate-spin text-sky-400" />
