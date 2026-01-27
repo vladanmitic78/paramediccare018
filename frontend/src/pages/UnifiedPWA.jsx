@@ -271,6 +271,17 @@ const UnifiedPWA = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    // Wait a moment for auth to load from storage
+    const timeout = setTimeout(() => {
+      if (user === null) {
+        navigate('/login');
+      }
+    }, 2000);
+    return () => clearTimeout(timeout);
+  }, [user, navigate]);
+  
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
