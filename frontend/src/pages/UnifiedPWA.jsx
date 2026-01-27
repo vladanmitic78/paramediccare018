@@ -795,19 +795,45 @@ const UnifiedPWA = () => {
                   {/* Action Buttons based on status */}
                   <div className="space-y-2 pt-2">
                     {driverStatus === 'assigned' && (
-                      <Button onClick={() => updateDriverStatus('en_route')} disabled={updatingStatus} className="w-full h-14 bg-purple-600 hover:bg-purple-700 text-lg font-bold gap-2">
+                      <Button onClick={startRouteWithMap} disabled={updatingStatus} className="w-full h-14 bg-purple-600 hover:bg-purple-700 text-lg font-bold gap-2" data-testid="start-route-btn">
                         {updatingStatus ? <Loader2 className="w-5 h-5 animate-spin" /> : <Navigation className="w-5 h-5" />}
                         {language === 'sr' ? 'KRENI KA LOKACIJI' : 'START ROUTE'}
                       </Button>
                     )}
-                    {driverStatus === 'en_route' && (
-                      <Button onClick={() => updateDriverStatus('on_site')} disabled={updatingStatus} className="w-full h-14 bg-orange-600 hover:bg-orange-700 text-lg font-bold gap-2">
-                        {updatingStatus ? <Loader2 className="w-5 h-5 animate-spin" /> : <MapPin className="w-5 h-5" />}
-                        {language === 'sr' ? 'STIGAO NA LOKACIJU' : 'ARRIVED'}
+                    {driverStatus === 'en_route' && !showRouteMap && (
+                      <Button onClick={() => setShowRouteMap(true)} className="w-full h-12 bg-slate-700 hover:bg-slate-600 text-base font-medium gap-2 mb-2">
+                        <MapPin className="w-4 h-4" />
+                        {language === 'sr' ? 'PRIKAŽI MAPU' : 'SHOW MAP'}
                       </Button>
                     )}
+                    {driverStatus === 'en_route' && (
+                      <>
+                        {distanceToPickup !== null && (
+                          <div className={`text-center py-2 px-4 rounded-lg ${nearPickup ? 'bg-green-600/30 border border-green-500' : 'bg-slate-700/50'}`}>
+                            <p className="text-sm text-slate-400">{language === 'sr' ? 'Udaljenost do preuzimanja' : 'Distance to pickup'}</p>
+                            <p className={`text-xl font-bold ${nearPickup ? 'text-green-400' : 'text-white'}`}>
+                              {distanceToPickup < 1000 ? `${distanceToPickup} m` : `${(distanceToPickup / 1000).toFixed(1)} km`}
+                            </p>
+                            {nearPickup && (
+                              <p className="text-green-400 text-sm font-medium animate-pulse">
+                                {language === 'sr' ? '✓ Stigli ste na lokaciju!' : '✓ You have arrived!'}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                        <Button 
+                          onClick={() => { updateDriverStatus('on_site'); setShowRouteMap(false); }} 
+                          disabled={updatingStatus} 
+                          className={`w-full h-14 text-lg font-bold gap-2 ${nearPickup ? 'bg-green-600 hover:bg-green-700 animate-pulse' : 'bg-orange-600 hover:bg-orange-700'}`}
+                          data-testid="arrived-btn"
+                        >
+                          {updatingStatus ? <Loader2 className="w-5 h-5 animate-spin" /> : <MapPin className="w-5 h-5" />}
+                          {language === 'sr' ? 'STIGAO NA LOKACIJU' : 'ARRIVED'}
+                        </Button>
+                      </>
+                    )}
                     {driverStatus === 'on_site' && (
-                      <Button onClick={() => updateDriverStatus('transporting')} disabled={updatingStatus} className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-lg font-bold gap-2">
+                      <Button onClick={() => updateDriverStatus('transporting')} disabled={updatingStatus} className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-lg font-bold gap-2" data-testid="start-transport-btn">
                         {updatingStatus ? <Loader2 className="w-5 h-5 animate-spin" /> : <Truck className="w-5 h-5" />}
                         {language === 'sr' ? 'ZAPOČNI TRANSPORT' : 'START TRANSPORT'}
                       </Button>
