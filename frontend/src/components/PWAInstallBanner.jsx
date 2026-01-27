@@ -3,6 +3,16 @@ import { Button } from './ui/button';
 import { X, Download, Smartphone, MoreVertical } from 'lucide-react';
 import { usePWA } from '../contexts/PWAContext';
 
+// Detect device type on initial load
+const getDeviceInfo = () => {
+  if (typeof window === 'undefined') return { isMobile: false, isAndroid: false };
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  return {
+    isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent),
+    isAndroid: /Android/i.test(userAgent)
+  };
+};
+
 /**
  * PWA Install Banner - Shows on the landing page to encourage app installation
  * - On supported mobile browsers: Shows native install prompt when available
@@ -22,17 +32,7 @@ const PWAInstallBanner = ({ language = 'en', forceShow = false }) => {
   } = usePWA();
   
   const [localDismissed, setLocalDismissed] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isAndroid, setIsAndroid] = useState(false);
-
-  useEffect(() => {
-    // Detect mobile and Android
-    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-    const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
-    const android = /Android/i.test(userAgent);
-    setIsMobile(mobile);
-    setIsAndroid(android);
-  }, []);
+  const [deviceInfo] = useState(getDeviceInfo);
 
   const handleInstall = async () => {
     await promptInstall();
@@ -133,7 +133,7 @@ const PWAInstallBanner = ({ language = 'en', forceShow = false }) => {
   }
 
   // Show Android Chrome instructions when on Android but beforeinstallprompt hasn't fired
-  if (forceShow && isAndroid) {
+  if (forceShow && deviceInfo.isAndroid) {
     return (
       <div 
         className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-sky-600 to-indigo-600 text-white p-4 shadow-lg animate-slide-up"
@@ -178,7 +178,7 @@ const PWAInstallBanner = ({ language = 'en', forceShow = false }) => {
   }
 
   // Show promotional banner on desktop when forceShow is true
-  if (forceShow && !isMobile) {
+  if (forceShow && !deviceInfo.isMobile) {
     return (
       <div 
         className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-sky-600 to-indigo-600 text-white p-4 shadow-lg animate-slide-up"
