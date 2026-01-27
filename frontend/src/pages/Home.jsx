@@ -14,6 +14,7 @@ import {
   Siren
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import PWAInstallBanner from '../components/PWAInstallBanner';
 import axios from 'axios';
 
 const API = process.env.REACT_APP_BACKEND_URL;
