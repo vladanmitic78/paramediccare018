@@ -100,6 +100,29 @@ const useWakeLock = (enabled) => {
   }, [enabled]);
 };
 
+// State persistence hook - saves app state to localStorage so it survives calls/interruptions
+const useStatePersistence = (key, state, enabled) => {
+  useEffect(() => {
+    if (enabled && state) {
+      try {
+        sessionStorage.setItem(key, JSON.stringify(state));
+      } catch (e) {
+        console.log('State persistence error:', e);
+      }
+    }
+  }, [key, state, enabled]);
+};
+
+// Restore state from session storage
+const getPersistedState = (key) => {
+  try {
+    const saved = sessionStorage.getItem(key);
+    return saved ? JSON.parse(saved) : null;
+  } catch (e) {
+    return null;
+  }
+};
+
 // Map icons
 const driverIcon = new L.DivIcon({
   className: 'driver-marker',
