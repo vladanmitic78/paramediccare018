@@ -1143,6 +1143,159 @@ async def delete_incoming_api(service_type: str, user: dict = Depends(require_ro
         raise HTTPException(status_code=404, detail="API configuration not found")
     return {"success": True}
 
+# ============ ROUTE CALCULATION (OSRM) ============
+
+class RouteRequest(BaseModel):
+    start_lat: float
+    start_lng: float
+    end_lat: float
+    end_lng: float
+
+class RouteResponse(BaseModel):
+    distance_km: float
+    duration_minutes: int
+    duration_formatted: str
+    estimated_arrival: Optional[str] = None
+
+@api_router.post("/route/calculate", response_model=RouteResponse)
+async def calculate_route(request: RouteRequest, start_time: Optional[str] = None):
+    """
+    Calculate route distance and duration between two points using OSRM.
+    If start_time is provided, also calculates estimated arrival time.
+    """
+    try:
+        osrm_url = f"https://router.project-osrm.org/route/v1/driving/{request.start_lng},{request.start_lat};{request.end_lng},{request.end_lat}?overview=false"
+        
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(osrm_url)
+            data = response.json()
+        
+        if data.get("code") != "Ok" or not data.get("routes"):
+            raise HTTPException(status_code=400, detail="Could not calculate route")
+        
+        route = data["routes"][0]
+        distance_m = route["distance"]  # meters
+        duration_s = route["duration"]  # seconds
+        
+        distance_km = round(distance_m / 1000, 1)
+        duration_minutes = int(duration_s / 60)
+        
+        # Format duration
+        hours = duration_minutes // 60
+        mins = duration_minutes % 60
+        if hours > 24:
+            days = hours // 24
+            remaining_hours = hours % 24
+            duration_formatted = f"{days}d {remaining_hours}h {mins}m"
+        elif hours > 0:
+            duration_formatted = f"{hours}h {mins}m"
+        else:
+            duration_formatted = f"{mins}m"
+        
+        # Calculate ETA if start_time provided
+        estimated_arrival = None
+        if start_time:
+            try:
+                start_dt = datetime.fromisoformat(start_time.replace('Z', '+00:00'))
+                arrival_dt = start_dt + timedelta(seconds=duration_s)
+                estimated_arrival = arrival_dt.isoformat()
+            except Exception as e:
+                logger.error(f"Error calculating ETA: {e}")
+        
+        return RouteResponse(
+            distance_km=distance_km,
+            duration_minutes=duration_minutes,
+            duration_formatted=duration_formatted,
+            estimated_arrival=estimated_arrival
+        )
+        
+    except httpx.RequestError as e:
+        logger.error(f"OSRM request error: {e}")
+        raise HTTPException(status_code=503, detail="Route calculation service unavailable")
+    except Exception as e:
+        logger.error(f"Route calculation error: {e}")
+        raise HTTPException(status_code=500, detail="Error calculating route")
+
+
+@api_router.post("/bookings/{booking_id}/update-eta")
+async def update_booking_eta(
+    booking_id: str,
+    current_lat: float,
+    current_lng: float,
+    user: dict = Depends(get_current_user)
+):
+    """
+    Update booking ETA based on driver's current location.
+    Called from driver app when location updates.
+    """
+    # Find the booking
+    booking = await db.bookings.find_one({"id": booking_id})
+    if not booking:
+        booking = await db.patient_bookings.find_one({"id": booking_id})
+    
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    # Get destination coordinates
+    end_lat = booking.get("end_lat") or booking.get("destination_lat")
+    end_lng = booking.get("end_lng") or booking.get("destination_lng")
+    
+    if not end_lat or not end_lng:
+        raise HTTPException(status_code=400, detail="Booking has no destination coordinates")
+    
+    try:
+        # Calculate route from current position to destination
+        osrm_url = f"https://router.project-osrm.org/route/v1/driving/{current_lng},{current_lat};{end_lng},{end_lat}?overview=false"
+        
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(osrm_url)
+            data = response.json()
+        
+        if data.get("code") != "Ok" or not data.get("routes"):
+            raise HTTPException(status_code=400, detail="Could not calculate route")
+        
+        route = data["routes"][0]
+        duration_s = route["duration"]
+        distance_m = route["distance"]
+        
+        # Calculate new ETA from now
+        now = datetime.now(timezone.utc)
+        eta = now + timedelta(seconds=duration_s)
+        eta_iso = eta.isoformat()
+        
+        # Update booking with new ETA
+        collection = db.bookings if await db.bookings.find_one({"id": booking_id}) else db.patient_bookings
+        
+        await collection.update_one(
+            {"id": booking_id},
+            {"$set": {
+                "estimated_arrival": eta_iso,
+                "eta_updated_at": now.isoformat(),
+                "eta_distance_remaining_km": round(distance_m / 1000, 1),
+                "eta_duration_remaining_min": int(duration_s / 60)
+            }}
+        )
+        
+        # Also update schedule if exists
+        await db.vehicle_schedules.update_many(
+            {"booking_id": booking_id},
+            {"$set": {"estimated_arrival": eta_iso}}
+        )
+        
+        logger.info(f"Updated ETA for booking {booking_id}: {eta_iso}")
+        
+        return {
+            "success": True,
+            "estimated_arrival": eta_iso,
+            "distance_remaining_km": round(distance_m / 1000, 1),
+            "duration_remaining_min": int(duration_s / 60)
+        }
+        
+    except httpx.RequestError as e:
+        logger.error(f"OSRM request error: {e}")
+        raise HTTPException(status_code=503, detail="Route calculation service unavailable")
+
+
 # ============ BOOKING ROUTES ============
 
 @api_router.post("/bookings", response_model=BookingResponse)
