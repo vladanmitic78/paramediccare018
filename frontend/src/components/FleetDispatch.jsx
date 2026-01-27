@@ -397,6 +397,7 @@ const FleetDispatch = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [vehicleSearch, setVehicleSearch] = useState('');
+  const [bookingSearch, setBookingSearch] = useState('');
   
   // Bookings state
   const [bookings, setBookings] = useState([]);
