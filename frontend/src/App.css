@@ -162,3 +162,37 @@ input:focus, textarea:focus, select:focus {
 .marker-pulse {
   animation: pulse-marker 2s infinite;
 }
+
+
+/* Force 24-hour time format on time inputs */
+input[type="time"] {
+  /* Use system 24h format */
+  font-variant-numeric: tabular-nums;
+}
+
+/* Chrome/Safari - ensure consistent display */
+input[type="time"]::-webkit-datetime-edit-hour-field,
+input[type="time"]::-webkit-datetime-edit-minute-field {
+  padding: 0 2px;
+}
+
+/* Hide AM/PM selector in webkit browsers */
+input[type="time"]::-webkit-datetime-edit-ampm-field {
+  display: none;
+}
+
+/* Slide up animation for PWA banner */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
