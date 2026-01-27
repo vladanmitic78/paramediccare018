@@ -636,7 +636,12 @@ const FleetDispatch = () => {
   // Time-slot assignment modal state
   const [showTimeSlotModal, setShowTimeSlotModal] = useState(false);
   const [pendingAssignment, setPendingAssignment] = useState(null);  // {vehicle, booking, driver}
-  const [assignmentTimeSlot, setAssignmentTimeSlot] = useState({ startTime: '', endTime: '' });
+  const [assignmentTimeSlot, setAssignmentTimeSlot] = useState({ 
+    startDate: '', 
+    startTime: '', 
+    endDate: '', 
+    endTime: '' 
+  });
   const [availabilityCheck, setAvailabilityCheck] = useState(null);  // {available, conflicts}
   const [checkingAvailability, setCheckingAvailability] = useState(false);
 
