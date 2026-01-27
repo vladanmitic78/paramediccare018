@@ -1056,7 +1056,15 @@ const FleetDispatch = () => {
               {filteredBookings.length === 0 ? (
                 <div className="text-center py-12 text-slate-400">
                   <CheckCircle className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-                  <p>{language === 'sr' ? 'Nema rezervacija' : 'No bookings'}</p>
+                  <p>{language === 'sr' ? (bookingSearch ? 'Nema rezultata pretrage' : 'Nema rezervacija') : (bookingSearch ? 'No search results' : 'No bookings')}</p>
+                  {bookingSearch && (
+                    <button
+                      onClick={() => setBookingSearch('')}
+                      className="mt-2 text-sm text-sky-600 hover:underline"
+                    >
+                      {language === 'sr' ? 'Očisti pretragu' : 'Clear search'}
+                    </button>
+                  )}
                 </div>
               ) : (
                 filteredBookings.map(booking => (
