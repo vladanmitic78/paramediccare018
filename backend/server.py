@@ -1087,6 +1087,144 @@ async def send_sms_notification(phone: str, message: str, booking_id: str = None
     return result
 
 
+# Endpoint to manually send SMS to a booking's contact
+@api_router.post("/bookings/{booking_id}/send-sms")
+async def send_booking_sms(
+    booking_id: str,
+    message_type: str = "reminder",  # reminder, driver_arriving, custom
+    custom_message: str = None,
+    eta_minutes: int = 15,
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.DRIVER]))
+):
+    """Send SMS to booking contact"""
+    booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    contact_phone = booking.get("contact_phone")
+    if not contact_phone:
+        raise HTTPException(status_code=400, detail="No contact phone number")
+    
+    language = booking.get("language", "sr")
+    patient_name = booking.get("patient_name", "")
+    pickup_time = booking.get("pickup_time", booking.get("pickup_datetime", ""))
+    if pickup_time and isinstance(pickup_time, str) and "T" in pickup_time:
+        pickup_time = pickup_time.split("T")[-1][:5]
+    
+    # Determine message based on type
+    if message_type == "reminder":
+        message = SMSTemplates.pickup_reminder(patient_name, pickup_time or "uskoro", language)
+    elif message_type == "driver_arriving":
+        message = SMSTemplates.driver_arriving(eta_minutes, language)
+    elif message_type == "custom" and custom_message:
+        message = custom_message
+    else:
+        raise HTTPException(status_code=400, detail="Invalid message type or missing custom message")
+    
+    result = await send_sms_notification(contact_phone, message, booking_id)
+    
+    return {
+        "success": result.success,
+        "message_id": result.message_id,
+        "error": result.error,
+        "phone": contact_phone,
+        "message_sent": message
+    }
+
+
+# Endpoint to send pickup reminders for upcoming bookings
+@api_router.post("/admin/send-pickup-reminders")
+async def send_pickup_reminders(
+    minutes_before: int = 30,
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Send pickup reminders for bookings starting within specified minutes"""
+    now = datetime.now(timezone.utc)
+    reminder_window_start = now
+    reminder_window_end = now + timedelta(minutes=minutes_before + 10)
+    
+    # Find confirmed bookings with pickup time within the window
+    bookings = await db.bookings.find({
+        "status": {"$in": ["confirmed", "assigned"]},
+        "contact_phone": {"$ne": None}
+    }, {"_id": 0}).to_list(100)
+    
+    sent_count = 0
+    failed_count = 0
+    results = []
+    
+    for booking in bookings:
+        # Check if pickup time is within window
+        pickup_datetime = booking.get("pickup_datetime") or booking.get("booking_date")
+        if not pickup_datetime:
+            continue
+        
+        try:
+            if isinstance(pickup_datetime, str):
+                # Parse the datetime
+                if "T" in pickup_datetime:
+                    pickup_dt = datetime.fromisoformat(pickup_datetime.replace("Z", "+00:00"))
+                else:
+                    # Just a date, skip time-based reminders
+                    continue
+            else:
+                pickup_dt = pickup_datetime
+            
+            # Check if within reminder window
+            time_until_pickup = (pickup_dt - now).total_seconds() / 60
+            if 0 < time_until_pickup <= minutes_before + 10:
+                # Check if reminder already sent
+                existing_reminder = await db.sms_logs.find_one({
+                    "booking_id": booking["id"],
+                    "message": {"$regex": "podsetnik|reminder", "$options": "i"},
+                    "sent_at": {"$gte": (now - timedelta(hours=2)).isoformat()}
+                })
+                
+                if existing_reminder:
+                    continue
+                
+                # Send reminder
+                language = booking.get("language", "sr")
+                pickup_time = pickup_dt.strftime("%H:%M")
+                message = SMSTemplates.pickup_reminder(
+                    booking.get("patient_name", ""),
+                    pickup_time,
+                    language
+                )
+                
+                result = await send_sms_notification(
+                    booking.get("contact_phone"),
+                    message,
+                    booking["id"]
+                )
+                
+                if result.success:
+                    sent_count += 1
+                else:
+                    failed_count += 1
+                
+                results.append({
+                    "booking_id": booking["id"],
+                    "patient": booking.get("patient_name"),
+                    "phone": booking.get("contact_phone"),
+                    "success": result.success,
+                    "error": result.error
+                })
+        except Exception as e:
+            results.append({
+                "booking_id": booking["id"],
+                "error": str(e)
+            })
+            failed_count += 1
+    
+    return {
+        "sent": sent_count,
+        "failed": failed_count,
+        "total_processed": len(results),
+        "details": results
+    }
+
+
 # ============ API KEY MANAGEMENT (Super Admin) ============
 
 class ApiKeyCreate(BaseModel):
