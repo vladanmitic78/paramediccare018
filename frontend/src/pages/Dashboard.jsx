@@ -1705,6 +1705,11 @@ const Dashboard = () => {
             </div>
           )}
 
+          {/* SMS Gateway Settings (Super Admin only) */}
+          {activeTab === 'sms-settings' && isSuperAdmin() && (
+            <SMSSettings language={language} />
+          )}
+
           {/* Availability Section - StaffAvailabilityCalendar is rendered above at line 1197 */}
         </main>
       </div>
