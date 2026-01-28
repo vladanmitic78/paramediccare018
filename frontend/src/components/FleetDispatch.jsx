@@ -722,6 +722,44 @@ const FleetDispatch = () => {
     }
   }, []);
 
+  // Send SMS to booking contact
+  const handleSendSMS = async () => {
+    if (!smsBooking) return;
+    
+    setSendingSMS(true);
+    try {
+      const params = new URLSearchParams({ message_type: smsType });
+      if (smsType === 'custom' && smsCustomMessage) {
+        params.append('custom_message', smsCustomMessage);
+      }
+      
+      const response = await axios.post(
+        `${API}/bookings/${smsBooking.id}/send-sms?${params}`
+      );
+      
+      if (response.data.success) {
+        toast.success(language === 'sr' ? 'SMS poslat!' : 'SMS sent!');
+        setShowSMSDialog(false);
+        setSmsBooking(null);
+        setSmsCustomMessage('');
+      } else {
+        toast.error(response.data.error || (language === 'sr' ? 'Greška pri slanju' : 'Error sending'));
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || (language === 'sr' ? 'Greška pri slanju SMS-a' : 'Error sending SMS'));
+    } finally {
+      setSendingSMS(false);
+    }
+  };
+
+  // Open SMS dialog for a booking
+  const openSMSDialog = (booking) => {
+    setSmsBooking(booking);
+    setSmsType('reminder');
+    setSmsCustomMessage('');
+    setShowSMSDialog(true);
+  };
+
   useEffect(() => {
     fetchData();
     fetchAvailableStaff();
