@@ -1164,11 +1164,16 @@ async def send_pickup_reminders(
                 # Parse the datetime
                 if "T" in pickup_datetime:
                     pickup_dt = datetime.fromisoformat(pickup_datetime.replace("Z", "+00:00"))
+                    # Ensure timezone aware
+                    if pickup_dt.tzinfo is None:
+                        pickup_dt = pickup_dt.replace(tzinfo=timezone.utc)
                 else:
                     # Just a date, skip time-based reminders
                     continue
             else:
                 pickup_dt = pickup_datetime
+                if pickup_dt.tzinfo is None:
+                    pickup_dt = pickup_dt.replace(tzinfo=timezone.utc)
             
             # Check if within reminder window
             time_until_pickup = (pickup_dt - now).total_seconds() / 60
