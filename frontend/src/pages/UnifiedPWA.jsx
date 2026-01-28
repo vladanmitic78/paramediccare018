@@ -2233,57 +2233,6 @@ const UnifiedPWA = () => {
               />
             </div>
 
-            {/* Notes */}
-            <div className="bg-slate-800 rounded-xl p-4">
-              <label className="text-sm text-slate-400 mb-2 flex items-center gap-2">
-                <ClipboardList className="w-4 h-4 text-slate-400" />
-                {language === 'sr' ? 'Napomene' : 'Notes'}
-              </label>
-              <textarea
-                placeholder={language === 'sr' ? 'Dodatne napomene o stanju pacijenta...' : 'Additional notes about patient condition...'}
-                value={vitals.notes}
-                onChange={(e) => setVitals({...vitals, notes: e.target.value})}
-                rows={3}
-                className="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
-              />
-            </div>
-
-            {/* Quick Presets */}
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 border-slate-600 text-slate-300"
-                onClick={() => setVitals({
-                  heart_rate: '75',
-                  blood_pressure_systolic: '120',
-                  blood_pressure_diastolic: '80',
-                  temperature: '36.6',
-                  oxygen_saturation: '98',
-                  respiratory_rate: '16',
-                  notes: vitals.notes
-                })}
-              >
-                {language === 'sr' ? 'Normalne vrednosti' : 'Normal Values'}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 border-slate-600 text-slate-300"
-                onClick={() => setVitals({
-                  heart_rate: '',
-                  blood_pressure_systolic: '',
-                  blood_pressure_diastolic: '',
-                  temperature: '',
-                  oxygen_saturation: '',
-                  respiratory_rate: '',
-                  notes: ''
-                })}
-              >
-                {language === 'sr' ? 'Obriši sve' : 'Clear All'}
-              </Button>
-            </div>
-
             {/* Diagnoses Section - Collapsible */}
             <div className="bg-slate-800 rounded-xl overflow-hidden">
               <button
@@ -2432,6 +2381,57 @@ const UnifiedPWA = () => {
                   )}
                 </div>
               )}
+            </div>
+
+            {/* Notes */}
+            <div className="bg-slate-800 rounded-xl p-4">
+              <label className="text-sm text-slate-400 mb-2 flex items-center gap-2">
+                <ClipboardList className="w-4 h-4 text-slate-400" />
+                {language === 'sr' ? 'Napomene' : 'Notes'}
+              </label>
+              <textarea
+                placeholder={language === 'sr' ? 'Dodatne napomene o stanju pacijenta...' : 'Additional notes about patient condition...'}
+                value={vitals.notes}
+                onChange={(e) => setVitals({...vitals, notes: e.target.value})}
+                rows={3}
+                className="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+            </div>
+
+            {/* Quick Presets */}
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 border-slate-600 text-slate-300"
+                onClick={() => setVitals({
+                  heart_rate: '75',
+                  blood_pressure_systolic: '120',
+                  blood_pressure_diastolic: '80',
+                  temperature: '36.6',
+                  oxygen_saturation: '98',
+                  respiratory_rate: '16',
+                  notes: vitals.notes
+                })}
+              >
+                {language === 'sr' ? 'Normalne vrednosti' : 'Normal Values'}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 border-slate-600 text-slate-300"
+                onClick={() => setVitals({
+                  heart_rate: '',
+                  blood_pressure_systolic: '',
+                  blood_pressure_diastolic: '',
+                  temperature: '',
+                  oxygen_saturation: '',
+                  respiratory_rate: '',
+                  notes: ''
+                })}
+              >
+                {language === 'sr' ? 'Obriši sve' : 'Clear All'}
+              </Button>
             </div>
           </div>
 
