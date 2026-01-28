@@ -65,7 +65,8 @@ import {
   Copy,
   RefreshCw,
   Shield,
-  ExternalLink
+  ExternalLink,
+  Phone
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
@@ -75,6 +76,7 @@ import AdminBookingNotifications from '../components/AdminBookingNotifications';
 import StaffAvailabilityCalendar from '../components/StaffAvailabilityCalendar';
 import InvoiceManager from '../components/InvoiceManager';
 import AdminLiveMap from '../components/AdminLiveMap';
+import SMSSettings from '../components/SMSSettings';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
