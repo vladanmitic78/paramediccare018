@@ -3565,6 +3565,33 @@ async def generate_patient_report(
         elements.append(t)
         elements.append(Spacer(1, 10*mm))
         
+        # Diagnoses Section
+        elements.append(Paragraph(f"Diagnoses ({len(diagnoses)}) / Dijagnoze", styles['Heading2']))
+        if diagnoses:
+            diag_data = [["ICD-10", "Diagnosis / Dijagnoza", "Category / Kategorija", "Date / Datum"]]
+            for diag in diagnoses[:20]:  # Limit to 20 entries
+                diag_data.append([
+                    diag.get("code", ""),
+                    diag.get("name_sr", diag.get("name_en", "")),
+                    diag.get("category_sr", diag.get("category_en", "")),
+                    diag.get("added_at", "")[:10] if diag.get("added_at") else ""
+                ])
+            t = Table(diag_data, colWidths=[20*mm, 65*mm, 45*mm, 30*mm])
+            t.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.Color(0.4, 0.2, 0.6)),  # Purple header for diagnoses
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('FONTNAME', (0, 0), (-1, 0), 'DejaVuSans-Bold'),
+                ('FONTNAME', (0, 1), (-1, -1), 'DejaVuSans'),
+                ('FONTSIZE', (0, 0), (-1, -1), 8),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                ('ALIGN', (0, 0), (0, -1), 'CENTER'),
+            ]))
+            elements.append(t)
+        else:
+            elements.append(Paragraph("No diagnoses recorded / Nema zabeleženih dijagnoza", styles['Normal']))
+        elements.append(Spacer(1, 10*mm))
+        
         # Medications
         elements.append(Paragraph(f"Medications ({len(medications)}) / Lekovi", styles['Heading2']))
         if medications:
