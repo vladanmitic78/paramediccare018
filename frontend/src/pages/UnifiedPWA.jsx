@@ -620,6 +620,15 @@ const UnifiedPWA = () => {
     return () => clearInterval(interval);
   }, [fetchData, user?.role]);
 
+  // Fetch diagnoses when vitals modal opens
+  useEffect(() => {
+    if (showVitalsModal && selectedPatient?.patient_id && isMedical) {
+      fetchPatientDiagnoses(selectedPatient.patient_id);
+      setShowDiagnosesSection(false);
+      setDiagnosisSearch('');
+    }
+  }, [showVitalsModal, selectedPatient?.patient_id, isMedical]);
+
   // GPS tracking for drivers
   useEffect(() => {
     if (isDriver && isActiveTransport && 'geolocation' in navigator) {
