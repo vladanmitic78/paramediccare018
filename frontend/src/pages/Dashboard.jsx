@@ -77,6 +77,7 @@ import StaffAvailabilityCalendar from '../components/StaffAvailabilityCalendar';
 import InvoiceManager from '../components/InvoiceManager';
 import AdminLiveMap from '../components/AdminLiveMap';
 import SMSSettings from '../components/SMSSettings';
+import EmailSettings from '../components/EmailSettings';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
