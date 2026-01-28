@@ -1602,6 +1602,56 @@ async def update_booking(booking_id: str, update: BookingFullUpdate, user: dict 
     await db.bookings.update_one({"id": booking_id}, {"$set": update_doc})
     
     booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
+    
+    # Send SMS notifications based on changes
+    contact_phone = booking.get("contact_phone")
+    language = booking.get("language", "sr")
+    
+    if contact_phone:
+        # SMS for driver assignment
+        if "assigned_driver" in update_dict and update_dict["assigned_driver"] and not old_driver:
+            driver_name = update_dict.get("assigned_driver_name", "")
+            # Get vehicle info if available
+            vehicle_info = ""
+            if new_driver:
+                driver_status = await db.driver_status.find_one({"driver_id": new_driver})
+                if driver_status and driver_status.get("vehicle_info"):
+                    vehicle_info = driver_status.get("vehicle_info", {}).get("registration", "")
+            
+            sms_message = SMSTemplates.driver_assigned(
+                booking.get("patient_name", ""),
+                driver_name,
+                vehicle_info,
+                language
+            )
+            await send_sms_notification(contact_phone, sms_message, booking_id)
+        
+        # SMS for status changes
+        if "status" in update_dict:
+            new_status = update_dict["status"]
+            if new_status == "confirmed":
+                # Booking confirmed SMS
+                pickup_time = booking.get("pickup_time", booking.get("pickup_datetime", ""))
+                if pickup_time and isinstance(pickup_time, str):
+                    pickup_time = pickup_time.split("T")[-1][:5] if "T" in pickup_time else pickup_time
+                sms_message = SMSTemplates.booking_confirmation(
+                    booking.get("patient_name", ""),
+                    booking.get("booking_date", ""),
+                    pickup_time or "TBD",
+                    language
+                )
+                await send_sms_notification(contact_phone, sms_message, booking_id)
+            
+            elif new_status == "in_transit":
+                # Driver is on the way
+                sms_message = SMSTemplates.driver_arriving(15, language)
+                await send_sms_notification(contact_phone, sms_message, booking_id)
+            
+            elif new_status == "completed":
+                # Transport completed
+                sms_message = SMSTemplates.transport_completed(language)
+                await send_sms_notification(contact_phone, sms_message, booking_id)
+    
     return BookingResponse(**booking)
 
 @api_router.delete("/bookings/{booking_id}")
