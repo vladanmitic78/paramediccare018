@@ -1912,28 +1912,68 @@ async def update_invoice_status(
 
 # PDF Generation function
 def generate_invoice_pdf(invoice: dict) -> io.BytesIO:
-    """Generate PDF for an invoice"""
+    """Generate PDF for an invoice with Serbian character support"""
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+    
+    # Register DejaVu fonts for Serbian Latin character support (šđžčć)
+    try:
+        pdfmetrics.registerFont(TTFont('DejaVu', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
+        pdfmetrics.registerFont(TTFont('DejaVu-Bold', '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'))
+    except Exception as e:
+        logger.warning(f"Could not register DejaVu fonts: {e}")
+    
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=20*mm, bottomMargin=20*mm, leftMargin=20*mm, rightMargin=20*mm)
     
     styles = getSampleStyleSheet()
     
-    # Custom styles
-    title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=24, textColor=colors.HexColor('#0f172a'), alignment=TA_CENTER)
-    header_style = ParagraphStyle('Header', parent=styles['Normal'], fontSize=10, textColor=colors.HexColor('#64748b'))
-    normal_style = ParagraphStyle('Normal', parent=styles['Normal'], fontSize=10, textColor=colors.HexColor('#334155'))
-    bold_style = ParagraphStyle('Bold', parent=styles['Normal'], fontSize=10, textColor=colors.HexColor('#0f172a'), fontName='Helvetica-Bold')
+    # Custom styles with DejaVu font for Serbian support
+    title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=24, textColor=colors.HexColor('#0f172a'), alignment=TA_CENTER, fontName='DejaVu-Bold')
+    header_style = ParagraphStyle('Header', parent=styles['Normal'], fontSize=10, textColor=colors.HexColor('#64748b'), fontName='DejaVu')
+    normal_style = ParagraphStyle('Normal', parent=styles['Normal'], fontSize=10, textColor=colors.HexColor('#334155'), fontName='DejaVu')
+    bold_style = ParagraphStyle('Bold', parent=styles['Normal'], fontSize=10, textColor=colors.HexColor('#0f172a'), fontName='DejaVu-Bold')
     
     elements = []
     
-    # Header with company info
-    company_info = """
-    <b>PARAMEDIC CARE 018</b><br/>
-    Žarka Zrenjanina 50A, 18103 Niš, Serbia<br/>
-    PIB: 115243796 | MB: 68211557<br/>
-    Tel: +381 18 123 456 | Email: info@paramedic-care018.rs
-    """
-    elements.append(Paragraph(company_info, header_style))
+    # Header with logo and company info side by side
+    logo_path = '/app/frontend/public/logo.jpg'
+    header_data = []
+    
+    try:
+        if os.path.exists(logo_path):
+            logo = RLImage(logo_path, width=25*mm, height=25*mm)
+            company_text = Paragraph("""
+            <b>PARAMEDIC CARE 018</b><br/>
+            Žarka Zrenjanina 50A, 18103 Niš, Srbija<br/>
+            PIB: 115243796 | MB: 68211557<br/>
+            Tel: +381 18 123 456 | Email: info@paramedic-care018.rs
+            """, header_style)
+            header_data = [[logo, company_text]]
+        else:
+            company_text = Paragraph("""
+            <b>PARAMEDIC CARE 018</b><br/>
+            Žarka Zrenjanina 50A, 18103 Niš, Srbija<br/>
+            PIB: 115243796 | MB: 68211557<br/>
+            Tel: +381 18 123 456 | Email: info@paramedic-care018.rs
+            """, header_style)
+            header_data = [['', company_text]]
+    except Exception as e:
+        logger.error(f"Error loading logo: {e}")
+        company_text = Paragraph("""
+        <b>PARAMEDIC CARE 018</b><br/>
+        Žarka Zrenjanina 50A, 18103 Niš, Srbija<br/>
+        PIB: 115243796 | MB: 68211557<br/>
+        Tel: +381 18 123 456 | Email: info@paramedic-care018.rs
+        """, header_style)
+        header_data = [['', company_text]]
+    
+    header_table = Table(header_data, colWidths=[30*mm, 140*mm])
+    header_table.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('ALIGN', (0, 0), (0, 0), 'LEFT'),
+    ]))
+    elements.append(header_table)
     elements.append(Spacer(1, 10*mm))
     
     # Invoice title
@@ -1966,7 +2006,7 @@ def generate_invoice_pdf(invoice: dict) -> io.BytesIO:
     service_data = [
         ['Opis usluge / Service Description', 'Datum / Date', 'Iznos / Amount'],
         [
-            invoice.get('service_description', 'Medical Transport'),
+            invoice.get('service_description', 'Medicinski transport'),
             invoice.get('service_date', 'N/A'),
             f"{invoice.get('amount', 0):.2f} RSD"
         ]
@@ -1981,7 +2021,8 @@ def generate_invoice_pdf(invoice: dict) -> io.BytesIO:
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('ALIGN', (2, 0), (2, -1), 'RIGHT'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTNAME', (0, 0), (-1, 0), 'DejaVu-Bold'),
+        ('FONTNAME', (0, 1), (-1, -1), 'DejaVu'),
         ('FONTSIZE', (0, 0), (-1, -1), 9),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
         ('TOPPADDING', (0, 0), (-1, -1), 8),
@@ -1992,7 +2033,7 @@ def generate_invoice_pdf(invoice: dict) -> io.BytesIO:
     elements.append(Spacer(1, 3*mm))
     
     # Route details
-    elements.append(Paragraph(f"<i>{route_info}</i>", ParagraphStyle('Route', parent=normal_style, fontSize=8, textColor=colors.HexColor('#64748b'))))
+    elements.append(Paragraph(f"<i>{route_info}</i>", ParagraphStyle('Route', parent=normal_style, fontSize=8, textColor=colors.HexColor('#64748b'), fontName='DejaVu')))
     elements.append(Spacer(1, 10*mm))
     
     # Totals table
@@ -2006,7 +2047,8 @@ def generate_invoice_pdf(invoice: dict) -> io.BytesIO:
     totals_table.setStyle(TableStyle([
         ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
         ('ALIGN', (2, 0), (2, -1), 'RIGHT'),
-        ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
+        ('FONTNAME', (0, 0), (-1, -2), 'DejaVu'),
+        ('FONTNAME', (0, -1), (-1, -1), 'DejaVu-Bold'),
         ('FONTSIZE', (0, 0), (-1, -1), 10),
         ('TOPPADDING', (0, 0), (-1, -1), 6),
         ('LINEABOVE', (1, -1), (-1, -1), 1, colors.HexColor('#0f172a')),
