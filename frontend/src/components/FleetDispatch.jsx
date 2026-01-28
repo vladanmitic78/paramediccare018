@@ -64,7 +64,9 @@ import {
   Calendar,
   ArrowRight,
   Edit2,
-  Truck
+  Truck,
+  MessageSquare,
+  Send
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
