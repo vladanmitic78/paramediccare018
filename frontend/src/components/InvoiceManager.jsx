@@ -100,18 +100,22 @@ const InvoiceManager = () => {
 
     setCreating(true);
     try {
+      // Calculate default due date if not provided (30 days from now)
+      const dueDate = newInvoice.due_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      
       await axios.post(`${API}/admin/invoices`, null, {
         params: {
           booking_id: selectedBooking.id,
           amount: parseFloat(newInvoice.amount),
-          service_description: newInvoice.service_description
+          service_description: newInvoice.service_description,
+          due_date: dueDate
         }
       });
       
       toast.success(language === 'sr' ? 'Faktura kreirana!' : 'Invoice created!');
       setShowCreateDialog(false);
       setSelectedBooking(null);
-      setNewInvoice({ amount: '', service_description: '' });
+      setNewInvoice({ amount: '', service_description: '', due_date: '' });
       fetchInvoices();
       fetchBookingsForInvoice();
     } catch (error) {
