@@ -77,6 +77,9 @@ from utils.email import (
     get_internal_notification_template
 )
 
+# Import SMS service
+from services.sms_service import SMSService, SMSConfig, SMSProvider, SMSTemplates, SMSResult
+
 # Import extracted routers
 from routes.fleet import router as fleet_router
 from routes.schedule import router as schedule_router
