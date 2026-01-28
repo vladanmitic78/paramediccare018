@@ -1675,6 +1675,7 @@ const FleetDispatch = () => {
                     language={language}
                     onEdit={openEditBooking}
                     onDetach={handleDetachDriver}
+                    onSendSMS={openSMSDialog}
                   />
                 ))
               )}
