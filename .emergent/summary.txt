@@ -4,46 +4,50 @@
 The user is building a comprehensive medical transport system named Paramedic Care 018. The system has evolved to include a public website, a patient portal, real-time mobile applications for admins and drivers, invoice management, location tracking, a live map, staff availability management, a full EMR-style medical dashboard, and a vehicle-centric team assignment module.
 
 **Recent PRODUCT REQUIREMENTS:**
-1.  **Unified PWA:** Consolidate the separate mobile apps into a single, role-aware Progressive Web App (PWA).
-2.  **Dispatch Console UI/UX:**
-    *   Allow admins to create/edit bookings.
-    *   Add search and filtering to vehicle and booking lists.
-    *   Improve the layout for consistency.
-    *   Allow detaching and reassigning vehicles from bookings.
-3.  **Advanced Scheduling Logic:**
-    *   A driver assigned to a future booking should still be available for bookings today.
-    *   Provide a warning popup if a driver is assigned to a new booking that conflicts with an existing one on the same day.
-4.  **PWA Installation:** The PWA should be easily installable on mobile devices.
-5.  **Future: Timeline-Based Availability:** The user has proposed a major architectural shift to a time-slot-based vehicle scheduling system, moving away from a simple busy/available status.
-6.  **Backend Refactoring:** Continue breaking down the monolithic  into smaller modules.
+1.  **Patient Diagnoses Management:** Doctors and Nurses need to be able to select multiple diagnoses for a patient from a predefined list (provided in an Excel file). The selected diagnoses should be displayed on the patient's profile page, next to their medications.
+2.  **Auto-Calculated & Live ETA:** The booking system's Estimated Time of Arrival (ETA) should be automatically calculated based on the route distance (using OSRM) and updated in real-time based on the driver's live GPS location from the PWA.
+3.  **Multi-Day Transports:** The booking and scheduling system must support transports that span multiple days, ensuring vehicles and staff are marked as busy for the entire duration from pickup to arrival.
+4.  **Invoice Enhancements:**
+    *   Add the company logo to all generated invoice PDFs.
+    *   Ensure Serbian Latin characters (šđžčć) render correctly on invoices.
+    *   Add a Due Date column to the invoice list.
+    *   Automatically mark invoices as Overdue (with red styling) if the due date has passed and the status isn't Paid or Cancelled.
+5.  **Session Persistence:** Users should not be logged out of the web application or PWA when they refresh the page.
+6.  **PWA Usability:**
+    *   The PWA installation prompt should appear on the public landing page, before login.
+    *   Add a burger menu to the PWA that allows users to see their future bookings.
+7.  **System Stability:** The user has requested a focus on optimizing and stabilizing the application.
 
 **User's preferred language**: The user communicates in English. The agent MUST respond in **English**.
 
 **what currently exists?**
-A full-stack application with a React frontend, a partially-refactored FastAPI backend, and a MongoDB database. The core of the application is a dispatch console () for managing vehicles and bookings, and a unified Progressive Web App () for mobile users (Drivers, Admins, Medical staff).
-
-Recent work has heavily focused on improving the dispatch console's functionality, adding booking editing, vehicle detachment/reassignment, and a time-conflict warning system. The PWA's stability was improved by fixing a critical infinite loading bug.
+A full-stack application with a React frontend, a partially-refactored FastAPI backend, and a MongoDB database. The session persistence on page refresh has been significantly improved for both the web dashboard and the PWA. The booking system now supports multi-day transports with an auto-calculated, live-updating ETA feature. The PWA has a new burger menu for viewing future bookings, and its install banner is now correctly displayed on the public landing page. The invoice system was enhanced with PDF logo/font support, a due date field, and an automatic overdue status. The agent has just begun work on a new feature for managing patient diagnoses by parsing a user-provided Excel file.
 
 **Last working item**:
--   **Last item agent was working:** The user reported they were not getting prompted to install the PWA on their mobile device. The agent identified that the PWA install prompt event () was not being handled and began implementing a custom hook () to manage and display a custom Install App banner/button within the PWA.
+-   **Last item agent was working:** Implementing a new feature for Doctors and Nurses to add multiple diagnoses to a patient's record. The user provided an Excel file () with a list of diagnoses. The agent successfully extracted the data from the file and created , and was beginning to explore the patient profile page to plan the UI implementation.
 -   **Status:** IN PROGRESS
 -   **Agent Testing Done:** N
--   **Which testing method agent to use?** Frontend testing agent or screenshot tool. The agent needs to verify that a custom Install App UI element appears on the  page and that clicking it triggers the browser's native installation dialog.
+-   **Which testing method agent to use?** Frontend testing agent. The test should verify that a doctor/nurse can:
+    1.  See a new Diagnoses section on the patient page.
+    2.  Use a multi-select dropdown to add diagnoses from the provided list, with support for searching.
+    3.  See the selected diagnoses saved and displayed on the patient page, positioned next to the Medications section.
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: (P0) PWA install prompt is not showing.**
-    -   **Description:** The browser's automatic Add to Home Screen prompt is not appearing for the user. The current implementation lacks a handler for the  event, which is necessary to provide a reliable, user-triggered installation flow.
-    -   **Attempted fixes:** The agent started creating a  custom hook in  to capture the browser's install event.
+-   **Issue 1: (P0) Implement Patient Diagnoses Feature.**
+    -   **Description:** This is the current . Doctors and Nurses need a way to select multiple diagnoses for a patient from a predefined list. This should be available when creating/editing a patient and displayed on their profile page next to the medications section.
+    -   **Attempted fixes:** Agent created  from the user's Excel file.
     -   **Next debug checklist:**
-        1.  Complete the implementation of the  hook in .
-        2.  Add a UI element (e.g., a banner or button) in the  render method that is conditionally displayed when the install prompt event has been captured.
-        3.  Ensure the button's  handler calls the  method on the saved event object to trigger the native installation dialog.
-        4.  Thoroughly test on a compatible browser (e.g., Chrome on Android or desktop) by navigating to the  route and verifying the custom install button appears and functions correctly.
-    -   **Why fix this issue and what will be achieved with the fix?** To provide a clear and reliable way for users to install the PWA on their mobile devices, improving accessibility and user experience.
+        1.  Locate the patient details component (likely within ).
+        2.  Modify the layout to create two columns: Diagnoses on the left, Medications on the right.
+        3.  Create a new  component.
+        4.  In , implement a multi-select combobox (e.g., Shadcn ) that loads data from  and supports searching.
+        5.  Create a backend model and API endpoint (e.g., ) to save and retrieve a patient's diagnoses.
+        6.  Connect the frontend component to the new backend endpoint.
+    -   **Why fix this issue and what will be achieved with the fix?** This is a core EMR feature to enhance patient records with structured medical data.
     -   **Status:** IN PROGRESS
     -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** Frontend.
+    -   **Should Test frontend/backend/both after fix?** Both.
 
 -   **Issue 2: (P2) Ephemeral Image Storage**
     -   **Description:** User-uploaded files and images are stored on the local filesystem (), which is not persistent and results in data loss between sessions.
@@ -55,112 +59,108 @@ Recent work has heavily focused on improving the dispatch console's functionalit
 
 **In progress Task List**:
 -   **Task 1: (P1) Backend Refactoring**
-    -   **Where to resume:**  and  have been extracted from . Continue this process by creating new route files for other domains (e.g., , , , ) and moving the corresponding endpoints out of .
-    -   **What will be achieved with this?** A more modular, scalable, and maintainable backend architecture, reducing technical debt.
+    -   **Where to resume:** The new route calculation endpoint was added directly to . This and other related endpoints should be moved to more modular route files (e.g., , ).
+    -   **What will be achieved with this?** A more modular, scalable, and maintainable backend architecture.
     -   **Status:** IN PROGRESS
     -   **Should Test frontend/backend/both after fix?** Backend.
     -   **Blocked on something:** None.
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks:**
-    *   **(P0) Implement Full Time-Slot Based Vehicle Scheduling System:** The user has provided a detailed specification for a timeline-based vehicle availability system. This is a major architectural change and the ideal long-term solution to scheduling complexity. Phased implementation is recommended:
-        1.  **Phase 1:** Data Model & Backend (Create  collection and APIs).
-        2.  **Phase 2:** Vehicle Card UI (Add mini-timeline strip to vehicle cards).
-        3.  **Phase 3:** Booking Flow (Update booking process to use time-slot selection).
-        4.  **Phase 4:** Admin Gantt View (Build a master timeline grid).
+    *   **(P1) System Stability and Optimization:** This is a high-priority user request. After the diagnoses feature, propose a plan to refactor the most complex components (, ).
+    *   **(P1) Timeline-Based Scheduling - Phase 4: Admin Gantt View:** Build a master timeline grid showing all vehicles and their schedules for a comprehensive overview.
     *   **(P1) Doctor Decision Panel:** Enable doctors to give live instructions from the Medical Dashboard.
     *   **(P1) Implement Incoming API Integrations:** Build backend logic for Stripe, SMS, and Email integrations using the  tool.
 *   **Future Tasks:**
-    *   **(P1) Refactor :** This component is extremely large and complex. It must be broken down into smaller, single-responsibility components and custom hooks to improve maintainability.
-    *   **(P2) Persist Collapsible Sidebar State:** Use  to save the state of the sidebar in the desktop dashboard.
-    *   **(P2) Calendar View for Bookings:** Implement the  view.
+    *   **(P2) Persist Collapsible Sidebar State:** Use  to save the expanded/collapsed state of sidebar groups in the desktop dashboard.
     *   **(P2) Implement Driver Rejection Reason:** Add a modal to capture the reason when a driver rejects a task.
 
 **Completed work in this session**
--   **Bug Fix: PWA Infinite Loading Loop:** Resolved a race condition in  between its local loading state and the  loading state, which caused the app to get stuck.
--   **Bug Fix: Incorrect Driver Availability:** Fixed a critical bug where a driver assigned to a future booking was marked as unavailable for all current-day bookings. The logic was updated to only block drivers who are actively on a transport.
--   **Bug Fix: Detach Driver Not Working:** Fixed a bug in the dispatch console where detaching a driver failed due to a malformed API URL (a double  prefix).
--   **Feature: Dispatch Console UI/UX Overhaul:**
-    *   The Add Vehicle button was moved into the vehicle section header.
-    *   The New Booking button text was updated.
-    *   The entire vehicle card was made draggable.
-    *   Search bars were added to both the vehicle and booking sections.
-    *   The layout of the vehicle and booking sections was unified for a consistent look and feel.
--   **Feature: Edit Bookings:** Implemented functionality to edit existing bookings via a modal in the dispatch console, including backend support for full object updates.
--   **Feature: Detach & Reassign Vehicles:** Implemented the ability to remove a vehicle/driver from a booking (detach) and to assign a new vehicle to an already-confirmed booking (reassign).
--   **Feature: Driver Time Conflict Warning:**
-    *   When assigning a driver who already has bookings on the same day, the backend now detects this and returns a warning.
-    *   The frontend displays a detailed, styled modal dialog (replacing the browser's default ) listing the conflicting bookings and asking the dispatcher for confirmation to proceed.
-
-**Earlier issues found/mentioned but not fixed**
--   **Ephemeral Image Storage:** This remains a known issue and is tracked in the pending list.
-
-**Known issue recurrence from previous fork**
--   None.
+-   **Feature: Multi-Day Booking & Auto-ETA:**
+    -   Updated the New Booking form in  with  and .
+    -   Added a backend endpoint () that uses OSRM to auto-calculate the ETA.
+    -   The driver's PWA () now sends location updates to a new endpoint () for live ETA tracking.
+-   **Feature: Invoice Enhancements:**
+    -   **PDF Generation:** Added company logo and registered DejaVu font in  to support Serbian Latin characters (šđžčć).
+    -   **Due Date & Overdue Status:** Added a Due Date column to . Invoices are now automatically flagged as Overdue with red styling.
+    -   **Create Invoice Form:** Added an optional Due Date field to the invoice creation dialog.
+-   **Feature: PWA Burger Menu & Install Banner:**
+    -   Added a slide-out burger menu to  that shows the user's future bookings.
+    -   Refactored the PWA installation logic into a global  to show the install banner on the public  page.
+-   **Bug Fix: Session Persistence on Refresh:**
+    -   Fixed a race condition in  that caused redirects on refresh. Enhanced  to persist the user object in  for a more stable session.
+-   **Bug Fix: Doctor Role Login in PWA:**
+    -   Fixed an Access Denied error in  for the 'doctor' role by adjusting data fetching logic.
+-   **Bug Fix: Addresses not available in PWA:**
+    -   Fixed  to correctly handle different naming conventions for address/coordinate data from the backend.
+-   **UI/UX Improvements:**
+    -   Improved the WebSocket connection status indicator on the Driver Management page.
+    -   Added loading states to refresh buttons in the Finance tab.
+    -   Applied CSS to encourage a 24-hour format for time inputs.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-*   **Stateful Time-Conflict Validation:** Backend logic that checks for scheduling overlaps by parsing dates and comparing existing bookings for a given driver.
-*   **Conditional UI for Dispatch:** Complex frontend logic in  to show different UI elements (e.g., detach button vs. drag here prompt) based on a booking's  and .
-*   **Custom Modal Dialogs:** Replacing  with styled React components ( from shadcn/ui) to provide a better user experience for critical confirmations, like schedule conflicts.
-*   **PWA Install Prompt Handling:** Intercepting the browser's  event to store it in state and allow a custom UI element to trigger the installation.
-*   **Robust State Management:** Fixing a race condition by correctly using multiple loading flags ( from a context and a local  state for data fetching) to create a reliable UI.
+*   **Real-time ETA Calculation:** A hybrid approach using a backend OSRM proxy for initial route calculation () and a separate endpoint () for live updates triggered by the driver's GPS location.
+*   **Client-Side Session Persistence:** Enhanced  to store the user object in  alongside the JWT to prevent UI flicker and race conditions on page refresh.
+*   **Global State Management (React Context):** Used a new  to manage the  event across the entire application.
+*   **Dynamic UI based on Data State:** Implemented logic in  to dynamically change the style (color, text, icon) of an invoice row based on its status and due date.
+*   **PDF Generation with ReportLab:** Modified backend PDF generation in  to embed images () and register custom TTF fonts (DejaVu) for full Unicode support.
 
 **key DB schema**
--   No new collections were created.
--   **bookings:** The schema was implicitly updated. Bookings now consistently store  (ID) and . The cancellation/completion logic was fixed to prevent stale assignments.
--   **driver_status:** The logic relying on this collection was made more robust, but it remains a potential source of inconsistencies. It gets updated when bookings are cancelled or drivers are assigned/detached.
-
-**changes in tech stack**
--   None.
+-   ****: Schema updated to include  (ISO String) and  (ISO String).
+-   ** (Anticipated):** A new collection will be needed to associate patients with a list of diagnosis codes.
 
 **All files of reference**
-*   **/app/frontend/src/components/FleetDispatch.jsx**: The central component for all new dispatch features. It now contains logic for editing, detaching, reassigning, searching, filtering, and conflict warnings.
-*   **/app/backend/server.py**: Modified to fix all driver availability and scheduling bugs. Contains the new  helper function.
-*   **/app/frontend/src/pages/UnifiedPWA.jsx**: The core mobile component. Modified to fix the loading loop and where the PWA install prompt is being implemented.
-*   **/app/backend/models/booking.py**: Updated to support full booking edits () and to ensure the API response includes the assigned driver's name ().
+*   **/app/frontend/src/pages/UnifiedPWA.jsx**: Heavily modified for burger menu, live ETA updates, and multiple bug fixes.
+*   **/app/frontend/src/components/FleetDispatch.jsx**: Heavily modified for the new multi-day booking form and auto-ETA calculation.
+*   **/app/frontend/src/pages/Dashboard.jsx**: Modified to fix session persistence on refresh.
+*   **/app/frontend/src/contexts/AuthContext.js**: Modified to improve session persistence.
+*   **/app/frontend/src/components/InvoiceManager.jsx**: Modified to add due date column, overdue status, and a due date field on creation.
+*   **/app/backend/server.py**: Modified to add ETA calculation endpoints and update invoice PDF generation.
+*   **/app/frontend/src/data/diagnoses.js**: New file containing diagnoses data for the upcoming feature.
+*   **/app/frontend/src/contexts/PWAContext.js**: New file for managing the PWA install prompt globally.
 
 **Areas that need refactoring**:
-*   **CRITICAL:**  is becoming very large and complex due to the addition of multiple features, modals, and state management logic. It should be broken down into smaller components and hooks (e.g., , ).
-*   **CRITICAL:**  remains over 2,200 lines and urgently needs to be refactored into smaller components and custom hooks.
-*   **HIGH:** The backend refactoring of  must continue. It is the source of most business logic and is hard to maintain.
+*   **CRITICAL:**  and  remain extremely large and complex. The System Stability and Optimization task should address this by breaking them into smaller, manageable components.
+*   **HIGH:**  continues to accumulate endpoints. The new route calculation and ETA update logic should be extracted into a separate, more focused route file.
 
 **key api endpoints**
-*   : Overhauled to accept a  model, allowing full edits and detaching drivers by setting  to .
-*   : The response was updated. It can now return a  and a list of  if a time overlap is detected, requiring a  parameter to override.
+*   : (New) Calculates route distance, duration, and ETA between two coordinates.
+*   : (New) Updates a booking's ETA based on the driver's live location.
+*   : (Modified) Updated to accept an optional  on creation.
 
 **Critical Info for New Agent**
-*   Your immediate task is to **finish the PWA install prompt feature**. This involves adding the UI banner/button in  and triggering the saved prompt event.
-*   The user is very interested in the **timeline-based scheduling system**. After fixing the PWA install, you should propose starting Phase 1 of this major feature. It is the correct long-term solution to the scheduling complexities that have been repeatedly patched.
-*   The bug fixes around driver availability have made the system more robust, but they are patches on a fragile model. Be aware that the root cause is the lack of a proper time-slot-based availability system.
-*   Technical debt in  and  is high. Any new feature work in these files should be paired with some refactoring if possible.
+*   Your immediate task is to **implement the patient diagnoses feature**. You have the data in . You need to create the UI (a multi-select dropdown on the patient page, splitting the view with medications) and the backend API and database schema to save the selections.
+*   The issue of session persistence on page refresh was a major focus. The fixes in  and  should be solid, but be mindful of this area as it has been a recurring pain point.
+*   The agent who implemented the PWA burger menu first made a mistake by adding it to the public  before moving it to . Verify that  was correctly cleaned up and does not contain any leftover logic.
 
 **documents and test reports created in this job**
--    was updated with the latest progress.
+*   
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Why am I not getting a push notification to download the app? **Status: IN PROGRESS**
-2.  **User:** Requested a better UI for the time conflict warning dialog. **Status: COMPLETED**
-3.  **User:** Pointed out two issues: 1) a pop-up should appear for time conflicts, and 2) the detach driver functionality was not working. **Status: COMPLETED**
-4.  **User:** Asked for clarification on the proposed timeline-based scheduling system and pointed out a critical bug: a driver busy tomorrow is unavailable today. **Status: COMPLETED** (Bug fixed, discussion on timeline system is ongoing).
-5.  **User:** Proposed a detailed, timeline-based solution for vehicle/driver availability management. **Status: Acknowledged, pending implementation.**
-6.  **User:** Asked how to detach/reassign a vehicle from a booking. **Status: COMPLETED**
-7.  **User:** Requested an edit functionality for bookings in the dispatch console. **Status: COMPLETED**
-8.  **User:** Requested that the UI for the Vehicle Fleet and Bookings sections be made consistent. **Status: COMPLETED**
-9.  **User:** Requested a search bar for the Bookings section. **Status: COMPLETED**
-10. **User:** Requested UI improvements for the dispatch console (move button, rename button, make whole card draggable). **Status: COMPLETED**
+1.  **User:** Requested a new feature to add multiple diagnoses for patients using a provided Excel file. **Status: IN PROGRESS**
+2.  **User:** Asked to add a Due Date field to the New Invoice form. **Status: COMPLETED**
+3.  **User:** Requested a Due Date column and automatic Overdue status for the invoice list. **Status: COMPLETED**
+4.  **User:** Asked to add a logo and Serbian Latin font support to invoice PDFs. **Status: COMPLETED**
+5.  **User:** Reported that the Refresh button on the Finance page was not working. **Status: COMPLETED**
+6.  **User:** Reported that the PWA showed Addresses not available for a driver's assignment. **Status: COMPLETED**
+7.  **User:** Requested that time inputs be in 24-hour format. **Status: COMPLETED**
+8.  **User:** Suggested an excellent idea to auto-calculate ETA on booking creation and update it live from the driver's app. **Status: COMPLETED**
+9.  **User:** Requested support for multi-day transports with explicit start/end times. **Status: COMPLETED**
+10. **User:** Reported being logged out of the web app after refreshing the page. **Status: COMPLETED**
 
 **Project Health Check:**
 *   **Broken:**
-    *   The PWA installation prompt is not being shown to the user, hindering mobile app adoption.
+    *   None. Multiple critical user-facing bugs were resolved in this session.
 *   **Mocked:**
-    *   Desktop Admin Dashboard sections: , , and the  view are still placeholders.
+    *   Desktop Admin Dashboard sections: , .
+    *    (History) view.
 
 **3rd Party Integrations**
 *   **Leaflet & Nominatim (OpenStreetMap):** Used for maps and address autocomplete.
-*   **OSRM (Open Source Routing Machine):** Used to calculate routes for the driver map.
+*   **OSRM (Open Source Routing Machine):** Now used on the backend for ETA calculations, in addition to frontend route display.
 *   **reportlab:** Used for generating PDF reports.
 *   **recharts:** Used for charts and graphs.
 *   **Jitsi Meet:** Used for in-app video calls.
@@ -170,14 +170,12 @@ Recent work has heavily focused on improving the dispatch console's functionalit
 -   **Testing agent used after significant changes:** NO
 -   **Troubleshoot agent used after agent stuck in loop:** NO
 -   **Test files created:** None
--   **Known regressions:** None
+-   **Known regressions:** None identified, but session persistence should be monitored.
 
 **Credentials to test flow:**
 *   **Admin/Super Admin:**  / 
-*   **Driver (Djoka Stroka):**  / 
-*   **Driver (Marko Vozač):**  / 
-*   **Driver (Marija Vujic):**  / 
-*   **Doctor (Test account):**  / 
+*   **Doctor (has bookings):**  / 
+*   **Driver (has bookings):**  / 
 
 **What agent forgot to execute**
-*   The major refactoring tasks ( and ) continue to be postponed in favor of implementing new features and urgent bug fixes requested by the user. While this has delivered value, it has also increased the technical debt in core components.</analysis>
+*   The agent correctly identified their mistake of adding the PWA burger menu to the public website's  before moving the feature to . However, the chat history does not show an explicit action to revert or clean up the changes from . The next agent should verify that this file is in its correct state.</analysis>
