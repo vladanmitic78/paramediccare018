@@ -307,6 +307,24 @@ const InvoiceManager = () => {
                     )}
                   </div>
                   
+                  {/* Due Date */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">
+                      {language === 'sr' ? 'Datum dospeća' : 'Due Date'}
+                    </label>
+                    <Input
+                      type="date"
+                      value={newInvoice.due_date}
+                      onChange={(e) => setNewInvoice({ ...newInvoice, due_date: e.target.value })}
+                      min={new Date().toISOString().split('T')[0]}
+                    />
+                    <p className="text-xs text-slate-500">
+                      {language === 'sr' 
+                        ? 'Ostavite prazno za podrazumevanih 30 dana' 
+                        : 'Leave empty for default 30 days'}
+                    </p>
+                  </div>
+                  
                   {/* Description */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium">
