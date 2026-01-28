@@ -738,7 +738,10 @@ const Dashboard = () => {
         { id: 'users', icon: Users, label: t('dashboard_users') },
         { id: 'cms', icon: Globe, label: language === 'sr' ? 'Web stranica' : 'Website' },
         { id: 'contacts', icon: MessageSquare, label: language === 'sr' ? 'Poruke' : 'Messages' },
-        ...(isSuperAdmin() ? [{ id: 'api-settings', icon: Key, label: language === 'sr' ? 'API Podešavanja' : 'API Settings' }] : []),
+        ...(isSuperAdmin() ? [
+          { id: 'api-settings', icon: Key, label: language === 'sr' ? 'API Podešavanja' : 'API Settings' },
+          { id: 'sms-settings', icon: Phone, label: language === 'sr' ? 'SMS Gateway' : 'SMS Gateway' }
+        ] : []),
       ]
     }] : []),
   ];
