@@ -2694,6 +2694,80 @@ const FleetDispatch = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* SMS Send Dialog */}
+        <Dialog open={showSMSDialog} onOpenChange={setShowSMSDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-indigo-600" />
+                {language === 'sr' ? 'Pošalji SMS' : 'Send SMS'}
+              </DialogTitle>
+            </DialogHeader>
+            {smsBooking && (
+              <div className="space-y-4 pt-4">
+                <div className="p-3 bg-slate-50 rounded-lg">
+                  <p className="font-medium">{smsBooking.patient_name}</p>
+                  <p className="text-sm text-slate-600">{smsBooking.contact_phone}</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    {language === 'sr' ? 'Tip poruke' : 'Message Type'}
+                  </label>
+                  <select
+                    value={smsType}
+                    onChange={(e) => setSmsType(e.target.value)}
+                    className="w-full p-2 border rounded-lg"
+                  >
+                    <option value="reminder">
+                      {language === 'sr' ? 'Podsetnik za preuzimanje' : 'Pickup Reminder'}
+                    </option>
+                    <option value="driver_arriving">
+                      {language === 'sr' ? 'Vozač stiže' : 'Driver Arriving'}
+                    </option>
+                    <option value="custom">
+                      {language === 'sr' ? 'Prilagođena poruka' : 'Custom Message'}
+                    </option>
+                  </select>
+                </div>
+                
+                {smsType === 'custom' && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">
+                      {language === 'sr' ? 'Poruka' : 'Message'}
+                    </label>
+                    <textarea
+                      value={smsCustomMessage}
+                      onChange={(e) => setSmsCustomMessage(e.target.value)}
+                      placeholder={language === 'sr' ? 'Unesite poruku...' : 'Enter message...'}
+                      rows={3}
+                      className="w-full p-2 border rounded-lg"
+                    />
+                  </div>
+                )}
+                
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button variant="outline" onClick={() => setShowSMSDialog(false)}>
+                    {language === 'sr' ? 'Otkaži' : 'Cancel'}
+                  </Button>
+                  <Button 
+                    onClick={handleSendSMS} 
+                    disabled={sendingSMS || (smsType === 'custom' && !smsCustomMessage)}
+                    className="gap-2 bg-indigo-600 hover:bg-indigo-700"
+                  >
+                    {sendingSMS ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Send className="w-4 h-4" />
+                    )}
+                    {language === 'sr' ? 'Pošalji' : 'Send'}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </DndContext>
   );
