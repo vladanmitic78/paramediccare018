@@ -3456,6 +3456,12 @@ async def generate_patient_report(
         checks_query["performed_at"] = date_filter
     checks = await db.medical_checks.find(checks_query, {"_id": 0}).sort("performed_at", -1).to_list(100)
     
+    # Get patient diagnoses
+    diagnoses = await db.patient_diagnoses.find(
+        {"patient_id": patient_id},
+        {"_id": 0}
+    ).sort("added_at", -1).to_list(100)
+    
     report_data = {
         "patient": patient,
         "report_generated_at": datetime.now(timezone.utc).isoformat(),
@@ -3464,6 +3470,8 @@ async def generate_patient_report(
             "from": from_date,
             "to": to_date
         },
+        "diagnoses": diagnoses,
+        "diagnoses_count": len(diagnoses),
         "vitals_history": vitals,
         "vitals_count": len(vitals),
         "medications_history": medications,
