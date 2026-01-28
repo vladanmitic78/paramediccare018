@@ -2227,17 +2227,8 @@ async def create_patient_booking(booking: PatientBookingCreate, user: dict = Dep
         booking_id
     )
     
-    # Send confirmation email
-    subject, body = get_booking_confirmation_template(
-        booking.patient_name,
-        f"{booking.preferred_date} {booking.preferred_time}",
-        booking.pickup_address,
-        booking.destination_address,
-        booking_id,
-        "transport",
-        booking.language
-    )
-    await send_email(booking.contact_email, subject, body)
+    # Send confirmation email using new template system
+    await send_booking_email_notification(booking_doc, "booking_confirmation")
     
     # Send notification to transport team
     internal_body = get_internal_notification_template("new_booking", {
