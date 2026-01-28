@@ -74,7 +74,7 @@ from utils.auth import (
 # Import email utilities
 from utils.email import (
     send_email, get_email_header, get_email_footer,
-    get_internal_notification_template
+    get_internal_notification_template, get_transport_email_template
 )
 
 # Import SMS service
