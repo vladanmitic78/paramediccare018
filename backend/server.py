@@ -907,6 +907,186 @@ async def get_staff(user: dict = Depends(require_roles([UserRole.ADMIN, UserRole
     staff = await db.users.find({"role": {"$in": [UserRole.DOCTOR, UserRole.NURSE, UserRole.DRIVER]}}, {"_id": 0, "password": 0}).to_list(1000)
     return [UserResponse(**s) for s in staff]
 
+
+# ============ SMS GATEWAY SETTINGS (Super Admin) ============
+
+class SMSSettingsUpdate(BaseModel):
+    provider: str = "textbelt"
+    api_key: Optional[str] = "textbelt"
+    api_secret: Optional[str] = None
+    sender_id: Optional[str] = None
+    custom_endpoint: Optional[str] = None
+    custom_headers: Optional[Dict[str, str]] = None
+    custom_payload_template: Optional[str] = None
+    enabled: bool = True
+
+class SMSSendRequest(BaseModel):
+    phone: str
+    message: str
+
+@api_router.get("/settings/sms")
+async def get_sms_settings(user: dict = Depends(require_roles([UserRole.SUPERADMIN]))):
+    """Get SMS gateway settings (Super Admin only)"""
+    settings = await db.system_settings.find_one({"type": "sms"}, {"_id": 0})
+    if not settings:
+        # Return default settings
+        return {
+            "type": "sms",
+            "provider": "textbelt",
+            "api_key": "textbelt",
+            "api_secret": None,
+            "sender_id": None,
+            "custom_endpoint": None,
+            "custom_headers": None,
+            "custom_payload_template": None,
+            "enabled": True,
+            "providers_available": [
+                {"id": "textbelt", "name": "Textbelt (Free)", "description": "Free tier: 1 SMS/day per phone number"},
+                {"id": "twilio", "name": "Twilio", "description": "Requires Account SID, Auth Token, and From number"},
+                {"id": "infobip", "name": "Infobip", "description": "Requires API Key"},
+                {"id": "custom", "name": "Custom HTTP", "description": "Custom HTTP endpoint with JSON payload"}
+            ]
+        }
+    
+    # Add available providers info
+    settings["providers_available"] = [
+        {"id": "textbelt", "name": "Textbelt (Free)", "description": "Free tier: 1 SMS/day per phone number"},
+        {"id": "twilio", "name": "Twilio", "description": "Requires Account SID, Auth Token, and From number"},
+        {"id": "infobip", "name": "Infobip", "description": "Requires API Key"},
+        {"id": "custom", "name": "Custom HTTP", "description": "Custom HTTP endpoint with JSON payload"}
+    ]
+    return settings
+
+@api_router.put("/settings/sms")
+async def update_sms_settings(
+    settings: SMSSettingsUpdate,
+    user: dict = Depends(require_roles([UserRole.SUPERADMIN]))
+):
+    """Update SMS gateway settings (Super Admin only)"""
+    settings_doc = {
+        "type": "sms",
+        "provider": settings.provider,
+        "api_key": settings.api_key,
+        "api_secret": settings.api_secret,
+        "sender_id": settings.sender_id,
+        "custom_endpoint": settings.custom_endpoint,
+        "custom_headers": settings.custom_headers,
+        "custom_payload_template": settings.custom_payload_template,
+        "enabled": settings.enabled,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "updated_by": user["id"]
+    }
+    
+    await db.system_settings.update_one(
+        {"type": "sms"},
+        {"$set": settings_doc},
+        upsert=True
+    )
+    
+    return {"success": True, "message": "SMS settings updated"}
+
+@api_router.post("/settings/sms/test")
+async def test_sms_settings(
+    request: SMSSendRequest,
+    user: dict = Depends(require_roles([UserRole.SUPERADMIN]))
+):
+    """Test SMS settings by sending a test message (Super Admin only)"""
+    # Get current settings
+    settings = await db.system_settings.find_one({"type": "sms"}, {"_id": 0})
+    
+    if not settings:
+        settings = {"provider": "textbelt", "api_key": "textbelt", "enabled": True}
+    
+    if not settings.get("enabled"):
+        return {"success": False, "error": "SMS service is disabled"}
+    
+    # Create SMS config
+    config = SMSConfig(
+        provider=SMSProvider(settings.get("provider", "textbelt")),
+        api_key=settings.get("api_key", "textbelt"),
+        api_secret=settings.get("api_secret"),
+        sender_id=settings.get("sender_id"),
+        custom_endpoint=settings.get("custom_endpoint"),
+        custom_headers=settings.get("custom_headers"),
+        custom_payload_template=settings.get("custom_payload_template"),
+        enabled=True
+    )
+    
+    # Send test SMS
+    sms_service = SMSService(config)
+    result = await sms_service.send_sms(request.phone, request.message)
+    
+    # Log the test
+    await db.sms_logs.insert_one({
+        "id": str(uuid.uuid4()),
+        "phone": request.phone,
+        "message": request.message,
+        "provider": result.provider,
+        "success": result.success,
+        "message_id": result.message_id,
+        "error": result.error,
+        "is_test": True,
+        "sent_by": user["id"],
+        "sent_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return {
+        "success": result.success,
+        "message_id": result.message_id,
+        "error": result.error,
+        "provider": result.provider,
+        "quota_remaining": result.quota_remaining
+    }
+
+@api_router.get("/settings/sms/logs")
+async def get_sms_logs(
+    limit: int = 50,
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Get SMS send logs"""
+    logs = await db.sms_logs.find({}, {"_id": 0}).sort("sent_at", -1).limit(limit).to_list(limit)
+    return logs
+
+
+# Helper function to send SMS (used by other parts of the app)
+async def send_sms_notification(phone: str, message: str, booking_id: str = None) -> SMSResult:
+    """Send SMS using configured provider"""
+    settings = await db.system_settings.find_one({"type": "sms"}, {"_id": 0})
+    
+    if not settings or not settings.get("enabled", True):
+        return SMSResult(success=False, error="SMS service is disabled", provider="none")
+    
+    config = SMSConfig(
+        provider=SMSProvider(settings.get("provider", "textbelt")),
+        api_key=settings.get("api_key", "textbelt"),
+        api_secret=settings.get("api_secret"),
+        sender_id=settings.get("sender_id"),
+        custom_endpoint=settings.get("custom_endpoint"),
+        custom_headers=settings.get("custom_headers"),
+        custom_payload_template=settings.get("custom_payload_template"),
+        enabled=True
+    )
+    
+    sms_service = SMSService(config)
+    result = await sms_service.send_sms(phone, message)
+    
+    # Log the SMS
+    await db.sms_logs.insert_one({
+        "id": str(uuid.uuid4()),
+        "phone": phone,
+        "message": message,
+        "booking_id": booking_id,
+        "provider": result.provider,
+        "success": result.success,
+        "message_id": result.message_id,
+        "error": result.error,
+        "is_test": False,
+        "sent_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return result
+
+
 # ============ API KEY MANAGEMENT (Super Admin) ============
 
 class ApiKeyCreate(BaseModel):
