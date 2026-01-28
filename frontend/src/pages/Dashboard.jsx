@@ -66,7 +66,8 @@ import {
   RefreshCw,
   Shield,
   ExternalLink,
-  Phone
+  Phone,
+  Mail
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
