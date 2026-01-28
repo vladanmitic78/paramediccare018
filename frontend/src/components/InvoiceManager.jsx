@@ -57,7 +57,8 @@ const InvoiceManager = () => {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [newInvoice, setNewInvoice] = useState({
     amount: '',
-    service_description: ''
+    service_description: '',
+    due_date: ''
   });
 
   useEffect(() => {
