@@ -1507,6 +1507,16 @@ async def create_booking(booking: BookingCreate, user: dict = Depends(get_option
     )
     await send_email(booking.contact_email, subject, body)
     
+    # Send SMS confirmation to customer
+    if booking.contact_phone:
+        sms_message = SMSTemplates.booking_confirmation(
+            booking.patient_name,
+            booking.booking_date,
+            booking.pickup_time or "TBD",
+            booking.language or 'sr'
+        )
+        await send_sms_notification(booking.contact_phone, sms_message, booking_id)
+    
     # Send internal notification to staff
     internal_body = get_internal_notification_template("new_booking", {
         "patient_name": booking.patient_name,
