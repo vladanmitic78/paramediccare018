@@ -48,6 +48,7 @@ const InvoiceManager = () => {
   const [invoices, setInvoices] = useState([]);
   const [bookingsForInvoice, setBookingsForInvoice] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [creating, setCreating] = useState(false);
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -63,15 +64,20 @@ const InvoiceManager = () => {
     fetchBookingsForInvoice();
   }, []);
 
-  const fetchInvoices = async () => {
+  const fetchInvoices = async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
     try {
       const response = await axios.get(`${API}/admin/invoices`);
       setInvoices(response.data);
+      if (isRefresh) {
+        toast.success(language === 'sr' ? 'Fakture osvežene' : 'Invoices refreshed');
+      }
     } catch (error) {
       console.error('Error fetching invoices:', error);
       toast.error(language === 'sr' ? 'Greška pri učitavanju faktura' : 'Error loading invoices');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
