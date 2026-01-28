@@ -110,6 +110,39 @@ A comprehensive medical transport system including a public website, patient por
 - **vehicle_schedules**: NEW - Timeline-based vehicle scheduling
 - **transport_events**: Timeline events for transports
 - **invoices**: Patient invoices
+- **patient_diagnoses**: NEW (Jan 28, 2026) - ICD-10 diagnoses for patients
+
+## Patient Diagnoses System (NEW Jan 28, 2026)
+
+**New Collection: `patient_diagnoses`**
+```javascript
+{
+  "id": "uuid",
+  "patient_id": "patient-uuid",
+  "code": "ICD-10 code (e.g., I10)",
+  "name_en": "English name",
+  "name_sr": "Serbian name",
+  "category_en": "Category in English",
+  "category_sr": "Category in Serbian",
+  "notes": "Optional notes",
+  "added_by": "user-uuid",
+  "added_by_name": "User full name",
+  "added_at": "ISO timestamp"
+}
+```
+
+**API Endpoints:**
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/patients/{patient_id}/diagnoses` | GET | Get all diagnoses for a patient |
+| `/api/patients/{patient_id}/diagnoses` | POST | Add a diagnosis (prevents duplicates) |
+| `/api/patients/{patient_id}/diagnoses/{diagnosis_id}` | DELETE | Remove a diagnosis |
+
+**Frontend Components:**
+- `DiagnosesManager.jsx` - Typeahead search for ICD-10 codes with bilingual support
+- Displays in two-column layout alongside `MedicationManager` in `MedicalDashboard.jsx`
+- Search works by code, name, or keywords in both English and Serbian
+- Color-coded category badges for visual grouping
 
 ## Timeline-Based Vehicle Scheduling System (NEW)
 
