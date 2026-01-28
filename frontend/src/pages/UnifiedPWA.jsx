@@ -2277,6 +2277,156 @@ const UnifiedPWA = () => {
                 {language === 'sr' ? 'Obriši sve' : 'Clear All'}
               </Button>
             </div>
+
+            {/* Diagnoses Section - Collapsible */}
+            <div className="bg-slate-800 rounded-xl overflow-hidden">
+              <button
+                onClick={() => setShowDiagnosesSection(!showDiagnosesSection)}
+                className="w-full p-4 flex items-center justify-between text-left"
+              >
+                <div className="flex items-center gap-2">
+                  <Stethoscope className="w-5 h-5 text-indigo-400" />
+                  <div>
+                    <p className="font-medium text-white">
+                      {language === 'sr' ? 'Dijagnoze' : 'Diagnoses'}
+                    </p>
+                    <p className="text-xs text-slate-400">
+                      {patientDiagnoses.length > 0 
+                        ? `${patientDiagnoses.length} ${language === 'sr' ? 'evidentiranih' : 'recorded'}`
+                        : (language === 'sr' ? 'Dodaj ICD-10 dijagnoze' : 'Add ICD-10 diagnoses')}
+                    </p>
+                  </div>
+                </div>
+                {showDiagnosesSection ? (
+                  <ChevronUp className="w-5 h-5 text-slate-400" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-slate-400" />
+                )}
+              </button>
+
+              {showDiagnosesSection && (
+                <div className="px-4 pb-4 space-y-3 border-t border-slate-700">
+                  {/* Search Input */}
+                  <div className="relative pt-3">
+                    <Search className="absolute left-3 top-1/2 mt-1.5 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Input
+                      type="text"
+                      placeholder={language === 'sr' ? 'Pretraži ICD-10 kod ili naziv...' : 'Search ICD-10 code or name...'}
+                      value={diagnosisSearch}
+                      onChange={(e) => setDiagnosisSearch(e.target.value)}
+                      className="pl-10 bg-slate-700 border-slate-600"
+                      data-testid="pwa-diagnosis-search"
+                    />
+                  </div>
+
+                  {/* Search Results */}
+                  {diagnosisSearch.length >= 2 && (
+                    <div className="max-h-48 overflow-y-auto space-y-1 rounded-lg bg-slate-700/50 p-2">
+                      {filteredDiagnoses.length > 0 ? (
+                        filteredDiagnoses.slice(0, 8).map((diagnosis) => {
+                          const isAdded = patientDiagnoses.some(d => d.code === diagnosis.code);
+                          const category = language === 'sr' ? diagnosis.category_sr : diagnosis.category_en;
+                          
+                          return (
+                            <button
+                              key={diagnosis.code}
+                              onClick={() => !isAdded && addDiagnosis(diagnosis)}
+                              disabled={isAdded || savingDiagnosis}
+                              className={`w-full p-3 rounded-lg text-left flex items-center justify-between ${
+                                isAdded 
+                                  ? 'bg-slate-600/50 opacity-50' 
+                                  : 'bg-slate-700 hover:bg-slate-600 active:bg-slate-500'
+                              }`}
+                              data-testid={`pwa-diagnosis-${diagnosis.code}`}
+                            >
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="outline" className="font-mono text-xs shrink-0">
+                                    {diagnosis.code}
+                                  </Badge>
+                                  <span className="text-sm font-medium text-white truncate">
+                                    {language === 'sr' ? diagnosis.name_sr : diagnosis.name_en}
+                                  </span>
+                                </div>
+                                <div className="mt-1">
+                                  <span className={`inline-block text-xs px-2 py-0.5 rounded ${getCategoryColor(category)} text-white`}>
+                                    {category}
+                                  </span>
+                                </div>
+                              </div>
+                              {isAdded ? (
+                                <CheckCircle className="w-5 h-5 text-green-400 shrink-0 ml-2" />
+                              ) : (
+                                <Plus className="w-5 h-5 text-indigo-400 shrink-0 ml-2" />
+                              )}
+                            </button>
+                          );
+                        })
+                      ) : (
+                        <p className="text-center text-slate-400 py-4 text-sm">
+                          {language === 'sr' ? 'Nema rezultata' : 'No results'}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Current Diagnoses List */}
+                  {patientDiagnoses.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-xs text-slate-400 font-medium">
+                        {language === 'sr' ? 'EVIDENTIRANE DIJAGNOZE' : 'RECORDED DIAGNOSES'}
+                      </p>
+                      {patientDiagnoses.map((diagnosis) => {
+                        const category = language === 'sr' ? diagnosis.category_sr : diagnosis.category_en;
+                        return (
+                          <div
+                            key={diagnosis.id}
+                            className="bg-slate-700 rounded-lg p-3 flex items-center justify-between"
+                          >
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="font-mono text-xs">
+                                  {diagnosis.code}
+                                </Badge>
+                                <span className="text-sm text-white truncate">
+                                  {language === 'sr' ? diagnosis.name_sr : diagnosis.name_en}
+                                </span>
+                              </div>
+                              <span className={`inline-block text-xs px-2 py-0.5 rounded mt-1 ${getCategoryColor(category)} text-white`}>
+                                {category}
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => removeDiagnosis(diagnosis.id)}
+                              className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/30 rounded-lg shrink-0 ml-2"
+                              data-testid={`pwa-remove-diagnosis-${diagnosis.code}`}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Loading State */}
+                  {loadingDiagnoses && (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="w-6 h-6 animate-spin text-indigo-400" />
+                    </div>
+                  )}
+
+                  {/* Empty State */}
+                  {!loadingDiagnoses && patientDiagnoses.length === 0 && diagnosisSearch.length < 2 && (
+                    <p className="text-center text-slate-500 py-4 text-sm">
+                      {language === 'sr' 
+                        ? 'Unesite najmanje 2 karaktera za pretragu' 
+                        : 'Enter at least 2 characters to search'}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Save Button - Fixed at bottom */}
