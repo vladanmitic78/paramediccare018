@@ -2498,6 +2498,25 @@ async def update_patient_booking_status(
         msg = status_messages[status]
         await create_notification(booking["user_id"], "status_update", msg[0], msg[1], msg[2], msg[3], booking_id)
     
+    # Send email notifications for status changes
+    if status == BookingStatus.EN_ROUTE:
+        # Get driver info
+        driver_name = booking.get("assigned_driver_name", "")
+        vehicle_info = ""
+        if booking.get("assigned_driver_id"):
+            ds = await db.driver_status.find_one({"driver_id": booking.get("assigned_driver_id")})
+            if ds and ds.get("vehicle_info"):
+                vehicle_info = ds.get("vehicle_info", {}).get("registration", "")
+        
+        await send_booking_email_notification(booking, "driver_arriving", {
+            "eta_minutes": 15,
+            "driver_name": driver_name,
+            "vehicle_info": vehicle_info
+        })
+    
+    elif status == BookingStatus.COMPLETED:
+        await send_booking_email_notification(booking, "transport_completed")
+    
     return {"success": True, "status": status}
 
 # Admin endpoint to create invoice for completed booking
