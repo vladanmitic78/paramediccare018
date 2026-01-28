@@ -30,6 +30,7 @@ A comprehensive medical transport system including a public website, patient por
 - Real-time transport monitoring
 - Transport timeline with event log
 - Vitals recording
+- **Patient Diagnoses Management (NEW Jan 28, 2026):** ICD-10 diagnoses with typeahead search, bilingual support (EN/SR), displayed alongside medications in two-column layout
 
 ### Backend Architecture
 - FastAPI backend with modular route structure
