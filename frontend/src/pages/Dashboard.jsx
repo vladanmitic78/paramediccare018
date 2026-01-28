@@ -731,7 +731,8 @@ const Dashboard = () => {
         { id: 'contacts', icon: MessageSquare, label: language === 'sr' ? 'Poruke' : 'Messages' },
         ...(isSuperAdmin() ? [
           { id: 'api-settings', icon: Key, label: language === 'sr' ? 'API Podešavanja' : 'API Settings' },
-          { id: 'sms-settings', icon: Phone, label: language === 'sr' ? 'SMS Gateway' : 'SMS Gateway' }
+          { id: 'sms-settings', icon: Phone, label: language === 'sr' ? 'SMS Gateway' : 'SMS Gateway' },
+          { id: 'email-settings', icon: Mail, label: language === 'sr' ? 'Email Podešavanja' : 'Email Settings' }
         ] : []),
       ]
     }] : []),
