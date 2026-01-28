@@ -440,16 +440,15 @@ const MedicalDashboard = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={generatePatientReport}
-                disabled={generatingReport}
+                onClick={() => {
+                  setReportDateFrom('');
+                  setReportDateTo('');
+                  setReportDialogOpen(true);
+                }}
                 className={`gap-2 ${darkMode ? 'border-slate-600 text-slate-300 hover:text-white' : ''}`}
                 data-testid="header-pdf-report-btn"
               >
-                {generatingReport ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Download className="w-4 h-4" />
-                )}
+                <Download className="w-4 h-4" />
                 {language === 'sr' ? 'PDF Izveštaj' : 'PDF Report'}
               </Button>
             )}
