@@ -441,6 +441,9 @@ const InvoiceManager = () => {
                   <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">
                     {language === 'sr' ? 'Datum' : 'Date'}
                   </th>
+                  <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">
+                    {language === 'sr' ? 'Dospeće' : 'Due Date'}
+                  </th>
                   <th className="text-right text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">
                     {language === 'sr' ? 'Iznos' : 'Amount'}
                   </th>
@@ -453,8 +456,16 @@ const InvoiceManager = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredInvoices.map(invoice => (
-                  <tr key={invoice.id} className="hover:bg-slate-50">
+                {filteredInvoices.map(invoice => {
+                  // Check if invoice is overdue
+                  const isOverdue = invoice.due_date && 
+                    new Date(invoice.due_date) < new Date() && 
+                    invoice.payment_status !== 'paid' && 
+                    invoice.payment_status !== 'cancelled';
+                  const effectiveStatus = isOverdue ? 'overdue' : invoice.payment_status;
+                  
+                  return (
+                  <tr key={invoice.id} className={`hover:bg-slate-50 ${isOverdue ? 'bg-red-50/50' : ''}`}>
                     <td className="px-4 py-3">
                       <span className="font-mono text-sm font-medium text-slate-900">
                         {invoice.invoice_number}
@@ -467,11 +478,17 @@ const InvoiceManager = () => {
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <div>
-                        <p className="text-sm text-slate-900">{invoice.created_at?.slice(0, 10)}</p>
-                        <p className="text-xs text-slate-500">
-                          {language === 'sr' ? 'Dospeće' : 'Due'}: {invoice.due_date?.slice(0, 10)}
-                        </p>
+                      <p className="text-sm text-slate-900">{invoice.created_at?.slice(0, 10)}</p>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className={`${isOverdue ? 'text-red-600 font-semibold' : 'text-slate-900'}`}>
+                        <p className="text-sm">{invoice.due_date?.slice(0, 10) || '-'}</p>
+                        {isOverdue && (
+                          <p className="text-xs text-red-500 flex items-center gap-1">
+                            <AlertCircle className="w-3 h-3" />
+                            {language === 'sr' ? 'Isteklo' : 'Overdue'}
+                          </p>
+                        )}
                       </div>
                     </td>
                     <td className="px-4 py-3 text-right">
@@ -484,13 +501,13 @@ const InvoiceManager = () => {
                     </td>
                     <td className="px-4 py-3 text-center">
                       <Select
-                        value={invoice.payment_status}
+                        value={effectiveStatus}
                         onValueChange={(value) => updateInvoiceStatus(invoice.id, value)}
                       >
-                        <SelectTrigger className={`w-32 h-8 ${getStatusColor(invoice.payment_status)} border`}>
+                        <SelectTrigger className={`w-32 h-8 ${getStatusColor(effectiveStatus)} border`}>
                           <div className="flex items-center gap-2">
-                            {getStatusIcon(invoice.payment_status)}
-                            <span className="text-xs">{getStatusLabel(invoice.payment_status)}</span>
+                            {getStatusIcon(effectiveStatus)}
+                            <span className="text-xs">{getStatusLabel(effectiveStatus)}</span>
                           </div>
                         </SelectTrigger>
                         <SelectContent>
