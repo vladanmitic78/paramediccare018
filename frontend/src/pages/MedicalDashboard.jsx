@@ -335,8 +335,13 @@ const MedicalDashboard = () => {
     
     setGeneratingReport(true);
     try {
+      // Build query params with date range
+      const params = new URLSearchParams({ format: 'pdf' });
+      if (reportDateFrom) params.append('from_date', reportDateFrom);
+      if (reportDateTo) params.append('to_date', reportDateTo);
+      
       const response = await axios.get(
-        `${API}/patients/${selectedPatient.id}/report?format=pdf`,
+        `${API}/patients/${selectedPatient.id}/report?${params}`,
         { responseType: 'blob' }
       );
 
@@ -344,13 +349,17 @@ const MedicalDashboard = () => {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `patient_report_${selectedPatient.full_name.replace(/\s+/g, '_')}.pdf`);
+      const dateRange = reportDateFrom || reportDateTo 
+        ? `_${reportDateFrom || 'start'}_to_${reportDateTo || 'now'}` 
+        : '';
+      link.setAttribute('download', `patient_report_${selectedPatient.full_name.replace(/\s+/g, '_')}${dateRange}.pdf`);
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
 
       toast.success(language === 'sr' ? 'Izveštaj generisan' : 'Report generated');
+      setReportDialogOpen(false);
     } catch (error) {
       toast.error(error.response?.data?.detail || (language === 'sr' ? 'Greška pri generisanju izveštaja' : 'Error generating report'));
     } finally {
