@@ -75,6 +75,7 @@ import {
 } from '../components/ui/sheet';
 import { toast } from 'sonner';
 import axios from 'axios';
+import { diagnoses as diagnosesData, searchDiagnoses } from '../data/diagnoses';
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
