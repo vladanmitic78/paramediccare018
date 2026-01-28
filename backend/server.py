@@ -1087,6 +1087,307 @@ async def send_sms_notification(phone: str, message: str, booking_id: str = None
     return result
 
 
+# ============ EMAIL SETTINGS (Super Admin) ============
+
+class EmailSettingsUpdate(BaseModel):
+    smtp_host: Optional[str] = None
+    smtp_port: Optional[int] = 465
+    sender_email: Optional[str] = None
+    sender_password: Optional[str] = None
+    sender_name: Optional[str] = "Paramedic Care 018"
+    enabled: bool = True
+    # Notification triggers
+    notify_booking_created: bool = True
+    notify_driver_assigned: bool = True
+    notify_driver_arriving: bool = True
+    notify_transport_completed: bool = True
+    notify_pickup_reminder: bool = True
+
+class EmailTestRequest(BaseModel):
+    to_email: str
+    subject: Optional[str] = "Test Email - Paramedic Care 018"
+    message: Optional[str] = None
+
+@api_router.get("/settings/email")
+async def get_email_settings(user: dict = Depends(require_roles([UserRole.SUPERADMIN]))):
+    """Get email settings (Super Admin only)"""
+    settings = await db.system_settings.find_one({"type": "email"}, {"_id": 0})
+    if not settings:
+        # Return default settings from config
+        return {
+            "type": "email",
+            "smtp_host": SMTP_HOST,
+            "smtp_port": SMTP_PORT,
+            "sender_email": INFO_EMAIL,
+            "sender_password": "********",  # Masked
+            "sender_name": "Paramedic Care 018",
+            "enabled": True,
+            "notify_booking_created": True,
+            "notify_driver_assigned": True,
+            "notify_driver_arriving": True,
+            "notify_transport_completed": True,
+            "notify_pickup_reminder": True
+        }
+    
+    # Mask password in response
+    if settings.get("sender_password"):
+        settings["sender_password"] = "********"
+    
+    return settings
+
+@api_router.put("/settings/email")
+async def update_email_settings(
+    settings: EmailSettingsUpdate,
+    user: dict = Depends(require_roles([UserRole.SUPERADMIN]))
+):
+    """Update email settings (Super Admin only)"""
+    # Get existing settings to preserve password if not changed
+    existing = await db.system_settings.find_one({"type": "email"}, {"_id": 0})
+    
+    settings_doc = {
+        "type": "email",
+        "smtp_host": settings.smtp_host or SMTP_HOST,
+        "smtp_port": settings.smtp_port or SMTP_PORT,
+        "sender_email": settings.sender_email or INFO_EMAIL,
+        "sender_name": settings.sender_name or "Paramedic Care 018",
+        "enabled": settings.enabled,
+        "notify_booking_created": settings.notify_booking_created,
+        "notify_driver_assigned": settings.notify_driver_assigned,
+        "notify_driver_arriving": settings.notify_driver_arriving,
+        "notify_transport_completed": settings.notify_transport_completed,
+        "notify_pickup_reminder": settings.notify_pickup_reminder,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "updated_by": user["id"]
+    }
+    
+    # Only update password if provided and not masked value
+    if settings.sender_password and settings.sender_password != "********":
+        settings_doc["sender_password"] = settings.sender_password
+    elif existing and existing.get("sender_password"):
+        settings_doc["sender_password"] = existing.get("sender_password")
+    else:
+        settings_doc["sender_password"] = INFO_PASS
+    
+    await db.system_settings.update_one(
+        {"type": "email"},
+        {"$set": settings_doc},
+        upsert=True
+    )
+    
+    return {"success": True, "message": "Email settings updated"}
+
+@api_router.post("/settings/email/test")
+async def test_email_settings(
+    request: EmailTestRequest,
+    user: dict = Depends(require_roles([UserRole.SUPERADMIN]))
+):
+    """Test email settings by sending a test email (Super Admin only)"""
+    # Get current settings
+    settings = await db.system_settings.find_one({"type": "email"}, {"_id": 0})
+    
+    smtp_host = settings.get("smtp_host", SMTP_HOST) if settings else SMTP_HOST
+    smtp_port = settings.get("smtp_port", SMTP_PORT) if settings else SMTP_PORT
+    sender_email = settings.get("sender_email", INFO_EMAIL) if settings else INFO_EMAIL
+    sender_pass = settings.get("sender_password", INFO_PASS) if settings else INFO_PASS
+    sender_name = settings.get("sender_name", "Paramedic Care 018") if settings else "Paramedic Care 018"
+    
+    # Create test email body
+    test_body = f"""
+    <html>
+    <body style="font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background-color: #f1f5f9;">
+        {get_email_header()}
+        <div style="padding: 30px; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+            <h1 style="color: #1e293b; margin-bottom: 10px;">✅ Test Email - Uspešno!</h1>
+            <p style="color: #475569; font-size: 16px; line-height: 1.6;">
+                {request.message or "Ovo je test email za proveru email konfiguracije. Ako vidite ovu poruku, vaše email podešavanja su ispravna!"}
+            </p>
+            
+            <div style="background-color: #f8fafc; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                <h3 style="color: #0ea5e9; margin-top: 0;">📧 Detalji konfiguracije</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 8px 0; color: #64748b;">SMTP Server:</td>
+                        <td style="padding: 8px 0; color: #1e293b;">{smtp_host}:{smtp_port}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; color: #64748b;">Pošiljalac:</td>
+                        <td style="padding: 8px 0; color: #1e293b;">{sender_email}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; color: #64748b;">Vreme slanja:</td>
+                        <td style="padding: 8px 0; color: #1e293b;">{datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')} UTC</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <p style="color: #64748b; font-size: 13px; margin-top: 30px;">
+                Sent by: {user.get('full_name', 'Super Admin')}
+            </p>
+        </div>
+        {get_email_footer('sr')}
+    </body>
+    </html>
+    """
+    
+    try:
+        from email.mime.text import MIMEText
+        from email.mime.multipart import MIMEMultipart
+        import aiosmtplib
+        
+        message = MIMEMultipart("alternative")
+        message["From"] = f"{sender_name} <{sender_email}>"
+        message["To"] = request.to_email
+        message["Subject"] = request.subject or "Test Email - Paramedic Care 018"
+        message.attach(MIMEText(test_body, "html"))
+        
+        await aiosmtplib.send(
+            message,
+            hostname=smtp_host,
+            port=smtp_port,
+            username=sender_email,
+            password=sender_pass,
+            use_tls=True
+        )
+        
+        # Log the test
+        await db.email_logs.insert_one({
+            "id": str(uuid.uuid4()),
+            "to_email": request.to_email,
+            "subject": request.subject or "Test Email - Paramedic Care 018",
+            "success": True,
+            "is_test": True,
+            "sent_by": user["id"],
+            "sent_at": datetime.now(timezone.utc).isoformat()
+        })
+        
+        return {"success": True, "message": "Test email sent successfully"}
+        
+    except Exception as e:
+        # Log the failure
+        await db.email_logs.insert_one({
+            "id": str(uuid.uuid4()),
+            "to_email": request.to_email,
+            "subject": request.subject or "Test Email - Paramedic Care 018",
+            "success": False,
+            "error": str(e),
+            "is_test": True,
+            "sent_by": user["id"],
+            "sent_at": datetime.now(timezone.utc).isoformat()
+        })
+        
+        return {"success": False, "error": str(e)}
+
+@api_router.get("/settings/email/logs")
+async def get_email_logs(
+    limit: int = 50,
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Get email send logs"""
+    logs = await db.email_logs.find({}, {"_id": 0}).sort("sent_at", -1).limit(limit).to_list(limit)
+    return logs
+
+
+# Helper function to send booking notification emails
+async def send_booking_email_notification(
+    booking: dict,
+    notification_type: str,
+    extra_data: dict = None
+) -> bool:
+    """
+    Send email notification for booking events.
+    
+    notification_type can be:
+    - booking_confirmation: New booking created
+    - driver_assigned: Driver assigned to booking
+    - driver_arriving: Driver is on the way
+    - transport_completed: Transport finished
+    - pickup_reminder: Reminder before pickup
+    """
+    # Get email settings
+    settings = await db.system_settings.find_one({"type": "email"}, {"_id": 0})
+    
+    # Check if email is enabled and this notification type is enabled
+    if settings:
+        if not settings.get("enabled", True):
+            logger.info(f"Email notifications disabled, skipping {notification_type}")
+            return False
+        
+        type_setting_map = {
+            "booking_confirmation": "notify_booking_created",
+            "driver_assigned": "notify_driver_assigned",
+            "driver_arriving": "notify_driver_arriving",
+            "transport_completed": "notify_transport_completed",
+            "pickup_reminder": "notify_pickup_reminder"
+        }
+        
+        setting_key = type_setting_map.get(notification_type)
+        if setting_key and not settings.get(setting_key, True):
+            logger.info(f"Email notification {notification_type} disabled, skipping")
+            return False
+    
+    # Get contact email
+    contact_email = booking.get("contact_email")
+    if not contact_email:
+        logger.warning(f"No contact email for booking {booking.get('id')}, skipping email")
+        return False
+    
+    # Get language
+    language = booking.get("language", "sr")
+    
+    # Build email data
+    data = {
+        "patient_name": booking.get("patient_name", ""),
+        "booking_date": booking.get("booking_date") or booking.get("preferred_date", ""),
+        "pickup_time": booking.get("pickup_time") or booking.get("preferred_time", "TBD"),
+        "start_point": booking.get("start_point") or booking.get("pickup_address", ""),
+        "end_point": booking.get("end_point") or booking.get("destination_address", ""),
+        "booking_id": booking.get("id", "")
+    }
+    
+    # Add extra data if provided
+    if extra_data:
+        data.update(extra_data)
+    
+    # Get email template
+    try:
+        subject, body = get_transport_email_template(notification_type, data, language)
+        
+        if not subject or not body:
+            logger.warning(f"No email template for {notification_type}")
+            return False
+        
+        # Send email
+        success = await send_email(contact_email, subject, body)
+        
+        # Log the email
+        await db.email_logs.insert_one({
+            "id": str(uuid.uuid4()),
+            "to_email": contact_email,
+            "subject": subject,
+            "notification_type": notification_type,
+            "booking_id": booking.get("id"),
+            "success": success,
+            "is_test": False,
+            "sent_at": datetime.now(timezone.utc).isoformat()
+        })
+        
+        return success
+        
+    except Exception as e:
+        logger.error(f"Failed to send email notification: {e}")
+        await db.email_logs.insert_one({
+            "id": str(uuid.uuid4()),
+            "to_email": contact_email,
+            "notification_type": notification_type,
+            "booking_id": booking.get("id"),
+            "success": False,
+            "error": str(e),
+            "is_test": False,
+            "sent_at": datetime.now(timezone.utc).isoformat()
+        })
+        return False
+
+
 # Endpoint to manually send SMS to a booking's contact
 @api_router.post("/bookings/{booking_id}/send-sms")
 async def send_booking_sms(
