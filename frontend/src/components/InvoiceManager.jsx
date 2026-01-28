@@ -531,7 +531,8 @@ const InvoiceManager = () => {
                       </Button>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
