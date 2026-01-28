@@ -409,8 +409,13 @@ const InvoiceManager = () => {
             <SelectItem value="cancelled">{language === 'sr' ? 'Otkazano' : 'Cancelled'}</SelectItem>
           </SelectContent>
         </Select>
-        <Button variant="outline" onClick={fetchInvoices} className="gap-2">
-          <RefreshCw className="w-4 h-4" />
+        <Button 
+          variant="outline" 
+          onClick={() => fetchInvoices(true)} 
+          disabled={refreshing}
+          className="gap-2"
+        >
+          <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
           {language === 'sr' ? 'Osveži' : 'Refresh'}
         </Button>
       </div>
