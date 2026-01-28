@@ -1916,31 +1916,37 @@ const UnifiedPWA = () => {
                   <Heart className="w-4 h-4" />
                   {language === 'sr' ? 'BRZI UNOS VITALA' : 'QUICK VITALS ENTRY'}
                 </h3>
-                {activeBookings.length > 0 ? (
-                  activeBookings.map(booking => (
-                    <div key={booking.id} className="bg-slate-800 rounded-xl p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <p className="font-semibold">{booking.patient_name}</p>
-                          <p className="text-xs text-slate-400">{statusConfig[booking.status]?.label[language]}</p>
+                {/* Show both active and confirmed bookings for medical staff */}
+                {(() => {
+                  const vitalsBookings = bookings.filter(b => 
+                    ['in_transit', 'picked_up', 'confirmed'].includes(b.status)
+                  );
+                  return vitalsBookings.length > 0 ? (
+                    vitalsBookings.map(booking => (
+                      <div key={booking.id} className="bg-slate-800 rounded-xl p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <p className="font-semibold">{booking.patient_name}</p>
+                            <p className="text-xs text-slate-400">{statusConfig[booking.status]?.label[language]}</p>
+                          </div>
+                          <Button 
+                            size="sm" 
+                            className="bg-purple-600 hover:bg-purple-700"
+                            onClick={() => { setSelectedPatient(booking); setShowVitalsModal(true); }}
+                          >
+                            <Plus className="w-4 h-4 mr-1" />
+                            {language === 'sr' ? 'Vitali' : 'Vitals'}
+                          </Button>
                         </div>
-                        <Button 
-                          size="sm" 
-                          className="bg-purple-600 hover:bg-purple-700"
-                          onClick={() => { setSelectedPatient(booking); setShowVitalsModal(true); }}
-                        >
-                          <Plus className="w-4 h-4 mr-1" />
-                          {language === 'sr' ? 'Vitali' : 'Vitals'}
-                        </Button>
                       </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-slate-500">
+                      <Heart className="w-12 h-12 mx-auto mb-2 text-slate-600" />
+                      <p>{language === 'sr' ? 'Nema aktivnih pacijenata' : 'No active patients'}</p>
                     </div>
-                  ))
-                ) : (
-                  <div className="text-center py-8 text-slate-500">
-                    <Heart className="w-12 h-12 mx-auto mb-2 text-slate-600" />
-                    <p>{language === 'sr' ? 'Nema aktivnih pacijenata' : 'No active patients'}</p>
-                  </div>
-                )}
+                  );
+                })()}
               </div>
             )}
 
