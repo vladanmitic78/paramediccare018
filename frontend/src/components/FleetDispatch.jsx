@@ -391,7 +391,7 @@ const VehicleOverlay = ({ vehicle, language }) => (
 );
 
 // Droppable Booking Card Component
-const DroppableBookingCard = ({ booking, language, isOver, onEdit, onDetach }) => {
+const DroppableBookingCard = ({ booking, language, isOver, onEdit, onDetach, onSendSMS }) => {
   const { setNodeRef, isOver: dropIsOver } = useDroppable({
     id: `booking-${booking.id}`,
     data: { booking }
@@ -422,6 +422,9 @@ const DroppableBookingCard = ({ booking, language, isOver, onEdit, onDetach }) =
   
   // Can edit if pending or active (not completed/cancelled)
   const canEdit = ['pending', 'confirmed', 'in_progress', 'en_route', 'on_site', 'transporting'].includes(booking.status);
+  
+  // Can send SMS if has phone number
+  const canSendSMS = booking.contact_phone && ['confirmed', 'in_progress', 'en_route', 'on_site'].includes(booking.status);
 
   return (
     <div
@@ -442,6 +445,15 @@ const DroppableBookingCard = ({ booking, language, isOver, onEdit, onDetach }) =
           </span>
         </div>
         <div className="flex items-center gap-2">
+          {canSendSMS && onSendSMS && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onSendSMS(booking); }}
+              className="p-1.5 text-indigo-500 hover:text-indigo-700 hover:bg-indigo-100 rounded-lg transition-colors"
+              title={language === 'sr' ? 'Pošalji SMS' : 'Send SMS'}
+            >
+              <MessageSquare className="w-4 h-4" />
+            </button>
+          )}
           {canEdit && onEdit && (
             <button
               onClick={(e) => { e.stopPropagation(); onEdit(booking); }}
