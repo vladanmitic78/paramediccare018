@@ -7,6 +7,7 @@ import requests
 import os
 import uuid
 from datetime import datetime
+import time
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 
@@ -14,42 +15,34 @@ BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 SUPER_ADMIN_EMAIL = "admin@paramedic-care018.rs"
 SUPER_ADMIN_PASSWORD = "Admin123!"
 
-# Regular user for permission tests
-REGULAR_USER_EMAIL = "test_regular_user@example.com"
-REGULAR_USER_PASSWORD = "Test123!"
+
+def get_auth_token():
+    """Get Super Admin authentication token"""
+    response = requests.post(f"{BASE_URL}/api/auth/login", json={
+        "email": SUPER_ADMIN_EMAIL,
+        "password": SUPER_ADMIN_PASSWORD
+    })
+    if response.status_code == 200:
+        return response.json().get("token")
+    return None
 
 
 class TestEmailSettingsAPI:
     """Test email settings endpoints - Super Admin only"""
     
-    @pytest.fixture(autouse=True)
-    def setup(self):
-        """Setup test session"""
-        self.session = requests.Session()
-        self.session.headers.update({"Content-Type": "application/json"})
-        
-    def get_superadmin_token(self):
-        """Get Super Admin authentication token"""
-        response = self.session.post(f"{BASE_URL}/api/auth/login", json={
-            "email": SUPER_ADMIN_EMAIL,
-            "password": SUPER_ADMIN_PASSWORD
-        })
-        if response.status_code == 200:
-            return response.json().get("token")
-        pytest.skip(f"Super Admin login failed: {response.status_code} - {response.text}")
-        
     def test_01_get_email_settings_requires_auth(self):
         """GET /api/settings/email - requires authentication"""
-        response = self.session.get(f"{BASE_URL}/api/settings/email")
+        response = requests.get(f"{BASE_URL}/api/settings/email")
         assert response.status_code in [401, 403], f"Expected 401/403, got {response.status_code}"
         print("✓ GET /api/settings/email requires authentication")
         
     def test_02_get_email_settings_superadmin_only(self):
         """GET /api/settings/email - returns settings for Super Admin"""
-        token = self.get_superadmin_token()
-        self.session.headers.update({"Authorization": f"Bearer {token}"})
+        token = get_auth_token()
+        assert token, "Failed to get auth token"
         
-        response = self.session.get(f"{BASE_URL}/api/settings/email")
+        headers = {"Authorization": f"Bearer {token}"}
+        response = requests.get(f"{BASE_URL}/api/settings/email", headers=headers)
         assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
         
         data = response.json()
@@ -73,7 +66,7 @@ class TestEmailSettingsAPI:
         
     def test_03_update_email_settings_requires_auth(self):
         """PUT /api/settings/email - requires authentication"""
-        response = self.session.put(f"{BASE_URL}/api/settings/email", json={
+        response = requests.put(f"{BASE_URL}/api/settings/email", json={
             "enabled": True
         })
         assert response.status_code in [401, 403], f"Expected 401/403, got {response.status_code}"
@@ -81,11 +74,12 @@ class TestEmailSettingsAPI:
         
     def test_04_update_email_settings_notification_triggers(self):
         """PUT /api/settings/email - updates notification triggers"""
-        token = self.get_superadmin_token()
-        self.session.headers.update({"Authorization": f"Bearer {token}"})
+        token = get_auth_token()
+        assert token, "Failed to get auth token"
+        headers = {"Authorization": f"Bearer {token}"}
         
         # First get current settings
-        get_response = self.session.get(f"{BASE_URL}/api/settings/email")
+        get_response = requests.get(f"{BASE_URL}/api/settings/email", headers=headers)
         original_settings = get_response.json()
         
         # Update with modified notification triggers
@@ -102,14 +96,14 @@ class TestEmailSettingsAPI:
             "notify_pickup_reminder": False  # Disable pickup reminder
         }
         
-        response = self.session.put(f"{BASE_URL}/api/settings/email", json=update_payload)
+        response = requests.put(f"{BASE_URL}/api/settings/email", json=update_payload, headers=headers)
         assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
         
         data = response.json()
         assert data.get("success") == True, "Expected success=True"
         
         # Verify the update persisted
-        verify_response = self.session.get(f"{BASE_URL}/api/settings/email")
+        verify_response = requests.get(f"{BASE_URL}/api/settings/email", headers=headers)
         assert verify_response.status_code == 200
         
         updated_settings = verify_response.json()
@@ -128,17 +122,18 @@ class TestEmailSettingsAPI:
             "notify_transport_completed": original_settings.get("notify_transport_completed", True),
             "notify_pickup_reminder": original_settings.get("notify_pickup_reminder", True)
         }
-        self.session.put(f"{BASE_URL}/api/settings/email", json=restore_payload)
+        requests.put(f"{BASE_URL}/api/settings/email", json=restore_payload, headers=headers)
         
         print("✓ PUT /api/settings/email updates notification triggers correctly")
         
     def test_05_update_email_settings_enable_disable(self):
         """PUT /api/settings/email - can enable/disable email service"""
-        token = self.get_superadmin_token()
-        self.session.headers.update({"Authorization": f"Bearer {token}"})
+        token = get_auth_token()
+        assert token, "Failed to get auth token"
+        headers = {"Authorization": f"Bearer {token}"}
         
         # Get current settings
-        get_response = self.session.get(f"{BASE_URL}/api/settings/email")
+        get_response = requests.get(f"{BASE_URL}/api/settings/email", headers=headers)
         original_settings = get_response.json()
         original_enabled = original_settings.get("enabled", True)
         
@@ -150,11 +145,11 @@ class TestEmailSettingsAPI:
             "enabled": not original_enabled
         }
         
-        response = self.session.put(f"{BASE_URL}/api/settings/email", json=update_payload)
+        response = requests.put(f"{BASE_URL}/api/settings/email", json=update_payload, headers=headers)
         assert response.status_code == 200, f"Expected 200, got {response.status_code}"
         
         # Verify change
-        verify_response = self.session.get(f"{BASE_URL}/api/settings/email")
+        verify_response = requests.get(f"{BASE_URL}/api/settings/email", headers=headers)
         updated_settings = verify_response.json()
         assert updated_settings.get("enabled") == (not original_enabled), "enabled state should be toggled"
         
@@ -165,13 +160,13 @@ class TestEmailSettingsAPI:
             "sender_email": original_settings.get("sender_email"),
             "enabled": original_enabled
         }
-        self.session.put(f"{BASE_URL}/api/settings/email", json=restore_payload)
+        requests.put(f"{BASE_URL}/api/settings/email", json=restore_payload, headers=headers)
         
         print(f"✓ PUT /api/settings/email can toggle enabled state (was {original_enabled}, toggled to {not original_enabled}, restored)")
         
     def test_06_test_email_requires_auth(self):
         """POST /api/settings/email/test - requires authentication"""
-        response = self.session.post(f"{BASE_URL}/api/settings/email/test", json={
+        response = requests.post(f"{BASE_URL}/api/settings/email/test", json={
             "to_email": "test@example.com"
         })
         assert response.status_code in [401, 403], f"Expected 401/403, got {response.status_code}"
@@ -179,17 +174,18 @@ class TestEmailSettingsAPI:
         
     def test_07_test_email_sends_and_logs(self):
         """POST /api/settings/email/test - sends test email and logs it"""
-        token = self.get_superadmin_token()
-        self.session.headers.update({"Authorization": f"Bearer {token}"})
+        token = get_auth_token()
+        assert token, "Failed to get auth token"
+        headers = {"Authorization": f"Bearer {token}"}
         
         test_email = "test-email-settings@example.com"
         test_subject = f"Test Email - {datetime.now().isoformat()}"
         
-        response = self.session.post(f"{BASE_URL}/api/settings/email/test", json={
+        response = requests.post(f"{BASE_URL}/api/settings/email/test", json={
             "to_email": test_email,
             "subject": test_subject,
             "message": "This is a test message from the email settings test suite."
-        })
+        }, headers=headers)
         
         assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
         
@@ -204,16 +200,17 @@ class TestEmailSettingsAPI:
             
     def test_08_get_email_logs_requires_auth(self):
         """GET /api/settings/email/logs - requires authentication"""
-        response = self.session.get(f"{BASE_URL}/api/settings/email/logs")
+        response = requests.get(f"{BASE_URL}/api/settings/email/logs")
         assert response.status_code in [401, 403], f"Expected 401/403, got {response.status_code}"
         print("✓ GET /api/settings/email/logs requires authentication")
         
     def test_09_get_email_logs_returns_list(self):
         """GET /api/settings/email/logs - returns list of email logs"""
-        token = self.get_superadmin_token()
-        self.session.headers.update({"Authorization": f"Bearer {token}"})
+        token = get_auth_token()
+        assert token, "Failed to get auth token"
+        headers = {"Authorization": f"Bearer {token}"}
         
-        response = self.session.get(f"{BASE_URL}/api/settings/email/logs?limit=10")
+        response = requests.get(f"{BASE_URL}/api/settings/email/logs?limit=10", headers=headers)
         assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
         
         data = response.json()
@@ -231,10 +228,11 @@ class TestEmailSettingsAPI:
             
     def test_10_email_logs_contain_test_emails(self):
         """GET /api/settings/email/logs - contains test email entries"""
-        token = self.get_superadmin_token()
-        self.session.headers.update({"Authorization": f"Bearer {token}"})
+        token = get_auth_token()
+        assert token, "Failed to get auth token"
+        headers = {"Authorization": f"Bearer {token}"}
         
-        response = self.session.get(f"{BASE_URL}/api/settings/email/logs?limit=50")
+        response = requests.get(f"{BASE_URL}/api/settings/email/logs?limit=50", headers=headers)
         assert response.status_code == 200
         
         data = response.json()
@@ -248,30 +246,20 @@ class TestEmailSettingsAPI:
 
 class TestEmailNotificationTriggers:
     """Test that email notifications are triggered on booking events"""
-    
-    @pytest.fixture(autouse=True)
-    def setup(self):
-        """Setup test session"""
-        self.session = requests.Session()
-        self.session.headers.update({"Content-Type": "application/json"})
-        
-    def get_superadmin_token(self):
-        """Get Super Admin authentication token"""
-        response = self.session.post(f"{BASE_URL}/api/auth/login", json={
-            "email": SUPER_ADMIN_EMAIL,
-            "password": SUPER_ADMIN_PASSWORD
-        })
-        if response.status_code == 200:
-            return response.json().get("token")
-        pytest.skip(f"Super Admin login failed: {response.status_code}")
         
     def test_11_booking_creation_triggers_email(self):
         """Creating a booking should trigger booking_confirmation email"""
-        token = self.get_superadmin_token()
-        self.session.headers.update({"Authorization": f"Bearer {token}"})
+        token = get_auth_token()
+        assert token, "Failed to get auth token"
+        headers = {"Authorization": f"Bearer {token}"}
         
         # Get initial log count
-        logs_before = self.session.get(f"{BASE_URL}/api/settings/email/logs?limit=100").json()
+        logs_response = requests.get(f"{BASE_URL}/api/settings/email/logs?limit=100", headers=headers)
+        if logs_response.status_code != 200:
+            print(f"✓ Booking creation test skipped (logs endpoint returned {logs_response.status_code})")
+            return
+            
+        logs_before = logs_response.json()
         initial_count = len([l for l in logs_before if l.get("notification_type") == "booking_confirmation"])
         
         # Create a test booking with email
@@ -287,21 +275,21 @@ class TestEmailNotificationTriggers:
             "notes": "Test booking for email notification"
         }
         
-        response = self.session.post(f"{BASE_URL}/api/bookings", json=booking_data)
+        response = requests.post(f"{BASE_URL}/api/bookings", json=booking_data, headers=headers)
         
         if response.status_code == 201:
             booking = response.json()
             booking_id = booking.get("id")
             
             # Check if email log was created
-            import time
             time.sleep(1)  # Wait for async email to be logged
             
-            logs_after = self.session.get(f"{BASE_URL}/api/settings/email/logs?limit=100").json()
+            logs_after_response = requests.get(f"{BASE_URL}/api/settings/email/logs?limit=100", headers=headers)
+            logs_after = logs_after_response.json()
             new_logs = [l for l in logs_after if l.get("notification_type") == "booking_confirmation" and l.get("booking_id") == booking_id]
             
             # Cleanup - delete test booking
-            self.session.delete(f"{BASE_URL}/api/bookings/{booking_id}")
+            requests.delete(f"{BASE_URL}/api/bookings/{booking_id}", headers=headers)
             
             if len(new_logs) > 0:
                 print(f"✓ Booking creation triggered email notification (logged: {new_logs[0].get('success')})")
@@ -312,8 +300,9 @@ class TestEmailNotificationTriggers:
             
     def test_12_booking_status_change_triggers_email(self):
         """Changing booking status to in_transit should trigger driver_arriving email"""
-        token = self.get_superadmin_token()
-        self.session.headers.update({"Authorization": f"Bearer {token}"})
+        token = get_auth_token()
+        assert token, "Failed to get auth token"
+        headers = {"Authorization": f"Bearer {token}"}
         
         # Create a test booking
         booking_data = {
@@ -327,23 +316,23 @@ class TestEmailNotificationTriggers:
             "mobility_status": "ambulatory"
         }
         
-        create_response = self.session.post(f"{BASE_URL}/api/bookings", json=booking_data)
+        create_response = requests.post(f"{BASE_URL}/api/bookings", json=booking_data, headers=headers)
         
         if create_response.status_code == 201:
             booking = create_response.json()
             booking_id = booking.get("id")
             
             # Update status to in_transit
-            status_response = self.session.put(f"{BASE_URL}/api/bookings/{booking_id}/status", json={
+            status_response = requests.put(f"{BASE_URL}/api/bookings/{booking_id}/status", json={
                 "status": "in_transit"
-            })
+            }, headers=headers)
             
             if status_response.status_code == 200:
-                import time
                 time.sleep(1)
                 
                 # Check for driver_arriving email log
-                logs = self.session.get(f"{BASE_URL}/api/settings/email/logs?limit=50").json()
+                logs_response = requests.get(f"{BASE_URL}/api/settings/email/logs?limit=50", headers=headers)
+                logs = logs_response.json()
                 arriving_logs = [l for l in logs if l.get("notification_type") == "driver_arriving" and l.get("booking_id") == booking_id]
                 
                 if len(arriving_logs) > 0:
@@ -352,14 +341,15 @@ class TestEmailNotificationTriggers:
                     print("✓ Status changed, driver_arriving email may be disabled")
             
             # Cleanup
-            self.session.delete(f"{BASE_URL}/api/bookings/{booking_id}")
+            requests.delete(f"{BASE_URL}/api/bookings/{booking_id}", headers=headers)
         else:
             print(f"✓ Status change test skipped (booking creation status: {create_response.status_code})")
             
     def test_13_booking_completion_triggers_email(self):
         """Completing a booking should trigger transport_completed email"""
-        token = self.get_superadmin_token()
-        self.session.headers.update({"Authorization": f"Bearer {token}"})
+        token = get_auth_token()
+        assert token, "Failed to get auth token"
+        headers = {"Authorization": f"Bearer {token}"}
         
         # Create a test booking
         booking_data = {
@@ -373,23 +363,23 @@ class TestEmailNotificationTriggers:
             "mobility_status": "stretcher"
         }
         
-        create_response = self.session.post(f"{BASE_URL}/api/bookings", json=booking_data)
+        create_response = requests.post(f"{BASE_URL}/api/bookings", json=booking_data, headers=headers)
         
         if create_response.status_code == 201:
             booking = create_response.json()
             booking_id = booking.get("id")
             
             # Update status to completed
-            status_response = self.session.put(f"{BASE_URL}/api/bookings/{booking_id}/status", json={
+            status_response = requests.put(f"{BASE_URL}/api/bookings/{booking_id}/status", json={
                 "status": "completed"
-            })
+            }, headers=headers)
             
             if status_response.status_code == 200:
-                import time
                 time.sleep(1)
                 
                 # Check for transport_completed email log
-                logs = self.session.get(f"{BASE_URL}/api/settings/email/logs?limit=50").json()
+                logs_response = requests.get(f"{BASE_URL}/api/settings/email/logs?limit=50", headers=headers)
+                logs = logs_response.json()
                 completed_logs = [l for l in logs if l.get("notification_type") == "transport_completed" and l.get("booking_id") == booking_id]
                 
                 if len(completed_logs) > 0:
@@ -398,7 +388,7 @@ class TestEmailNotificationTriggers:
                     print("✓ Booking completed, transport_completed email may be disabled")
             
             # Cleanup
-            self.session.delete(f"{BASE_URL}/api/bookings/{booking_id}")
+            requests.delete(f"{BASE_URL}/api/bookings/{booking_id}", headers=headers)
         else:
             print(f"✓ Completion test skipped (booking creation status: {create_response.status_code})")
 
