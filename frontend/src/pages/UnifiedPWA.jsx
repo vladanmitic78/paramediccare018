@@ -379,6 +379,13 @@ const UnifiedPWA = () => {
   });
   const [savingVitals, setSavingVitals] = useState(false);
   
+  // Diagnoses state for PWA
+  const [showDiagnosesSection, setShowDiagnosesSection] = useState(false);
+  const [diagnosisSearch, setDiagnosisSearch] = useState('');
+  const [patientDiagnoses, setPatientDiagnoses] = useState([]);
+  const [loadingDiagnoses, setLoadingDiagnoses] = useState(false);
+  const [savingDiagnosis, setSavingDiagnosis] = useState(false);
+  
   // Role checks
   const isDriver = user?.role === 'driver';
   const isMedical = ['doctor', 'nurse'].includes(user?.role);
