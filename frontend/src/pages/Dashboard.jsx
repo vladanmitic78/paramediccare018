@@ -589,18 +589,6 @@ const Dashboard = () => {
       ]
     },
     {
-      type: 'sms',
-      name: language === 'sr' ? 'SMS Servis' : 'SMS Service',
-      icon: '📱',
-      description: language === 'sr' ? 'Slanje SMS poruka' : 'Send SMS messages',
-      fields: [
-        { key: 'provider', label: 'Provider', type: 'select', options: ['twilio', 'nexmo', 'infobip', 'other'] },
-        { key: 'api_key', label: 'API Key / Account SID', type: 'password', required: true },
-        { key: 'api_secret', label: 'API Secret / Auth Token', type: 'password', required: true },
-        { key: 'sender_id', label: 'Sender ID / Phone Number', type: 'text', placeholder: '+381...' }
-      ]
-    },
-    {
       type: 'email',
       name: language === 'sr' ? 'Email Servis' : 'Email Service',
       icon: '📧',
