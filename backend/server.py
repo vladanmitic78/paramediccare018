@@ -1815,6 +1815,7 @@ async def create_invoice(
     booking_id: str,
     amount: float,
     service_description: str,
+    due_date: Optional[str] = None,
     user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
 ):
     """Create invoice for a completed booking"""
@@ -1828,6 +1829,16 @@ async def create_invoice(
     
     tax = round(amount * 0.20, 2)  # 20% VAT
     total = round(amount + tax, 2)
+    
+    # Parse due_date or use default (30 days from now)
+    if due_date:
+        try:
+            parsed_due_date = datetime.fromisoformat(due_date.replace('Z', '+00:00'))
+            due_date_iso = parsed_due_date.isoformat()
+        except:
+            due_date_iso = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
+    else:
+        due_date_iso = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
     
     invoice = {
         "id": str(uuid.uuid4()),
@@ -1846,7 +1857,7 @@ async def create_invoice(
         "total": total,
         "payment_status": "pending",
         "created_at": datetime.now(timezone.utc).isoformat(),
-        "due_date": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
+        "due_date": due_date_iso
     }
     
     await db.invoices.insert_one(invoice)
