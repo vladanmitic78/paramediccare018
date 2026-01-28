@@ -261,18 +261,76 @@ A comprehensive medical transport system including a public website, patient por
 - [x] Timeline-Based Vehicle Scheduling - Phase 3: Booking Flow Integration
 - [x] Fix logout on refresh issue - Extended session duration
 - [x] Patient Diagnoses Management - ICD-10 diagnoses with typeahead search (Jan 28, 2026)
+- [x] Email Notifications System - Booking event notifications with Super Admin settings UI (Jan 28, 2026)
 
 ### P1 - High Priority
 - [ ] Timeline-Based Vehicle Scheduling - Phase 4: Admin Gantt View
 - [ ] Continue backend refactoring (extract medical, driver, users, bookings routes from server.py)
 - [ ] Doctor Decision Panel - live instructions from Medical Dashboard
 - [ ] Refactor UnifiedPWA.jsx (~2,200 lines) into smaller components
+- [ ] Add more SMS triggers ("Driver on way", "Transport completed")
 
 ### P2 - Medium Priority
 - [ ] Calendar view for bookings (`OPERACIJE -> Kalendar`)
 - [ ] Persist sidebar state with localStorage
 - [ ] Driver rejection reason modal
 - [ ] Migrate image storage to persistent cloud (S3)
+
+## Email Notification System (Jan 28, 2026)
+
+**New Collection: `email_logs`**
+```javascript
+{
+  "id": "uuid",
+  "to_email": "patient@example.com",
+  "subject": "Email subject",
+  "notification_type": "booking_confirmation|driver_assigned|driver_arriving|transport_completed|pickup_reminder",
+  "booking_id": "booking-uuid (optional)",
+  "success": true,
+  "error": "error message if failed",
+  "is_test": false,
+  "sent_by": "user-uuid (for test emails)",
+  "sent_at": "ISO timestamp"
+}
+```
+
+**System Settings: `system_settings.type=email`**
+```javascript
+{
+  "type": "email",
+  "smtp_host": "mailcluster.loopia.se",
+  "smtp_port": 465,
+  "sender_email": "info@paramedic-care018.rs",
+  "sender_password": "encrypted",
+  "sender_name": "Paramedic Care 018",
+  "enabled": true,
+  "notify_booking_created": true,
+  "notify_driver_assigned": true,
+  "notify_driver_arriving": true,
+  "notify_transport_completed": true,
+  "notify_pickup_reminder": true
+}
+```
+
+**API Endpoints:**
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/settings/email` | GET | Get email settings (Super Admin only) |
+| `/api/settings/email` | PUT | Update email settings and notification triggers |
+| `/api/settings/email/test` | POST | Send test email to verify configuration |
+| `/api/settings/email/logs` | GET | Get email send history |
+
+**Frontend Components:**
+- `EmailSettings.jsx` - Super Admin UI for email configuration
+- Displays in Dashboard under "Podešavanja" > "Email Podešavanja"
+- Features: SMTP configuration, notification triggers toggles, test email, email logs
+
+**Email Triggers:**
+- `booking_confirmation` - Sent when new booking is created
+- `driver_assigned` - Sent when driver is assigned to booking
+- `driver_arriving` - Sent when status changes to "in_transit"/"en_route"
+- `transport_completed` - Sent when transport is marked as completed
+- `pickup_reminder` - Sent before scheduled pickup (planned feature)
 
 ## Live Tracking Enhancements (Jan 27, 2026)
 
@@ -287,7 +345,7 @@ A comprehensive medical transport system including a public website, patient por
 - Clicking header dismiss button or another driver clears selection
 
 ### P3 - Future
-- [ ] API integrations (Stripe, SMS, Email)
+- [ ] Stripe integration for payments
 - [ ] Advanced reporting and statistics
 
 ## Test Credentials
