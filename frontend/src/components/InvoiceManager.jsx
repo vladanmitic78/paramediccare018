@@ -10,6 +10,7 @@ import {
   Clock,
   XCircle,
   AlertTriangle,
+  AlertCircle,
   ChevronRight,
   Loader2,
   RefreshCw,
