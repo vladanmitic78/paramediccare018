@@ -2047,7 +2047,7 @@ async def update_booking(booking_id: str, update: BookingFullUpdate, user: dict 
     
     booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
     
-    # Send SMS notifications based on changes
+    # Send SMS and EMAIL notifications based on changes
     contact_phone = booking.get("contact_phone")
     language = booking.get("language", "sr")
     
@@ -2069,6 +2069,12 @@ async def update_booking(booking_id: str, update: BookingFullUpdate, user: dict 
                 language
             )
             await send_sms_notification(contact_phone, sms_message, booking_id)
+            
+            # Also send email notification for driver assignment
+            await send_booking_email_notification(booking, "driver_assigned", {
+                "driver_name": driver_name,
+                "vehicle_info": vehicle_info
+            })
         
         # SMS for status changes
         if "status" in update_dict:
@@ -2087,14 +2093,30 @@ async def update_booking(booking_id: str, update: BookingFullUpdate, user: dict 
                 await send_sms_notification(contact_phone, sms_message, booking_id)
             
             elif new_status == "in_transit":
-                # Driver is on the way
+                # Driver is on the way - SMS and Email
                 sms_message = SMSTemplates.driver_arriving(15, language)
                 await send_sms_notification(contact_phone, sms_message, booking_id)
+                
+                # Get driver info for email
+                driver_name = booking.get("assigned_driver_name", "")
+                vehicle_info = ""
+                if booking.get("assigned_driver"):
+                    ds = await db.driver_status.find_one({"driver_id": booking.get("assigned_driver")})
+                    if ds and ds.get("vehicle_info"):
+                        vehicle_info = ds.get("vehicle_info", {}).get("registration", "")
+                
+                await send_booking_email_notification(booking, "driver_arriving", {
+                    "eta_minutes": 15,
+                    "driver_name": driver_name,
+                    "vehicle_info": vehicle_info
+                })
             
             elif new_status == "completed":
-                # Transport completed
+                # Transport completed - SMS and Email
                 sms_message = SMSTemplates.transport_completed(language)
                 await send_sms_notification(contact_phone, sms_message, booking_id)
+                
+                await send_booking_email_notification(booking, "transport_completed")
     
     return BookingResponse(**booking)
 
