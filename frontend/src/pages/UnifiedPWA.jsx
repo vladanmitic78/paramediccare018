@@ -1005,6 +1005,92 @@ const UnifiedPWA = () => {
     return alerts;
   };
 
+  // Fetch patient diagnoses
+  const fetchPatientDiagnoses = async (patientId) => {
+    if (!patientId) return;
+    setLoadingDiagnoses(true);
+    try {
+      const response = await axios.get(`${API}/api/patients/${patientId}/diagnoses`);
+      setPatientDiagnoses(response.data || []);
+    } catch (error) {
+      console.error('Error fetching diagnoses:', error);
+      setPatientDiagnoses([]);
+    } finally {
+      setLoadingDiagnoses(false);
+    }
+  };
+
+  // Add diagnosis to patient
+  const addDiagnosis = async (diagnosis) => {
+    if (!selectedPatient?.patient_id) {
+      toast.error(language === 'sr' ? 'Nema ID pacijenta' : 'No patient ID');
+      return;
+    }
+    
+    // Check if already added
+    if (patientDiagnoses.some(d => d.code === diagnosis.code)) {
+      toast.info(language === 'sr' ? 'Dijagnoza je već dodana' : 'Diagnosis already added');
+      return;
+    }
+    
+    setSavingDiagnosis(true);
+    try {
+      await axios.post(`${API}/api/patients/${selectedPatient.patient_id}/diagnoses`, {
+        code: diagnosis.code,
+        name_en: diagnosis.name_en,
+        name_sr: diagnosis.name_sr,
+        category_en: diagnosis.category_en,
+        category_sr: diagnosis.category_sr
+      });
+      toast.success(language === 'sr' ? 'Dijagnoza dodana' : 'Diagnosis added');
+      setDiagnosisSearch('');
+      fetchPatientDiagnoses(selectedPatient.patient_id);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || (language === 'sr' ? 'Greška pri dodavanju' : 'Error adding diagnosis'));
+    } finally {
+      setSavingDiagnosis(false);
+    }
+  };
+
+  // Remove diagnosis from patient
+  const removeDiagnosis = async (diagnosisId) => {
+    if (!selectedPatient?.patient_id) return;
+    
+    try {
+      await axios.delete(`${API}/api/patients/${selectedPatient.patient_id}/diagnoses/${diagnosisId}`);
+      toast.success(language === 'sr' ? 'Dijagnoza uklonjena' : 'Diagnosis removed');
+      fetchPatientDiagnoses(selectedPatient.patient_id);
+    } catch (error) {
+      toast.error(language === 'sr' ? 'Greška pri uklanjanju' : 'Error removing');
+    }
+  };
+
+  // Filter diagnoses for search
+  const filteredDiagnoses = diagnosisSearch.length >= 2 
+    ? searchDiagnoses(diagnosisSearch, language)
+    : [];
+
+  // Category colors for diagnoses
+  const getCategoryColor = (category) => {
+    const colors = {
+      'Circulatory system': 'bg-red-600',
+      'Sistem krvotoka': 'bg-red-600',
+      'Respiratory system': 'bg-sky-600',
+      'Respiratorni sistem': 'bg-sky-600',
+      'Nervous system': 'bg-purple-600',
+      'Nervni sistem': 'bg-purple-600',
+      'Endocrine system': 'bg-amber-600',
+      'Endokrini sistem': 'bg-amber-600',
+      'Injuries': 'bg-orange-600',
+      'Povrede': 'bg-orange-600',
+      'Poisoning': 'bg-lime-600',
+      'Trovanja': 'bg-lime-600',
+      'Symptoms': 'bg-slate-600',
+      'Simptomi': 'bg-slate-600',
+    };
+    return colors[category] || 'bg-slate-600';
+  };
+
   // Logout
   const handleLogout = () => {
     logout();
