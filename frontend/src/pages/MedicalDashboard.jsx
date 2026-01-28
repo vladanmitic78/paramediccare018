@@ -9,6 +9,7 @@ import VitalSignsGraph from '../components/VitalSignsGraph';
 import TransportVitalsDialog from '../components/TransportVitalsDialog';
 import CriticalAlertsPanel from '../components/CriticalAlertsPanel';
 import MedicationManager from '../components/MedicationManager';
+import DiagnosesManager from '../components/DiagnosesManager';
 import TransportTimeline from '../components/TransportTimeline';
 import {
   Select,
@@ -910,12 +911,24 @@ const MedicalDashboard = () => {
               darkMode={darkMode}
             />
             
-            {/* Medication Administration */}
-            <div className={`${cardClass} border rounded-xl p-4`}>
-              <MedicationManager 
-                patient={selectedPatient}
-                language={language}
-              />
+            {/* Diagnoses and Medications - Side by Side */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* Diagnoses Manager */}
+              <div className={`${cardClass} border rounded-xl p-4`}>
+                <DiagnosesManager 
+                  patient={selectedPatient}
+                  language={language}
+                  onUpdate={() => fetchPatients()}
+                />
+              </div>
+              
+              {/* Medication Administration */}
+              <div className={`${cardClass} border rounded-xl p-4`}>
+                <MedicationManager 
+                  patient={selectedPatient}
+                  language={language}
+                />
+              </div>
             </div>
             
             {/* Vital Signs History */}
