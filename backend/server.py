@@ -3340,6 +3340,83 @@ async def get_patient_medications(
     return medications
 
 
+# ============ PATIENT DIAGNOSES ROUTES ============
+
+class PatientDiagnosisCreate(BaseModel):
+    code: str
+    name_en: str
+    name_sr: str
+    category_en: str
+    category_sr: str
+    notes: Optional[str] = None
+
+@api_router.get("/patients/{patient_id}/diagnoses")
+async def get_patient_diagnoses(
+    patient_id: str,
+    user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Get all diagnoses for a patient"""
+    diagnoses = await db.patient_diagnoses.find(
+        {"patient_id": patient_id},
+        {"_id": 0}
+    ).sort("added_at", -1).to_list(100)
+    return diagnoses
+
+@api_router.post("/patients/{patient_id}/diagnoses")
+async def add_patient_diagnosis(
+    patient_id: str,
+    diagnosis: PatientDiagnosisCreate,
+    user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Add a diagnosis to a patient's record"""
+    # Verify patient exists
+    patient = await db.medical_patients.find_one(
+        {"$or": [{"id": patient_id}, {"patient_id": patient_id}]}
+    )
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    
+    # Check if this diagnosis code is already added
+    existing = await db.patient_diagnoses.find_one({
+        "patient_id": patient_id,
+        "code": diagnosis.code
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="Diagnosis already recorded for this patient")
+    
+    diagnosis_doc = {
+        "id": str(uuid.uuid4()),
+        "patient_id": patient_id,
+        "code": diagnosis.code,
+        "name_en": diagnosis.name_en,
+        "name_sr": diagnosis.name_sr,
+        "category_en": diagnosis.category_en,
+        "category_sr": diagnosis.category_sr,
+        "notes": diagnosis.notes,
+        "added_by": user["id"],
+        "added_by_name": user["full_name"],
+        "added_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.patient_diagnoses.insert_one(diagnosis_doc)
+    return {k: v for k, v in diagnosis_doc.items() if k != "_id"}
+
+@api_router.delete("/patients/{patient_id}/diagnoses/{diagnosis_id}")
+async def remove_patient_diagnosis(
+    patient_id: str,
+    diagnosis_id: str,
+    user: dict = Depends(require_roles([UserRole.DOCTOR, UserRole.NURSE, UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Remove a diagnosis from a patient's record"""
+    result = await db.patient_diagnoses.delete_one({
+        "id": diagnosis_id,
+        "patient_id": patient_id
+    })
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Diagnosis not found")
+    return {"success": True, "message": "Diagnosis removed"}
+
+
 @api_router.get("/patients/{patient_id}/report")
 async def generate_patient_report(
     patient_id: str,
