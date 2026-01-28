@@ -1700,6 +1700,11 @@ const Dashboard = () => {
             <SMSSettings language={language} />
           )}
 
+          {/* Email Settings (Super Admin only) */}
+          {activeTab === 'email-settings' && isSuperAdmin() && (
+            <EmailSettings language={language} />
+          )}
+
           {/* Availability Section - StaffAvailabilityCalendar is rendered above at line 1197 */}
         </main>
       </div>
