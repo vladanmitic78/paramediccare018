@@ -1939,17 +1939,8 @@ async def create_booking(booking: BookingCreate, user: dict = Depends(get_option
     }
     await db.bookings.insert_one(booking_doc)
     
-    # Send confirmation email to customer
-    subject, body = get_booking_confirmation_template(
-        booking.patient_name,
-        booking.booking_date,
-        booking.start_point,
-        booking.end_point,
-        booking_id,
-        booking.booking_type,
-        booking.language
-    )
-    await send_email(booking.contact_email, subject, body)
+    # Send confirmation email to customer using new template system
+    await send_booking_email_notification(booking_doc, "booking_confirmation")
     
     # Send SMS confirmation to customer
     if booking.contact_phone:
