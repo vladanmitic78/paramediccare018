@@ -1411,6 +1411,81 @@ const MedicalDashboard = () => {
         }}
         patientName={selectedTransportPatient}
       />
+
+      {/* PDF Report Dialog with Date Range */}
+      <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
+        <DialogContent className={`max-w-md ${darkMode ? 'bg-slate-800 text-slate-100' : ''}`}>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              {language === 'sr' ? 'Generisanje PDF izveštaja' : 'Generate PDF Report'}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 pt-4">
+            <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+              {language === 'sr' 
+                ? 'Izaberite vremenski period za izveštaj (opciono):' 
+                : 'Select time range for the report (optional):'}
+            </p>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={`text-sm font-medium block mb-1.5 ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                  {language === 'sr' ? 'Od datuma' : 'From date'}
+                </label>
+                <Input
+                  type="date"
+                  value={reportDateFrom}
+                  onChange={(e) => setReportDateFrom(e.target.value)}
+                  className={darkMode ? 'bg-slate-700 border-slate-600' : ''}
+                  data-testid="report-date-from"
+                />
+              </div>
+              <div>
+                <label className={`text-sm font-medium block mb-1.5 ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                  {language === 'sr' ? 'Do datuma' : 'To date'}
+                </label>
+                <Input
+                  type="date"
+                  value={reportDateTo}
+                  onChange={(e) => setReportDateTo(e.target.value)}
+                  className={darkMode ? 'bg-slate-700 border-slate-600' : ''}
+                  data-testid="report-date-to"
+                />
+              </div>
+            </div>
+            
+            <p className={`text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+              {language === 'sr' 
+                ? 'Ostavite prazno za kompletan izveštaj sa svim podacima.' 
+                : 'Leave empty for complete report with all data.'}
+            </p>
+            
+            <div className="flex justify-end gap-3 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setReportDialogOpen(false)}
+                className={darkMode ? 'border-slate-600' : ''}
+              >
+                {language === 'sr' ? 'Otkaži' : 'Cancel'}
+              </Button>
+              <Button
+                onClick={generatePatientReport}
+                disabled={generatingReport}
+                className="gap-2"
+              >
+                {generatingReport ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4" />
+                )}
+                {language === 'sr' ? 'Generiši PDF' : 'Generate PDF'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
