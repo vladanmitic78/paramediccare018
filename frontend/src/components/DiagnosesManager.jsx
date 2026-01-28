@@ -302,7 +302,7 @@ const DiagnosesManager = ({ patient, language = 'sr', onUpdate }) => {
               )}
             </div>
 
-            <div className="flex justify-end mt-4">
+            <div className="flex justify-end mt-4 relative z-[60]">
               <Button
                 type="button"
                 variant="outline"
