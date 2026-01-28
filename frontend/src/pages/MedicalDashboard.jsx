@@ -944,83 +944,12 @@ const MedicalDashboard = () => {
               </div>
             </div>
             
-            {/* Vital Signs History */}
-            <div className={`${cardClass} border rounded-xl p-4`}>
-              <h3 className={`font-semibold ${textClass} mb-4 flex items-center gap-2`}>
-                <TrendingUp className="w-5 h-5" />
-                {language === 'sr' ? 'Istorija vitalnih parametara' : 'Vital Signs History'}
-              </h3>
-              
-              {patientVitals.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className={`border-b ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}>
-                        <th className={`text-left p-2 text-sm ${textMutedClass}`}>{language === 'sr' ? 'Datum' : 'Date'}</th>
-                        <th className={`text-center p-2 text-sm ${textMutedClass}`}>BP</th>
-                        <th className={`text-center p-2 text-sm ${textMutedClass}`}>HR</th>
-                        <th className={`text-center p-2 text-sm ${textMutedClass}`}>SpO₂</th>
-                        <th className={`text-center p-2 text-sm ${textMutedClass}`}>Temp</th>
-                        <th className={`text-center p-2 text-sm ${textMutedClass}`}>RR</th>
-                        <th className={`text-left p-2 text-sm ${textMutedClass}`}>{language === 'sr' ? 'Upozorenja' : 'Flags'}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {patientVitals.map((vital, idx) => (
-                        <tr key={idx} className={`border-b ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}>
-                          <td className={`p-2 ${textClass}`}>
-                            <p className="font-medium">{new Date(vital.recorded_at).toLocaleDateString()}</p>
-                            <p className={`text-xs ${textMutedClass}`}>{new Date(vital.recorded_at).toLocaleTimeString()}</p>
-                          </td>
-                          <td className="text-center p-2">
-                            <span className={`px-2 py-1 rounded text-sm ${getVitalStatus('systolic_bp', vital.systolic_bp).bg} ${getVitalStatus('systolic_bp', vital.systolic_bp).text}`}>
-                              {vital.systolic_bp || '-'}/{vital.diastolic_bp || '-'}
-                            </span>
-                          </td>
-                          <td className="text-center p-2">
-                            <span className={`px-2 py-1 rounded text-sm ${getVitalStatus('heart_rate', vital.heart_rate).bg} ${getVitalStatus('heart_rate', vital.heart_rate).text}`}>
-                              {vital.heart_rate || '-'}
-                            </span>
-                          </td>
-                          <td className="text-center p-2">
-                            <span className={`px-2 py-1 rounded text-sm ${getVitalStatus('oxygen_saturation', vital.oxygen_saturation).bg} ${getVitalStatus('oxygen_saturation', vital.oxygen_saturation).text}`}>
-                              {vital.oxygen_saturation ? `${vital.oxygen_saturation}%` : '-'}
-                            </span>
-                          </td>
-                          <td className="text-center p-2">
-                            <span className={`px-2 py-1 rounded text-sm ${getVitalStatus('temperature', vital.temperature).bg} ${getVitalStatus('temperature', vital.temperature).text}`}>
-                              {vital.temperature ? `${vital.temperature}°` : '-'}
-                            </span>
-                          </td>
-                          <td className="text-center p-2">
-                            <span className={`px-2 py-1 rounded text-sm ${getVitalStatus('respiratory_rate', vital.respiratory_rate).bg} ${getVitalStatus('respiratory_rate', vital.respiratory_rate).text}`}>
-                              {vital.respiratory_rate || '-'}
-                            </span>
-                          </td>
-                          <td className="p-2">
-                            {vital.flags?.length > 0 ? (
-                              <div className="flex flex-wrap gap-1">
-                                {vital.flags.map((flag, fIdx) => (
-                                  <Badge key={fIdx} variant="destructive" className="text-xs">
-                                    {flag}
-                                  </Badge>
-                                ))}
-                              </div>
-                            ) : (
-                              <span className={textMutedClass}>-</span>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <p className={`text-center py-8 ${textMutedClass}`}>
-                  {language === 'sr' ? 'Nema zabeleženih vitalnih parametara' : 'No vital signs recorded'}
-                </p>
-              )}
-            </div>
+            {/* Vital Signs History - with search and collapse/expand */}
+            <VitalSignsHistory
+              vitals={patientVitals}
+              language={language}
+              darkMode={darkMode}
+            />
             
             {/* Emergency Contacts */}
             {selectedPatient.emergency_contacts?.length > 0 && (
