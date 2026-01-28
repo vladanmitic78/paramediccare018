@@ -60,10 +60,12 @@ import {
   Eye,
   Edit,
   Trash2,
-  Download
+  Download,
+  CalendarRange
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
+import VitalSignsHistory from '../components/VitalSignsHistory';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
