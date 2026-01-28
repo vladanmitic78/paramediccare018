@@ -649,6 +649,13 @@ const FleetDispatch = () => {
   const [activeVehicle, setActiveVehicle] = useState(null);
   const [assigning, setAssigning] = useState(false);
   
+  // SMS Dialog state
+  const [showSMSDialog, setShowSMSDialog] = useState(false);
+  const [smsBooking, setSmsBooking] = useState(null);
+  const [smsType, setSmsType] = useState('reminder');
+  const [smsCustomMessage, setSmsCustomMessage] = useState('');
+  const [sendingSMS, setSendingSMS] = useState(false);
+  
   // Time-slot assignment modal state
   const [showTimeSlotModal, setShowTimeSlotModal] = useState(false);
   const [pendingAssignment, setPendingAssignment] = useState(null);  // {vehicle, booking, driver}
