@@ -299,7 +299,7 @@ export const MapPicker = ({
       </div>
 
       {/* Map */}
-      <div className="h-48 rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+      <div className="h-48 rounded-xl overflow-hidden border border-slate-200 shadow-sm relative" style={{ zIndex: 1 }}>
         <MapContainer
           center={mapCenter}
           zoom={12}
