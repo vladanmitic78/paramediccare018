@@ -228,16 +228,6 @@ const CriticalAlertsPanel = ({ language = 'sr', darkMode = false, embedded = fal
             </div>
           </div>
         )}
-
-        <style jsx>{`
-          @keyframes pulse-slow {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-          }
-          .animate-pulse-slow {
-            animation: pulse-slow 2s ease-in-out infinite;
-          }
-        `}</style>
       </div>
     );
   }
