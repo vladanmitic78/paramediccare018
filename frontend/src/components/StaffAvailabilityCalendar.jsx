@@ -755,7 +755,7 @@ const StaffAvailabilityCalendar = () => {
                 
                 {/* Day cells */}
                 {getWeekDays().map((day, dayIdx) => {
-                  const slots = availability.filter(
+                  const slots = (availability || []).filter(
                     s => s.user_id === staffId && s.date === formatDate(day)
                   );
                   const isToday = formatDate(day) === formatDate(new Date());
