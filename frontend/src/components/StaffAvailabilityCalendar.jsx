@@ -716,7 +716,7 @@ const StaffAvailabilityCalendar = () => {
           </div>
           
           {/* Staff rows */}
-          {(staffList.length > 0 ? staffList : uniqueStaffFromAvailability).map(staff => {
+          {((staffList || []).length > 0 ? (staffList || []) : (uniqueStaffFromAvailability || [])).map(staff => {
             const staffId = staff.id;
             const staffName = staff.full_name || staff.name;
             const staffRole = staff.role;
