@@ -40,21 +40,20 @@ const OperationsDashboard = () => {
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [bookingsRes, statsRes] = await Promise.all([
+          axios.get(`${API}/bookings`),
+          axios.get(`${API}/stats/dashboard`).catch(() => ({ data: null }))
+        ]);
+        setBookings(bookingsRes.data || []);
+        setStats(statsRes.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
     fetchData();
   }, []);
-
-  const fetchData = async () => {
-    try {
-      const [bookingsRes, statsRes] = await Promise.all([
-        axios.get(`${API}/bookings`),
-        axios.get(`${API}/stats/dashboard`).catch(() => ({ data: null }))
-      ]);
-      setBookings(bookingsRes.data || []);
-      setStats(statsRes.data);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  };
 
   // Transportation Stats
   const transportStats = [
