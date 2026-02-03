@@ -1950,7 +1950,6 @@ def generate_invoice_pdf(invoice: dict) -> io.BytesIO:
     title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=24, textColor=colors.HexColor('#0f172a'), alignment=TA_CENTER, fontName='DejaVu-Bold')
     header_style = ParagraphStyle('Header', parent=styles['Normal'], fontSize=10, textColor=colors.HexColor('#64748b'), fontName='DejaVu')
     normal_style = ParagraphStyle('Normal', parent=styles['Normal'], fontSize=10, textColor=colors.HexColor('#334155'), fontName='DejaVu')
-    bold_style = ParagraphStyle('Bold', parent=styles['Normal'], fontSize=10, textColor=colors.HexColor('#0f172a'), fontName='DejaVu-Bold')
     
     elements = []
     
