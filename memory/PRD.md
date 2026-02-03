@@ -388,6 +388,70 @@ A comprehensive medical transport system including a public website, patient por
 - [ ] Stripe integration for payments
 - [ ] Advanced reporting and statistics
 
+## Booking Calendar View (Feb 3, 2026)
+
+**Component:** `BookingCalendarView.jsx`
+- Monthly calendar grid showing all bookings
+- Location: Dashboard → Dispečerski centar → Kalendar
+
+**Features:**
+| Feature | Description |
+|---------|-------------|
+| Monthly Grid | Shows 6-week grid with booking indicators |
+| Day Indicators | Color-coded dots for bookings (by status) |
+| Day Detail | Click day to see all bookings in dialog |
+| List View | Toggle to see bookings as sortable list |
+| Status Filter | Filter by booking status |
+| Navigation | Previous/Next month, Today button |
+| Stats Cards | Total, Pending, Confirmed, Completed, Cancelled counts |
+| Legend | Status color legend at bottom |
+
+## Driver Rejection Modal (Feb 3, 2026)
+
+**Component:** `DriverRejectionModal.jsx`
+- Modal for drivers to reject/decline booking assignments with reason
+
+**Predefined Rejection Reasons:**
+| Code | Label (SR) | Description |
+|------|------------|-------------|
+| vehicle_issue | Problem sa vozilom | Vehicle breakdown/unavailable |
+| schedule_conflict | Konflikt u rasporedu | Already have another trip |
+| location_issue | Problem sa lokacijom | Location inaccessible/too far |
+| medical_reason | Zdravstveni razlog | Health-related issue |
+| equipment_missing | Nedostaje oprema | Required equipment unavailable |
+| other | Drugi razlog | Custom reason in notes |
+
+**API Endpoints:**
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/bookings/{id}/reject` | POST | Driver rejects booking with reason |
+| `/api/bookings/{id}/rejections` | GET | Get rejection history for booking |
+
+**MongoDB Collection: `booking_rejections`**
+```javascript
+{
+  "id": "uuid",
+  "booking_id": "booking-uuid",
+  "rejected_by": "driver-uuid",
+  "rejected_by_name": "Driver Name",
+  "rejected_at": "ISO timestamp",
+  "reason_code": "schedule_conflict",
+  "reason_label": "Konflikt u rasporedu",
+  "notes": "optional notes",
+  "previous_driver": "previous-driver-uuid",
+  "previous_driver_name": "Previous Driver Name"
+}
+```
+
+**Behavior:**
+- Removes driver assignment from booking
+- Reverts booking status to "pending"
+- Increments `rejection_count` on booking
+- Stores full rejection record
+- Sends email notification to transport team
+
+## Doctor Decision Panel (Feb 3, 2026)
+
 ## Test Credentials
 - **Admin:** admin@paramedic-care018.rs / Admin123!
 - **Driver (User):** vladanmitic@gmail.com / Test123!
