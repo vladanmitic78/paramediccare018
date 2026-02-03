@@ -286,7 +286,7 @@ const StaffAvailabilityCalendar = () => {
   // Get unique staff members from availability data
   const uniqueStaffFromAvailability = useMemo(() => {
     const staffMap = new Map();
-    availability.forEach(slot => {
+    (availability || []).forEach(slot => {
       if (!staffMap.has(slot.user_id)) {
         staffMap.set(slot.user_id, {
           id: slot.user_id,
