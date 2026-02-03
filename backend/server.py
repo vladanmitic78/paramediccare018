@@ -910,24 +910,19 @@ async def get_staff(user: dict = Depends(require_roles([UserRole.ADMIN, UserRole
     return [UserResponse(**s) for s in staff]
 
 
-# ============ SMS GATEWAY SETTINGS (Super Admin) ============
+# ============ SMS/EMAIL SETTINGS - MOVED TO routes/notifications.py ============
+# The following endpoints are now available via the notifications router:
+# - GET/PUT /api/settings/sms
+# - POST /api/settings/sms/test
+# - GET /api/settings/sms/logs
+# - GET/PUT /api/settings/email
+# - POST /api/settings/email/test
+# - GET /api/settings/email/logs
+# Helper functions send_sms_notification and send_booking_email_notification 
+# are imported from routes.notifications
 
-class SMSSettingsUpdate(BaseModel):
-    provider: str = "textbelt"
-    api_key: Optional[str] = "textbelt"
-    api_secret: Optional[str] = None
-    sender_id: Optional[str] = None
-    custom_endpoint: Optional[str] = None
-    custom_headers: Optional[Dict[str, str]] = None
-    custom_payload_template: Optional[str] = None
-    enabled: bool = True
 
-class SMSSendRequest(BaseModel):
-    phone: str
-    message: str
-
-@api_router.get("/settings/sms")
-async def get_sms_settings(user: dict = Depends(require_roles([UserRole.SUPERADMIN]))):
+# Endpoint to manually send SMS to a booking's contact:
     """Get SMS gateway settings (Super Admin only)"""
     settings = await db.system_settings.find_one({"type": "sms"}, {"_id": 0})
     if not settings:
