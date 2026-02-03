@@ -922,7 +922,7 @@ async def get_staff(user: dict = Depends(require_roles([UserRole.ADMIN, UserRole
 # are imported from routes.notifications
 
 
-# Endpoint to manually send SMS to a booking's contact:
+# Endpoint to manually send SMS to a booking's contact
     """Get SMS gateway settings (Super Admin only)"""
     settings = await db.system_settings.find_one({"type": "sms"}, {"_id": 0})
     if not settings:
