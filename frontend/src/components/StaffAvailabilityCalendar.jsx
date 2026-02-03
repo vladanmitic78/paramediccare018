@@ -795,7 +795,7 @@ const StaffAvailabilityCalendar = () => {
             );
           })}
           
-          {(staffList.length === 0 && uniqueStaffFromAvailability.length === 0) && (
+          {((staffList || []).length === 0 && (uniqueStaffFromAvailability || []).length === 0) && (
             <div className="p-8 text-center text-slate-500">
               {language === 'sr' ? 'Nema registrovanih zaposlenih' : 'No staff members registered'}
             </div>
