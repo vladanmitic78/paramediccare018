@@ -969,6 +969,123 @@ async def send_booking_sms(
     }
 
 
+# Endpoint for driver to reject a booking assignment
+class BookingRejectionRequest(BaseModel):
+    reason_code: str
+    reason_label: str
+    notes: Optional[str] = None
+
+@api_router.post("/bookings/{booking_id}/reject")
+async def reject_booking_assignment(
+    booking_id: str,
+    rejection: BookingRejectionRequest,
+    user: dict = Depends(require_roles([UserRole.DRIVER, UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Driver rejects/declines a booking assignment - returns it to unassigned"""
+    # Find booking
+    booking = await db.bookings.find_one({"id": booking_id})
+    if not booking:
+        booking = await db.patient_bookings.find_one({"id": booking_id})
+    
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    # Only assigned bookings can be rejected by drivers
+    if user.get("role") == "driver":
+        if booking.get("assigned_driver") != user["id"]:
+            raise HTTPException(status_code=403, detail="You are not assigned to this booking")
+    
+    # Store rejection record
+    rejection_record = {
+        "id": str(uuid.uuid4()),
+        "booking_id": booking_id,
+        "rejected_by": user["id"],
+        "rejected_by_name": user.get("full_name", "Unknown"),
+        "rejected_at": datetime.now(timezone.utc).isoformat(),
+        "reason_code": rejection.reason_code,
+        "reason_label": rejection.reason_label,
+        "notes": rejection.notes,
+        "previous_driver": booking.get("assigned_driver"),
+        "previous_driver_name": booking.get("assigned_driver_name")
+    }
+    await db.booking_rejections.insert_one(rejection_record)
+    
+    # Update booking - remove driver assignment and revert to pending/confirmed
+    collection = db.bookings if await db.bookings.find_one({"id": booking_id}) else db.patient_bookings
+    
+    update_data = {
+        "assigned_driver": None,
+        "assigned_driver_name": None,
+        "vehicle_id": None,
+        "status": "pending" if booking.get("status") in ["assigned", "confirmed"] else booking.get("status"),
+        "rejection_count": (booking.get("rejection_count", 0) or 0) + 1,
+        "last_rejection": rejection_record,
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await collection.update_one({"id": booking_id}, {"$set": update_data})
+    
+    # Log the rejection
+    logger.info(f"Booking {booking_id} rejected by {user.get('full_name')} - Reason: {rejection.reason_label}")
+    
+    # Notify admin about rejection
+    internal_body = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; padding: 20px;">
+        <h2 style="color: #dc2626;">⚠️ Vožnja odbijena od strane vozača</h2>
+        <table style="border-collapse: collapse; margin-top: 20px;">
+            <tr>
+                <td style="padding: 8px; font-weight: bold;">Pacijent:</td>
+                <td style="padding: 8px;">{booking.get('patient_name')}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; font-weight: bold;">Datum:</td>
+                <td style="padding: 8px;">{booking.get('booking_date')} {booking.get('pickup_time', '')}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; font-weight: bold;">Vozač:</td>
+                <td style="padding: 8px;">{user.get('full_name')}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; font-weight: bold;">Razlog:</td>
+                <td style="padding: 8px; color: #dc2626;">{rejection.reason_label}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; font-weight: bold;">Napomena:</td>
+                <td style="padding: 8px;">{rejection.notes or '-'}</td>
+            </tr>
+        </table>
+        <p style="margin-top: 20px; color: #666;">
+            Rezervacija je vraćena na listu nedodeljenih i čeka novog vozača.
+        </p>
+    </body>
+    </html>
+    """
+    await send_email(TRANSPORT_EMAIL, f"⚠️ Vožnja odbijena - {booking.get('patient_name')}", internal_body)
+    
+    return {
+        "success": True,
+        "message": "Booking rejected successfully",
+        "booking_id": booking_id,
+        "rejection_id": rejection_record["id"]
+    }
+
+
+# Endpoint to get rejection history for a booking
+@api_router.get("/bookings/{booking_id}/rejections")
+async def get_booking_rejections(
+    booking_id: str,
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Get rejection history for a booking"""
+    rejections = await db.booking_rejections.find(
+        {"booking_id": booking_id},
+        {"_id": 0}
+    ).sort("rejected_at", -1).to_list(50)
+    
+    return rejections
+
+
 # Endpoint to send pickup reminders for upcoming bookings
 @api_router.post("/admin/send-pickup-reminders")
 async def send_pickup_reminders(
