@@ -76,6 +76,7 @@ import {
 import { toast } from 'sonner';
 import axios from 'axios';
 import { diagnoses as diagnosesData, searchDiagnoses } from '../data/diagnoses';
+import DriverRejectionModal from '../components/DriverRejectionModal';
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
