@@ -923,7 +923,6 @@ async def get_staff(user: dict = Depends(require_roles([UserRole.ADMIN, UserRole
 
 
 # Endpoint to manually send SMS to a booking's contact
-# Endpoint to manually send SMS to a booking's contact
 @api_router.post("/bookings/{booking_id}/send-sms")
 async def send_booking_sms(
     booking_id: str,
