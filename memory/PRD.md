@@ -3,6 +3,10 @@
 ## Overview
 A comprehensive medical transport system including a public website, patient portal, real-time mobile applications (PWA) for admins, drivers, and medical staff, invoice management, location tracking, live map, staff availability management, EMR-style medical dashboard, and vehicle-centric team assignment module.
 
+## Super Admin Credentials
+- **Email:** vladanmitic@gmail.com
+- **Password:** Ipponluka_78
+
 ## Core Features Implemented
 
 ### Public Website & Booking
@@ -16,10 +20,12 @@ A comprehensive medical transport system including a public website, patient por
 - Staff/team management
 - Booking management (pending/active/completed)
 - Invoice generation
+- Gantt Schedule View with drag-and-drop rescheduling
+- Booking Calendar (monthly view)
 
 ### PWA (Progressive Web App)
 - Unified role-aware mobile app at `/app` route
-- Driver view: task acceptance, navigation, status updates
+- Driver view: task acceptance, navigation, status updates, rejection with reason
 - Admin view: booking overview, driver assignment
 - Medical view: vitals recording, patient info
 - Push notifications (iOS 16.4+ and Android)
@@ -30,13 +36,31 @@ A comprehensive medical transport system including a public website, patient por
 - Real-time transport monitoring
 - Transport timeline with event log
 - Vitals recording
-- **Patient Diagnoses Management (NEW Jan 28, 2026):** ICD-10 diagnoses with typeahead search, bilingual support (EN/SR), displayed alongside medications in two-column layout
+- Doctor Decision Panel - live instructions to transport team
+- Patient Diagnoses Management (ICD-10 with typeahead search)
 
-### Backend Architecture
+### Email & SMS Notifications
+- Booking confirmation emails
+- Driver assignment notifications
+- Transport completion alerts
+- Super Admin settings UI for SMTP configuration
+
+### Backend Architecture (Refactored Feb 3, 2026)
 - FastAPI backend with modular route structure
-- MongoDB database
+- MongoDB database with optimized indexes
 - WebSocket for real-time updates
-- Partially refactored into modules (auth.py, fleet.py)
+
+**Extracted Routers:**
+| Router | Lines | Purpose |
+|--------|-------|---------|
+| auth.py | 263 | Authentication |
+| bookings.py | 395 | Booking CRUD, SMS, rejection |
+| fleet.py | 935 | Vehicle management |
+| medical.py | 880 | Vitals, diagnoses, decisions |
+| notifications.py | 485 | SMS/Email settings |
+| schedule.py | 848 | Timeline scheduling |
+
+**server.py:** 3,874 lines (reduced from 5,800+)
 
 ## Recent Bug Fixes (January 27, 2026)
 
