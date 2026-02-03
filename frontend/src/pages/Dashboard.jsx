@@ -79,6 +79,7 @@ import InvoiceManager from '../components/InvoiceManager';
 import AdminLiveMap from '../components/AdminLiveMap';
 import SMSSettings from '../components/SMSSettings';
 import EmailSettings from '../components/EmailSettings';
+import GanttScheduleView from '../components/GanttScheduleView';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
