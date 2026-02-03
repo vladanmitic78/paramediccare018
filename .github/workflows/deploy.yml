@@ -1,12 +1,10 @@
 name: Deploy to Hetzner
 
 on:
-  # Auto-deploy on push to main
   push:
     branches:
       - main
   
-  # Manual deploy button (Actions tab → Run workflow)
   workflow_dispatch:
     inputs:
       confirm:
@@ -34,11 +32,16 @@ jobs:
             # Remove emergentintegrations (not available on production)
             sed -i '/emergentintegrations/d' backend/requirements.txt
             
-            # Rebuild containers
-            sudo docker-compose down
+            # Stop containers but KEEP volumes (don't use 'down -v')
+            sudo docker-compose stop
+            
+            # Remove only containers, not volumes
+            sudo docker-compose rm -f
+            
+            # Rebuild and start (volumes are preserved)
             sudo docker-compose up -d --build
             
-            # Update main nginx config for compression
+            # Update nginx config
             sudo tee /etc/nginx/sites-available/paramedic-care018 > /dev/null << 'NGINXCONF'
             server {
                 listen 80;
@@ -82,6 +85,7 @@ jobs:
                     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
                     proxy_set_header X-Forwarded-Proto $scheme;
                     proxy_read_timeout 300s;
+                    client_max_body_size 50M;
                 }
 
                 location /ws {
@@ -95,7 +99,8 @@ jobs:
             }
             NGINXCONF
             
-            # Reload nginx
             sudo nginx -t && sudo systemctl reload nginx
             
             echo "Deployment completed at $(date)"
+            echo "MongoDB data: PRESERVED"
+            echo "Uploads data: PRESERVED"
