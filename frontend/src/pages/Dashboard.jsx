@@ -710,6 +710,7 @@ const Dashboard = () => {
       label: language === 'sr' ? 'Dispečerski centar' : 'Dispatch Center',
       items: [
         { id: 'vehicles', icon: Ambulance, label: language === 'sr' ? 'Vozila & Rezervacije' : 'Vehicles & Bookings' },
+        { id: 'gantt-schedule', icon: Calendar, label: language === 'sr' ? 'Raspored (Gantt)' : 'Schedule (Gantt)' },
         { id: 'fleet-history', icon: Clock, label: language === 'sr' ? 'Istorija' : 'History' },
         { id: 'livemap', icon: Map, label: language === 'sr' ? 'Praćenje vozila' : 'Live Tracking' },
       ]
