@@ -387,6 +387,10 @@ const UnifiedPWA = () => {
   const [loadingDiagnoses, setLoadingDiagnoses] = useState(false);
   const [savingDiagnosis, setSavingDiagnosis] = useState(false);
   
+  // Driver rejection modal state
+  const [showRejectionModal, setShowRejectionModal] = useState(false);
+  const [rejectionBooking, setRejectionBooking] = useState(null);
+  
   // Role checks
   const isDriver = user?.role === 'driver';
   const isMedical = ['doctor', 'nurse'].includes(user?.role);
