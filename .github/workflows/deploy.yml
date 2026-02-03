@@ -1,0 +1,32 @@
+name: Deploy to Hetzner
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 46.225.75.191
+          username: deploy
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          script: |
+            cd /opt/paramedic-care
+            
+            # Pull latest code
+            git fetch origin
+            git reset --hard origin/main
+            
+            # Remove emergentintegrations (not available on production)
+            sed -i '/emergentintegrations/d' backend/requirements.txt
+            
+            # Rebuild and restart containers
+            sudo docker-compose down
+            sudo docker-compose up -d --build
+            
+            echo "Deployment completed at $(date)"
