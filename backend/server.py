@@ -83,6 +83,7 @@ from services.sms_service import SMSService, SMSConfig, SMSProvider, SMSTemplate
 # Import extracted routers
 from routes.fleet import router as fleet_router
 from routes.schedule import router as schedule_router
+from routes.notifications import router as notifications_router, send_sms_notification, send_booking_email_notification
 
 # Create the main app
 app = FastAPI(title="Paramedic Care 018 API")
@@ -91,6 +92,7 @@ api_router = APIRouter(prefix="/api")
 # Include extracted routers
 api_router.include_router(fleet_router)
 api_router.include_router(schedule_router)
+api_router.include_router(notifications_router)
 
 # WebSocket connection manager instance
 manager = ConnectionManager()
