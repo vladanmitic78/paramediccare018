@@ -77,6 +77,15 @@ import { toast } from 'sonner';
 import axios from 'axios';
 import { diagnoses as diagnosesData, searchDiagnoses } from '../data/diagnoses';
 import DriverRejectionModal from '../components/DriverRejectionModal';
+// PWA-specific hooks extracted to separate file
+import { 
+  usePushNotifications, 
+  usePWAManifest, 
+  useWakeLock, 
+  useStatePersistence, 
+  getPersistedState 
+} from '../hooks/usePWAHooks';
+
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
