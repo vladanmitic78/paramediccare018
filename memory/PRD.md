@@ -262,12 +262,13 @@ A comprehensive medical transport system including a public website, patient por
 - [x] Fix logout on refresh issue - Extended session duration
 - [x] Patient Diagnoses Management - ICD-10 diagnoses with typeahead search (Jan 28, 2026)
 - [x] Email Notifications System - Booking event notifications with Super Admin settings UI (Jan 28, 2026)
+- [x] Timeline-Based Vehicle Scheduling - Phase 4: Admin Gantt View (Feb 3, 2026)
+- [x] Backend refactoring - Extracted notifications router (Feb 3, 2026)
 
 ### P1 - High Priority
-- [ ] Timeline-Based Vehicle Scheduling - Phase 4: Admin Gantt View
 - [ ] Continue backend refactoring (extract medical, driver, users, bookings routes from server.py)
 - [ ] Doctor Decision Panel - live instructions from Medical Dashboard
-- [ ] Refactor UnifiedPWA.jsx (~2,200 lines) into smaller components
+- [ ] Refactor UnifiedPWA.jsx (~3,000 lines) into smaller components
 - [ ] Add more SMS triggers ("Driver on way", "Transport completed")
 
 ### P2 - Medium Priority
@@ -275,6 +276,37 @@ A comprehensive medical transport system including a public website, patient por
 - [ ] Persist sidebar state with localStorage
 - [ ] Driver rejection reason modal
 - [ ] Migrate image storage to persistent cloud (S3)
+
+## Gantt Schedule View (Feb 3, 2026)
+
+**Component: `GanttScheduleView.jsx`**
+- Weekly timeline view for vehicle scheduling
+- Features:
+  - Week navigation (previous/next/today)
+  - Vehicles displayed as rows
+  - Unassigned bookings row at top
+  - Time scale: 6:00 AM - 10:00 PM
+  - Current time indicator (red line)
+  - Status filter dropdown
+  - Zoom controls (50%-200%)
+  - Color-coded booking blocks by status
+  - Click booking for detail popup
+  - Status legend at bottom
+
+**Location:** Dashboard → Dispečerski centar → Raspored (Gantt)
+
+## Backend Refactoring (Feb 3, 2026)
+
+**Extracted Routers:**
+| Router | File | Endpoints |
+|--------|------|-----------|
+| notifications | `routes/notifications.py` | SMS & Email settings, logs, test |
+
+**Helper Functions Exported:**
+- `send_sms_notification(phone, message, booking_id)` - Send SMS via configured provider
+- `send_booking_email_notification(booking, type, extra_data)` - Send email for booking events
+
+**server.py Status:** Reduced from 5,885 to 5,419 lines (466 lines extracted)
 
 ## Email Notification System (Jan 28, 2026)
 
