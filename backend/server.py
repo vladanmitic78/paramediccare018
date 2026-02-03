@@ -85,6 +85,7 @@ from routes.fleet import router as fleet_router
 from routes.schedule import router as schedule_router
 from routes.notifications import router as notifications_router, send_sms_notification, send_booking_email_notification
 from routes.medical import router as medical_router
+from routes.bookings import router as bookings_router
 
 # Create the main app
 app = FastAPI(title="Paramedic Care 018 API")
