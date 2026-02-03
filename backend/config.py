@@ -11,8 +11,8 @@ import logging
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# Create uploads directory
-UPLOADS_DIR = ROOT_DIR / 'uploads'
+# Create uploads directory - use /app/uploads for Docker volume mount
+UPLOADS_DIR = Path('/app/uploads')
 UPLOADS_DIR.mkdir(exist_ok=True)
 
 # MongoDB connection
