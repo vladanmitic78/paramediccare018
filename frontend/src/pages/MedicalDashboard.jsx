@@ -66,6 +66,7 @@ import {
 import { toast } from 'sonner';
 import axios from 'axios';
 import VitalSignsHistory from '../components/VitalSignsHistory';
+import DoctorDecisionPanel from '../components/DoctorDecisionPanel';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
