@@ -988,14 +988,14 @@ const Dashboard = () => {
             <GanttScheduleView language={language} />
           )}
 
+          {/* Booking Calendar View */}
+          {activeTab === 'booking-calendar' && isAdmin() && (
+            <BookingCalendarView language={language} />
+          )}
+
           {/* Fleet History */}
           {activeTab === 'fleet-history' && isAdmin() && (
             <FleetHistory language={language} />
-          )}
-
-          {/* Booking Calendar */}
-          {activeTab === 'calendar' && isAdmin() && (
-            <BookingCalendar />
           )}
 
           {/* CMS - Page Management */}
