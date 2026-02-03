@@ -1036,6 +1036,11 @@ const MedicalDashboard = () => {
           </div>
         )}
         
+        {/* Doctor Decision Panel */}
+        {activeTab === 'decisions' && (
+          <DoctorDecisionPanel language={language} />
+        )}
+        
         {/* Alerts */}
         {activeTab === 'alerts' && (
           <CriticalAlertsPanel language={language} darkMode={darkMode} embedded={true} />
