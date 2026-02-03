@@ -34,8 +34,10 @@ class TestAuthSetup:
         })
         assert response.status_code == 200, f"Superadmin login failed: {response.text}"
         data = response.json()
-        assert "token" in data, "No token in response"
-        return data["token"]
+        # API returns access_token, not token
+        token = data.get("access_token") or data.get("token")
+        assert token, f"No token in response: {data.keys()}"
+        return token
     
     @pytest.fixture(scope="class")
     def doctor_token(self):
@@ -47,7 +49,7 @@ class TestAuthSetup:
         if response.status_code != 200:
             pytest.skip(f"Doctor login failed: {response.text}")
         data = response.json()
-        return data.get("token")
+        return data.get("access_token") or data.get("token")
     
     @pytest.fixture(scope="class")
     def auth_headers(self, superadmin_token):
