@@ -265,10 +265,12 @@ A comprehensive medical transport system including a public website, patient por
 - [x] Timeline-Based Vehicle Scheduling - Phase 4: Admin Gantt View with Drag-and-Drop (Feb 3, 2026)
 - [x] Backend refactoring - Extracted notifications & medical routers (Feb 3, 2026)
 - [x] Doctor Decision Panel - Live instructions from Medical Dashboard (Feb 3, 2026)
+- [x] Backend refactoring - Extracted bookings router (Feb 3, 2026)
+- [x] PWA refactoring - Extracted PWA hooks to separate file (Feb 3, 2026)
 
 ### P1 - High Priority
-- [ ] Continue backend refactoring (extract driver, bookings routes from server.py)
-- [ ] Refactor UnifiedPWA.jsx (~3,000 lines) into smaller components
+- [ ] Continue backend refactoring (extract driver, patient, admin routes from server.py)
+- [ ] Continue PWA refactoring (extract VitalsModal, booking card components)
 - [ ] Add more SMS triggers ("Driver on way", "Transport completed")
 
 ### P2 - Medium Priority
