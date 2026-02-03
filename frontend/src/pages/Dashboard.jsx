@@ -80,6 +80,7 @@ import AdminLiveMap from '../components/AdminLiveMap';
 import SMSSettings from '../components/SMSSettings';
 import EmailSettings from '../components/EmailSettings';
 import GanttScheduleView from '../components/GanttScheduleView';
+import BookingCalendarView from '../components/BookingCalendarView';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
