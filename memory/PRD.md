@@ -272,9 +272,7 @@ A comprehensive medical transport system including a public website, patient por
 - [ ] Add more SMS triggers ("Driver on way", "Transport completed")
 
 ### P2 - Medium Priority
-- [ ] Calendar view for bookings (`OPERACIJE -> Kalendar`)
 - [ ] Persist sidebar state with localStorage
-- [ ] Driver rejection reason modal
 - [ ] Migrate image storage to persistent cloud (S3)
 
 ## Gantt Schedule View (Feb 3, 2026)
