@@ -937,7 +937,7 @@ const StaffAvailabilityCalendar = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="self">{language === 'sr' ? 'Za sebe' : 'For myself'}</SelectItem>
-                    {staffList.map(staff => (
+                    {(staffList || []).map(staff => (
                       <SelectItem key={staff.id} value={staff.id}>
                         {staff.full_name} ({ROLE_CONFIG[staff.role]?.[language === 'sr' ? 'label_sr' : 'label_en'] || staff.role})
                       </SelectItem>
