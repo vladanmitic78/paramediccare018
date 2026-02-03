@@ -2947,6 +2947,15 @@ const UnifiedPWA = () => {
           </div>
         </div>
       )}
+      
+      {/* Driver Rejection Modal */}
+      <DriverRejectionModal
+        open={showRejectionModal}
+        onOpenChange={setShowRejectionModal}
+        booking={rejectionBooking}
+        language={language}
+        onRejected={handleRejectionComplete}
+      />
     </div>
   );
 };
