@@ -6,10 +6,8 @@ services:
     restart: always
     volumes:
       - mongodb_data:/data/db
-    environment:
-      MONGO_INITDB_DATABASE: paramedic_care_018
     networks:
-      - paramedic-network
+      - app-network
 
   backend:
     build: ./backend
@@ -19,26 +17,33 @@ services:
     environment:
       - MONGO_URL=mongodb://mongodb:27017
       - DB_NAME=paramedic_care_018
-      - JWT_SECRET=${JWT_SECRET:-change-this-to-secure-random-string}
+      - JWT_SECRET=ParamedicCare018SecureKey2026xK9mP2vL8nQ4wR7
     depends_on:
       - mongodb
+    volumes:
+      # Persist uploaded files
+      - uploads_data:/app/uploads
     networks:
-      - paramedic-network
+      - app-network
 
   frontend:
     build:
       context: ./frontend
       args:
-        REACT_APP_BACKEND_URL: https://paramedic-care018.rs
+        - REACT_APP_BACKEND_URL=https://paramedic-care018.rs
     restart: always
     ports:
       - "3000:3000"
     networks:
-      - paramedic-network
+      - app-network
 
 volumes:
+  # These volumes persist data across deployments
   mongodb_data:
+    name: paramedic_mongodb_data
+  uploads_data:
+    name: paramedic_uploads_data
 
 networks:
-  paramedic-network:
+  app-network:
     driver: bridge
