@@ -930,6 +930,8 @@ async def send_pickup_reminders(
     user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
 ):
     """Send pickup reminders for bookings starting within specified minutes"""
+    now = datetime.now(timezone.utc)
+    
     # Find confirmed bookings with pickup time within the window
     bookings = await db.bookings.find({
         "status": {"$in": ["confirmed", "assigned"]},
