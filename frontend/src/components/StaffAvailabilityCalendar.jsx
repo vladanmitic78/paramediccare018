@@ -175,7 +175,7 @@ const StaffAvailabilityCalendar = () => {
         : `${API}/staff/availability?${params}`;
       
       const response = await axios.get(endpoint);
-      setAvailability(response.data);
+      setAvailability(response.data || []);
     } catch (error) {
       console.error('Error fetching availability:', error);
       toast.error(language === 'sr' ? 'Greška pri učitavanju' : 'Error loading data');
