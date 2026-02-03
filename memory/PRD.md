@@ -262,12 +262,12 @@ A comprehensive medical transport system including a public website, patient por
 - [x] Fix logout on refresh issue - Extended session duration
 - [x] Patient Diagnoses Management - ICD-10 diagnoses with typeahead search (Jan 28, 2026)
 - [x] Email Notifications System - Booking event notifications with Super Admin settings UI (Jan 28, 2026)
-- [x] Timeline-Based Vehicle Scheduling - Phase 4: Admin Gantt View (Feb 3, 2026)
-- [x] Backend refactoring - Extracted notifications router (Feb 3, 2026)
+- [x] Timeline-Based Vehicle Scheduling - Phase 4: Admin Gantt View with Drag-and-Drop (Feb 3, 2026)
+- [x] Backend refactoring - Extracted notifications & medical routers (Feb 3, 2026)
+- [x] Doctor Decision Panel - Live instructions from Medical Dashboard (Feb 3, 2026)
 
 ### P1 - High Priority
-- [ ] Continue backend refactoring (extract medical, driver, users, bookings routes from server.py)
-- [ ] Doctor Decision Panel - live instructions from Medical Dashboard
+- [ ] Continue backend refactoring (extract driver, bookings routes from server.py)
 - [ ] Refactor UnifiedPWA.jsx (~3,000 lines) into smaller components
 - [ ] Add more SMS triggers ("Driver on way", "Transport completed")
 
