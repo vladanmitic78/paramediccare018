@@ -6,6 +6,7 @@ from .fleet import router as fleet_router
 from .schedule import router as schedule_router
 from .notifications import router as notifications_router, send_sms_notification, send_booking_email_notification
 from .medical import router as medical_router
+from .bookings import router as bookings_router
 
 __all__ = [
     'auth_router', 
@@ -13,6 +14,7 @@ __all__ = [
     'schedule_router',
     'notifications_router',
     'medical_router',
+    'bookings_router',
     'send_sms_notification',
     'send_booking_email_notification'
 ]
