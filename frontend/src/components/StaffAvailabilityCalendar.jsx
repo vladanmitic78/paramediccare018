@@ -407,7 +407,7 @@ const StaffAvailabilityCalendar = () => {
   const getCoverageStats = (date) => {
     const slots = getSlotsForDate(date);
     const available = slots.filter(s => s.status === 'available').length;
-    const total = staffList.length || uniqueStaffFromAvailability.length;
+    const total = (staffList || []).length || (uniqueStaffFromAvailability || []).length;
     return { available, total };
   };
 
