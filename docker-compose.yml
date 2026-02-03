@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7
+    restart: always
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: paramedic_care_018
+    networks:
+      - paramedic-network
+
+  backend:
+    build: ./backend
+    restart: always
+    ports:
+      - "8001:8001"
+    environment:
+      - MONGO_URL=mongodb://mongodb:27017
+      - DB_NAME=paramedic_care_018
+      - JWT_SECRET=${JWT_SECRET:-change-this-to-secure-random-string}
+    depends_on:
+      - mongodb
+    networks:
+      - paramedic-network
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        REACT_APP_BACKEND_URL: https://paramedic-care018.rs
+    restart: always
+    ports:
+      - "3000:3000"
+    networks:
+      - paramedic-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  paramedic-network:
+    driver: bridge
