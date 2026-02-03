@@ -280,7 +280,7 @@ const StaffAvailabilityCalendar = () => {
   // Get slots for a specific date
   const getSlotsForDate = (date) => {
     const dateStr = formatDate(date);
-    return availability.filter(slot => slot.date === dateStr);
+    return (availability || []).filter(slot => slot.date === dateStr);
   };
 
   // Get unique staff members from availability data
