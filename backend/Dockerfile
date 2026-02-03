@@ -1,12 +1,8 @@
-# Backend Dockerfile for Paramedic Care 018
 FROM python:3.11-slim
-
 WORKDIR /app
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y gcc && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for caching
 COPY requirements.txt .
@@ -15,8 +11,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
-# Expose port
+# Make start script executable
+RUN chmod +x start.sh
+
+# Create uploads directory
+RUN mkdir -p /app/uploads
+
 EXPOSE 8001
 
-# Run the application
-CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8001"]
+# Run startup script (initializes DB then starts server)
+CMD ["./start.sh"]
