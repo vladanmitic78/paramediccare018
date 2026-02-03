@@ -308,15 +308,31 @@ A comprehensive medical transport system including a public website, patient por
 ## Backend Refactoring (Feb 3, 2026)
 
 **Extracted Routers:**
-| Router | File | Endpoints |
-|--------|------|-----------|
-| notifications | `routes/notifications.py` | SMS & Email settings, logs, test |
+| Router | File | Lines | Endpoints |
+|--------|------|-------|-----------|
+| notifications | `routes/notifications.py` | 485 | SMS & Email settings, logs, test |
+| medical | `routes/medical.py` | 880 | Vitals, diagnoses, decisions, patient medical |
+| bookings | `routes/bookings.py` | 395 | Booking CRUD, SMS, rejection |
+| fleet | `routes/fleet.py` | 935 | Vehicle management |
+| schedule | `routes/schedule.py` | 848 | Timeline scheduling |
+| auth | `routes/auth.py` | 263 | Authentication |
 
 **Helper Functions Exported:**
 - `send_sms_notification(phone, message, booking_id)` - Send SMS via configured provider
 - `send_booking_email_notification(booking, type, extra_data)` - Send email for booking events
 
-**server.py Status:** Reduced from 5,885 to 5,419 lines (466 lines extracted)
+**server.py Status:** Reduced from 4,229 to 3,877 lines (352 lines extracted in this session)
+
+## PWA Refactoring (Feb 3, 2026)
+
+**Extracted Hooks to `/app/frontend/src/hooks/usePWAHooks.js`:**
+- `usePushNotifications()` - Push notification permission and service worker
+- `usePWAManifest()` - PWA manifest and theme color management  
+- `useWakeLock(enabled)` - Keep screen on during transport
+- `useStatePersistence(key, state, enabled)` - Persist state through phone calls
+- `getPersistedState(key)` - Restore persisted state
+
+**UnifiedPWA.jsx Status:** Reduced from 3,051 to 2,895 lines (156 lines extracted)
 
 ## Email Notification System (Jan 28, 2026)
 
