@@ -96,6 +96,7 @@ api_router.include_router(fleet_router)
 api_router.include_router(schedule_router)
 api_router.include_router(notifications_router)
 api_router.include_router(medical_router)
+api_router.include_router(bookings_router)
 
 # WebSocket connection manager instance
 manager = ConnectionManager()
