@@ -226,14 +226,14 @@ export const MapPicker = ({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" style={{ position: 'relative', zIndex: 10 }}>
       <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
         <MapPin className={`w-4 h-4 ${markerColor === 'green' ? 'text-emerald-500' : 'text-red-500'}`} />
         {label}
       </label>
       
       {/* Search Input with Autocomplete */}
-      <div className="relative">
+      <div className="relative" style={{ zIndex: 9999 }}>
         <div className="flex gap-2">
           <div className="relative flex-1" ref={inputRef}>
             <Input
