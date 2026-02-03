@@ -496,6 +496,7 @@ const MedicalDashboard = () => {
             { id: 'dashboard', icon: Activity, label: language === 'sr' ? 'Pregled' : 'Overview' },
             { id: 'patients', icon: Users, label: language === 'sr' ? 'Pacijenti' : 'Patients' },
             { id: 'transports', icon: Ambulance, label: language === 'sr' ? 'Transporti' : 'Transports' },
+            { id: 'decisions', icon: Stethoscope, label: language === 'sr' ? 'Odluke' : 'Decisions' },
             { id: 'alerts', icon: AlertTriangle, label: language === 'sr' ? 'Upozorenja' : 'Alerts' }
           ].map(tab => (
             <Button
