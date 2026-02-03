@@ -280,7 +280,7 @@ A comprehensive medical transport system including a public website, patient por
 ## Gantt Schedule View (Feb 3, 2026)
 
 **Component: `GanttScheduleView.jsx`**
-- Weekly timeline view for vehicle scheduling
+- Weekly timeline view for vehicle scheduling with **drag-and-drop rescheduling**
 - Features:
   - Week navigation (previous/next/today)
   - Vehicles displayed as rows
@@ -292,6 +292,16 @@ A comprehensive medical transport system including a public website, patient por
   - Color-coded booking blocks by status
   - Click booking for detail popup
   - Status legend at bottom
+  - **Drag-and-drop**: Move bookings between vehicles/days
+  - **Confirmation modal**: Verify before rescheduling
+  - **Visual feedback**: Drop zones highlight when dragging
+
+**Drag-and-Drop Implementation:**
+- Uses @dnd-kit library (already installed)
+- `DraggableBooking` component for draggable booking blocks
+- `DroppableCell` component for vehicle/day drop zones
+- Confirmation modal before API update
+- Only pending/confirmed/assigned bookings can be dragged
 
 **Location:** Dashboard → Dispečerski centar → Raspored (Gantt)
 
