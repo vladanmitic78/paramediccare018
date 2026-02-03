@@ -777,18 +777,16 @@ const UnifiedPWA = () => {
 
   const rejectAssignment = async () => {
     if (!assignment) return;
-    setUpdatingStatus(true);
-    try {
-      await axios.post(`${API}/api/driver/reject-assignment/${assignment.id}`);
-      toast.success(language === 'sr' ? 'Zadatak odbijen' : 'Task rejected');
-      setAssignment(null);
-      prevAssignmentRef.current = null;
-      fetchData();
-    } catch (error) {
-      toast.error(language === 'sr' ? 'Greška' : 'Error');
-    } finally {
-      setUpdatingStatus(false);
-    }
+    // Open rejection modal with reason selection
+    setRejectionBooking(assignment);
+    setShowRejectionModal(true);
+  };
+  
+  const handleRejectionComplete = () => {
+    setAssignment(null);
+    prevAssignmentRef.current = null;
+    setRejectionBooking(null);
+    fetchData();
   };
 
   const updateDriverStatus = async (newStatus) => {
