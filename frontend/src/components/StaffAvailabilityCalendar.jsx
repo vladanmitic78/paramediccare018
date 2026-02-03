@@ -189,7 +189,7 @@ const StaffAvailabilityCalendar = () => {
     if (!isAdmin()) return;
     try {
       const response = await axios.get(`${API}/admin/staff-list`);
-      setStaffList(response.data);
+      setStaffList(response.data || []);
     } catch (error) {
       console.error('Error fetching staff:', error);
     }
