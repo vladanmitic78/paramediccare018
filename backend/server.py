@@ -1842,7 +1842,7 @@ async def create_invoice(
         try:
             parsed_due_date = datetime.fromisoformat(due_date.replace('Z', '+00:00'))
             due_date_iso = parsed_due_date.isoformat()
-        except:
+        except ValueError:
             due_date_iso = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
     else:
         due_date_iso = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
