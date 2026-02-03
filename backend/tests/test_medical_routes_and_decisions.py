@@ -386,7 +386,7 @@ class TestDoctorDecisionPanel(TestAuthSetup):
         assert data["decision_type"] == "alert"
         assert data["priority"] == "urgent"
         
-        print(f"✓ Created alert decision")
+        print("✓ Created alert decision")
     
     def test_get_booking_decisions(self, auth_headers, test_booking_id):
         """Should get all decisions for a booking"""
@@ -423,7 +423,7 @@ class TestDoctorDecisionPanel(TestAuthSetup):
         data = response.json()
         assert data.get("success") == True, "Acknowledge not successful"
         
-        print(f"✓ Decision acknowledged")
+        print("✓ Decision acknowledged")
     
     def test_acknowledge_decision_multiple_times(self, auth_headers, test_decision_id):
         """Should handle multiple acknowledgments (same user)"""
@@ -432,7 +432,7 @@ class TestDoctorDecisionPanel(TestAuthSetup):
                                headers=auth_headers)
         assert response.status_code == 200, f"Second acknowledge failed: {response.text}"
         
-        print(f"✓ Multiple acknowledgments handled correctly")
+        print("✓ Multiple acknowledgments handled correctly")
     
     def test_execute_decision(self, auth_headers, test_decision_id):
         """Should execute a decision"""
@@ -444,7 +444,7 @@ class TestDoctorDecisionPanel(TestAuthSetup):
         data = response.json()
         assert data.get("success") == True, "Execute not successful"
         
-        print(f"✓ Decision executed")
+        print("✓ Decision executed")
     
     def test_cancel_decision(self, auth_headers, test_booking_id):
         """Should cancel a decision"""
@@ -470,7 +470,7 @@ class TestDoctorDecisionPanel(TestAuthSetup):
         data = response.json()
         assert data.get("success") == True, "Cancel not successful"
         
-        print(f"✓ Decision cancelled")
+        print("✓ Decision cancelled")
     
     def test_decision_not_found(self, auth_headers):
         """Should return 404 for non-existent decision"""
@@ -478,7 +478,7 @@ class TestDoctorDecisionPanel(TestAuthSetup):
                                headers=auth_headers)
         assert response.status_code == 404, f"Expected 404, got {response.status_code}"
         
-        print(f"✓ Non-existent decision returns 404")
+        print("✓ Non-existent decision returns 404")
 
 
 class TestMedicalChecks(TestAuthSetup):

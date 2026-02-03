@@ -108,7 +108,7 @@ class TestCalendarAndRejection:
             # Either booking_date or pickup_datetime should exist
             has_date = "booking_date" in booking or "pickup_datetime" in booking
             assert has_date, "Booking should have booking_date or pickup_datetime"
-            print(f"✓ Booking has required calendar fields: id, status, date")
+            print("✓ Booking has required calendar fields: id, status, date")
         else:
             print("⚠ No bookings to verify fields, skipping field check")
             
@@ -335,7 +335,7 @@ class TestCalendarViewComponent:
             assert "status" in booking
             assert booking["status"] in valid_statuses, f"Invalid status: {booking['status']}"
             
-        print(f"✓ All checked bookings have valid status field")
+        print("✓ All checked bookings have valid status field")
 
 
 if __name__ == "__main__":

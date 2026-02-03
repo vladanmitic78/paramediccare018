@@ -218,7 +218,7 @@ class ConnectionManager:
     async def connect_admin(self, websocket: WebSocket):
         await websocket.accept()
         self.admin_connections.append(websocket)
-        logger.info(f"Admin connected to live map")
+        logger.info("Admin connected to live map")
     
     def disconnect_driver(self, driver_id: str):
         if driver_id in self.active_connections:
@@ -228,7 +228,7 @@ class ConnectionManager:
     def disconnect_admin(self, websocket: WebSocket):
         if websocket in self.admin_connections:
             self.admin_connections.remove(websocket)
-            logger.info(f"Admin disconnected from live map")
+            logger.info("Admin disconnected from live map")
     
     async def send_to_driver(self, driver_id: str, message: dict):
         if driver_id in self.active_connections:
@@ -2201,7 +2201,7 @@ def generate_invoice_pdf(invoice: dict) -> io.BytesIO:
     elements.append(Spacer(1, 10*mm))
     
     # Invoice title
-    elements.append(Paragraph(f"FAKTURA / INVOICE", title_style))
+    elements.append(Paragraph("FAKTURA / INVOICE", title_style))
     elements.append(Spacer(1, 5*mm))
     
     # Invoice number and dates

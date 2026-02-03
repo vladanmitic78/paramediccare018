@@ -188,7 +188,7 @@ class TestNotificationHelpers:
         
         for toggle in expected_toggles:
             assert toggle in data, f"Expected toggle {toggle} in email settings"
-        print(f"✓ All email notification toggles present")
+        print("✓ All email notification toggles present")
 
 
 if __name__ == "__main__":

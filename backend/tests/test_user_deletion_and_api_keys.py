@@ -70,7 +70,7 @@ class TestUserDeletion:
         users = users_response.json()
         
         test_user = next((u for u in users if u.get("email") == test_email), None)
-        assert test_user is not None, f"Test user not found in users list"
+        assert test_user is not None, "Test user not found in users list"
         test_user_id = test_user["id"]
         print(f"PASS: Found test user with ID {test_user_id}")
         

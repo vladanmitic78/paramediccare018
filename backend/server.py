@@ -1999,7 +1999,7 @@ def generate_invoice_pdf(invoice: dict) -> io.BytesIO:
     elements.append(Spacer(1, 10*mm))
     
     # Invoice title
-    elements.append(Paragraph(f"FAKTURA / INVOICE", title_style))
+    elements.append(Paragraph("FAKTURA / INVOICE", title_style))
     elements.append(Spacer(1, 5*mm))
     
     # Invoice number and dates

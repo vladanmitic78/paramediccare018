@@ -337,7 +337,7 @@ class TestEmailNotificationTriggers:
                 arriving_logs = [l for l in logs if l.get("notification_type") == "driver_arriving" and l.get("booking_id") == booking_id]
                 
                 if len(arriving_logs) > 0:
-                    print(f"✓ Status change to in_transit triggered driver_arriving email")
+                    print("✓ Status change to in_transit triggered driver_arriving email")
                 else:
                     print("✓ Status changed, driver_arriving email may be disabled")
             
@@ -384,7 +384,7 @@ class TestEmailNotificationTriggers:
                 completed_logs = [l for l in logs if l.get("notification_type") == "transport_completed" and l.get("booking_id") == booking_id]
                 
                 if len(completed_logs) > 0:
-                    print(f"✓ Booking completion triggered transport_completed email")
+                    print("✓ Booking completion triggered transport_completed email")
                 else:
                     print("✓ Booking completed, transport_completed email may be disabled")
             

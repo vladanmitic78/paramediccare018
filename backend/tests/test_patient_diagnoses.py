@@ -343,7 +343,7 @@ class TestDiagnosesDataIntegrity:
                 date1 = diagnoses[i].get("added_at", "")
                 date2 = diagnoses[i + 1].get("added_at", "")
                 assert date1 >= date2, f"Diagnoses should be sorted by date descending: {date1} >= {date2}"
-            print(f"✓ Diagnoses are sorted by date (newest first)")
+            print("✓ Diagnoses are sorted by date (newest first)")
         else:
             print("✓ Not enough diagnoses to verify sorting (need at least 2)")
 
