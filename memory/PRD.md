@@ -261,6 +261,7 @@ A comprehensive medical transport system including a public website, patient por
 - [x] Timeline-Based Vehicle Scheduling - Phase 3: Booking Flow Integration
 - [x] Fix logout on refresh issue - Extended session duration
 - [x] Patient Diagnoses Management - ICD-10 diagnoses with typeahead search (Jan 28, 2026)
+- [x] Forgot Password Feature - Email-based password reset flow (Feb 4, 2026)
 
 ### P1 - High Priority
 - [ ] Timeline-Based Vehicle Scheduling - Phase 4: Admin Gantt View
