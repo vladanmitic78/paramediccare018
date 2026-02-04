@@ -39,12 +39,77 @@ async def init_database():
     else:
         print("✓ Super Admin already exists")
     
+    # Seed page_content if empty (for images on Medical Care and Transport pages)
+    page_content_count = await db.page_content.count_documents({})
+    if page_content_count == 0:
+        print("Seeding page_content collection...")
+        
+        # Default page content with placeholder images
+        default_content = [
+            # Medical Care page - Team section
+            {
+                "page": "medical-care",
+                "section": "team",
+                "title_en": "Our Team of Professionals",
+                "title_sr": "Naš tim profesionalaca",
+                "content_en": "Our medical team consists of experienced professionals dedicated to providing the best possible care. Each team member undergoes regular training to stay up-to-date with the latest medical practices.",
+                "content_sr": "Naš medicinski tim se sastoji od iskusnih profesionalaca posvećenih pružanju najbolje moguće nege. Svaki član tima prolazi redovnu obuku kako bi bio u toku sa najnovijim medicinskim praksama.",
+                "image_url": "/api/uploads/20260203_203008_e923822e.jpg"
+            },
+            # Transport page - Fleet section
+            {
+                "page": "transport",
+                "section": "fleet",
+                "title_en": "Modern Vehicle Fleet",
+                "title_sr": "Moderna flota vozila",
+                "content_en": "Our ambulance fleet is equipped with the most modern medical equipment. All vehicles are air-conditioned and regularly serviced to ensure maximum comfort and safety for patients.",
+                "content_sr": "Naša flota sanitetskih vozila opremljena je najmodernijom medicinskom opremom. Sva vozila su klimatizovana i redovno servisirana kako bi se osigurao maksimalan komfor i bezbednost pacijenata.",
+                "image_url": "/api/uploads/20260203_203024_10a07490.jpg"
+            },
+            # Home page - Hero section
+            {
+                "page": "home",
+                "section": "hero",
+                "title_en": "Professional Medical Transport",
+                "title_sr": "Profesionalni medicinski transport",
+                "content_en": "24/7 emergency medical transport services with professional care",
+                "content_sr": "Hitne medicinske usluge transporta 24/7 sa profesionalnom negom",
+                "image_url": None
+            },
+            # Medical Care page - Services title
+            {
+                "page": "medical-care",
+                "section": "services-title",
+                "title_en": "Our Medical Services",
+                "title_sr": "Naše medicinske usluge",
+                "content_en": "We provide comprehensive medical care services",
+                "content_sr": "Pružamo sveobuhvatne medicinske usluge",
+                "image_url": None
+            },
+            # Transport page - Services title
+            {
+                "page": "transport",
+                "section": "services-title",
+                "title_en": "Our Transport Services",
+                "title_sr": "Naše usluge transporta",
+                "content_en": "Safe and reliable medical transport solutions",
+                "content_sr": "Bezbedna i pouzdana rešenja za medicinski transport",
+                "image_url": None
+            }
+        ]
+        
+        await db.page_content.insert_many(default_content)
+        print(f"✓ Seeded {len(default_content)} page_content documents")
+    else:
+        print(f"✓ page_content collection already has {page_content_count} documents")
+    
     # Create indexes for better performance
     await db.users.create_index("email", unique=True)
     await db.users.create_index("role")
     await db.bookings.create_index("status")
     await db.bookings.create_index("booking_date")
     await db.bookings.create_index([("created_at", -1)])
+    await db.page_content.create_index([("page", 1), ("section", 1)], unique=True)
     print("✓ Database indexes created")
     
     client.close()
