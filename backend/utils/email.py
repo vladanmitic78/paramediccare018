@@ -592,3 +592,84 @@ def get_transport_email_template(template_type: str, data: dict, language: str =
     
     # Default: return empty
     return "", ""
+
+
+def get_password_reset_email_template(full_name: str, reset_link: str, language: str = "sr"):
+    """
+    Generate email template for password reset requests
+    """
+    header = get_email_header()
+    footer = get_email_footer(language)
+    
+    if language == "sr":
+        subject = "Resetovanje lozinke - Paramedic Care 018"
+        body = f"""
+        <html>
+        <body style="font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background-color: #f1f5f9;">
+            {header}
+            <div style="padding: 30px; max-width: 600px; margin: 0 auto;">
+                <h1 style="color: #1e293b; margin-bottom: 10px;">Poštovani {full_name},</h1>
+                <p style="color: #475569; font-size: 16px; line-height: 1.6;">
+                    Primili smo zahtev za resetovanje lozinke za vaš nalog.
+                </p>
+                
+                <div style="background-color: #fef3c7; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
+                    <p style="color: #92400e; margin: 0 0 15px 0;">
+                        Kliknite na dugme ispod da resetujete vašu lozinku:
+                    </p>
+                    <a href="{reset_link}" style="display: inline-block; padding: 14px 28px; background-color: #0ea5e9; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                        Resetuj Lozinku
+                    </a>
+                </div>
+                
+                <div style="background-color: #f8fafc; border-radius: 8px; padding: 15px; margin: 20px 0;">
+                    <p style="color: #64748b; font-size: 13px; margin: 0;">
+                        <strong>Napomena:</strong> Ovaj link ističe za 1 sat. Ako niste zatražili resetovanje lozinke, možete ignorisati ovaj email.
+                    </p>
+                </div>
+                
+                <p style="color: #64748b; font-size: 13px; margin-top: 30px;">
+                    Za sva pitanja pozovite nas na <strong>+381 18 123 456</strong>
+                </p>
+            </div>
+            {footer}
+        </body>
+        </html>
+        """
+    else:
+        subject = "Password Reset - Paramedic Care 018"
+        body = f"""
+        <html>
+        <body style="font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background-color: #f1f5f9;">
+            {header}
+            <div style="padding: 30px; max-width: 600px; margin: 0 auto;">
+                <h1 style="color: #1e293b; margin-bottom: 10px;">Dear {full_name},</h1>
+                <p style="color: #475569; font-size: 16px; line-height: 1.6;">
+                    We received a request to reset the password for your account.
+                </p>
+                
+                <div style="background-color: #fef3c7; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
+                    <p style="color: #92400e; margin: 0 0 15px 0;">
+                        Click the button below to reset your password:
+                    </p>
+                    <a href="{reset_link}" style="display: inline-block; padding: 14px 28px; background-color: #0ea5e9; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                        Reset Password
+                    </a>
+                </div>
+                
+                <div style="background-color: #f8fafc; border-radius: 8px; padding: 15px; margin: 20px 0;">
+                    <p style="color: #64748b; font-size: 13px; margin: 0;">
+                        <strong>Note:</strong> This link expires in 1 hour. If you didn't request a password reset, you can safely ignore this email.
+                    </p>
+                </div>
+                
+                <p style="color: #64748b; font-size: 13px; margin-top: 30px;">
+                    For any questions, call us at <strong>+381 18 123 456</strong>
+                </p>
+            </div>
+            {footer}
+        </body>
+        </html>
+        """
+    
+    return subject, body
