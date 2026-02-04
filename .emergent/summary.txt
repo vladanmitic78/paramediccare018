@@ -4,48 +4,38 @@
 The user is building a comprehensive medical transport system named Paramedic Care 018. The system has evolved to include a public website, a patient portal, real-time mobile applications for admins and drivers, invoice management, location tracking, a live map, staff availability management, a full EMR-style medical dashboard, and a vehicle-centric team assignment module.
 
 **Recent PRODUCT REQUIREMENTS:**
-1.  **Patient Diagnoses Management:** Doctors and Nurses need to be able to select multiple diagnoses for a patient from a predefined list (provided in an Excel file). The selected diagnoses should be displayed on the patient's profile page, next to their medications.
-2.  **Auto-Calculated & Live ETA:** The booking system's Estimated Time of Arrival (ETA) should be automatically calculated based on the route distance (using OSRM) and updated in real-time based on the driver's live GPS location from the PWA.
-3.  **Multi-Day Transports:** The booking and scheduling system must support transports that span multiple days, ensuring vehicles and staff are marked as busy for the entire duration from pickup to arrival.
-4.  **Invoice Enhancements:**
-    *   Add the company logo to all generated invoice PDFs.
-    *   Ensure Serbian Latin characters (šđžčć) render correctly on invoices.
-    *   Add a Due Date column to the invoice list.
-    *   Automatically mark invoices as Overdue (with red styling) if the due date has passed and the status isn't Paid or Cancelled.
-5.  **Session Persistence:** Users should not be logged out of the web application or PWA when they refresh the page.
-6.  **PWA Usability:**
-    *   The PWA installation prompt should appear on the public landing page, before login.
-    *   Add a burger menu to the PWA that allows users to see their future bookings.
-7.  **System Stability:** The user has requested a focus on optimizing and stabilizing the application.
+1.  **Patient Diagnoses Management:** Doctors and Nurses need to be able to select multiple diagnoses for a patient from a predefined list. This should be available on the web dashboard and PWA. (Completed)
+2.  **Report Enhancements:** Add patient diagnoses to PDF reports and allow generating reports for a specific time frame. (Completed)
+3.  **UI/UX Improvements:** Enhance the Vital Signs history with search and expand/collapse functionality. (Completed)
+4.  **Swappable SMS Gateway:** Implement a flexible SMS notification system with a free default provider (Textbelt) that can be managed by a Super Admin. (Completed)
+5.  **Notification Triggers:** Integrate SMS and Email notifications for key booking events (new booking, driver assigned, reminders, completion). (SMS is Done, Email is In Progress)
+6.  **Forgot Password:** Add a Forgot Password? feature to the login screen for both English and Serbian languages. (Not Started)
 
 **User's preferred language**: The user communicates in English. The agent MUST respond in **English**.
 
 **what currently exists?**
-A full-stack application with a React frontend, a partially-refactored FastAPI backend, and a MongoDB database. The session persistence on page refresh has been significantly improved for both the web dashboard and the PWA. The booking system now supports multi-day transports with an auto-calculated, live-updating ETA feature. The PWA has a new burger menu for viewing future bookings, and its install banner is now correctly displayed on the public landing page. The invoice system was enhanced with PDF logo/font support, a due date field, and an automatic overdue status. The agent has just begun work on a new feature for managing patient diagnoses by parsing a user-provided Excel file.
+A full-stack application with a React frontend, a FastAPI backend, and MongoDB. The application now includes a complete patient diagnosis management feature on both the web dashboard and the PWA. PDF reports are enhanced with diagnoses and a date-range filter. The vital signs history UI is now more user-friendly with search and expand/collapse features. A flexible, admin-configurable SMS gateway using Textbelt (free tier) is fully integrated, triggering notifications for various booking events. Email templates for similar notifications have been created, but the backend integration is not yet complete. The agent was just about to start work on a Forgot Password feature.
 
 **Last working item**:
--   **Last item agent was working:** Implementing a new feature for Doctors and Nurses to add multiple diagnoses to a patient's record. The user provided an Excel file () with a list of diagnoses. The agent successfully extracted the data from the file and created , and was beginning to explore the patient profile page to plan the UI implementation.
+-   **Last item agent was working:** The user requested two features: completing the email integration and adding a Forgot Password feature. The agent acknowledged both and was about to begin implementing the Forgot Password feature by locating the login page component.
 -   **Status:** IN PROGRESS
 -   **Agent Testing Done:** N
--   **Which testing method agent to use?** Frontend testing agent. The test should verify that a doctor/nurse can:
-    1.  See a new Diagnoses section on the patient page.
-    2.  Use a multi-select dropdown to add diagnoses from the provided list, with support for searching.
-    3.  See the selected diagnoses saved and displayed on the patient page, positioned next to the Medications section.
+-   **Which testing method agent to use?**
+    -   For Forgot Password: Use both the backend and frontend testing agents to verify the API and the end-to-end UI flow (request, email link, reset).
+    -   For Email Integration: Manual testing by triggering booking events and checking backend logs to confirm mock emails are sent.
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: (P0) Implement Patient Diagnoses Feature.**
-    -   **Description:** This is the current . Doctors and Nurses need a way to select multiple diagnoses for a patient from a predefined list. This should be available when creating/editing a patient and displayed on their profile page next to the medications section.
-    -   **Attempted fixes:** Agent created  from the user's Excel file.
+-   **Issue 1: (P0) Implement Forgot Password Feature.**
+    -   **Description:** The user has requested a Forgot your password? link on the login screen. This is the next immediate task.
     -   **Next debug checklist:**
-        1.  Locate the patient details component (likely within ).
-        2.  Modify the layout to create two columns: Diagnoses on the left, Medications on the right.
-        3.  Create a new  component.
-        4.  In , implement a multi-select combobox (e.g., Shadcn ) that loads data from  and supports searching.
-        5.  Create a backend model and API endpoint (e.g., ) to save and retrieve a patient's diagnoses.
-        6.  Connect the frontend component to the new backend endpoint.
-    -   **Why fix this issue and what will be achieved with the fix?** This is a core EMR feature to enhance patient records with structured medical data.
-    -   **Status:** IN PROGRESS
+        1.  Add a Forgot Password? link to .
+        2.  Create a new page/modal for the user to enter their email address.
+        3.  Create a backend endpoint (e.g., ) that generates a secure, single-use token, stores it with an expiry, and sends a password reset email to the user.
+        4.  Create a new frontend page (e.g., ) where the user can enter a new password.
+        5.  Create a backend endpoint (e.g., ) to validate the token and update the user's password.
+    -   **Why fix this issue and what will be achieved with the fix?** This is a standard and essential feature for user account management.
+    -   **Status:** NOT STARTED
     -   **Is recurring issue?** N
     -   **Should Test frontend/backend/both after fix?** Both.
 
@@ -58,8 +48,15 @@ A full-stack application with a React frontend, a partially-refactored FastAPI b
     -   **Should Test frontend/backend/both after fix?** Both.
 
 **In progress Task List**:
--   **Task 1: (P1) Backend Refactoring**
-    -   **Where to resume:** The new route calculation endpoint was added directly to . This and other related endpoints should be moved to more modular route files (e.g., , ).
+-   **Task 1: (P0) Complete Email Integration.**
+    -   **Where to resume:** The email templates have been created in . The next step is to call the  function within the booking creation and update endpoints in , mirroring the logic already implemented for SMS notifications.
+    -   **What will be achieved with this?** The application will send email notifications for critical booking events, providing a more robust communication channel.
+    -   **Status:** IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?** Backend.
+    -   **Blocked on something:** Blocked by the higher-priority Forgot Password task.
+
+-   **Task 2: (P1) Backend Refactoring.**
+    -   **Where to resume:**  is now over 4,500 lines. The newly added SMS endpoints and other logic should be extracted into dedicated router files (e.g., , ) to improve maintainability.
     -   **What will be achieved with this?** A more modular, scalable, and maintainable backend architecture.
     -   **Status:** IN PROGRESS
     -   **Should Test frontend/backend/both after fix?** Backend.
@@ -67,115 +64,120 @@ A full-stack application with a React frontend, a partially-refactored FastAPI b
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks:**
-    *   **(P1) System Stability and Optimization:** This is a high-priority user request. After the diagnoses feature, propose a plan to refactor the most complex components (, ).
-    *   **(P1) Timeline-Based Scheduling - Phase 4: Admin Gantt View:** Build a master timeline grid showing all vehicles and their schedules for a comprehensive overview.
+    *   **(P1) Automate Pickup Reminders:** The  endpoint exists but is only triggered manually. Implement a background job (e.g., using a scheduler library like APScheduler) to run this task automatically.
+    *   **(P1) System Stability and Optimization:** Refactor the large  and  components.
+    *   **(P1) Admin Gantt View:** Build a master timeline grid showing all vehicles and their schedules.
     *   **(P1) Doctor Decision Panel:** Enable doctors to give live instructions from the Medical Dashboard.
-    *   **(P1) Implement Incoming API Integrations:** Build backend logic for Stripe, SMS, and Email integrations using the  tool.
 *   **Future Tasks:**
-    *   **(P2) Persist Collapsible Sidebar State:** Use  to save the expanded/collapsed state of sidebar groups in the desktop dashboard.
-    *   **(P2) Implement Driver Rejection Reason:** Add a modal to capture the reason when a driver rejects a task.
+    *   **(P2) Implement Incoming API Integrations:** Build backend logic for Stripe using the  tool.
+    -   **(P2) Persist Collapsible Sidebar State:** Use  to remember the state of sidebar groups.
+    -   **(P2) Implement Driver Rejection Reason:** Add a modal to capture why a driver rejects a task.
 
 **Completed work in this session**
--   **Feature: Multi-Day Booking & Auto-ETA:**
-    -   Updated the New Booking form in  with  and .
-    -   Added a backend endpoint () that uses OSRM to auto-calculate the ETA.
-    -   The driver's PWA () now sends location updates to a new endpoint () for live ETA tracking.
--   **Feature: Invoice Enhancements:**
-    -   **PDF Generation:** Added company logo and registered DejaVu font in  to support Serbian Latin characters (šđžčć).
-    -   **Due Date & Overdue Status:** Added a Due Date column to . Invoices are now automatically flagged as Overdue with red styling.
-    -   **Create Invoice Form:** Added an optional Due Date field to the invoice creation dialog.
--   **Feature: PWA Burger Menu & Install Banner:**
-    -   Added a slide-out burger menu to  that shows the user's future bookings.
-    -   Refactored the PWA installation logic into a global  to show the install banner on the public  page.
--   **Bug Fix: Session Persistence on Refresh:**
-    -   Fixed a race condition in  that caused redirects on refresh. Enhanced  to persist the user object in  for a more stable session.
--   **Bug Fix: Doctor Role Login in PWA:**
-    -   Fixed an Access Denied error in  for the 'doctor' role by adjusting data fetching logic.
--   **Bug Fix: Addresses not available in PWA:**
-    -   Fixed  to correctly handle different naming conventions for address/coordinate data from the backend.
--   **UI/UX Improvements:**
-    -   Improved the WebSocket connection status indicator on the Driver Management page.
-    -   Added loading states to refresh buttons in the Finance tab.
-    -   Applied CSS to encourage a 24-hour format for time inputs.
+-   **Feature: Patient Diagnoses Management (Web & PWA):**
+    -   Implemented a typeahead search component () for the web dashboard.
+    -   Integrated a mobile-friendly diagnoses search into the PWA's vitals modal ().
+    -   Created backend endpoints and database schema to store patient diagnoses.
+    -   Updated the diagnoses dataset with 51 ICD-10 codes provided by the user.
+-   **Feature: PDF Report Enhancements:**
+    -   Added patient diagnoses to the generated PDF reports.
+    -   Implemented a date-range selection dialog for creating time-bound reports.
+-   **Feature: Vital Signs History UI/UX:**
+    -   Created  with search and expand/collapse functionality to improve usability.
+-   **Feature: Swappable SMS Gateway & Notifications:**
+    -   Created an abstract SMS service () supporting Textbelt and Twilio.
+    -   Built a Super Admin UI () to configure the active SMS provider and API keys.
+    -   Integrated SMS triggers for new bookings, driver assignments, and pickup reminders.
+-   **Bug Fix: PWA Vitals Tab Visibility:**
+    -   Modified  to show bookings with confirmed status on the Vitals tab, ensuring medical staff can always access upcoming patient records.
+
+**Earlier issues found/mentioned but not fixed**
+-   **Issue 1: PWA Authentication in Preview Environment.**
+    -   **Debug checklist:** The agent repeatedly faced  errors and session expirations when testing the PWA. Direct API calls with the same tokens succeeded, suggesting an infrastructure issue with how the preview environment's proxy handles authentication.
+    -   **Why to solve this issue and what will be achieved with this?** This is a major blocker for reliable frontend testing and verification in the preview environment.
+    -   **Should Test frontend/backend/both after fix:** Both.
+    -   **Is recurring issue?** Y.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-*   **Real-time ETA Calculation:** A hybrid approach using a backend OSRM proxy for initial route calculation () and a separate endpoint () for live updates triggered by the driver's GPS location.
-*   **Client-Side Session Persistence:** Enhanced  to store the user object in  alongside the JWT to prevent UI flicker and race conditions on page refresh.
-*   **Global State Management (React Context):** Used a new  to manage the  event across the entire application.
-*   **Dynamic UI based on Data State:** Implemented logic in  to dynamically change the style (color, text, icon) of an invoice row based on its status and due date.
-*   **PDF Generation with ReportLab:** Modified backend PDF generation in  to embed images () and register custom TTF fonts (DejaVu) for full Unicode support.
+*   **Swappable Service Architecture:** Implemented for the SMS service, allowing an admin to switch between providers (e.g., Textbelt, Twilio) via a database setting without requiring code changes.
+*   **Mobile-First PWA Design:** The diagnoses feature was integrated into the existing vitals entry modal using a collapsible section to maintain a clean UI on small screens.
+*   **Backend Abstraction:** Key functionalities like sending SMS notifications are handled by dedicated services () and helper functions, separating concerns from the main API routing logic in .
 
 **key DB schema**
--   ****: Schema updated to include  (ISO String) and  (ISO String).
--   ** (Anticipated):** A new collection will be needed to associate patients with a list of diagnosis codes.
+-   ** (New):** Stores links between patients and diagnosis codes. 
+-   ** (Modified):** A document stores the system-wide SMS configuration: 
+-   ** (New):** A collection to log all outgoing SMS messages for debugging and auditing. 
 
 **All files of reference**
-*   **/app/frontend/src/pages/UnifiedPWA.jsx**: Heavily modified for burger menu, live ETA updates, and multiple bug fixes.
-*   **/app/frontend/src/components/FleetDispatch.jsx**: Heavily modified for the new multi-day booking form and auto-ETA calculation.
-*   **/app/frontend/src/pages/Dashboard.jsx**: Modified to fix session persistence on refresh.
-*   **/app/frontend/src/contexts/AuthContext.js**: Modified to improve session persistence.
-*   **/app/frontend/src/components/InvoiceManager.jsx**: Modified to add due date column, overdue status, and a due date field on creation.
-*   **/app/backend/server.py**: Modified to add ETA calculation endpoints and update invoice PDF generation.
-*   **/app/frontend/src/data/diagnoses.js**: New file containing diagnoses data for the upcoming feature.
-*   **/app/frontend/src/contexts/PWAContext.js**: New file for managing the PWA install prompt globally.
+*   **/app/backend/server.py**: Heavily modified for diagnoses, PDF reports with date ranges, SMS settings, and notification triggers.
+*   **/app/frontend/src/pages/MedicalDashboard.jsx**: Modified to integrate the new  and  components, and the PDF report date-range dialog.
+*   **/app/frontend/src/pages/UnifiedPWA.jsx**: Heavily modified to integrate the diagnoses feature into the vitals modal and fix a bug preventing confirmed bookings from showing.
+*   **/app/backend/services/sms_service.py**: New file creating a swappable service for sending SMS messages.
+*   **/app/frontend/src/components/SMSSettings.jsx**: New component for the Super Admin SMS configuration page.
+*   **/app/backend/utils/email.py**: Modified to include new HTML templates for booking-related email notifications.
 
 **Areas that need refactoring**:
-*   **CRITICAL:**  and  remain extremely large and complex. The System Stability and Optimization task should address this by breaking them into smaller, manageable components.
-*   **HIGH:**  continues to accumulate endpoints. The new route calculation and ETA update logic should be extracted into a separate, more focused route file.
+*   **CRITICAL:**  has grown significantly and is difficult to navigate. The SMS, notification, and settings endpoints should be moved to separate router files.
+*   **HIGH:**  and  are monolithic components that should be broken down to improve maintainability.
 
 **key api endpoints**
-*   : (New) Calculates route distance, duration, and ETA between two coordinates.
-*   : (New) Updates a booking's ETA based on the driver's live location.
-*   : (Modified) Updated to accept an optional  on creation.
+*   : Add a diagnosis to a patient.
+*   : (Modified) Generate patient PDF report, now accepts  and  query params.
+*   : Update system-wide SMS configuration.
+*   : Manually send a pickup reminder SMS.
 
 **Critical Info for New Agent**
-*   Your immediate task is to **implement the patient diagnoses feature**. You have the data in . You need to create the UI (a multi-select dropdown on the patient page, splitting the view with medications) and the backend API and database schema to save the selections.
-*   The issue of session persistence on page refresh was a major focus. The fixes in  and  should be solid, but be mindful of this area as it has been a recurring pain point.
-*   The agent who implemented the PWA burger menu first made a mistake by adding it to the public  before moving it to . Verify that  was correctly cleaned up and does not contain any leftover logic.
+*   Your first task is to **implement the Forgot Password feature**. This is a top priority from the user. You will need to build the complete UI and backend logic for this flow.
+*   After completing the Forgot Password feature, you must **finish the email integration**. The templates are ready; you just need to call the send function from the appropriate places in .
+*   Be aware of the **unstable PWA authentication** in the preview environment. It may cause  errors. If you face issues testing the frontend, verify the backend endpoints directly with  to confirm your logic is correct before debugging the frontend extensively.
 
 **documents and test reports created in this job**
-*   
+*   /app/test_reports/iteration_18.json
+*   /app/backend/tests/test_patient_diagnoses.py
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Requested a new feature to add multiple diagnoses for patients using a provided Excel file. **Status: IN PROGRESS**
-2.  **User:** Asked to add a Due Date field to the New Invoice form. **Status: COMPLETED**
-3.  **User:** Requested a Due Date column and automatic Overdue status for the invoice list. **Status: COMPLETED**
-4.  **User:** Asked to add a logo and Serbian Latin font support to invoice PDFs. **Status: COMPLETED**
-5.  **User:** Reported that the Refresh button on the Finance page was not working. **Status: COMPLETED**
-6.  **User:** Reported that the PWA showed Addresses not available for a driver's assignment. **Status: COMPLETED**
-7.  **User:** Requested that time inputs be in 24-hour format. **Status: COMPLETED**
-8.  **User:** Suggested an excellent idea to auto-calculate ETA on booking creation and update it live from the driver's app. **Status: COMPLETED**
-9.  **User:** Requested support for multi-day transports with explicit start/end times. **Status: COMPLETED**
-10. **User:** Reported being logged out of the web app after refreshing the page. **Status: COMPLETED**
+1.  **User:** Requested to add a Forgot your password? feature on the login screen. **Status: NOT STARTED**
+2.  **User:** Requested to continue with the email integration and create nice templates. **Status: IN PROGRESS**
+3.  **User:** Provided a list of email triggers and templates to be created. **Status: COMPLETED (Templates created)**
+4.  **User:** Asked to remove the SMS settings from the API page and integrate the notification triggers. **Status: COMPLETED**
+5.  **User:** Requested a free, swappable SMS gateway that can be configured by a Super Admin. **Status: COMPLETED**
+6.  **User:** Requested to move the Diagnoses section above the Notes section in the PWA modal. **Status: COMPLETED**
+7.  **User:** Asked for the best UI/UX to integrate diagnoses into the PWA. **Status: COMPLETED**
+8.  **User:** Requested a time frame option for PDF reports and a search/collapse feature for the Vital Signs history. **Status: COMPLETED**
+9.  **User:** Asked for diagnoses to be included in the patient PDF report. **Status: COMPLETED**
+10. **User:** Provided an extended list of 51 diagnoses to add to the system. **Status: COMPLETED**
 
 **Project Health Check:**
 *   **Broken:**
-    *   None. Multiple critical user-facing bugs were resolved in this session.
+    *   PWA authentication in the preview environment is unstable and frequently returns  errors, which hinders frontend testing.
 *   **Mocked:**
     *   Desktop Admin Dashboard sections: , .
     *    (History) view.
 
 **3rd Party Integrations**
+*   **Textbelt:** Newly added as the default free provider for the SMS gateway.
+*   **Twilio:** Configured as an alternative SMS provider.
 *   **Leaflet & Nominatim (OpenStreetMap):** Used for maps and address autocomplete.
-*   **OSRM (Open Source Routing Machine):** Now used on the backend for ETA calculations, in addition to frontend route display.
+*   **OSRM (Open Source Routing Machine):** Used on the backend for ETA calculations.
 *   **reportlab:** Used for generating PDF reports.
 *   **recharts:** Used for charts and graphs.
 *   **Jitsi Meet:** Used for in-app video calls.
 *   **@dnd-kit:** Used for drag-and-drop in the desktop dispatch console.
 
 **Testing status**
--   **Testing agent used after significant changes:** NO
+-   **Testing agent used after significant changes:** YES (for the initial diagnoses feature on the web)
 -   **Troubleshoot agent used after agent stuck in loop:** NO
--   **Test files created:** None
--   **Known regressions:** None identified, but session persistence should be monitored.
+-   **Test files created:**
+    -   
+-   **Known regressions:** The session instability in the preview environment appears to be a persistent issue.
 
 **Credentials to test flow:**
-*   **Admin/Super Admin:**  / 
+*   **Super Admin:**  / 
 *   **Doctor (has bookings):**  / 
 *   **Driver (has bookings):**  / 
 
 **What agent forgot to execute**
-*   The agent correctly identified their mistake of adding the PWA burger menu to the public website's  before moving the feature to . However, the chat history does not show an explicit action to revert or clean up the changes from . The next agent should verify that this file is in its correct state.</analysis>
+*   The agent created an API endpoint () to send SMS reminders for upcoming bookings. However, this endpoint is only triggered manually via a button in the UI. A crucial step was missed: implementing an automated, recurring background task (e.g., a cron job) to call this endpoint periodically. Without this, reminders will not be sent automatically.</analysis>
