@@ -239,6 +239,8 @@ const MedicalCare = () => {
               <img
                 src={teamImage}
                 alt="Medical team"
+                loading="lazy"
+                decoding="async"
                 className="rounded-2xl shadow-xl w-full h-[400px] object-cover"
               />
             </div>
