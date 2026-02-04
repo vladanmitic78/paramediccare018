@@ -290,6 +290,8 @@ const Transport = () => {
               <img
                 src={fleetImage}
                 alt="Paramedic team"
+                loading="lazy"
+                decoding="async"
                 className="rounded-2xl shadow-xl w-full h-[400px] object-cover"
               />
             </div>
