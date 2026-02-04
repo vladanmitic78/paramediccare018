@@ -184,6 +184,7 @@ const Home = () => {
                   <img
                     src={heroImage}
                     alt="Ambulance"
+                    fetchpriority="high"
                     className="w-full h-[400px] lg:h-[500px] object-cover"
                   />
                 ) : (
