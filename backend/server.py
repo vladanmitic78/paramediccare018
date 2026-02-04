@@ -3683,7 +3683,10 @@ async def upload_image(
     file: UploadFile = File(...),
     user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
 ):
-    """Upload an image file and return the URL"""
+    """Upload an image file, optimize it, and return the URL"""
+    from PIL import Image
+    import io
+    
     # Validate file extension
     file_ext = Path(file.filename).suffix.lower()
     if file_ext not in ALLOWED_EXTENSIONS:
@@ -3694,24 +3697,99 @@ async def upload_image(
     
     # Read file content to check size
     content = await file.read()
-    if len(content) > MAX_FILE_SIZE:
+    original_size = len(content)
+    
+    if original_size > MAX_FILE_SIZE:
         raise HTTPException(
             status_code=400,
             detail=f"File too large. Maximum size is {MAX_FILE_SIZE // (1024*1024)}MB"
         )
     
-    # Generate unique filename
+    # Generate unique filename - always save as optimized JPEG or WebP
     unique_id = str(uuid.uuid4())[:8]
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    safe_filename = f"{timestamp}_{unique_id}{file_ext}"
     
-    # Save file
+    # Optimize image
+    optimized_content = content
+    output_ext = file_ext
+    
+    try:
+        # Skip SVG files - can't optimize with Pillow
+        if file_ext not in ['.svg']:
+            img = Image.open(io.BytesIO(content))
+            
+            # Convert RGBA to RGB for JPEG (remove alpha channel)
+            if img.mode in ('RGBA', 'LA', 'P'):
+                # For PNG with transparency, keep as PNG but optimize
+                if file_ext == '.png':
+                    output_ext = '.png'
+                    # Resize if too large (max 1920px width for web)
+                    max_width = 1920
+                    if img.width > max_width:
+                        ratio = max_width / img.width
+                        new_height = int(img.height * ratio)
+                        img = img.resize((max_width, new_height), Image.Resampling.LANCZOS)
+                    
+                    # Optimize PNG
+                    output_buffer = io.BytesIO()
+                    img.save(output_buffer, format='PNG', optimize=True)
+                    optimized_content = output_buffer.getvalue()
+                else:
+                    # Convert to RGB for JPEG
+                    background = Image.new('RGB', img.size, (255, 255, 255))
+                    if img.mode == 'P':
+                        img = img.convert('RGBA')
+                    background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+                    img = background
+                    output_ext = '.jpg'
+                    
+                    # Resize if too large
+                    max_width = 1920
+                    if img.width > max_width:
+                        ratio = max_width / img.width
+                        new_height = int(img.height * ratio)
+                        img = img.resize((max_width, new_height), Image.Resampling.LANCZOS)
+                    
+                    # Save as optimized JPEG
+                    output_buffer = io.BytesIO()
+                    img.save(output_buffer, format='JPEG', quality=85, optimize=True)
+                    optimized_content = output_buffer.getvalue()
+            else:
+                # RGB or L mode - save as JPEG
+                output_ext = '.jpg'
+                
+                # Resize if too large (max 1920px width for web)
+                max_width = 1920
+                if img.width > max_width:
+                    ratio = max_width / img.width
+                    new_height = int(img.height * ratio)
+                    img = img.resize((max_width, new_height), Image.Resampling.LANCZOS)
+                
+                # Convert to RGB if grayscale
+                if img.mode == 'L':
+                    img = img.convert('RGB')
+                
+                # Save as optimized JPEG with quality 85 (good balance of quality/size)
+                output_buffer = io.BytesIO()
+                img.save(output_buffer, format='JPEG', quality=85, optimize=True)
+                optimized_content = output_buffer.getvalue()
+            
+            logger.info(f"Image optimized: {original_size} bytes -> {len(optimized_content)} bytes ({100 - (len(optimized_content) * 100 // original_size)}% reduction)")
+    
+    except Exception as e:
+        logger.warning(f"Could not optimize image, saving original: {str(e)}")
+        # If optimization fails, save original
+        optimized_content = content
+        output_ext = file_ext
+    
+    safe_filename = f"{timestamp}_{unique_id}{output_ext}"
+    
+    # Save optimized file
     file_path = UPLOADS_DIR / safe_filename
     with open(file_path, "wb") as f:
-        f.write(content)
+        f.write(optimized_content)
     
     # Return the URL (with /api prefix for ingress routing)
-    # The URL will be accessible via /api/uploads/filename
     image_url = f"/api/uploads/{safe_filename}"
     
     logger.info(f"Image uploaded: {safe_filename} by {user.get('email', 'unknown')}")
@@ -3720,8 +3798,10 @@ async def upload_image(
         "success": True,
         "filename": safe_filename,
         "url": image_url,
-        "size": len(content),
-        "type": file.content_type
+        "size": len(optimized_content),
+        "original_size": original_size,
+        "optimized": len(optimized_content) < original_size,
+        "type": f"image/{output_ext[1:]}"  # e.g., "image/jpg"
     }
 
 @api_router.delete("/upload/image/{filename}")
