@@ -4,6 +4,7 @@ Creates default superadmin if not exists
 """
 import bcrypt
 import asyncio
+import uuid
 from motor.motor_asyncio import AsyncIOMotorClient
 from datetime import datetime, timezone
 import os
@@ -15,6 +16,8 @@ async def init_database():
     
     client = AsyncIOMotorClient(mongo_url)
     db = client[db_name]
+    
+    now = datetime.now(timezone.utc).isoformat()
     
     # Check if superadmin exists
     superadmin = await db.users.find_one({'email': 'vladanmitic@gmail.com'})
@@ -33,79 +36,148 @@ async def init_database():
             'language': 'sr',
             'is_active': True,
             'is_verified': True,
-            'created_at': datetime.now(timezone.utc).isoformat()
+            'created_at': now
         })
         print("✓ Super Admin created: vladanmitic@gmail.com")
     else:
         print("✓ Super Admin already exists")
     
-    # Seed page_content - ensure required sections exist (upsert missing ones)
-    print("Checking page_content collection...")
+    # Fix existing page_content documents that are missing required fields
+    print("Checking and fixing page_content collection...")
     
-    # Default page content with placeholder images
+    # Find documents missing required fields (id, is_active, order, updated_at)
+    docs_without_id = await db.page_content.find({"id": {"$exists": False}}).to_list(1000)
+    fixed_count = 0
+    
+    for doc in docs_without_id:
+        update_fields = {
+            "id": str(uuid.uuid4()),
+            "is_active": True,
+            "order": 0,
+            "updated_at": now,
+            "updated_by": "System"
+        }
+        # Add optional fields if missing
+        if "subtitle_sr" not in doc:
+            update_fields["subtitle_sr"] = ""
+        if "subtitle_en" not in doc:
+            update_fields["subtitle_en"] = ""
+        if "icon" not in doc:
+            update_fields["icon"] = ""
+        
+        await db.page_content.update_one(
+            {"_id": doc["_id"]},
+            {"$set": update_fields}
+        )
+        fixed_count += 1
+        print(f"  Fixed document: {doc.get('page')}/{doc.get('section')}")
+    
+    if fixed_count > 0:
+        print(f"✓ Fixed {fixed_count} page_content documents with missing fields")
+    
+    # Default page content with ALL required fields
     default_content = [
         # Medical Care page - Team section
         {
+            "id": str(uuid.uuid4()),
             "page": "medical-care",
             "section": "team",
             "title_en": "Our Team of Professionals",
             "title_sr": "Naš tim profesionalaca",
+            "subtitle_en": "",
+            "subtitle_sr": "",
             "content_en": "Our medical team consists of experienced professionals dedicated to providing the best possible care. Each team member undergoes regular training to stay up-to-date with the latest medical practices.",
             "content_sr": "Naš medicinski tim se sastoji od iskusnih profesionalaca posvećenih pružanju najbolje moguće nege. Svaki član tima prolazi redovnu obuku kako bi bio u toku sa najnovijim medicinskim praksama.",
-            "image_url": "/api/uploads/20260203_203008_e923822e.jpg"
+            "image_url": "/api/uploads/20260203_203008_e923822e.jpg",
+            "icon": "",
+            "order": 1,
+            "is_active": True,
+            "updated_at": now,
+            "updated_by": "System"
         },
         # Transport page - Fleet section
         {
+            "id": str(uuid.uuid4()),
             "page": "transport",
             "section": "fleet",
             "title_en": "Modern Vehicle Fleet",
             "title_sr": "Moderna flota vozila",
+            "subtitle_en": "",
+            "subtitle_sr": "",
             "content_en": "Our ambulance fleet is equipped with the most modern medical equipment. All vehicles are air-conditioned and regularly serviced to ensure maximum comfort and safety for patients.",
             "content_sr": "Naša flota sanitetskih vozila opremljena je najmodernijom medicinskom opremom. Sva vozila su klimatizovana i redovno servisirana kako bi se osigurao maksimalan komfor i bezbednost pacijenata.",
-            "image_url": "/api/uploads/20260203_203024_10a07490.jpg"
+            "image_url": "/api/uploads/20260203_203024_10a07490.jpg",
+            "icon": "",
+            "order": 1,
+            "is_active": True,
+            "updated_at": now,
+            "updated_by": "System"
         },
         # Home page - Hero section
         {
+            "id": str(uuid.uuid4()),
             "page": "home",
             "section": "hero",
             "title_en": "Professional Medical Transport",
             "title_sr": "Profesionalni medicinski transport",
+            "subtitle_en": "Available 24/7",
+            "subtitle_sr": "Dostupni 24/7",
             "content_en": "24/7 emergency medical transport services with professional care",
             "content_sr": "Hitne medicinske usluge transporta 24/7 sa profesionalnom negom",
-            "image_url": None
+            "image_url": "",
+            "icon": "",
+            "order": 0,
+            "is_active": True,
+            "updated_at": now,
+            "updated_by": "System"
         },
         # Medical Care page - Services title
         {
+            "id": str(uuid.uuid4()),
             "page": "medical-care",
             "section": "services-title",
             "title_en": "Our Medical Services",
             "title_sr": "Naše medicinske usluge",
+            "subtitle_en": "",
+            "subtitle_sr": "",
             "content_en": "We provide comprehensive medical care services",
             "content_sr": "Pružamo sveobuhvatne medicinske usluge",
-            "image_url": None
+            "image_url": "",
+            "icon": "",
+            "order": 0,
+            "is_active": True,
+            "updated_at": now,
+            "updated_by": "System"
         },
         # Transport page - Services title
         {
+            "id": str(uuid.uuid4()),
             "page": "transport",
             "section": "services-title",
             "title_en": "Our Transport Services",
             "title_sr": "Naše usluge transporta",
+            "subtitle_en": "",
+            "subtitle_sr": "",
             "content_en": "Safe and reliable medical transport solutions",
             "content_sr": "Bezbedna i pouzdana rešenja za medicinski transport",
-            "image_url": None
+            "image_url": "",
+            "icon": "",
+            "order": 0,
+            "is_active": True,
+            "updated_at": now,
+            "updated_by": "System"
         }
     ]
     
     # Upsert each content item (insert if not exists, skip if exists)
     inserted_count = 0
     for content in default_content:
-        result = await db.page_content.update_one(
-            {"page": content["page"], "section": content["section"]},
-            {"$setOnInsert": content},
-            upsert=True
-        )
-        if result.upserted_id:
+        # Check if document exists
+        existing = await db.page_content.find_one({"page": content["page"], "section": content["section"]})
+        if not existing:
+            await db.page_content.insert_one(content)
             inserted_count += 1
+            print(f"  Inserted: {content['page']}/{content['section']}")
     
     if inserted_count > 0:
         print(f"✓ Inserted {inserted_count} new page_content documents")
