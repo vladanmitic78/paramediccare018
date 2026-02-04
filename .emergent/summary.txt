@@ -1,197 +1,191 @@
-<analysis>Here is a summary of the session to help the next agent get up to speed.
-
-**original_problem_statement:**
-The user is building a comprehensive medical transport system named Paramedic Care 018. The system has evolved to include a public website, a patient portal, real-time mobile applications for admins and drivers, invoice management, location tracking, a live map, staff availability management, a full EMR-style medical dashboard, and a vehicle-centric team assignment module.
+<analysis>**original_problem_statement:**
+The user is building a comprehensive medical transport system named Paramedic Care 018. The initial scope included a public website, patient portal, real-time mobile apps, invoice management, location tracking, a medical dashboard, and staff/vehicle management.
 
 **Recent PRODUCT REQUIREMENTS:**
-1.  **Patient Diagnoses Management:** Doctors and Nurses need to select multiple diagnoses for a patient from a predefined list. The selected diagnoses should be displayed on the patient's profile page, included in their PDF report, and be manageable from the PWA.
-2.  **PDF Report Enhancements:** Add a date-range filter for generating patient PDF reports.
-3.  **Vitals History UI/UX:** Improve the Vital Signs history view with search and a collapse/expand option.
-4.  **Flexible Notification System:** Implement a modular SMS gateway that can be configured by a Super Admin, using a free provider initially. Integrate this for booking confirmations and other triggers.
-5.  **Email Notifications:** Integrate email notifications for key booking events (creation, driver assignment, reminders, completion).
+1.  **Deploy to Production:** Deploy the full application to a Hetzner VPS with the domain . This includes setting up the server, Docker, Nginx, SSL, and a CI/CD pipeline with GitHub Actions for automatic deployments.
+2.  **Ensure Data Persistence:** User-uploaded images and database content (users, CMS data) must persist across deployments.
+3.  **Optimize Performance:** Improve the low PageSpeed score (49) by addressing large bundle sizes, lack of caching, and render-blocking resources.
+4.  **Fix Live Bugs:**
+    *   Images not displaying on some pages (Medical Care, Transport).
+    *   Booking page address search dropdown appears behind the map.
+    *   Email verification links point to an old preview domain instead of the production domain.
+    *   Inability to log in as Super Admin on the new server.
+    *   Demo Access credentials visible on the login page.
+5.  **Continue Refactoring:** Proceed with the backend () and frontend () refactoring tasks.
 
 **User's preferred language**: The user communicates in English. The agent MUST respond in **English**.
 
 **what currently exists?**
-A full-stack application with a React frontend, a partially-refactored FastAPI backend, and a MongoDB database. A complete patient diagnosis feature has been implemented across the web dashboard and PWA, including search, saving, and inclusion in PDF reports. The vitals history UI has been overhauled with search and expand/collapse functionality. A flexible, admin-configurable SMS gateway system using Textbelt as a free provider has been integrated for booking notifications. The agent has just started integrating email notifications by creating the necessary templates.
+A full-stack application (React, FastAPI, MongoDB) has been successfully deployed to a Hetzner production server, accessible via .
+
+A complete CI/CD pipeline using GitHub Actions is in place, which automatically deploys changes from the  branch. The deployment setup uses Docker and Docker Compose, with persistent volumes for the MongoDB database and user-uploaded images, ensuring data is not lost on redeployment. An initialization script automatically creates a super admin user if one doesn't exist.
+
+Significant performance optimizations have been implemented, including Gzip compression, browser caching, code-splitting (), and deferred loading of non-critical scripts. Several production bugs have been fixed, including incorrect email verification links and UI z-index issues. The agent has been actively helping the user debug live issues by providing commands to run on the server.
 
 **Last working item**:
--   **Last item agent was working:** Integrating email notifications for booking events. The agent successfully created new email templates in  and added the import statement to . The next step is to call the email-sending function from the relevant booking API endpoints (e.g., booking creation, update).
+-   **Last item agent was working:** The agent was remotely diagnosing why images are not appearing on specific sections of the Medical Care and Transport pages on the live site. Through a series of diagnostic commands run by the user, the agent confirmed that the image files exist on the server and are accessible via their URLs. The root cause was identified: the database documents for these specific sections (, , etc.) are missing the  field. The agent's last proposed action was to have the user run  commands on the frontend code to see exactly which section names the components are looking for, in order to confirm the data mismatch.
 -   **Status:** IN PROGRESS
 -   **Agent Testing Done:** N
--   **Which testing method agent to use?** Backend testing agent. The tests should trigger various booking actions (create, assign driver, etc.) and verify that the email sending functions are called with the correct parameters. This will likely involve mocking the actual email sending and checking logs or mock object calls.
+-   **Which testing method agent to use?** This is a remote debugging session. The agent must provide the user with  commands to run on the Hetzner server to inspect the frontend code. Based on the output, the agent will propose a fix.
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: (P0) Session Instability in Preview Environment.**
-    -   **Description:** The agent repeatedly encountered session expiration and Access Denied errors when testing the frontend, especially the Fleet Dispatch page and the PWA. This appears to be an infrastructure or environment configuration issue with the preview URL's authentication, not a code bug. It significantly hinders frontend testing and verification.
-    -   **Attempted fixes:** The agent tried clearing cookies and re-logging in multiple times. A workaround was implemented in the PWA to show  bookings for medical staff, which allowed the UI to be tested.
+-   **Issue 1: (P0) Images not displaying on Medical Care and Transport pages.**
+    -   **Description:** The Our Team of Professionals and Modern Vehicle Fleet sections are missing images on the live site. The investigation has confirmed image files exist and are accessible, but the corresponding database entries in the  collection lack the  field.
+    -   **Attempted fixes:** Confirmed file existence on the server, correct URL format in the DB, and HTTP 200 status on image URLs.
     -   **Next debug checklist:**
-        1.  Investigate console logs for JWT token mismatches or expiry issues when the frontend calls the preview URL ().
-        2.  Compare the authentication flow between  and the preview environment.
-        3.  If this is an infrastructure blocker, focus on backend testing () and code correctness, and inform the user about the preview environment instability.
-    -   **Why fix this issue and what will be achieved with the fix?** Resolving this will unblock reliable frontend testing and allow for proper verification of UI-related features.
-    -   **Status:** BLOCKED
-    -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Frontend.
+        1.  Instruct the user to run the following commands on their server:
+            
+        2.  Analyze the output to confirm the exact section names the frontend components are using to fetch image URLs (e.g., , ).
+        3.  The most likely fix is that the user needs to re-upload the images for those specific sections using the CMS manager, as the database records are incomplete. Guide the user on how to do this.
+    -   **Why fix this issue and what will be achieved with the fix?** This will restore the visual integrity of the public-facing website pages.
+    -   **Status:** IN PROGRESS
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** Frontend (User to verify visually on the live site).
     -   **Blocked on other issue:** None.
 
 **In progress Task List**:
--   **Task 1: (P0) Complete Email Integration.**
-    -   **Where to resume:** In , locate the booking creation () and update () endpoints. Call the appropriate email template functions from  to send notifications for events like New booking, Driver assigned, etc.
-    -   **What will be achieved with this?** A complete notification system that informs patients via email about their transport status.
-    -   **Status:** IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?** Backend.
-    -   **Blocked on something:** None.
-
--   **Task 2: (P1) Backend Refactoring.**
-    -   **Where to resume:**  has grown significantly with the addition of diagnoses and SMS endpoints. These should be moved to dedicated router files (e.g., , ).
+-   **Task 1: (P1) Continue Backend Refactoring.**
+    -   **Where to resume:** The agent extracted . The next logical step is to extract the patient portal routes (e.g., , ) from  into a new file, .
     -   **What will be achieved with this?** A more modular, scalable, and maintainable backend architecture.
     -   **Status:** IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?** Backend.
-    -   **Blocked on something:** None.
+    -   **Should Test frontend/backend/both after fix?** Backend (The CI/CD pipeline will deploy the changes, and the user can perform E2E testing on the live site).
+    -   **Blocked on something:** The P0 image issue should be resolved first.
+
+-   **Task 2: (P1) Refactor .**
+    -   **Where to resume:** Hooks have been extracted, but the component is still over 2800 lines. The next step is to identify and extract the  (lines ~2122-2450) into its own component file, .
+    -   **What will be achieved with this?** Improved code readability and maintainability for the PWA.
+    -   **Status:** IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?** Frontend (The CI/CD pipeline will deploy the changes, and the user can test the PWA on the live site).
+    -   **Blocked on something:** The P0 image issue should be resolved first.
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks:**
-    *   **(P1) Add more SMS triggers:** Implement SMS notifications for Driver on way and Transport completed.
-    *   **(P1) System Stability and Optimization:** Refactor  and  into smaller components.
-    *   **(P1) Timeline-Based Scheduling - Phase 4: Admin Gantt View:** Build a master timeline grid.
-    *   **(P1) Doctor Decision Panel:** Enable live instructions from the Medical Dashboard.
-    *   **(P2) Implement Incoming API Integrations:** Build backend logic for Stripe using .
+    *   **(P1) Real-time PWA updates for Doctor Decisions:** Implement WebSockets so doctor instructions appear on the PWA without a refresh.
+    *   **(P1) Horizontal Drag on Gantt View:** Allow adjusting a booking's start/end time by dragging it horizontally.
+    *   **(P1) Refactor :** Break down the large component (over 2,700 lines).
 *   **Future Tasks:**
-    *   **(P2) Persist Collapsible Sidebar State:** Use .
-    *   **(P2) Implement Driver Rejection Reason Modal.**
+    *   **(P2) Recurring Bookings:** Allow users to create recurring transport schedules.
     *   **(P2) Invoice SMS reminders.**
-    *   **(P2) Calendar view for bookings.**
+    *   **(P2) Persist Collapsible Sidebar State:** Use .
 
 **Completed work in this session**
--   **Feature: Patient Diagnoses Management:**
-    -   Created  with typeahead search for the Medical Dashboard.
-    -   Implemented backend API () and  collection.
-    -   Integrated the feature into the  in a two-column layout next to Medications.
-    -   Passed comprehensive testing via .
--   **Feature: Extended Diagnoses Database:**
-    -   Updated  with a list of 51 ICD-10 codes provided by the user.
--   **Feature: Diagnoses in PDF Report:**
-    -   Modified the patient PDF generation logic in  to include a new Diagnoses section.
--   **Feature: PDF Report Time Frame Selection:**
-    -   Added a dialog in  allowing users to select a date range for PDF reports.
-    -   Updated the backend endpoint to filter data based on the provided dates.
--   **Feature: Vitals History Overhaul:**
-    -   Created  with a search bar and an expand/collapse feature for viewing patient vitals.
--   **Feature: Diagnoses in PWA:**
-    -   Integrated a mobile-friendly, collapsible diagnoses management section into the Vitals modal in .
-    -   Fixed a bug where the PWA Vitals tab was empty by modifying the filter to include  bookings.
--   **Feature: Modular SMS Gateway:**
-    -   Created a new  backend service to abstract SMS providers.
-    -   Implemented a Super Admin settings page () to manage the SMS provider (Textbelt, Twilio, Custom) and API key.
-    -   Stored SMS settings in a new  MongoDB collection.
-    -   Integrated SMS notifications for booking confirmations and driver assignments.
-    -   Added a button to the  booking cards to send manual reminders.
--   **Bug Fix: Timezone-aware Reminders:**
-    -   Fixed a  in the pickup reminder logic by making datetime calculations timezone-aware.
+-   **Production Deployment:** Guided the user through a full deployment to a Hetzner VPS, including server setup, Docker, Nginx, and SSL (Certbot).
+-   **CI/CD Automation:** Created a robust GitHub Actions workflow () for automatic deployments on push to , which also handles server-side configurations.
+-   **Data Persistence:** Configured Docker volumes in  to make MongoDB data and user uploads persistent across deployments, resolving the ephemeral storage issue.
+-   **Auto-Seeding DB:** Implemented a startup script (, ) to automatically create the super admin user on the production server.
+-   **Performance Optimization:** Significantly improved the PageSpeed score by implementing Gzip compression, browser caching, code-splitting (), and disabling source maps in production builds.
+-   **Production Bug Fixes:**
+    -   Corrected all email verification links to use the production domain ().
+    -   Updated the  file to use the correct production backend URL.
+    -   Fixed a z-index issue where the map's address suggestions appeared behind other content.
+    -   Removed the hardcoded Demo Access panel from the  page.
+-   **Refactoring Progress:**
+    -   **Backend:** Extracted booking routes from  into .
+    -   **Frontend:** Extracted PWA-related hooks from  into .
 
 **Earlier issues found/mentioned but not fixed**
--   **Issue 1: Verification of  Cleanup**
-    -   **Description:** The previous handoff noted that the PWA burger menu was mistakenly added to  before being moved. It was recommended to verify the cleanup. This verification was not performed.
-    -   **Debug checklist:** View  and ensure no leftover state or UI elements related to the PWA burger menu exist.
-    -   **Why to solve this issue and what will be achieved with this?** Prevents dead code and potential UI bugs on the public website.
-    -   **Should Test frontend/backend/both after fix:** Frontend.
-    -   **Is recurring issue?** N
+-   None.
 
 **Known issue recurrence from previous fork**
--   **Issue recurrence in previous fork:**  - user-uploaded files are lost between sessions.
--   **Recurrence count:** 2
--   **Status:** NOT STARTED
+-   **Issue recurrence in previous fork:** .
+-   **Recurrence count:** 3
+-   **Status:** RESOLVED. The agent successfully implemented persistent Docker volumes for both the database () and file uploads ().
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-*   **Abstracted Service Layer:** The new  creates a separation of concerns, allowing the main application logic to send an SMS without knowing the specific provider (Textbelt, Twilio, etc.).
-*   **Dynamic Configuration:** The Super Admin can switch the SMS provider and update API keys at runtime without code changes or redeployment. This configuration is stored in the  collection in MongoDB.
-*   **Component-Driven UI:** New complex UI sections (Vitals History, Diagnoses Manager, SMS Settings) were built as separate, reusable React components.
-*   **Comprehensive Testing ():** The patient diagnoses feature was validated with a dedicated test file () created by the testing agent, ensuring backend robustness.
+*   **Production Deployment:** Deploying a full-stack application to a cloud VPS (Hetzner) using Docker, Docker Compose, Nginx (as a reverse proxy), and Certbot for SSL.
+*   **CI/CD Automation:** Using GitHub Actions to create a workflow that automatically deploys the application to the server upon a push to the  branch.
+*   **Persistent Storage:** Using named Docker volumes to ensure that database data and user-uploaded files are not lost when containers are updated or recreated.
+*   **Database Seeding:** Running a Python script on container startup to initialize the database with necessary data, such as a default admin user.
+*   **Web Performance Optimization:** Applying techniques like Gzip compression, browser caching (, ), code-splitting (), and script deferral to improve page load times.
+*   **Remote Debugging:** Assisting the user in diagnosing and fixing issues on a live production server by providing specific commands to execute and interpreting the output.
 
 **key DB schema**
--   ** (New):**
-    -   
--   ** (New):**
-    -   
+-   ****:  - This collection was the focus of the latest debugging effort.
 
 **changes in tech stack**
--   None.
+-   The application stack itself is unchanged, but the environment has transitioned from the Emergent preview environment to a self-managed production environment on Hetzner with Docker.
 
 **All files of reference**
-*   **/app/backend/server.py**: Heavily modified to add APIs for diagnoses, SMS settings, PDF date ranges, and to integrate notification triggers.
-*   **/app/frontend/src/pages/MedicalDashboard.jsx**: Heavily modified to include the new  and  components, and the PDF report date-range dialog.
-*   **/app/frontend/src/pages/UnifiedPWA.jsx**: Heavily modified to add the diagnoses feature to the vitals modal and fix the bug preventing patients from being displayed.
-*   **/app/backend/services/sms_service.py**: New file creating an abstracted service for sending SMS messages.
-*   **/app/frontend/src/components/SMSSettings.jsx**: New component for Super Admins to configure the SMS gateway.
-*   **/app/frontend/src/components/DiagnosesManager.jsx**: New component for managing patient diagnoses on the web dashboard.
-*   **/app/frontend/src/components/VitalSignsHistory.jsx**: New component for displaying patient vital signs history.
-*   **/app/backend/utils/email.py**: Modified to include new templates for booking notifications.
+*   **/app/.github/workflows/deploy.yml**: The core of the CI/CD pipeline. Defines steps to SSH into the server and run the deployment script.
+*   **/app/docker-compose.yml**: Defines the production services (frontend, backend, mongodb) and the persistent volumes.
+*   **/app/backend/start.sh**: The new entrypoint for the backend container, which runs the  script before starting the server.
+*   **/app/backend/init_db.py**: Script to create the super admin user if it doesn't exist.
+*   **/app/frontend/Dockerfile**: Production-ready, multi-stage Dockerfile that builds the React app and serves it with Nginx.
+*   **/app/frontend/nginx.conf**: Nginx configuration used inside the frontend container, providing compression and caching.
+*   **/app/frontend/src/App.js**: Modified to implement code-splitting with  for performance.
+*   **/app/frontend/src/pages/Login.jsx**: The demo credentials section was removed from this file.
+*   **/app/frontend/src/components/MapPicker.jsx**: Modified to fix the z-index issue with the autocomplete dropdown.
 
-**Areas that need refactoring**:
-*   **CRITICAL:**  is now over 4,600 lines. The newly added diagnoses, SMS, and notification logic must be extracted into separate FastAPI routers (e.g., in a  directory) to improve maintainability.
-*   **HIGH:**  and  remain monolithic and are difficult to manage. They should be broken down into smaller, more focused components.
+**Areas that need refactoring**
+*   **CRITICAL:**  is still large and contains routes for the Patient Portal and Admin dashboard that should be extracted.
+*   **CRITICAL:**  (2,895 lines) is a high priority for refactoring. The  and other view components should be extracted.
+*   **/app/frontend/src/components/FleetDispatch.jsx**: Another large component (over 2,700 lines) that is a candidate for future refactoring.
 
 **key api endpoints**
-*   : Manage patient diagnoses.
-*   : Delete a diagnosis.
-*   : Manage SMS gateway configuration (Super Admin only).
-*   : Send a test SMS message (Super Admin only).
-*   : View SMS sending logs (Super Admin only).
-*   : Manually send an SMS pickup reminder.
-*   : (Modified) Now accepts  and  query parameters.
+*   : This endpoint was analyzed during the image persistence debugging.
+*   : The static file path for serving uploaded images.
 
 **Critical Info for New Agent**
-*   Your first task is to **complete the email integration**. The templates are created in ; you need to call them from the booking endpoints in .
-*   **BE AWARE:** The preview environment has severe session instability issues. This makes frontend testing via screenshots very unreliable. You may need to rely on  tests for the backend and trust that the React code is correct if linting passes. Do not spend too much time trying to debug the session issue itself, as it appears to be environmental.
-*   After the email task, the user wants you to remove the SMS Gateway item from the main sidebar and only integrate SMS triggers into the booking flow (this seems contradictory, as the admin page is needed for config, so clarify if needed). The priority should be integrating more SMS/email triggers.
+*   The entire project has been migrated to a **live production server on Hetzner**. You are no longer working in the isolated Emergent preview environment.
+*   You **cannot access the server directly**. You must guide the user by providing precise shell commands to run in their SSH session.
+*   A **CI/CD pipeline is active**. All code changes should be saved to GitHub, which will automatically trigger the deployment workflow defined in . Do not instruct the user to run manual deployment commands unless the CI/CD pipeline fails.
+*   Your immediate priority is to solve **Issue #1: Missing images on live pages**. The root cause is missing  data in the database for certain sections. Guide the user to re-upload the images for the affected sections via the CMS.
+*   After the image issue is resolved, pivot back to the approved refactoring tasks for  and .
 
 **documents and test reports created in this job**
-*   
-*   
+*   /app/.github/workflows/deploy.yml
+*   /app/docker-compose.yml
+*   /app/backend/Dockerfile
+*   /app/frontend/Dockerfile
+*   /app/frontend/nginx.conf
+*   /app/backend/init_db.py
+*   /app/backend/start.sh
+*   /app/deployment/cloud-init.yaml
+*   /app/deployment/DEPLOYMENT_GUIDE.md
+*   /app/memory/PRD.md (updated for deployment and optimization)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Requested to move the Dijagnoze section above Napomene in the PWA Vitals modal. **Status: COMPLETED**
-2.  **User:** Asked to implement a free, swappable SMS gateway manageable by a Super Admin. **Status: COMPLETED**
-3.  **User:** Asked to remove the SMS settings page from the UI and instead integrate SMS triggers directly for booking confirmations and reminders. **Status: IN PROGRESS** (Integration started, UI removal pending clarification).
-4.  **User:** Requested to add email notifications for various booking triggers. **Status: IN PROGRESS**
-5.  **User:** Provided specific templates for the email notifications. **Status: IN PROGRESS** (Agent created templates).
-6.  **User:** Confirmed they want the agent to continue with the email integration using simple, nice templates. **Status: IN PROGRESS** (This is the current task).
-7.  **User:** Asked to find a UI/UX solution to add Diagnoses to the PWA. **Status: COMPLETED**
-8.  **User:** Reported not seeing the diagnoses tab on the PWA. **Status: RESOLVED** (Agent clarified it's inside the Vitals modal and fixed a bug preventing patients from showing).
-9.  **User:** Requested a time frame option for the PDF report and a search/expand feature for Vitals History. **Status: COMPLETED**
-10. **User:** Asked to add the diagnoses to the patient PDF report. **Status: COMPLETED**
+1.  **User:** On some of the pages, pictures are still not showing. Can you check the code manually on the live server? - **Status: IN PROGRESS**.
+2.  **Agent:** Explains they cannot SSH directly and asks the user to connect and run diagnostic commands.
+3.  **User:** Provides the output of total 8
+drwxr-xr-x  2 root root 4096 Feb  3 19:24 .
+drwxr-xr-x 13 root root 4096 Feb  3 19:55 .. and , confirming files exist and have correct DB URLs. - **Status: ADDRESSED**.
+4.  **Agent:** Analyzes the output, asks the user to run a  command to test image accessibility.
+5.  **User:** Provides  output, confirming images are served with HTTP 200. - **Status: ADDRESSED**.
+6.  **Agent:** Asks for a more detailed database dump to see  and  for each entry.
+7.  **User:** Provides the detailed database dump. - **Status: ADDRESSED**.
+8.  **Agent:** Analyzes the dump and identifies the root cause:  sections for medical-care and transport pages are missing the  field. Proposes  commands to check frontend code. - **Status: PENDING USER ACTION**.
+9.  **User:** lets first connect tothe server? (Appears to be a typo/misunderstanding of the agent's previous message) - **Status: ADDRESSED**.
+10. **Agent:** Clarifies that the user needs to run the commands in their existing SSH session and re-provides the commands.
 
 **Project Health Check:**
-*   **Broken:**
-    *   Frontend session/authentication in the preview environment is highly unstable, preventing reliable testing.
+*   **Broken:** None. The application is live and running. The current issues are content-related (missing image URLs in the DB).
 *   **Mocked:**
     *   Desktop Admin Dashboard sections: , .
     *    (History) view.
 
 **3rd Party Integrations**
-*   **Leaflet & Nominatim (OpenStreetMap):** Maps and address autocomplete.
-*   **OSRM (Open Source Routing Machine):** Backend ETA calculations.
-*   **reportlab:** PDF generation.
-*   **recharts:** Charts and graphs.
-*   **Jitsi Meet:** In-app video calls.
-*   **@dnd-kit:** Drag-and-drop.
-*   **Textbelt:** (New) Integrated as the default free SMS provider.
+*   **Hetzner:** Cloud VPS provider.
+*   **Docker/Docker-Compose:** Containerization and orchestration.
+*   **Nginx:** Reverse proxy and static file server.
+*   **Certbot:** SSL certificate management.
+*   **GitHub Actions:** CI/CD automation.
+*   (Existing) Leaflet & Nominatim, OSRM, reportlab, recharts, Jitsi Meet, @dnd-kit, Textbelt.
 
 **Testing status**
--   **Testing agent used after significant changes:** YES (for Patient Diagnoses feature).
+-   **Testing agent used after significant changes:** NO (Session focused on deployment).
 -   **Troubleshoot agent used after agent stuck in loop:** NO
--   **Test files created:** []
--   **Known regressions:** None in code, but the preview environment's session handling has regressed, making testing difficult.
+-   **Test files created:** None in this session.
+-   **Known regressions:** None.
 
 **Credentials to test flow:**
-*   **Super Admin:**  / 
-*   **Doctor (has bookings):**  / 
-*   **Driver (has bookings):**  / 
+The super admin user is automatically created on the production server on deployment.
+*   **Email:** 
+*   **Password:** 
 
 **What agent forgot to execute**
-*   The agent did not verify the cleanup of  as recommended in the initial handoff summary from the previous fork.</analysis>
+*   The agent was in the middle of diagnosing the missing image issue. The final diagnostic step—running  on the frontend code to find the exact section names being used—has been proposed but is pending user action.</analysis>
