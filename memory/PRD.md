@@ -299,3 +299,31 @@ A comprehensive medical transport system including a public website, patient por
 ## Known Limitations
 - Image uploads are ephemeral (stored on local filesystem)
 - Some desktop dashboard sections are placeholders (Patients, Statistics)
+
+## Forgot Password Feature (NEW Feb 4, 2026)
+
+**Implementation:**
+- "Forgot Password?" link added to login page (both English and Serbian)
+- Secure email-based password reset flow with 1-hour token expiration
+- Email sent via Loopia SMTP (info@paramedic-care018.rs)
+- Frontend pages: `/forgot-password` and `/reset-password`
+
+**API Endpoints:**
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/auth/forgot-password` | POST | Request password reset email |
+| `/api/auth/verify-reset-token` | GET | Validate reset token (without consuming it) |
+| `/api/auth/reset-password` | POST | Reset password with valid token |
+
+**Security Features:**
+- Always returns success message to prevent email enumeration attacks
+- JWT tokens with 1-hour expiration
+- Token type validation (prevents using email verification tokens for password reset)
+- Minimum password length enforcement (6 characters)
+
+**Frontend Components:**
+- `ForgotPassword.jsx` - Email input form with success/loading states
+- `ResetPassword.jsx` - Password reset form with token validation
+
+**Test Status:** All 17 backend tests passed (100%), Frontend UI fully tested
+
