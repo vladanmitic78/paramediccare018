@@ -911,6 +911,8 @@ async def verify_reset_token(token: str):
         raise
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid token")
+
+@api_router.post("/auth/login", response_model=TokenResponse)
 async def login(credentials: UserLogin):
     # Trim whitespace from email and password (helps with mobile keyboard issues)
     email = credentials.email.strip().lower()
