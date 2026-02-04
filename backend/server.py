@@ -799,7 +799,118 @@ async def verify_email(token: str):
     
     return {"message": "Email verified successfully! Welcome email has been sent.", "verified": True}
 
-@api_router.post("/auth/login", response_model=TokenResponse)
+
+# ============ PASSWORD RESET ============
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+    language: str = "sr"
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
+def create_password_reset_token(user_id: str) -> str:
+    """Create a JWT token for password reset (expires in 1 hour)"""
+    payload = {
+        "user_id": user_id,
+        "type": "password_reset",
+        "exp": datetime.now(timezone.utc) + timedelta(hours=1)
+    }
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+def verify_password_reset_token(token: str) -> dict:
+    """Verify and decode the password reset token"""
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        if payload.get("type") != "password_reset":
+            raise HTTPException(status_code=400, detail="Invalid token type")
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=400, detail="Password reset link has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=400, detail="Invalid password reset token")
+
+@api_router.post("/auth/forgot-password")
+async def forgot_password(request: ForgotPasswordRequest):
+    """Send password reset email"""
+    email = request.email.strip().lower()
+    
+    user = await db.users.find_one({"email": email}, {"_id": 0})
+    
+    # Always return success to prevent email enumeration attacks
+    if not user:
+        logger.info(f"Password reset requested for non-existent email: {email}")
+        return {"message": "If an account exists with this email, you will receive a password reset link."}
+    
+    if not user.get("is_active", True):
+        logger.info(f"Password reset requested for deactivated account: {email}")
+        return {"message": "If an account exists with this email, you will receive a password reset link."}
+    
+    # Create password reset token
+    reset_token = create_password_reset_token(user["id"])
+    reset_link = f"{FRONTEND_URL}/reset-password?token={reset_token}"
+    
+    # Get language preference from user or request
+    language = user.get("language", request.language)
+    
+    # Send password reset email
+    subject, body = get_password_reset_email_template(user["full_name"], reset_link, language)
+    email_sent = await send_email(email, subject, body)
+    
+    if email_sent:
+        logger.info(f"Password reset email sent to: {email}")
+    else:
+        logger.error(f"Failed to send password reset email to: {email}")
+    
+    return {"message": "If an account exists with this email, you will receive a password reset link."}
+
+@api_router.post("/auth/reset-password")
+async def reset_password(request: ResetPasswordRequest):
+    """Reset user's password with the provided token"""
+    # Verify the token
+    payload = verify_password_reset_token(request.token)
+    user_id = payload["user_id"]
+    
+    # Get the user
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if not user.get("is_active", True):
+        raise HTTPException(status_code=400, detail="Account is deactivated")
+    
+    # Validate new password
+    if len(request.new_password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+    
+    # Hash and update the password
+    hashed_password = hash_password(request.new_password)
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {
+            "password": hashed_password,
+            "password_updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    logger.info(f"Password reset successful for user: {user_id}")
+    
+    return {"message": "Password has been reset successfully. You can now log in with your new password."}
+
+@api_router.get("/auth/verify-reset-token")
+async def verify_reset_token(token: str):
+    """Verify if a password reset token is valid (without consuming it)"""
+    try:
+        payload = verify_password_reset_token(token)
+        user = await db.users.find_one({"id": payload["user_id"]}, {"_id": 0, "password": 0})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        return {"valid": True, "email": user["email"]}
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid token")
 async def login(credentials: UserLogin):
     # Trim whitespace from email and password (helps with mobile keyboard issues)
     email = credentials.email.strip().lower()
