@@ -123,6 +123,10 @@ function App() {
               {/* Email Verification without header/footer */}
               <Route path="/verify-email" element={<VerifyEmail />} />
               
+              {/* Password Reset without header/footer */}
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              
               {/* Patient Portal without header/footer */}
               <Route path="/patient" element={<PatientRoute><PatientDashboard /></PatientRoute>} />
               <Route path="/patient/book" element={<PatientRoute><PatientBookingWizard /></PatientRoute>} />
