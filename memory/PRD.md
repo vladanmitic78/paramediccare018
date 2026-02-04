@@ -503,3 +503,55 @@ A comprehensive medical transport system including a public website, patient por
 ## Known Limitations
 - Image uploads are ephemeral (stored on local filesystem)
 - Some desktop dashboard sections are placeholders (Patients, Statistics)
+
+## Performance Optimizations (Feb 4, 2026)
+
+### Image Upload Optimization
+**Automatic Server-Side Image Optimization:**
+- All uploaded images are automatically optimized using Pillow
+- Images resized to max 1920px width (maintains aspect ratio)
+- JPEG compression at quality 85 (good balance of quality/size)
+- PNG files with transparency preserved, others converted to JPEG
+- SVG files passed through unchanged
+- Logs show compression ratio achieved
+
+**API Response (enhanced):**
+```javascript
+{
+  "success": true,
+  "filename": "20260204_123456_abc12345.jpg",
+  "url": "/api/uploads/filename.jpg",
+  "size": 85432,          // Optimized size
+  "original_size": 256789, // Original size
+  "optimized": true,      // Was optimization applied?
+  "type": "image/jpg"
+}
+```
+
+### Render-Blocking Resource Fixes
+- Removed `@import` for Google Fonts from CSS (was blocking render)
+- Google Fonts now loaded asynchronously via `media="print"` trick
+- Reduced font weights (8 → 5) to decrease download size
+- Added `fetchpriority="high"` to critical font preload
+- Inline critical CSS in `index.html` for faster FCP
+
+### Image Loading Optimization
+- Hero images: `fetchPriority="high"` for LCP improvement
+- Below-fold images: `loading="lazy"` and `decoding="async"`
+- Added to MedicalCare, Transport, and Home pages
+
+### Nginx Caching (Enhanced)
+- Added image file caching (jpg, png, gif, svg, webp) - 1 year
+- Added `gzip_proxied any` for better compression
+- Added `Vary: Accept-Encoding` header
+- CORS headers for fonts
+
+### CMS Data Fix
+- `init_db.py` now auto-fixes existing page_content documents
+- Adds missing fields: `id`, `is_active`, `order`, `updated_at`, etc.
+- Ensures CMS editing works properly after deployment
+
+## Known Limitations (Updated)
+- ~~Image uploads are ephemeral (stored on local filesystem)~~ **FIXED** - Docker volumes persist uploads
+- Some desktop dashboard sections are placeholders (Patients, Statistics)
+- OPERACIJE → Istorija (History) view is mocked
