@@ -46,7 +46,7 @@ export const Footer = () => {
   const companyAddress = footerContent?.['company-info']?.[language === 'sr' ? 'content_sr' : 'content_en'] || 
     (language === 'sr' ? 'Žarka Zrenjanina 50A, 18103 Niš (Pantelej), Srbija' : 'Žarka Zrenjanina 50A, 18103 Niš (Pantelej), Serbia');
   
-  const phoneNumber = footerContent?.phone?.[language === 'sr' ? 'content_sr' : 'content_en'] || '+381 18 123 456';
+  const phoneNumber = footerContent?.phone?.[language === 'sr' ? 'content_sr' : 'content_en'] || '+381 66 81 01 007';
   
   const legalInfo = footerContent?.legal?.[language === 'sr' ? 'content_sr' : 'content_en'] || 'PIB: 115243796 | MB: 68211557';
   

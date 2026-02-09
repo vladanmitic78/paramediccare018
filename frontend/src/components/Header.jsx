@@ -144,7 +144,7 @@ export const Header = () => {
     'https://customer-assets.emergentagent.com/job_433955cc-2ea1-4976-bce7-1cf9f8ad9654/artifacts/j7ye45w5_Paramedic%20Care%20018%20Logo.jpg';
   
   // Get emergency phone from CMS or use default
-  const emergencyPhone = headerContent?.['emergency-banner']?.[language === 'sr' ? 'content_sr' : 'content_en'] || '+381 18 123 456';
+  const emergencyPhone = headerContent?.['emergency-banner']?.[language === 'sr' ? 'content_sr' : 'content_en'] || '+381 66 81 01 007';
 
   const navItems = [
     { path: '/', label: t('nav_home') },
