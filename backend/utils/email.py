@@ -48,7 +48,7 @@ def get_email_footer(language: str = "sr"):
         <div style="background-color: #f1f5f9; padding: 20px; text-align: center; font-size: 12px; color: #64748b; margin-top: 30px;">
             <p style="margin: 5px 0;"><strong>Paramedic Care 018</strong></p>
             <p style="margin: 5px 0;">Žarka Zrenjanina 50A, 18103 Niš, Serbia</p>
-            <p style="margin: 5px 0;">Phone: +381 18 123 456 | Email: info@paramedic-care018.rs</p>
+            <p style="margin: 5px 0;">Phone: +381 66 81 01 007 | Email: info@paramedic-care018.rs</p>
             <p style="margin: 5px 0;">PIB: 115243796 | MB: 68211557</p>
             <p style="margin: 15px 0 5px 0; font-size: 11px;">© 2026 Paramedic Care 018. All rights reserved.</p>
         </div>
@@ -58,7 +58,7 @@ def get_email_footer(language: str = "sr"):
         <div style="background-color: #f1f5f9; padding: 20px; text-align: center; font-size: 12px; color: #64748b; margin-top: 30px;">
             <p style="margin: 5px 0;"><strong>Paramedic Care 018</strong></p>
             <p style="margin: 5px 0;">Žarka Zrenjanina 50A, 18103 Niš, Srbija</p>
-            <p style="margin: 5px 0;">Telefon: +381 18 123 456 | Email: info@paramedic-care018.rs</p>
+            <p style="margin: 5px 0;">Telefon: +381 66 81 01 007 | Email: info@paramedic-care018.rs</p>
             <p style="margin: 5px 0;">PIB: 115243796 | MB: 68211557</p>
             <p style="margin: 15px 0 5px 0; font-size: 11px;">© 2026 Paramedic Care 018. Sva prava zadržana.</p>
         </div>
@@ -173,7 +173,7 @@ def get_transport_email_template(template_type: str, data: dict, language: str =
                     </p>
                     
                     <p style="color: #64748b; font-size: 13px; margin-top: 30px;">
-                        Za sva pitanja pozovite nas na <strong>+381 18 123 456</strong>
+                        Za sva pitanja pozovite nas na <strong>+381 66 81 01 007</strong>
                     </p>
                 </div>
                 {footer}
@@ -223,7 +223,7 @@ def get_transport_email_template(template_type: str, data: dict, language: str =
                     </p>
                     
                     <p style="color: #64748b; font-size: 13px; margin-top: 30px;">
-                        For any questions, call us at <strong>+381 18 123 456</strong>
+                        For any questions, call us at <strong>+381 66 81 01 007</strong>
                     </p>
                 </div>
                 {footer}
@@ -629,7 +629,7 @@ def get_password_reset_email_template(full_name: str, reset_link: str, language:
                 </div>
                 
                 <p style="color: #64748b; font-size: 13px; margin-top: 30px;">
-                    Za sva pitanja pozovite nas na <strong>+381 18 123 456</strong>
+                    Za sva pitanja pozovite nas na <strong>+381 66 81 01 007</strong>
                 </p>
             </div>
             {footer}
@@ -664,7 +664,7 @@ def get_password_reset_email_template(full_name: str, reset_link: str, language:
                 </div>
                 
                 <p style="color: #64748b; font-size: 13px; margin-top: 30px;">
-                    For any questions, call us at <strong>+381 18 123 456</strong>
+                    For any questions, call us at <strong>+381 66 81 01 007</strong>
                 </p>
             </div>
             {footer}

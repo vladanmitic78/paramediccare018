@@ -289,7 +289,7 @@ def get_registration_email_template(full_name: str, email: str, language: str = 
                 <!-- Emergency Contact -->
                 <div style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-radius: 12px; padding: 20px; margin: 20px 0; text-align: center;">
                     <p style="margin: 0 0 10px 0; color: #991b1b; font-weight: 600;">🚨 Emergency Contact</p>
-                    <p style="margin: 0; color: #dc2626; font-size: 24px; font-weight: 700;">+381 18 123 456</p>
+                    <p style="margin: 0; color: #dc2626; font-size: 24px; font-weight: 700;">+381 66 81 01 007</p>
                     <p style="margin: 5px 0 0 0; color: #7f1d1d; font-size: 12px;">Available 24/7</p>
                 </div>
                 
@@ -382,7 +382,7 @@ def get_registration_email_template(full_name: str, email: str, language: str = 
                 <!-- Emergency Contact -->
                 <div style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-radius: 12px; padding: 20px; margin: 20px 0; text-align: center;">
                     <p style="margin: 0 0 10px 0; color: #991b1b; font-weight: 600;">🚨 Hitna linija</p>
-                    <p style="margin: 0; color: #dc2626; font-size: 24px; font-weight: 700;">+381 18 123 456</p>
+                    <p style="margin: 0; color: #dc2626; font-size: 24px; font-weight: 700;">+381 66 81 01 007</p>
                     <p style="margin: 5px 0 0 0; color: #7f1d1d; font-size: 12px;">Dostupno 24/7</p>
                 </div>
                 
@@ -524,7 +524,7 @@ def get_contact_autoreply_template(name: str, inquiry_type: str, language: str =
                 </div>
                 
                 <p style="color: #334155; line-height: 1.6;">For urgent medical transport needs, please call us directly:</p>
-                <p style="color: #0ea5e9; font-size: 20px; font-weight: bold; margin: 15px 0;">+381 18 123 456</p>
+                <p style="color: #0ea5e9; font-size: 20px; font-weight: bold; margin: 15px 0;">+381 66 81 01 007</p>
                 
                 <p style="color: #334155; line-height: 1.6; margin-top: 30px;">Best regards,<br><strong>Paramedic Care 018 Team</strong></p>
             </div>
@@ -549,7 +549,7 @@ def get_contact_autoreply_template(name: str, inquiry_type: str, language: str =
                 </div>
                 
                 <p style="color: #334155; line-height: 1.6;">Za hitne potrebe medicinskog transporta, pozovite nas direktno:</p>
-                <p style="color: #0ea5e9; font-size: 20px; font-weight: bold; margin: 15px 0;">+381 18 123 456</p>
+                <p style="color: #0ea5e9; font-size: 20px; font-weight: bold; margin: 15px 0;">+381 66 81 01 007</p>
                 
                 <p style="color: #334155; line-height: 1.6; margin-top: 30px;">Srdačan pozdrav,<br><strong>Tim Paramedic Care 018</strong></p>
             </div>
@@ -621,7 +621,7 @@ def get_booking_confirmation_template(patient_name: str, booking_date: str, star
                 </div>
                 
                 <p style="color: #334155; line-height: 1.6;">For any questions or changes to your booking, please contact us:</p>
-                <p style="color: #0ea5e9; font-size: 18px; font-weight: bold; margin: 10px 0;">+381 18 123 456</p>
+                <p style="color: #0ea5e9; font-size: 18px; font-weight: bold; margin: 10px 0;">+381 66 81 01 007</p>
                 <p style="color: #64748b; font-size: 14px;">info@paramedic-care018.rs</p>
                 
                 <p style="color: #334155; line-height: 1.6; margin-top: 30px;">Best regards,<br><strong>Paramedic Care 018 Team</strong></p>
@@ -682,7 +682,7 @@ def get_booking_confirmation_template(patient_name: str, booking_date: str, star
                 </div>
                 
                 <p style="color: #334155; line-height: 1.6;">Za sva pitanja ili izmene rezervacije, kontaktirajte nas:</p>
-                <p style="color: #0ea5e9; font-size: 18px; font-weight: bold; margin: 10px 0;">+381 18 123 456</p>
+                <p style="color: #0ea5e9; font-size: 18px; font-weight: bold; margin: 10px 0;">+381 66 81 01 007</p>
                 <p style="color: #64748b; font-size: 14px;">info@paramedic-care018.rs</p>
                 
                 <p style="color: #334155; line-height: 1.6; margin-top: 30px;">Srdačan pozdrav,<br><strong>Tim Paramedic Care 018</strong></p>
@@ -2458,7 +2458,7 @@ def generate_invoice_pdf(invoice: dict) -> io.BytesIO:
             <b>PARAMEDIC CARE 018</b><br/>
             Žarka Zrenjanina 50A, 18103 Niš, Srbija<br/>
             PIB: 115243796 | MB: 68211557<br/>
-            Tel: +381 18 123 456 | Email: info@paramedic-care018.rs
+            Tel: +381 66 81 01 007 | Email: info@paramedic-care018.rs
             """, header_style)
             header_data = [[logo, company_text]]
         else:
@@ -2466,7 +2466,7 @@ def generate_invoice_pdf(invoice: dict) -> io.BytesIO:
             <b>PARAMEDIC CARE 018</b><br/>
             Žarka Zrenjanina 50A, 18103 Niš, Srbija<br/>
             PIB: 115243796 | MB: 68211557<br/>
-            Tel: +381 18 123 456 | Email: info@paramedic-care018.rs
+            Tel: +381 66 81 01 007 | Email: info@paramedic-care018.rs
             """, header_style)
             header_data = [['', company_text]]
     except Exception as e:
@@ -2475,7 +2475,7 @@ def generate_invoice_pdf(invoice: dict) -> io.BytesIO:
         <b>PARAMEDIC CARE 018</b><br/>
         Žarka Zrenjanina 50A, 18103 Niš, Srbija<br/>
         PIB: 115243796 | MB: 68211557<br/>
-        Tel: +381 18 123 456 | Email: info@paramedic-care018.rs
+        Tel: +381 66 81 01 007 | Email: info@paramedic-care018.rs
         """, header_style)
         header_data = [['', company_text]]
     
@@ -5106,8 +5106,8 @@ async def seed_page_content(user: dict = Depends(require_roles([UserRole.ADMIN, 
             "section": "emergency-phone",
             "title_sr": "Hitna linija",
             "title_en": "Emergency Line",
-            "content_sr": "+381 18 123 456",
-            "content_en": "+381 18 123 456",
+            "content_sr": "+381 66 81 01 007",
+            "content_en": "+381 66 81 01 007",
             "order": 4,
             "is_active": True,
             "updated_at": datetime.now(timezone.utc).isoformat(),
@@ -5409,8 +5409,8 @@ async def seed_page_content(user: dict = Depends(require_roles([UserRole.ADMIN, 
             "section": "emergency-banner",
             "title_sr": "Hitna pomoć",
             "title_en": "Emergency Help",
-            "content_sr": "+381 18 123 456",
-            "content_en": "+381 18 123 456",
+            "content_sr": "+381 66 81 01 007",
+            "content_en": "+381 66 81 01 007",
             "order": 2,
             "is_active": True,
             "updated_at": datetime.now(timezone.utc).isoformat(),
@@ -5436,8 +5436,8 @@ async def seed_page_content(user: dict = Depends(require_roles([UserRole.ADMIN, 
             "section": "phone",
             "title_sr": "Telefon",
             "title_en": "Phone",
-            "content_sr": "+381 18 123 456",
-            "content_en": "+381 18 123 456",
+            "content_sr": "+381 66 81 01 007",
+            "content_en": "+381 66 81 01 007",
             "order": 2,
             "is_active": True,
             "updated_at": datetime.now(timezone.utc).isoformat(),
@@ -5630,7 +5630,7 @@ async def seed_data():
             "email": "admin@paramedic-care018.rs",
             "password": hash_password("Admin123!"),
             "full_name": "Super Administrator",
-            "phone": "+381 18 123 456",
+            "phone": "+381 66 81 01 007",
             "role": UserRole.SUPERADMIN,
             "is_active": True,
             "created_at": datetime.now(timezone.utc).isoformat()
