@@ -55,7 +55,7 @@ const Home = () => {
       ? 'Zakažite medicinski transport brzo i jednostavno. Naš tim je spreman da vam pomogne.'
       : 'Book medical transport quickly and easily. Our team is ready to help you.');
   
-  const emergencyPhone = homeContent?.['emergency-phone']?.[language === 'sr' ? 'content_sr' : 'content_en'] || '+381 18 123 456';
+  const emergencyPhone = homeContent?.['emergency-phone']?.[language === 'sr' ? 'content_sr' : 'content_en'] || '+381 66 81 01 007';
 
   // Gallery section title from CMS
   const galleryTitle = homeContent?.['gallery-title']?.[language === 'sr' ? 'title_sr' : 'title_en'] || 

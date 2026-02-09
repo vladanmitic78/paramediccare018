@@ -77,8 +77,8 @@ const Contact = () => {
     {
       icon: Phone,
       title: language === 'sr' ? 'Telefon' : 'Phone',
-      lines: ['+381 18 123 456'],
-      link: 'tel:+38118123456'
+      lines: ['+381 66 81 01 007'],
+      link: 'tel:+381668101007'
     },
     {
       icon: Ambulance,
@@ -334,10 +334,10 @@ const Contact = () => {
                   : 'Call us immediately for emergencies'}
               </p>
             </div>
-            <a href="tel:+38118123456">
+            <a href="tel:+381668101007">
               <Button className="bg-white text-red-600 hover:bg-red-50 rounded-full px-8 py-6 text-lg font-semibold">
                 <Phone className="w-5 h-5 mr-2" />
-                +381 18 123 456
+                +381 66 81 01 007
               </Button>
             </a>
           </div>

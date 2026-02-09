@@ -480,10 +480,10 @@ const Booking = () => {
                 ? 'Za hitne slučajeve pozovite nas direktno'
                 : 'For emergencies call us directly'}
             </p>
-            <a href="tel:+38118123456">
+            <a href="tel:+381668101007">
               <Button variant="outline" className="gap-2 text-lg">
                 <Phone className="w-5 h-5" />
-                +381 18 123 456
+                +381 66 81 01 007
               </Button>
             </a>
           </div>
