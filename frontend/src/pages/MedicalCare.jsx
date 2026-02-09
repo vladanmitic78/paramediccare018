@@ -137,12 +137,12 @@ const MedicalCare = () => {
                     {language === 'sr' ? 'Zakažite' : 'Book Now'}
                   </Button>
                 </Link>
-                <Link to="/contact">
+                <a href="tel:+381668101007">
                   <Button variant="outline" className="btn-outline gap-2">
                     <Phone className="w-4 h-4" />
-                    {language === 'sr' ? 'Pozovite nas' : 'Call Us'}
+                    +381 66 81 01 007
                   </Button>
-                </Link>
+                </a>
               </div>
             </div>
 
