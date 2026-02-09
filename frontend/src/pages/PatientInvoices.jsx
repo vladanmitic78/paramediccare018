@@ -107,7 +107,7 @@ const PatientInvoices = () => {
         </div>
         
         <div class="footer">
-          <p>Paramedic Care 018 | info@paramedic-care018.rs | +381 18 123 456</p>
+          <p>Paramedic Care 018 | info@paramedic-care018.rs | +381 66 81 01 007</p>
         </div>
         
         <script>window.print();</script>

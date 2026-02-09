@@ -193,7 +193,7 @@ const PatientDashboard = () => {
               </Button>
               
               {/* Emergency Button */}
-              <a href="tel:+381181234567" className="hidden sm:flex">
+              <a href="tel:+381668101007" className="hidden sm:flex">
                 <Button variant="outline" className="gap-2 border-red-200 text-red-600 hover:bg-red-50">
                   <Phone className="w-4 h-4" />
                   <span className="hidden md:inline">{language === 'sr' ? 'Hitna linija' : 'Emergency'}</span>
@@ -433,9 +433,9 @@ const PatientDashboard = () => {
                 </p>
               </div>
             </div>
-            <a href="tel:+381181234567" className="w-full sm:w-auto">
+            <a href="tel:+381668101007" className="w-full sm:w-auto">
               <Button className="w-full sm:w-auto bg-white text-red-600 hover:bg-red-50 text-base sm:text-lg px-6 sm:px-8 py-2.5 sm:py-3 font-bold">
-                +381 18 123 456
+                +381 66 81 01 007
               </Button>
             </a>
           </div>
