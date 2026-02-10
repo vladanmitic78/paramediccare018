@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -31,6 +31,7 @@ const Contact = () => {
   const { language, t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [pageContent, setPageContent] = useState({});
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -38,6 +39,28 @@ const Contact = () => {
     message: '',
     inquiry_type: 'general'
   });
+
+  // Fetch CMS content
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const response = await axios.get(`${API}/pages/contact`);
+        const content = {};
+        response.data.forEach(item => {
+          content[item.section] = item;
+        });
+        setPageContent(content);
+      } catch (error) {
+        console.error('Error fetching contact content:', error);
+      }
+    };
+    fetchContent();
+  }, []);
+
+  // Get phone number from CMS or use default
+  const contactPhone = pageContent?.['contact-phone']?.[language === 'sr' ? 'content_sr' : 'content_en'] || '+381 66 81 01 007';
+  const emergencyPhone = pageContent?.['emergency-phone']?.[language === 'sr' ? 'content_sr' : 'content_en'] || '+381 66 81 01 007';
+  const companyAddress = pageContent?.['address']?.[language === 'sr' ? 'content_sr' : 'content_en'] || 'Žarka Zrenjanina 50A, 18103 Niš (Pantelej), Serbia';
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
