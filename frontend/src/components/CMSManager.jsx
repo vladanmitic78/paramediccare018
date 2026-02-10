@@ -913,6 +913,193 @@ const CMSManager = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Add Content Guide Dialog */}
+      <Dialog open={showAddGuide} onOpenChange={setShowAddGuide}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-sky-600" />
+              {language === 'sr' ? 'Dodaj ili Izmeni Sadržaj' : 'Add or Edit Content'}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-6 py-4">
+            {/* Explanation */}
+            <div className="bg-sky-50 border border-sky-200 rounded-lg p-4">
+              <p className="text-sm text-sky-800">
+                {language === 'sr' 
+                  ? '📌 Fiksne sekcije mogu se samo MENJATI (postoji samo jedna od svake). Sekcije koje možete DODAVATI omogućavaju kreiranje više stavki.'
+                  : '📌 Fixed sections can only be EDITED (only one of each exists). Addable sections allow you to CREATE multiple items.'}
+              </p>
+            </div>
+
+            {/* Fixed Sections */}
+            {getPageConfig(selectedPage).fixed.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-amber-600" />
+                  {language === 'sr' ? 'Fiksne Sekcije (samo izmena)' : 'Fixed Sections (edit only)'}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {getPageConfig(selectedPage).fixed.map((section) => {
+                    const exists = sectionExists(section.id);
+                    return (
+                      <button
+                        key={section.id}
+                        onClick={() => handleAddTypeSelect('fixed', section)}
+                        className={`p-4 border rounded-xl text-left transition-all hover:shadow-md ${
+                          exists 
+                            ? 'border-emerald-200 bg-emerald-50 hover:border-emerald-400' 
+                            : 'border-slate-200 bg-white hover:border-sky-400'
+                        }`}
+                        data-testid={`add-fixed-${section.id}`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <p className="font-medium text-slate-900">
+                              {language === 'sr' ? section.name_sr : section.name_en}
+                            </p>
+                            <p className="text-xs text-slate-500 mt-1">
+                              {language === 'sr' ? section.desc_sr : section.desc_en}
+                            </p>
+                          </div>
+                          {exists ? (
+                            <Badge className="bg-emerald-100 text-emerald-700 shrink-0">
+                              <Edit className="w-3 h-3 mr-1" />
+                              {language === 'sr' ? 'Izmeni' : 'Edit'}
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="shrink-0">
+                              <Plus className="w-3 h-3 mr-1" />
+                              {language === 'sr' ? 'Kreiraj' : 'Create'}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-400 mt-2 font-mono">section: {section.id}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Addable Sections */}
+            {getPageConfig(selectedPage).addable.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                  <Plus className="w-4 h-4 text-emerald-600" />
+                  {language === 'sr' ? 'Sekcije koje možete dodavati' : 'Sections you can add'}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {getPageConfig(selectedPage).addable.map((section) => {
+                    const existingCount = content.filter(c => 
+                      c.page === selectedPage && c.section.startsWith(section.prefix + '-')
+                    ).length;
+                    const canAddMore = existingCount < section.max;
+                    const nextNum = getNextSectionNumber(section.prefix);
+                    
+                    return (
+                      <button
+                        key={section.prefix}
+                        onClick={() => canAddMore && handleAddTypeSelect('addable', section)}
+                        disabled={!canAddMore}
+                        className={`p-4 border rounded-xl text-left transition-all ${
+                          canAddMore 
+                            ? 'border-emerald-200 bg-white hover:border-emerald-400 hover:shadow-md' 
+                            : 'border-slate-200 bg-slate-50 opacity-60 cursor-not-allowed'
+                        }`}
+                        data-testid={`add-addable-${section.prefix}`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <p className="font-medium text-slate-900">
+                              {language === 'sr' ? section.name_sr : section.name_en}
+                            </p>
+                            <p className="text-xs text-slate-500 mt-1">
+                              {language === 'sr' ? section.desc_sr : section.desc_en}
+                            </p>
+                          </div>
+                          {canAddMore ? (
+                            <Badge className="bg-emerald-100 text-emerald-700 shrink-0">
+                              <Plus className="w-3 h-3 mr-1" />
+                              {language === 'sr' ? 'Dodaj' : 'Add'}
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary" className="shrink-0">
+                              {language === 'sr' ? 'Maksimum' : 'Max'}
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <p className="text-xs text-slate-400 font-mono">
+                            {language === 'sr' ? 'Sledeća' : 'Next'}: {section.prefix}-{nextNum}
+                          </p>
+                          <span className="text-xs text-slate-400">•</span>
+                          <p className="text-xs text-slate-400">
+                            {existingCount}/{section.max} {language === 'sr' ? 'kreirano' : 'created'}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Existing addable items - quick edit list */}
+            {getPageConfig(selectedPage).addable.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-slate-600" />
+                  {language === 'sr' ? 'Postojeće stavke (kliknite za izmenu)' : 'Existing items (click to edit)'}
+                </h3>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {content
+                    .filter(c => c.page === selectedPage && getPageConfig(selectedPage).addable.some(a => c.section.startsWith(a.prefix + '-')))
+                    .sort((a, b) => a.order - b.order)
+                    .map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          openEditDialog(item);
+                          setShowAddGuide(false);
+                        }}
+                        className="w-full p-3 border border-slate-200 rounded-lg text-left hover:border-sky-400 hover:bg-sky-50 transition-all flex items-center justify-between gap-3"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <Badge variant="outline" className="font-mono text-xs shrink-0">{item.section}</Badge>
+                          <span className="text-sm text-slate-700 truncate">
+                            {language === 'sr' ? item.title_sr : item.title_en}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {!item.is_active && (
+                            <Badge variant="secondary" className="text-xs">
+                              {language === 'sr' ? 'Neaktivno' : 'Inactive'}
+                            </Badge>
+                          )}
+                          <Edit className="w-4 h-4 text-slate-400" />
+                        </div>
+                      </button>
+                    ))}
+                  {content.filter(c => c.page === selectedPage && getPageConfig(selectedPage).addable.some(a => c.section.startsWith(a.prefix + '-'))).length === 0 && (
+                    <p className="text-sm text-slate-400 text-center py-4">
+                      {language === 'sr' ? 'Nema postojećih stavki' : 'No existing items'}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddGuide(false)}>
+              {language === 'sr' ? 'Zatvori' : 'Close'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
