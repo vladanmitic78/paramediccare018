@@ -255,9 +255,17 @@ const Transport = () => {
                 className="card-base service-transport hover:shadow-lg transition-shadow"
                 data-testid={`transport-card-${i}`}
               >
-                <div className="w-14 h-14 bg-red-100 rounded-xl flex items-center justify-center mb-6">
-                  <service.icon className="w-7 h-7 text-red-600" />
-                </div>
+                {service.image_url ? (
+                  <img 
+                    src={service.image_url} 
+                    alt={service.title}
+                    className="w-full h-32 object-cover rounded-xl mb-6"
+                  />
+                ) : (
+                  <div className="w-14 h-14 bg-red-100 rounded-xl flex items-center justify-center mb-6">
+                    <service.icon className="w-7 h-7 text-red-600" />
+                  </div>
+                )}
                 
                 <h3 className="text-xl font-semibold text-slate-900 mb-3">
                   {service.title}
