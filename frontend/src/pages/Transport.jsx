@@ -131,28 +131,47 @@ const Transport = () => {
     }
   ].filter(Boolean);
 
+  // Feature icons mapping
+  const featureIconMap = {
+    clock: Clock,
+    shield: Shield,
+    map: MapPin,
+    truck: Truck
+  };
+
+  // Get feature from CMS or use default
+  const getFeatureFromCMS = (num) => {
+    const section = pageContent?.[`feature-${num}`];
+    if (!section) return null;
+    return {
+      icon: featureIconMap[section.icon] || Clock,
+      title: section[language === 'sr' ? 'title_sr' : 'title_en'],
+      desc: section[language === 'sr' ? 'content_sr' : 'content_en']
+    };
+  };
+
   const features = [
-    { 
+    getFeatureFromCMS(1) || { 
       icon: Clock, 
       title: language === 'sr' ? 'Dostupnost 24/7' : '24/7 Availability',
       desc: language === 'sr' ? 'Uvek smo tu kada vam zatrebamo' : 'We are always here when you need us'
     },
-    { 
+    getFeatureFromCMS(2) || { 
       icon: Shield, 
       title: language === 'sr' ? 'Bezbednost' : 'Safety',
       desc: language === 'sr' ? 'Najviši standardi bezbednosti' : 'Highest safety standards'
     },
-    { 
+    getFeatureFromCMS(3) || { 
       icon: MapPin, 
       title: language === 'sr' ? 'Širom Srbije' : 'Across Serbia',
       desc: language === 'sr' ? 'Pokrivamo celu teritoriju' : 'We cover the entire territory'
     },
-    { 
+    getFeatureFromCMS(4) || { 
       icon: Truck, 
       title: language === 'sr' ? 'Moderna flota' : 'Modern Fleet',
       desc: language === 'sr' ? 'Najnovija vozila i oprema' : 'Latest vehicles and equipment'
     },
-  ];
+  ].filter(Boolean);
 
   return (
     <div className="min-h-screen" data-testid="transport-page">
