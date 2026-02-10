@@ -687,15 +687,30 @@ const CMSManager = () => {
                 </div>
                 {formData.image_url && (
                   <div className="mt-2 p-2 border border-slate-200 rounded-lg bg-slate-50">
-                    <img 
-                      src={formData.image_url} 
-                      alt="Preview" 
-                      className="h-20 w-auto object-cover rounded"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                      }}
-                    />
-                    <p className="text-xs text-slate-500 mt-1 truncate max-w-xs">{formData.image_url}</p>
+                    <div className="flex items-start gap-3">
+                      <img 
+                        src={formData.image_url} 
+                        alt="Preview" 
+                        className="h-20 w-auto object-cover rounded"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                      <div className="flex-1">
+                        <p className="text-xs text-slate-500 truncate max-w-xs">{formData.image_url}</p>
+                        <Button 
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="mt-2"
+                          onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
+                          data-testid="delete-image-btn"
+                        >
+                          <Trash2 className="w-3 h-3 mr-1" />
+                          {language === 'sr' ? 'Obriši sliku' : 'Delete image'}
+                        </Button>
+                      </div>
+                    </div></p>
                   </div>
                 )}
               </div>
