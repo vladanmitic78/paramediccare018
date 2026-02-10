@@ -377,6 +377,16 @@ const CMSManager = () => {
                       <h4 className="font-semibold text-slate-900">{item.title_sr}</h4>
                       {item.subtitle_sr && <p className="text-sm text-slate-500">{item.subtitle_sr}</p>}
                       <p className="text-sm text-slate-600 mt-1 whitespace-pre-wrap">{item.content_sr}</p>
+                      {item.features_sr && (
+                        <div className="mt-2 pt-2 border-t border-slate-200">
+                          <p className="text-xs text-slate-400 mb-1">{language === 'sr' ? 'Stavke:' : 'Features:'}</p>
+                          <div className="flex flex-wrap gap-1">
+                            {item.features_sr.split('|').map((f, i) => (
+                              <span key={i} className="text-xs bg-red-50 text-red-700 px-2 py-0.5 rounded">✓ {f.trim()}</span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                     
                     {/* English */}
@@ -388,6 +398,16 @@ const CMSManager = () => {
                       <h4 className="font-semibold text-slate-900">{item.title_en}</h4>
                       {item.subtitle_en && <p className="text-sm text-slate-500">{item.subtitle_en}</p>}
                       <p className="text-sm text-slate-600 mt-1 whitespace-pre-wrap">{item.content_en}</p>
+                      {item.features_en && (
+                        <div className="mt-2 pt-2 border-t border-slate-200">
+                          <p className="text-xs text-slate-400 mb-1">Features:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {item.features_en.split('|').map((f, i) => (
+                              <span key={i} className="text-xs bg-red-50 text-red-700 px-2 py-0.5 rounded">✓ {f.trim()}</span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
