@@ -148,9 +148,9 @@ const Home = () => {
                 {heroTitle}
               </h1>
               
-              <p className="text-lg text-slate-600 leading-relaxed mb-8 max-w-xl">
-                {heroSubtitle}
-              </p>
+              <div className="mb-8 max-w-xl">
+                {formatContent(heroSubtitle, 'sky')}
+              </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/booking">
