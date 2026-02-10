@@ -33,7 +33,8 @@ import {
   PanelTop,
   PanelBottom,
   Lock,
-  Upload
+  Upload,
+  Phone
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
