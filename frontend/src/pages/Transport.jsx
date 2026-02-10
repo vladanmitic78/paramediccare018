@@ -317,10 +317,10 @@ const Transport = () => {
                 {language === 'sr' ? 'Online Rezervacija' : 'Online Booking'}
               </Button>
             </Link>
-            <a href={`tel:${emergencyPhone.replace(/\s/g, '')}`}>
+            <a href={`tel:${transportPhone.replace(/\s/g, '')}`}>
               <Button variant="outline" className="border-2 border-white text-white hover:bg-white/10 rounded-full px-8 py-3 font-medium">
                 <Phone className="w-4 h-4 mr-2" />
-                {emergencyPhone}
+                {transportPhone}
               </Button>
             </a>
           </div>
