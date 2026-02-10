@@ -47,6 +47,80 @@ const iconOptions = [
   'Phone', 'Mail', 'MapPin', 'Star', 'Award', 'CheckCircle'
 ];
 
+// Section configuration per page - defines which sections are fixed vs addable
+const PAGE_SECTIONS_CONFIG = {
+  transport: {
+    fixed: [
+      { id: 'hero', name_sr: 'Glavni Baner', name_en: 'Hero Banner', desc_sr: 'Glavni naslov i slika na vrhu stranice', desc_en: 'Main title and image at the top of the page' },
+      { id: 'transport-phone', name_sr: 'Telefon za Rezervacije', name_en: 'Booking Phone', desc_sr: 'Broj telefona pored dugmeta za rezervaciju', desc_en: 'Phone number next to booking button' },
+      { id: 'emergency-phone', name_sr: 'Hitna Linija', name_en: 'Emergency Phone', desc_sr: 'Broj za hitne slučajeve u plutajućoj kartici', desc_en: 'Emergency number in floating card' },
+      { id: 'services-title', name_sr: 'Naslov Usluga', name_en: 'Services Title', desc_sr: 'Naslov sekcije "Vrste Transporta"', desc_en: 'Title for "Transport Types" section' },
+      { id: 'fleet', name_sr: 'Flota Vozila', name_en: 'Vehicle Fleet', desc_sr: 'Sekcija sa slikom i opisom flote', desc_en: 'Section with fleet image and description' },
+      { id: 'cta', name_sr: 'Poziv na Akciju', name_en: 'Call to Action', desc_sr: 'Sekcija na dnu stranice sa dugmićima', desc_en: 'Bottom section with action buttons' },
+    ],
+    addable: [
+      { prefix: 'service', name_sr: 'Kartica Usluge', name_en: 'Service Card', desc_sr: 'Kartica u sekciji "Vrste Transporta" (service-1, service-2...)', desc_en: 'Card in "Transport Types" section (service-1, service-2...)', max: 6 },
+      { prefix: 'feature', name_sr: 'Karakteristika', name_en: 'Feature Icon', desc_sr: 'Ikonica u crvenoj traci (feature-1, feature-2...)', desc_en: 'Icon in the red bar (feature-1, feature-2...)', max: 6 },
+    ]
+  },
+  home: {
+    fixed: [
+      { id: 'hero', name_sr: 'Glavni Baner', name_en: 'Hero Banner', desc_sr: 'Glavni naslov i slika na početnoj stranici', desc_en: 'Main title and image on homepage' },
+      { id: 'cta', name_sr: 'Poziv na Akciju', name_en: 'Call to Action', desc_sr: 'Sekcija sa dugmićima za akciju', desc_en: 'Section with action buttons' },
+    ],
+    addable: [
+      { prefix: 'service', name_sr: 'Kartica Usluge', name_en: 'Service Card', desc_sr: 'Kartica usluge na početnoj stranici', desc_en: 'Service card on homepage', max: 6 },
+      { prefix: 'feature', name_sr: 'Karakteristika', name_en: 'Feature', desc_sr: 'Stavka u sekciji karakteristika', desc_en: 'Item in features section', max: 8 },
+    ]
+  },
+  'medical-care': {
+    fixed: [
+      { id: 'hero', name_sr: 'Glavni Baner', name_en: 'Hero Banner', desc_sr: 'Glavni naslov stranice medicinske nege', desc_en: 'Main title of medical care page' },
+      { id: 'cta', name_sr: 'Poziv na Akciju', name_en: 'Call to Action', desc_sr: 'Sekcija na dnu stranice', desc_en: 'Bottom section of page' },
+    ],
+    addable: [
+      { prefix: 'service', name_sr: 'Medicinska Usluga', name_en: 'Medical Service', desc_sr: 'Kartica medicinske usluge', desc_en: 'Medical service card', max: 8 },
+    ]
+  },
+  contact: {
+    fixed: [
+      { id: 'hero', name_sr: 'Glavni Baner', name_en: 'Hero Banner', desc_sr: 'Naslov kontakt stranice', desc_en: 'Contact page title' },
+      { id: 'phone', name_sr: 'Telefon', name_en: 'Phone', desc_sr: 'Glavni broj telefona', desc_en: 'Main phone number' },
+      { id: 'email', name_sr: 'Email', name_en: 'Email', desc_sr: 'Email adresa', desc_en: 'Email address' },
+      { id: 'address', name_sr: 'Adresa', name_en: 'Address', desc_sr: 'Fizička adresa', desc_en: 'Physical address' },
+      { id: 'hours', name_sr: 'Radno Vreme', name_en: 'Working Hours', desc_sr: 'Radno vreme', desc_en: 'Working hours' },
+    ],
+    addable: []
+  },
+  about: {
+    fixed: [
+      { id: 'hero', name_sr: 'Glavni Baner', name_en: 'Hero Banner', desc_sr: 'Naslov stranice o nama', desc_en: 'About page title' },
+      { id: 'mission', name_sr: 'Misija', name_en: 'Mission', desc_sr: 'Naša misija', desc_en: 'Our mission' },
+      { id: 'vision', name_sr: 'Vizija', name_en: 'Vision', desc_sr: 'Naša vizija', desc_en: 'Our vision' },
+    ],
+    addable: [
+      { prefix: 'team', name_sr: 'Član Tima', name_en: 'Team Member', desc_sr: 'Profil člana tima', desc_en: 'Team member profile', max: 10 },
+      { prefix: 'value', name_sr: 'Vrednost', name_en: 'Value', desc_sr: 'Naše vrednosti', desc_en: 'Our values', max: 6 },
+    ]
+  },
+  header: {
+    fixed: [
+      { id: 'logo', name_sr: 'Logo', name_en: 'Logo', desc_sr: 'Logo sajta', desc_en: 'Website logo' },
+      { id: 'company-name', name_sr: 'Naziv Firme', name_en: 'Company Name', desc_sr: 'Naziv koji se prikazuje u headeru', desc_en: 'Name displayed in header' },
+    ],
+    addable: []
+  },
+  footer: {
+    fixed: [
+      { id: 'copyright', name_sr: 'Copyright', name_en: 'Copyright', desc_sr: 'Tekst autorskih prava', desc_en: 'Copyright text' },
+      { id: 'contact-info', name_sr: 'Kontakt Info', name_en: 'Contact Info', desc_sr: 'Kontakt informacije u footeru', desc_en: 'Contact information in footer' },
+    ],
+    addable: [
+      { prefix: 'social', name_sr: 'Društvena Mreža', name_en: 'Social Link', desc_sr: 'Link na društvenu mrežu', desc_en: 'Social media link', max: 6 },
+    ]
+  }
+};
+
 const CMSManager = () => {
   const { language } = useLanguage();
   const { user } = useAuth();
