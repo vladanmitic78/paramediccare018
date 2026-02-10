@@ -501,8 +501,20 @@ const CMSManager = () => {
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
                     <Badge variant="outline" className="font-mono text-xs">{item.section}</Badge>
+                    {getSectionType(item.page, item.section) === 'fixed' && (
+                      <Badge className="bg-amber-100 text-amber-700 text-xs">
+                        <Lock className="w-3 h-3 mr-1" />
+                        {language === 'sr' ? 'Fiksna' : 'Fixed'}
+                      </Badge>
+                    )}
+                    {getSectionType(item.page, item.section) === 'addable' && (
+                      <Badge className="bg-sky-100 text-sky-700 text-xs">
+                        <Plus className="w-3 h-3 mr-1" />
+                        {language === 'sr' ? 'Dodato' : 'Added'}
+                      </Badge>
+                    )}
                     <Badge className={item.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}>
                       {item.is_active 
                         ? (language === 'sr' ? 'Aktivno' : 'Active')
