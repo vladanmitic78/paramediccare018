@@ -230,23 +230,59 @@ const CMSManager = () => {
   };
 
   const openAddDialog = () => {
-    setEditingItem(null);
-    setFormData({
-      page: selectedPage,
-      section: '',
-      title_sr: '',
-      title_en: '',
-      subtitle_sr: '',
-      subtitle_en: '',
-      content_sr: '',
-      content_en: '',
-      features_sr: '',
-      features_en: '',
-      image_url: '',
-      icon: '',
-      order: content.filter(c => c.page === selectedPage).length + 1,
-      is_active: true
-    });
+    // Show the guided add dialog instead of direct form
+    setShowAddGuide(true);
+    setSelectedAddType(null);
+  };
+
+  // Handle selection from the add guide
+  const handleAddTypeSelect = (type, config) => {
+    if (type === 'fixed') {
+      // Fixed section - should edit existing, not add new
+      const existingItem = content.find(c => c.page === selectedPage && c.section === config.id);
+      if (existingItem) {
+        openEditDialog(existingItem);
+        setShowAddGuide(false);
+        return;
+      }
+      // If doesn't exist yet, create it
+      setFormData({
+        page: selectedPage,
+        section: config.id,
+        title_sr: config.name_sr,
+        title_en: config.name_en,
+        subtitle_sr: '',
+        subtitle_en: '',
+        content_sr: '',
+        content_en: '',
+        features_sr: '',
+        features_en: '',
+        image_url: '',
+        icon: '',
+        order: content.filter(c => c.page === selectedPage).length + 1,
+        is_active: true
+      });
+    } else {
+      // Addable section - auto-generate section name
+      const nextNum = getNextSectionNumber(config.prefix);
+      setFormData({
+        page: selectedPage,
+        section: `${config.prefix}-${nextNum}`,
+        title_sr: '',
+        title_en: '',
+        subtitle_sr: '',
+        subtitle_en: '',
+        content_sr: '',
+        content_en: '',
+        features_sr: '',
+        features_en: '',
+        image_url: '',
+        icon: '',
+        order: content.filter(c => c.page === selectedPage).length + 1,
+        is_active: true
+      });
+    }
+    setShowAddGuide(false);
     setIsDialogOpen(true);
   };
 
