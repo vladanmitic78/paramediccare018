@@ -194,10 +194,14 @@ const Home = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent" />
               </div>
               
-              {/* Floating card */}
-              <div className="absolute -bottom-6 -left-6 bg-white rounded-xl shadow-xl p-4 border border-slate-100">
+              {/* Floating card - Clickable Emergency Line */}
+              <a 
+                href={`tel:${emergencyPhone.replace(/\s/g, '')}`}
+                className="absolute -bottom-6 -left-6 bg-white rounded-xl shadow-xl p-4 border border-slate-100 hover:shadow-2xl hover:scale-105 transition-all cursor-pointer group"
+                data-testid="emergency-phone-card"
+              >
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                  <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center group-hover:bg-red-200 transition-colors">
                     <Phone className="w-6 h-6 text-red-600" />
                   </div>
                   <div>
@@ -207,7 +211,7 @@ const Home = () => {
                     <p className="font-bold text-slate-900">{emergencyPhone}</p>
                   </div>
                 </div>
-              </div>
+              </a>
             </div>
           </div>
         </div>
