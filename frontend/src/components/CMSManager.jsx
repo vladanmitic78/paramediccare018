@@ -351,7 +351,7 @@ const CMSManager = () => {
           filteredContent.sort((a, b) => a.order - b.order).map((item) => (
             <div 
               key={item.id} 
-              className={`card-base border-l-4 ${item.is_active ? 'border-l-emerald-500' : 'border-l-slate-300'}`}
+              className={`card-base border-l-4 ${item.is_active ? 'border-l-emerald-500' : 'border-l-red-400 opacity-60 bg-slate-50'}`}
               data-testid={`content-item-${item.id}`}
             >
               <div className="flex items-start justify-between gap-4">
