@@ -12,6 +12,7 @@ import {
   Building2
 } from 'lucide-react';
 import axios from 'axios';
+import { formatContent } from '../utils/formatContent';
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
