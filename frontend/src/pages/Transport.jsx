@@ -93,7 +93,8 @@ const Transport = () => {
       icon: iconMap[section.icon] || Ambulance,
       title: section[language === 'sr' ? 'title_sr' : 'title_en'],
       description: section[language === 'sr' ? 'content_sr' : 'content_en'],
-      features: features ? features.split('|') : []
+      features: features ? features.split('|') : [],
+      image_url: section.image_url || null
     };
   };
 
