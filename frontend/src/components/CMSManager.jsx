@@ -351,7 +351,7 @@ const CMSManager = () => {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
-                    <Badge variant="outline">{item.section}</Badge>
+                    <Badge variant="outline" className="font-mono text-xs">{item.section}</Badge>
                     <Badge className={item.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}>
                       {item.is_active 
                         ? (language === 'sr' ? 'Aktivno' : 'Active')
@@ -359,6 +359,13 @@ const CMSManager = () => {
                     </Badge>
                     {item.icon && <Badge variant="secondary">{item.icon}</Badge>}
                   </div>
+                  
+                  {/* Description - explains what this section controls */}
+                  {(item.description_sr || item.description_en) && (
+                    <p className="text-xs text-sky-600 bg-sky-50 px-2 py-1 rounded mb-3">
+                      📍 {language === 'sr' ? item.description_sr : item.description_en}
+                    </p>
+                  )}
                   
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     {/* Serbian */}
@@ -369,7 +376,7 @@ const CMSManager = () => {
                       </div>
                       <h4 className="font-semibold text-slate-900">{item.title_sr}</h4>
                       {item.subtitle_sr && <p className="text-sm text-slate-500">{item.subtitle_sr}</p>}
-                      <p className="text-sm text-slate-600 mt-1 line-clamp-2">{item.content_sr}</p>
+                      <p className="text-sm text-slate-600 mt-1 whitespace-pre-wrap">{item.content_sr}</p>
                     </div>
                     
                     {/* English */}
@@ -380,7 +387,7 @@ const CMSManager = () => {
                       </div>
                       <h4 className="font-semibold text-slate-900">{item.title_en}</h4>
                       {item.subtitle_en && <p className="text-sm text-slate-500">{item.subtitle_en}</p>}
-                      <p className="text-sm text-slate-600 mt-1 line-clamp-2">{item.content_en}</p>
+                      <p className="text-sm text-slate-600 mt-1 whitespace-pre-wrap">{item.content_en}</p>
                     </div>
                   </div>
 
