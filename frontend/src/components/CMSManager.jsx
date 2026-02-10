@@ -710,7 +710,7 @@ const CMSManager = () => {
                           {language === 'sr' ? 'Obriši sliku' : 'Delete image'}
                         </Button>
                       </div>
-                    </div></p>
+                    </div>
                   </div>
                 )}
               </div>
