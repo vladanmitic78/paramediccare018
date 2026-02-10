@@ -41,6 +41,12 @@ const About = () => {
   const heroImage = pageContent?.hero?.image_url || null;
   const missionImage = pageContent?.mission?.image_url || null;
 
+  // Get content from CMS or use defaults
+  const heroTitle = pageContent?.hero?.[language === 'sr' ? 'title_sr' : 'title_en'] || t('about_subtitle');
+  const heroText = pageContent?.hero?.[language === 'sr' ? 'content_sr' : 'content_en'] || t('about_text');
+  const missionTitle = pageContent?.mission?.[language === 'sr' ? 'title_sr' : 'title_en'] || t('about_mission');
+  const missionText = pageContent?.mission?.[language === 'sr' ? 'content_sr' : 'content_en'] || t('about_mission_text');
+
   const values = [
     { 
       icon: Shield, 
