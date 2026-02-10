@@ -521,6 +521,11 @@ const CMSManager = () => {
                   onChange={handleInputChange}
                   data-testid="order-input"
                 />
+                <p className="text-xs text-slate-400">
+                  {language === 'sr' 
+                    ? 'Manji broj = prikazuje se prvi na stranici (1 je na vrhu)'
+                    : 'Lower number = appears first on page (1 is at top)'}
+                </p>
               </div>
             </div>
 
