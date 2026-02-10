@@ -74,6 +74,7 @@ const Transport = () => {
       : 'Easily book medical transport through our online form or call us directly.');
 
   const emergencyPhone = pageContent?.['emergency-phone']?.[language === 'sr' ? 'content_sr' : 'content_en'] || '+381 66 81 01 007';
+  const transportPhone = pageContent?.['transport-phone']?.[language === 'sr' ? 'content_sr' : 'content_en'] || '+381 66 81 01 007';
 
   const services = [
     {
