@@ -152,19 +152,13 @@ const About = () => {
                   <Target className="w-6 h-6 text-sky-600" />
                 </div>
                 <h2 className="text-2xl md:text-3xl font-bold text-slate-900">
-                  {t('about_mission')}
+                  {missionTitle}
                 </h2>
               </div>
               
-              <p className="text-lg text-slate-600 leading-relaxed mb-6">
-                {t('about_mission_text')}
-              </p>
-
-              <p className="text-slate-600 mb-6">
-                {language === 'sr'
-                  ? 'Naša misija je da pružimo najkvalitetniju medicinsku negu i transport, osiguravajući bezbednost i udobnost svakog pacijenta. Verujemo da svaka osoba zaslužuje pristup profesionalnoj medicinskoj pomoći, bez obzira na okolnosti.'
-                  : 'Our mission is to provide the highest quality medical care and transport, ensuring the safety and comfort of every patient. We believe that every person deserves access to professional medical assistance, regardless of circumstances.'}
-              </p>
+              <div className="mb-6">
+                {formatContent(missionText, 'sky')}
+              </div>
 
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
