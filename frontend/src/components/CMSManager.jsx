@@ -726,8 +726,8 @@ const CMSManager = () => {
                 </p>
                 <p className="text-sm text-slate-500">
                   {language === 'sr' 
-                    ? 'Prikaži ovaj sadržaj na stranici'
-                    : 'Show this content on the page'}
+                    ? 'Kada je ISKLJUČENO, sekcija neće biti vidljiva na javnoj stranici'
+                    : 'When OFF, this section will NOT appear on the public page'}
                 </p>
               </div>
               <Switch
