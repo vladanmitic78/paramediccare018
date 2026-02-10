@@ -281,9 +281,9 @@ const MedicalCare = () => {
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             {ctaTitle}
           </h2>
-          <p className="text-lg text-sky-100 mb-8 max-w-xl mx-auto">
-            {ctaContent}
-          </p>
+          <div className="text-lg text-sky-100 mb-8 max-w-xl mx-auto">
+            {formatContent(ctaContent, 'sky')}
+          </div>
           <Link to="/contact">
             <Button className="bg-white text-sky-600 hover:bg-sky-50 rounded-full px-8 py-3 font-medium">
               {language === 'sr' ? 'Kontaktirajte Nas' : 'Contact Us'}
