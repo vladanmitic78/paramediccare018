@@ -150,6 +150,8 @@ const CMSManager = () => {
       subtitle_en: item.subtitle_en || '',
       content_sr: item.content_sr,
       content_en: item.content_en,
+      features_sr: item.features_sr || '',
+      features_en: item.features_en || '',
       image_url: item.image_url || '',
       icon: item.icon || '',
       order: item.order,
