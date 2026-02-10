@@ -150,10 +150,45 @@ const CMSManager = () => {
 
   const isSuperAdmin = user?.role === 'superadmin';
   const fileInputRef = useRef(null);
+  const [showAddGuide, setShowAddGuide] = useState(false);
+  const [selectedAddType, setSelectedAddType] = useState(null);
 
   useEffect(() => {
     fetchContent();
   }, []);
+
+  // Get page configuration
+  const getPageConfig = (page) => PAGE_SECTIONS_CONFIG[page] || { fixed: [], addable: [] };
+  
+  // Check if a section is fixed (edit-only) or addable (can have multiples)
+  const getSectionType = (page, section) => {
+    const config = getPageConfig(page);
+    const isFixed = config.fixed.some(f => f.id === section);
+    if (isFixed) return 'fixed';
+    
+    const addableMatch = config.addable.find(a => section.startsWith(a.prefix));
+    if (addableMatch) return 'addable';
+    
+    return 'custom';
+  };
+
+  // Get next available section number for addable types
+  const getNextSectionNumber = (prefix) => {
+    const existingSections = content.filter(c => 
+      c.page === selectedPage && c.section.startsWith(prefix + '-')
+    );
+    const numbers = existingSections.map(c => {
+      const match = c.section.match(new RegExp(`^${prefix}-(\\d+)$`));
+      return match ? parseInt(match[1], 10) : 0;
+    });
+    const maxNum = numbers.length > 0 ? Math.max(...numbers) : 0;
+    return maxNum + 1;
+  };
+
+  // Check if section already exists
+  const sectionExists = (section) => {
+    return content.some(c => c.page === selectedPage && c.section === section);
+  };
 
   const fetchContent = async () => {
     setLoading(true);
