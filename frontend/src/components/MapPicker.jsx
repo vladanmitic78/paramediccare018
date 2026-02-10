@@ -283,7 +283,8 @@ export const MapPicker = ({
         {showSuggestions && suggestions.length > 0 && (
           <div 
             ref={suggestionsRef}
-            className="absolute z-50 w-full mt-1 bg-white rounded-lg shadow-lg border border-slate-200 max-h-60 overflow-y-auto"
+            className="absolute w-full mt-1 bg-white rounded-lg shadow-lg border border-slate-200 max-h-60 overflow-y-auto"
+            style={{ zIndex: 9999 }}
             data-testid={`suggestions-${markerColor}`}
           >
             {suggestions.map((suggestion, index) => {
