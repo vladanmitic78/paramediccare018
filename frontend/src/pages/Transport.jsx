@@ -251,9 +251,9 @@ const Transport = () => {
                 {heroTitle}
               </h1>
               
-              <p className="text-lg text-slate-600 leading-relaxed mb-8">
-                {heroSubtitle}
-              </p>
+              <div className="mb-8">
+                {formatContent(heroSubtitle)}
+              </div>
 
               <div className="flex flex-wrap gap-4">
                 <Link to="/booking">
