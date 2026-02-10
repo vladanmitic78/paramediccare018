@@ -95,13 +95,13 @@ const Contact = () => {
     {
       icon: MapPin,
       title: t('contact_address'),
-      lines: ['Žarka Zrenjanina 50A', '18103 Niš (Pantelej), Serbia']
+      lines: companyAddress.split(',').map(s => s.trim())
     },
     {
       icon: Phone,
       title: language === 'sr' ? 'Telefon' : 'Phone',
-      lines: ['+381 66 81 01 007'],
-      link: 'tel:+381668101007'
+      lines: [contactPhone],
+      link: `tel:${contactPhone.replace(/\s/g, '')}`
     },
     {
       icon: Ambulance,
