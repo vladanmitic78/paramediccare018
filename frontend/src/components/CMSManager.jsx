@@ -254,8 +254,8 @@ const CMSManager = () => {
     }
   };
 
-  // Filter content: show only active entries for the selected page
-  const filteredContent = content.filter(c => c.page === selectedPage && c.is_active !== false);
+  // Filter content: show ALL entries for the selected page (including inactive for admin visibility)
+  const filteredContent = content.filter(c => c.page === selectedPage);
 
   // Admin pages: Home, Medical Care, Transport, About
   // Super Admin pages: All admin pages + Header, Footer
