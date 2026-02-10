@@ -66,6 +66,8 @@ const CMSManager = () => {
     subtitle_en: '',
     content_sr: '',
     content_en: '',
+    features_sr: '',
+    features_en: '',
     image_url: '',
     icon: '',
     order: 0,
