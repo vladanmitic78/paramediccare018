@@ -1969,7 +1969,7 @@ const FleetDispatch = () => {
                   )}
                 </div>
                 {pickupSuggestions.length > 0 && (
-                  <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                  <div className="absolute w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto" style={{ zIndex: 9999 }}>
                     {pickupSuggestions.map((suggestion, idx) => (
                       <button
                         key={idx}
