@@ -204,7 +204,12 @@ export const MapPicker = ({
     // Reverse geocode
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${newPosition.lat}&lon=${newPosition.lng}`
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${newPosition.lat}&lon=${newPosition.lng}`,
+        {
+          headers: {
+            'Accept-Language': 'en'
+          }
+        }
       );
       const data = await response.json();
       const address = data.display_name || `${newPosition.lat.toFixed(5)}, ${newPosition.lng.toFixed(5)}`;
