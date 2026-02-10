@@ -90,12 +90,12 @@ const About = () => {
               </div>
               
               <h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight mb-6">
-                {t('about_subtitle')}
+                {heroTitle}
               </h1>
               
-              <p className="text-lg text-slate-600 leading-relaxed">
-                {t('about_text')}
-              </p>
+              <div className="leading-relaxed">
+                {formatContent(heroText, 'sky')}
+              </div>
             </div>
 
             <div className="relative">
