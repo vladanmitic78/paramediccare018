@@ -76,8 +76,29 @@ const Transport = () => {
   const emergencyPhone = pageContent?.['emergency-phone']?.[language === 'sr' ? 'content_sr' : 'content_en'] || '+381 66 81 01 007';
   const transportPhone = pageContent?.['transport-phone']?.[language === 'sr' ? 'content_sr' : 'content_en'] || '+381 66 81 01 007';
 
+  // Icon mapping for CMS services
+  const iconMap = {
+    ambulance: Ambulance,
+    building: Building2,
+    home: Home
+  };
+
+  // Get services from CMS or use defaults
+  const getServiceFromCMS = (sectionNum) => {
+    const section = pageContent?.[`service-${sectionNum}`];
+    if (!section) return null;
+    
+    const features = section[language === 'sr' ? 'features_sr' : 'features_en'];
+    return {
+      icon: iconMap[section.icon] || Ambulance,
+      title: section[language === 'sr' ? 'title_sr' : 'title_en'],
+      description: section[language === 'sr' ? 'content_sr' : 'content_en'],
+      features: features ? features.split('|') : []
+    };
+  };
+
   const services = [
-    {
+    getServiceFromCMS(1) || {
       icon: Ambulance,
       title: language === 'sr' ? 'Transport sanitetom' : 'Ambulance Transport',
       description: language === 'sr' 
@@ -87,7 +108,7 @@ const Transport = () => {
         ? ['Moderna oprema', 'Klimatizovano vozilo', 'Medicinska pratnja']
         : ['Modern equipment', 'Air-conditioned vehicle', 'Medical escort']
     },
-    {
+    getServiceFromCMS(2) || {
       icon: Building2,
       title: language === 'sr' ? 'Transport između bolnica' : 'Hospital-to-Hospital Transport',
       description: language === 'sr'
@@ -97,7 +118,7 @@ const Transport = () => {
         ? ['Koordinacija sa bolnicama', 'Kontinuitet nege', 'Dokumentacija']
         : ['Hospital coordination', 'Continuity of care', 'Documentation']
     },
-    {
+    getServiceFromCMS(3) || {
       icon: Home,
       title: language === 'sr' ? 'Transport od kuće do bolnice' : 'Home-to-Hospital Transport',
       description: language === 'sr'
@@ -107,7 +128,7 @@ const Transport = () => {
         ? ['Pomoć pri ukrcavanju', 'Udoban transport', 'Pratnja do prijema']
         : ['Boarding assistance', 'Comfortable transport', 'Escort to admission']
     }
-  ];
+  ].filter(Boolean);
 
   const features = [
     { 
