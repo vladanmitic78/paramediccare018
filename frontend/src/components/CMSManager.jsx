@@ -563,6 +563,20 @@ const CMSManager = () => {
                     data-testid="content-sr-input"
                   />
                 </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-600" />
+                    Stavke / Bullet Points
+                  </label>
+                  <Input
+                    name="features_sr"
+                    value={formData.features_sr}
+                    onChange={handleInputChange}
+                    placeholder="Stavka 1|Stavka 2|Stavka 3 (odvojite sa |)"
+                    data-testid="features-sr-input"
+                  />
+                  <p className="text-xs text-slate-400">Odvojite stavke sa | znakom</p>
+                </div>
               </div>
             </div>
 
@@ -606,6 +620,20 @@ const CMSManager = () => {
                     rows={4}
                     data-testid="content-en-input"
                   />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-600" />
+                    Features / Bullet Points
+                  </label>
+                  <Input
+                    name="features_en"
+                    value={formData.features_en}
+                    onChange={handleInputChange}
+                    placeholder="Feature 1|Feature 2|Feature 3 (separate with |)"
+                    data-testid="features-en-input"
+                  />
+                  <p className="text-xs text-slate-400">Separate features with | character</p>
                 </div>
               </div>
             </div>
