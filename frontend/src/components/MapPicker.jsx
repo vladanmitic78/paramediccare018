@@ -169,7 +169,12 @@ export const MapPicker = ({
     setShowSuggestions(false);
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&countrycodes=rs`
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`,
+        {
+          headers: {
+            'Accept-Language': 'en'
+          }
+        }
       );
       const data = await response.json();
       
