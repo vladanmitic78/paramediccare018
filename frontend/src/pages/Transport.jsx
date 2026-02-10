@@ -160,10 +160,10 @@ const Transport = () => {
                     {language === 'sr' ? 'Zakažite Transport' : 'Book Transport'}
                   </Button>
                 </Link>
-                <a href={`tel:${emergencyPhone.replace(/\s/g, '')}`}>
+                <a href={`tel:${transportPhone.replace(/\s/g, '')}`}>
                   <Button variant="outline" className="btn-outline gap-2">
                     <Phone className="w-4 h-4" />
-                    {emergencyPhone}
+                    {transportPhone}
                   </Button>
                 </a>
               </div>
