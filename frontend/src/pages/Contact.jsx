@@ -357,10 +357,10 @@ const Contact = () => {
                   : 'Call us immediately for emergencies'}
               </p>
             </div>
-            <a href="tel:+381668101007">
+            <a href={`tel:${emergencyPhone.replace(/\s/g, '')}`}>
               <Button className="bg-white text-red-600 hover:bg-red-50 rounded-full px-8 py-6 text-lg font-semibold">
                 <Phone className="w-5 h-5 mr-2" />
-                +381 66 81 01 007
+                {emergencyPhone}
               </Button>
             </a>
           </div>
