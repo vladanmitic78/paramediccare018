@@ -256,6 +256,7 @@ const CMSManager = () => {
     { id: 'home', label: language === 'sr' ? 'Početna' : 'Home', icon: Home, color: 'text-emerald-600' },
     { id: 'medical-care', label: language === 'sr' ? 'Medicinska Nega' : 'Medical Care', icon: Stethoscope, color: 'text-sky-600' },
     { id: 'transport', label: 'Transport', icon: Ambulance, color: 'text-red-600' },
+    { id: 'contact', label: language === 'sr' ? 'Kontakt' : 'Contact', icon: Phone, color: 'text-green-600' },
     { id: 'about', label: language === 'sr' ? 'O Nama' : 'About Us', icon: Info, color: 'text-slate-600' },
   ];
 
