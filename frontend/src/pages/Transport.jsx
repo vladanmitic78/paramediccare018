@@ -174,19 +174,23 @@ const Transport = () => {
                 alt="Ambulance"
                 className="rounded-2xl shadow-2xl w-full h-[400px] object-cover"
               />
-              <div className="absolute -bottom-6 -left-6 bg-white rounded-xl shadow-xl p-4 border border-slate-100">
+              <a 
+                href={`tel:${emergencyPhone.replace(/\s/g, '')}`}
+                className="absolute -bottom-6 -left-6 bg-white rounded-xl shadow-xl p-4 border border-slate-100 hover:shadow-2xl hover:scale-105 transition-all cursor-pointer group"
+                data-testid="emergency-phone-card"
+              >
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center animate-pulse">
+                  <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center animate-pulse group-hover:bg-red-200">
                     <Phone className="w-6 h-6 text-red-600" />
                   </div>
                   <div>
                     <p className="text-xs text-slate-500 uppercase tracking-wide">
-                      {language === 'sr' ? 'Hitna linija' : 'Emergency'}
+                      {language === 'sr' ? 'Hitna linija' : 'Emergency Line'}
                     </p>
-                    <p className="font-bold text-slate-900">24/7</p>
+                    <p className="font-bold text-slate-900">{emergencyPhone}</p>
                   </div>
                 </div>
-              </div>
+              </a>
             </div>
           </div>
         </div>
