@@ -248,7 +248,8 @@ const CMSManager = () => {
     }
   };
 
-  const filteredContent = content.filter(c => c.page === selectedPage);
+  // Filter content: show only active entries for the selected page
+  const filteredContent = content.filter(c => c.page === selectedPage && c.is_active !== false);
 
   // Admin pages: Home, Medical Care, Transport, About
   // Super Admin pages: All admin pages + Header, Footer
