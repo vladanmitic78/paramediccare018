@@ -80,10 +80,11 @@ export const MapPicker = ({
     setLoadingSuggestions(true);
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=rs&limit=5&addressdetails=1`,
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`,
         {
           headers: {
             'Accept': 'application/json',
+            'Accept-Language': 'en',
             'User-Agent': 'ParamedicCare018/1.0'
           }
         }
