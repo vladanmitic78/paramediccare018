@@ -1,6 +1,7 @@
 {
   "short_name": "PC018 Medical",
   "name": "Paramedic Care 018 - Medical Staff",
+  "id": "/medical-pwa",
   "icons": [
     {
       "src": "logo.jpg",
@@ -17,5 +18,7 @@
   "display": "standalone",
   "theme_color": "#0f172a",
   "background_color": "#0f172a",
-  "orientation": "portrait"
+  "orientation": "portrait",
+  "prefer_related_applications": false,
+  "related_applications": []
 }
