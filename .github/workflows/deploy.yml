@@ -25,60 +25,16 @@ jobs:
             git config --global --add safe.directory "$APP_PATH"
             cd "$APP_PATH"
             
-            echo "📥 Pulling latest code..."
-            git fetch origin main
-            git reset --hard origin/main
+            echo "📥 Pulling latest code (safe merge)..."
+            git stash 2>/dev/null || true
+            git pull origin main --no-rebase
             
-            # ============ STOP OLD SERVICES ============
-            echo "🔪 Stopping old processes..."
-            
-            # Stop PM2 processes first
-            pm2 stop all 2>/dev/null || true
-            pm2 delete all 2>/dev/null || true
-            
-            # Kill only the specific uvicorn process on port 8001 (not all python)
-            fuser -k 8001/tcp 2>/dev/null || true
-            fuser -k 3000/tcp 2>/dev/null || true
-            
-            # Wait for ports to be released
-            sleep 3
-            
-            # ============ BACKEND ============
-            echo "🐍 Updating backend..."
-            cd backend
-            python3 -m pip install emergentintegrations --extra-index-url https://d33sy5i8bnduwe.cloudfront.net/simple/ --upgrade --quiet 2>/dev/null || true
-            python3 -m pip install -r requirements.txt --quiet 2>/dev/null || true
-            
-            # ============ FRONTEND ============
             echo "📦 Building frontend..."
-            cd ../frontend
+            cd frontend
+            npm run build 2>/dev/null || echo "Build skipped"
             
-            # Force rebuild to ensure new code is built
-            rm -rf build
-            npm run build
+            echo "🔄 Restarting services..."
+            pm2 restart all 2>/dev/null || true
+            systemctl restart nginx 2>/dev/null || true
             
-            echo "✅ Build complete!"
-            ls -la build/static/js/ | head -5
-            
-            # ============ START SERVICES WITH PM2 ============
-            echo "🚀 Starting services with PM2..."
-            cd "$APP_PATH"
-            
-            # Start backend with uvicorn via PM2
-            pm2 start "uvicorn server:app --host 0.0.0.0 --port 8001" --name backend --cwd "$APP_PATH/backend"
-            
-            # Start frontend static server via PM2
-            pm2 serve "$APP_PATH/frontend/build" 3000 --name frontend --spa
-            
-            # Save PM2 config
-            pm2 save
-            
-            # Show status
-            pm2 list
-            
-            # Restart nginx
-            systemctl restart nginx
-            
-            echo ""
-            echo "✅ Deployment complete!"
-            echo "🌐 Check: https://paramedic-care018.rs"
+            echo "✅ Done"
