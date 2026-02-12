@@ -94,13 +94,19 @@ jobs:
             echo "7. Restarting services..."
             cd "$APP_PATH"
             
-            pm2 restart all 2>/dev/null || {
-              pm2 delete all 2>/dev/null || true
+            # Install PM2 if needed
+            if ! command -v pm2 &> /dev/null; then
+              echo "Installing PM2..."
+              /usr/local/bin/npm install -g pm2
+            fi
+            
+            /usr/local/bin/pm2 restart all 2>/dev/null || {
+              /usr/local/bin/pm2 delete all 2>/dev/null || true
               cd backend
-              pm2 start "uvicorn server:app --host 0.0.0.0 --port 8001" --name backend
+              /usr/local/bin/pm2 start "uvicorn server:app --host 0.0.0.0 --port 8001" --name backend
               cd ../frontend
-              pm2 serve build 3000 --name frontend --spa
-              pm2 save
+              /usr/local/bin/pm2 serve build 3000 --name frontend --spa
+              /usr/local/bin/pm2 save
             }
             
             systemctl restart nginx 2>/dev/null || true
