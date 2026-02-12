@@ -29,19 +29,19 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             
-            # ============ KILL OLD PROCESSES ============
+            # ============ STOP OLD SERVICES ============
             echo "🔪 Stopping old processes..."
             
-            # Kill any old uvicorn processes NOT managed by PM2
-            pkill -f "uvicorn server:app" 2>/dev/null || true
-            pkill -f "python.*server" 2>/dev/null || true
-            
-            # Stop PM2 processes to avoid conflicts
+            # Stop PM2 processes first
             pm2 stop all 2>/dev/null || true
             pm2 delete all 2>/dev/null || true
             
+            # Kill only the specific uvicorn process on port 8001 (not all python)
+            fuser -k 8001/tcp 2>/dev/null || true
+            fuser -k 3000/tcp 2>/dev/null || true
+            
             # Wait for ports to be released
-            sleep 2
+            sleep 3
             
             # ============ BACKEND ============
             echo "🐍 Updating backend..."
