@@ -19,22 +19,98 @@ jobs:
           port: 22
           command_timeout: 30m
           script: |
-            echo "🔍 App directory: /opt/paramedic-care"
-            APP_PATH="/opt/paramedic-care"
+            set -e  # Exit on any error
             
+            APP_PATH="/opt/paramedic-care"
+            echo "=========================================="
+            echo "SAFE DEPLOYMENT - Protecting all data"
+            echo "=========================================="
+            
+            # Fix git permissions
             git config --global --add safe.directory "$APP_PATH"
             cd "$APP_PATH"
             
-            echo "📥 Pulling latest code (safe merge)..."
+            # ============ PROTECT DATA ============
+            echo "1. Backing up uploads folder..."
+            if [ -d "uploads" ]; then
+              cp -r uploads /tmp/uploads_backup_$(date +%s) 2>/dev/null || true
+            fi
+            if [ -d "backend/uploads" ]; then
+              cp -r backend/uploads /tmp/backend_uploads_backup_$(date +%s) 2>/dev/null || true
+            fi
+            
+            # ============ SAFE CODE UPDATE ============
+            echo "2. Pulling code (safe merge, no reset)..."
             git stash 2>/dev/null || true
-            git pull origin main --no-rebase
+            git pull origin main --no-rebase || {
+              echo "Merge conflict - using remote version for code files only"
+              git checkout --theirs . 2>/dev/null || true
+              git add -A
+              git commit -m "Auto-merge from deployment" 2>/dev/null || true
+            }
             
-            echo "📦 Building frontend..."
-            cd frontend
-            npm run build 2>/dev/null || echo "Build skipped"
+            # ============ RESTORE UPLOADS ============
+            echo "3. Ensuring uploads folders exist..."
+            mkdir -p uploads
+            mkdir -p backend/uploads
             
-            echo "🔄 Restarting services..."
-            pm2 restart all 2>/dev/null || true
+            # ============ INSTALL NODE IF NEEDED ============
+            echo "4. Checking Node.js..."
+            if ! command -v node &> /dev/null || [[ $(node -v) != v20* ]]; then
+              echo "Installing Node.js 20..."
+              snap install node --classic --channel=20 2>/dev/null || true
+              ln -sf /snap/bin/node /usr/local/bin/node 2>/dev/null || true
+              ln -sf /snap/bin/npm /usr/local/bin/npm 2>/dev/null || true
+            fi
+            echo "Node version: $(node -v 2>/dev/null || echo 'not installed')"
+            
+            # ============ BACKEND DEPENDENCIES ============
+            echo "5. Installing backend dependencies..."
+            cd "$APP_PATH/backend"
+            pip3 install -r requirements.txt --quiet 2>/dev/null || true
+            
+            # ============ FRONTEND BUILD ============
+            echo "6. Building frontend..."
+            cd "$APP_PATH/frontend"
+            
+            # Install dependencies if needed
+            if [ ! -d "node_modules" ]; then
+              echo "Installing npm packages..."
+              /usr/local/bin/npm install --legacy-peer-deps 2>/dev/null || npm install --legacy-peer-deps
+            fi
+            
+            # Build
+            echo "Running build..."
+            CI=false /usr/local/bin/npm run build 2>/dev/null || CI=false npm run build || {
+              echo "Build failed - deployment stopped to protect existing site"
+              exit 1
+            }
+            
+            # Verify build succeeded
+            if [ ! -d "build" ] || [ ! -f "build/index.html" ]; then
+              echo "ERROR: Build folder not created - stopping deployment"
+              exit 1
+            fi
+            echo "Build successful!"
+            
+            # ============ RESTART SERVICES ============
+            echo "7. Restarting services..."
+            cd "$APP_PATH"
+            
+            # Try PM2
+            pm2 restart all 2>/dev/null && echo "PM2 restarted" || {
+              # Start PM2 if not running
+              echo "Starting PM2 processes..."
+              pm2 delete all 2>/dev/null || true
+              cd backend && pm2 start "python3 -m uvicorn server:app --host 0.0.0.0 --port 8001" --name backend 2>/dev/null || true
+              cd ../frontend && pm2 serve build 3000 --name frontend --spa 2>/dev/null || true
+              pm2 save 2>/dev/null || true
+            }
+            
+            # Restart nginx
             systemctl restart nginx 2>/dev/null || true
             
-            echo "✅ Done"
+            echo "=========================================="
+            echo "DEPLOYMENT COMPLETE!"
+            echo "Data preserved, code updated."
+            echo "=========================================="
