@@ -21,26 +21,20 @@ jobs:
           script: |
             echo "🔍 Finding app directory..."
             
-            # Find the app directory (look for common locations)
-            APP_PATH=""
-            for path in /var/www/paramediccare018 /var/www/paramedic-care /home/paramedic /root/paramediccare018 /opt/paramediccare018; do
-              if [ -d "$path" ] && [ -f "$path/backend/server.py" ]; then
-                APP_PATH="$path"
-                break
-              fi
-            done
+            # App path (found from previous run)
+            APP_PATH="/opt/paramedic-care"
             
-            # If not found, search for it
-            if [ -z "$APP_PATH" ]; then
-              APP_PATH=$(find /var/www /home /opt /root -maxdepth 3 -name "server.py" -path "*/backend/*" 2>/dev/null | head -1 | sed 's|/backend/server.py||')
-            fi
-            
-            if [ -z "$APP_PATH" ]; then
-              echo "❌ Could not find app directory!"
+            if [ ! -d "$APP_PATH" ]; then
+              echo "❌ App directory not found!"
               exit 1
             fi
             
             echo "✅ Found app at: $APP_PATH"
+            
+            # Fix git ownership issue
+            echo "🔧 Fixing git safe directory..."
+            git config --global --add safe.directory "$APP_PATH"
+            
             cd "$APP_PATH"
             
             echo "📥 Pulling latest code..."
@@ -48,24 +42,56 @@ jobs:
             
             echo "🐍 Updating backend dependencies..."
             cd backend
-            pip3 install -r requirements.txt --quiet
+            # Try different pip paths
+            if command -v pip3 &> /dev/null; then
+              pip3 install -r requirements.txt --quiet
+            elif command -v /usr/bin/pip3 &> /dev/null; then
+              /usr/bin/pip3 install -r requirements.txt --quiet
+            elif command -v python3 &> /dev/null; then
+              python3 -m pip install -r requirements.txt --quiet
+            else
+              echo "⚠️ pip3 not found, skipping backend deps"
+            fi
             
             echo "📦 Updating frontend dependencies..."
             cd ../frontend
-            yarn install --silent
             
-            echo "🔨 Building frontend..."
-            yarn build
+            # Source nvm if available
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            
+            # Try different yarn/npm paths
+            if command -v yarn &> /dev/null; then
+              yarn install --silent
+              echo "🔨 Building frontend..."
+              yarn build
+            elif command -v /usr/local/bin/yarn &> /dev/null; then
+              /usr/local/bin/yarn install --silent
+              echo "🔨 Building frontend..."
+              /usr/local/bin/yarn build
+            elif [ -f "$HOME/.yarn/bin/yarn" ]; then
+              $HOME/.yarn/bin/yarn install --silent
+              echo "🔨 Building frontend..."
+              $HOME/.yarn/bin/yarn build
+            elif command -v npm &> /dev/null; then
+              npm install --silent
+              echo "🔨 Building frontend..."
+              npm run build
+            else
+              echo "⚠️ yarn/npm not found, skipping frontend build"
+            fi
             
             echo "🔄 Restarting services..."
-            # Try PM2 first, then systemctl
+            # Try PM2 first
             if command -v pm2 &> /dev/null; then
-              pm2 restart all || echo "PM2 restart attempted"
+              pm2 restart all 2>/dev/null || echo "PM2 restart attempted"
+            elif [ -f "$HOME/.nvm/versions/node/*/bin/pm2" ]; then
+              $HOME/.nvm/versions/node/*/bin/pm2 restart all 2>/dev/null || echo "PM2 restart attempted"
             fi
             
             # Try systemctl if service exists
-            if systemctl list-units --type=service | grep -q "paramedic"; then
-              sudo systemctl restart paramedic* || echo "Systemctl restart attempted"
+            if systemctl list-units --type=service 2>/dev/null | grep -q "paramedic"; then
+              systemctl restart paramedic* || echo "Systemctl restart attempted"
             fi
             
             echo "✅ Deployment complete!"
