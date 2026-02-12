@@ -127,6 +127,8 @@ export const PWAProvider = ({ children }) => {
       if (result.outcome === 'accepted') {
         setIsInstalled(true);
         setIsInstallable(false);
+        // Persist the installation state
+        localStorage.setItem('pwa-was-installed', 'true');
       }
       setInstallPrompt(null);
       return result.outcome === 'accepted';
