@@ -13,22 +13,59 @@ jobs:
       - name: Deploy to server
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
+          host: 46.225.75.191
+          username: root
+          key: ${{ secrets.HETZNER_SSH_KEY }}
           port: 22
+          command_timeout: 30m
           script: |
-            cd ${{ secrets.APP_PATH }}
+            echo "🔍 Finding app directory..."
+            
+            # Find the app directory (look for common locations)
+            APP_PATH=""
+            for path in /var/www/paramediccare018 /var/www/paramedic-care /home/paramedic /root/paramediccare018 /opt/paramediccare018; do
+              if [ -d "$path" ] && [ -f "$path/backend/server.py" ]; then
+                APP_PATH="$path"
+                break
+              fi
+            done
+            
+            # If not found, search for it
+            if [ -z "$APP_PATH" ]; then
+              APP_PATH=$(find /var/www /home /opt /root -maxdepth 3 -name "server.py" -path "*/backend/*" 2>/dev/null | head -1 | sed 's|/backend/server.py||')
+            fi
+            
+            if [ -z "$APP_PATH" ]; then
+              echo "❌ Could not find app directory!"
+              exit 1
+            fi
+            
+            echo "✅ Found app at: $APP_PATH"
+            cd "$APP_PATH"
+            
+            echo "📥 Pulling latest code..."
             git pull origin main
             
-            # Backend
+            echo "🐍 Updating backend dependencies..."
             cd backend
-            pip install -r requirements.txt
+            pip3 install -r requirements.txt --quiet
             
-            # Frontend
+            echo "📦 Updating frontend dependencies..."
             cd ../frontend
-            yarn install
+            yarn install --silent
+            
+            echo "🔨 Building frontend..."
             yarn build
             
-            # Restart services
-            pm2 restart all || systemctl restart paramedic-care
+            echo "🔄 Restarting services..."
+            # Try PM2 first, then systemctl
+            if command -v pm2 &> /dev/null; then
+              pm2 restart all || echo "PM2 restart attempted"
+            fi
+            
+            # Try systemctl if service exists
+            if systemctl list-units --type=service | grep -q "paramedic"; then
+              sudo systemctl restart paramedic* || echo "Systemctl restart attempted"
+            fi
+            
+            echo "✅ Deployment complete!"
