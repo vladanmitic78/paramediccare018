@@ -22,84 +22,63 @@ jobs:
             echo "🔍 App directory: /opt/paramedic-care"
             APP_PATH="/opt/paramedic-care"
             
-            # Fix git ownership issue
             git config --global --add safe.directory "$APP_PATH"
-            
             cd "$APP_PATH"
             
             echo "📥 Pulling latest code..."
             git fetch origin main
             git reset --hard origin/main
             
+            # ============ KILL OLD PROCESSES ============
+            echo "🔪 Stopping old processes..."
+            
+            # Kill any old uvicorn processes NOT managed by PM2
+            pkill -f "uvicorn server:app" 2>/dev/null || true
+            pkill -f "python.*server" 2>/dev/null || true
+            
+            # Stop PM2 processes to avoid conflicts
+            pm2 stop all 2>/dev/null || true
+            pm2 delete all 2>/dev/null || true
+            
+            # Wait for ports to be released
+            sleep 2
+            
             # ============ BACKEND ============
-            echo "🐍 Updating backend dependencies..."
+            echo "🐍 Updating backend..."
             cd backend
-            
-            # Install emergentintegrations from special URL first (without version constraint)
             python3 -m pip install emergentintegrations --extra-index-url https://d33sy5i8bnduwe.cloudfront.net/simple/ --upgrade --quiet 2>/dev/null || true
-            
-            # Install other requirements (ignore version errors)
-            python3 -m pip install -r requirements.txt --quiet 2>/dev/null || echo "⚠️ Some pip packages may have failed"
+            python3 -m pip install -r requirements.txt --quiet 2>/dev/null || true
             
             # ============ FRONTEND ============
             echo "📦 Building frontend..."
             cd ../frontend
             
-            # Only rebuild if node_modules missing or package.json changed
-            if [ ! -d "node_modules" ]; then
-              echo "Installing npm dependencies..."
-              npm install --legacy-peer-deps
-            fi
-            
-            echo "🔨 Building frontend..."
+            # Force rebuild to ensure new code is built
+            rm -rf build
             npm run build
             
-            # ============ CHECK NGINX CONFIG ============
-            echo "🔍 Checking Nginx configuration..."
+            echo "✅ Build complete!"
+            ls -la build/static/js/ | head -5
             
-            # Find where nginx is serving from
-            NGINX_ROOT=$(grep -r "root" /etc/nginx/sites-enabled/ 2>/dev/null | grep -v "#" | head -1 | awk '{print $2}' | tr -d ';')
-            echo "Nginx root: $NGINX_ROOT"
+            # ============ START SERVICES WITH PM2 ============
+            echo "🚀 Starting services with PM2..."
+            cd "$APP_PATH"
             
-            # Show nginx config
-            echo "--- Nginx sites-enabled ---"
-            ls -la /etc/nginx/sites-enabled/
-            cat /etc/nginx/sites-enabled/* 2>/dev/null | head -100
+            # Start backend with uvicorn via PM2
+            pm2 start "uvicorn server:app --host 0.0.0.0 --port 8001" --name backend --cwd "$APP_PATH/backend"
             
-            # If nginx serves from a different location, copy build there
-            if [ -n "$NGINX_ROOT" ] && [ "$NGINX_ROOT" != "$APP_PATH/frontend/build" ]; then
-              echo "📋 Copying build to nginx root: $NGINX_ROOT"
-              cp -r frontend/build/* "$NGINX_ROOT/" 2>/dev/null || echo "Could not copy to $NGINX_ROOT"
-            fi
+            # Start frontend static server via PM2
+            pm2 serve "$APP_PATH/frontend/build" 3000 --name frontend --spa
             
-            # ============ RESTART SERVICES ============
-            echo "🔄 Restarting services..."
+            # Save PM2 config
+            pm2 save
             
-            # Check what's already running
-            echo "--- Currently running processes ---"
-            ps aux | grep -E "(uvicorn|gunicorn|node|python.*server)" | grep -v grep || true
-            
-            # Check for systemctl services
-            echo "--- Systemctl services ---"
-            systemctl list-units --type=service | grep -E "(paramedic|uvicorn|gunicorn|node)" || true
-            
-            # Try to restart any existing services
-            systemctl restart paramedic-backend 2>/dev/null && echo "✅ paramedic-backend restarted" || true
-            systemctl restart paramedic-frontend 2>/dev/null && echo "✅ paramedic-frontend restarted" || true
-            systemctl restart backend 2>/dev/null && echo "✅ backend restarted" || true
-            systemctl restart frontend 2>/dev/null && echo "✅ frontend restarted" || true
-            
-            # Restart PM2 if running
-            pm2 restart all 2>/dev/null && echo "✅ PM2 restarted" || true
+            # Show status
+            pm2 list
             
             # Restart nginx
-            systemctl restart nginx && echo "✅ Nginx restarted"
+            systemctl restart nginx
             
-            # Clear nginx cache if exists
-            rm -rf /var/cache/nginx/* 2>/dev/null || true
-            
-            echo "✅ Deployment complete!"
             echo ""
-            echo "--- Final status ---"
-            pm2 list 2>/dev/null || true
-            systemctl status nginx --no-pager | head -10
+            echo "✅ Deployment complete!"
+            echo "🌐 Check: https://paramedic-care018.rs"
