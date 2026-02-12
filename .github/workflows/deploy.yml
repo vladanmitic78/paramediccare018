@@ -31,22 +31,6 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             
-            # ============ INSTALL NODE.JS IF MISSING ============
-            if ! command -v node &> /dev/null; then
-              echo "📦 Installing Node.js..."
-              curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-              apt-get install -y nodejs
-              echo "✅ Node.js installed: $(node --version)"
-            else
-              echo "✅ Node.js already installed: $(node --version)"
-            fi
-            
-            # Install PM2 globally if missing
-            if ! command -v pm2 &> /dev/null; then
-              echo "📦 Installing PM2..."
-              npm install -g pm2
-            fi
-            
             # ============ BACKEND ============
             echo "🐍 Updating backend dependencies..."
             cd backend
@@ -55,14 +39,26 @@ jobs:
             if ! python3 -m pip --version &> /dev/null; then
               apt-get install -y python3-pip
             fi
+            
+            # Install emergentintegrations from special URL first
+            python3 -m pip install emergentintegrations --extra-index-url https://d33sy5i8bnduwe.cloudfront.net/simple/ --quiet || true
+            
+            # Install other requirements
             python3 -m pip install -r requirements.txt --quiet || echo "⚠️ Some pip packages may have failed"
             
             # ============ FRONTEND ============
             echo "📦 Updating frontend..."
             cd ../frontend
             
-            echo "Installing npm dependencies..."
+            # Clean install to avoid dependency conflicts
+            echo "🧹 Cleaning old node_modules..."
+            rm -rf node_modules package-lock.json
+            
+            echo "Installing npm dependencies (fresh install)..."
             npm install --legacy-peer-deps
+            
+            # Fix ajv dependency issue
+            npm install ajv@8 --save-dev --legacy-peer-deps
             
             echo "🔨 Building frontend..."
             npm run build
@@ -80,10 +76,18 @@ jobs:
               pm2 restart all
               echo "✅ PM2 processes restarted"
             else
-              echo "⚠️ No PM2 processes found. You may need to start them manually."
-              echo "Run: pm2 start backend/server.py --name backend --interpreter python3"
-              echo "Run: pm2 serve frontend/build 3000 --name frontend --spa"
+              echo "⚠️ No PM2 processes found. Starting services..."
+              # Start backend
+              cd backend
+              pm2 start "python3 -m uvicorn server:app --host 0.0.0.0 --port 8001" --name backend
+              cd ..
+              # Serve frontend build
+              pm2 serve frontend/build 3000 --name frontend --spa
+              pm2 save
+              echo "✅ PM2 processes started"
             fi
+            
+            pm2 list
             
             # Restart nginx if exists
             systemctl restart nginx 2>/dev/null && echo "✅ Nginx restarted" || true
