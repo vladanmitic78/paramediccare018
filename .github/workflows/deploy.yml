@@ -27,49 +27,65 @@ jobs:
             
             cd "$APP_PATH"
             
-            echo "📥 Pulling latest code (force sync with GitHub)..."
+            echo "📥 Pulling latest code..."
             git fetch origin main
             git reset --hard origin/main
             
+            # ============ INSTALL NODE.JS IF MISSING ============
+            if ! command -v node &> /dev/null; then
+              echo "📦 Installing Node.js..."
+              curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+              apt-get install -y nodejs
+              echo "✅ Node.js installed: $(node --version)"
+            else
+              echo "✅ Node.js already installed: $(node --version)"
+            fi
+            
+            # Install PM2 globally if missing
+            if ! command -v pm2 &> /dev/null; then
+              echo "📦 Installing PM2..."
+              npm install -g pm2
+            fi
+            
+            # ============ BACKEND ============
             echo "🐍 Updating backend dependencies..."
             cd backend
-            # Install pip if missing, then install requirements
-            python3 -m ensurepip --upgrade 2>/dev/null || apt-get install -y python3-pip 2>/dev/null || true
-            python3 -m pip install -r requirements.txt --quiet 2>/dev/null || pip3 install -r requirements.txt --quiet 2>/dev/null || echo "⚠️ pip install skipped"
             
+            # Install pip if missing
+            if ! python3 -m pip --version &> /dev/null; then
+              apt-get install -y python3-pip
+            fi
+            python3 -m pip install -r requirements.txt --quiet || echo "⚠️ Some pip packages may have failed"
+            
+            # ============ FRONTEND ============
             echo "📦 Updating frontend..."
             cd ../frontend
             
-            # Source nvm
-            export NVM_DIR="/root/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            echo "Installing npm dependencies..."
+            npm install --legacy-peer-deps
             
-            # Find and use node/npm/yarn
-            export PATH="$PATH:/usr/local/bin:/root/.nvm/versions/node/v18.20.8/bin:/root/.nvm/versions/node/v20.20.0/bin"
+            echo "🔨 Building frontend..."
+            npm run build
             
-            if command -v npm &> /dev/null; then
-              echo "Found npm, installing dependencies..."
-              npm install --legacy-peer-deps 2>/dev/null || npm install
-              echo "🔨 Building frontend..."
-              npm run build
+            echo "✅ Build complete! Files in build/:"
+            ls -la build/ | head -10
+            
+            # ============ RESTART SERVICES ============
+            echo "🔄 Restarting services..."
+            
+            cd "$APP_PATH"
+            
+            # Check if PM2 processes exist, if not start them
+            if pm2 list | grep -q "online\|stopped"; then
+              pm2 restart all
+              echo "✅ PM2 processes restarted"
             else
-              echo "⚠️ npm not found, checking for pre-built files..."
-              ls -la build/ 2>/dev/null || echo "No build folder found"
+              echo "⚠️ No PM2 processes found. You may need to start them manually."
+              echo "Run: pm2 start backend/server.py --name backend --interpreter python3"
+              echo "Run: pm2 serve frontend/build 3000 --name frontend --spa"
             fi
             
-            echo "🔄 Restarting services..."
-            # Source nvm again for pm2
-            export NVM_DIR="/root/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            
-            # Restart with pm2
-            pm2 restart all 2>/dev/null && echo "✅ PM2 restarted" || echo "PM2 not available"
-            
-            # Or systemctl
-            systemctl restart paramedic-backend 2>/dev/null || true
-            systemctl restart paramedic-frontend 2>/dev/null || true
-            systemctl restart nginx 2>/dev/null || true
+            # Restart nginx if exists
+            systemctl restart nginx 2>/dev/null && echo "✅ Nginx restarted" || true
             
             echo "✅ Deployment complete!"
-            echo "📁 Current files:"
-            ls -la
