@@ -3,6 +3,20 @@
 ## Overview
 A comprehensive medical transport system including a public website, patient portal, real-time mobile applications (PWA) for admins, drivers, and medical staff, invoice management, location tracking, live map, staff availability management, EMR-style medical dashboard, and vehicle-centric team assignment module.
 
+## Recent Changes (December 2025)
+
+### Demo Access Section Removal - COMPLETED
+**Date:** December 2025
+**Issue:** The login page was showing a "DEMO ACCESS" section with test credentials that should have been removed in a previous session. This was a code regression.
+**Fix:** Removed lines 291-322 from `/app/frontend/src/pages/Login.jsx` containing the demo credentials section.
+**Status:** ✅ Verified working
+
+### Features Pending Deployment
+- CMS "Add Guide" improvements (`CMSManager.jsx`)
+- Content formatting with line breaks/bullets (`formatContent.js` utility)
+- PWA install detection improvements (`PWAContext.js`)
+- Safe deployment workflow (`.github/workflows/deploy.yml`)
+
 ## Core Features Implemented
 
 ### Public Website & Booking
