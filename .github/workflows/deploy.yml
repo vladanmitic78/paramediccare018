@@ -112,62 +112,9 @@ jobs:
             # ============ UPDATE NGINX TO SERVE STATIC FILES ============
             echo "8. Updating nginx to serve static files directly..."
             
-            # Create new nginx config that serves static files directly
-            cat > /etc/nginx/sites-available/paramedic-care018 << 'NGINXCONFIG'
-server {
-    listen 80;
-    server_name paramedic-care018.rs www.paramedic-care018.rs;
-    return 301 https://$server_name$request_uri;
-}
-
-server {
-    listen 443 ssl;
-    server_name paramedic-care018.rs www.paramedic-care018.rs;
-
-    ssl_certificate /etc/letsencrypt/live/paramedic-care018.rs/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/paramedic-care018.rs/privkey.pem;
-
-    # Serve frontend static files directly
-    root /opt/paramedic-care/frontend/build;
-    index index.html;
-
-    gzip on;
-    gzip_vary on;
-    gzip_min_length 256;
-    gzip_proxied any;
-    gzip_types text/plain text/css text/xml text/javascript application/javascript application/json application/xml image/svg+xml;
-    gzip_comp_level 6;
-
-    # Frontend - serve static files with SPA fallback
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-
-    # Backend API proxy
-    location /api {
-        proxy_pass http://localhost:8001;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_read_timeout 300s;
-        client_max_body_size 50M;
-    }
-
-    # WebSocket proxy
-    location /ws {
-        proxy_pass http://localhost:8001;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host $host;
-        proxy_read_timeout 86400;
-    }
-}
-NGINXCONFIG
+            # Modify nginx config to serve static files instead of proxying to port 3000
+            # Replace the location / block to serve static files directly
+            sed -i '/location \/ {/,/}/c\    location / {\n        root /opt/paramedic-care/frontend/build;\n        index index.html;\n        try_files $uri $uri/ /index.html;\n    }' /etc/nginx/sites-available/paramedic-care018
             
             echo "Testing nginx config..."
             nginx -t
