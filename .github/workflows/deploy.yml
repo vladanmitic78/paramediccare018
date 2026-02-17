@@ -94,32 +94,20 @@ jobs:
             fi
             echo "Build successful!"
             
-            # ============ RESTART SERVICES ============
-            echo "7. Restarting services..."
+            # ============ RESTART BACKEND SERVICE ============
+            echo "7. Starting backend service..."
             cd "$APP_PATH"
             
-            # Install PM2 if needed
-            if ! command -v pm2 &> /dev/null; then
-              echo "Installing PM2..."
-              /usr/local/bin/npm install -g pm2
-            fi
+            # Kill any existing uvicorn processes
+            pkill -f "uvicorn server:app" 2>/dev/null || true
             
-            # Stop all existing PM2 processes
-            /usr/local/bin/pm2 delete all 2>/dev/null || true
-            
-            # Start backend with correct command
+            # Start backend with nohup (simpler than PM2)
             cd "$APP_PATH/backend"
-            /usr/local/bin/pm2 start "python3 -m uvicorn server:app --host 0.0.0.0 --port 8001" --name backend
+            nohup python3 -m uvicorn server:app --host 0.0.0.0 --port 8001 > /var/log/paramedic-backend.log 2>&1 &
             
-            # Start frontend server
-            cd "$APP_PATH/frontend"
-            /usr/local/bin/pm2 serve build 3000 --name frontend --spa
-            
-            # Save PM2 config
-            /usr/local/bin/pm2 save
-            
-            # Show status
-            /usr/local/bin/pm2 status
+            sleep 3
+            echo "Backend started. Checking if running..."
+            pgrep -f "uvicorn server:app" && echo "Backend is running!" || echo "WARNING: Backend may not be running"
             
             # ============ UPDATE NGINX TO SERVE STATIC FILES ============
             echo "8. Updating nginx to serve static files directly..."
