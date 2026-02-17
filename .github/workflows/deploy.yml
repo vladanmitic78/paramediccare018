@@ -115,6 +115,9 @@ jobs:
             
             systemctl restart nginx 2>/dev/null || true
             
+            # Clear any nginx cache
+            rm -rf /var/cache/nginx/* 2>/dev/null || true
+            
             echo "=========================================="
             echo "DEPLOYMENT COMPLETE!"
-            echo "=========================================="
+            echo "==========================================" 
