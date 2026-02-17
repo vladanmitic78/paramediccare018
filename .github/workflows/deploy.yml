@@ -104,14 +104,22 @@ jobs:
               /usr/local/bin/npm install -g pm2
             fi
             
-            /usr/local/bin/pm2 restart all 2>/dev/null || {
-              /usr/local/bin/pm2 delete all 2>/dev/null || true
-              cd backend
-              /usr/local/bin/pm2 start "uvicorn server:app --host 0.0.0.0 --port 8001" --name backend
-              cd ../frontend
-              /usr/local/bin/pm2 serve build 3000 --name frontend --spa
-              /usr/local/bin/pm2 save
-            }
+            # Stop all existing PM2 processes
+            /usr/local/bin/pm2 delete all 2>/dev/null || true
+            
+            # Start backend with correct command
+            cd "$APP_PATH/backend"
+            /usr/local/bin/pm2 start "python3 -m uvicorn server:app --host 0.0.0.0 --port 8001" --name backend
+            
+            # Start frontend server
+            cd "$APP_PATH/frontend"
+            /usr/local/bin/pm2 serve build 3000 --name frontend --spa
+            
+            # Save PM2 config
+            /usr/local/bin/pm2 save
+            
+            # Show status
+            /usr/local/bin/pm2 status
             
             # ============ FIX NGINX CONFIG ============
             echo "8. Checking nginx configuration..."
