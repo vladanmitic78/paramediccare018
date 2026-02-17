@@ -68,6 +68,10 @@ jobs:
             echo "6. Building frontend..."
             cd "$APP_PATH/frontend"
             
+            # CRITICAL: Delete old build to force new JS bundle hash
+            echo "Removing old build folder..."
+            rm -rf build
+            
             # Clean install to fix ajv issue
             echo "Cleaning old modules..."
             rm -rf node_modules package-lock.json
