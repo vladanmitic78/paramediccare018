@@ -128,23 +128,32 @@ jobs:
             echo "Current nginx sites-enabled:"
             ls -la /etc/nginx/sites-enabled/ 2>/dev/null || true
             
-            # Check if nginx serves directly or proxies to PM2
-            echo "Nginx root configuration:"
-            grep -r "root\|proxy_pass" /etc/nginx/sites-enabled/ 2>/dev/null | head -10 || true
+            # Show FULL nginx config content
+            echo "=== FULL NGINX CONFIG ==="
+            cat /etc/nginx/sites-enabled/paramedic-care018 2>/dev/null || cat /etc/nginx/sites-enabled/default 2>/dev/null || true
+            echo "=== END NGINX CONFIG ==="
             
-            # If nginx serves static files directly, copy build there
-            if [ -d "/var/www/html" ]; then
-              echo "Copying build to /var/www/html..."
-              rm -rf /var/www/html/*
-              cp -r /opt/paramedic-care/frontend/build/* /var/www/html/
+            # Find where nginx root is configured
+            NGINX_ROOT=$(grep -r "root " /etc/nginx/sites-enabled/ 2>/dev/null | grep -v "#" | head -1 | awk '{print $2}' | tr -d ';')
+            echo "Detected nginx root: $NGINX_ROOT"
+            
+            # Copy build to detected nginx root
+            if [ -n "$NGINX_ROOT" ] && [ -d "$NGINX_ROOT" ]; then
+              echo "Copying build to nginx root: $NGINX_ROOT"
+              rm -rf "$NGINX_ROOT"/*
+              cp -r /opt/paramedic-care/frontend/build/* "$NGINX_ROOT"/
+              echo "Files in nginx root:"
+              ls -la "$NGINX_ROOT"/static/js/ | head -5
             fi
             
-            # Also try /var/www/paramedic-care if it exists
-            if [ -d "/var/www/paramedic-care" ]; then
-              echo "Copying build to /var/www/paramedic-care..."
-              rm -rf /var/www/paramedic-care/*
-              cp -r /opt/paramedic-care/frontend/build/* /var/www/paramedic-care/
-            fi
+            # Also copy to common locations just in case
+            for DIR in /var/www/html /var/www/paramedic-care /var/www/paramedic-care018; do
+              if [ -d "$DIR" ]; then
+                echo "Also copying to $DIR..."
+                rm -rf "$DIR"/*
+                cp -r /opt/paramedic-care/frontend/build/* "$DIR"/
+              fi
+            done
             
             systemctl restart nginx 2>/dev/null || true
             
