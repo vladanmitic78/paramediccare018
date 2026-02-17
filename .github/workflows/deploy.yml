@@ -113,6 +113,31 @@ jobs:
               /usr/local/bin/pm2 save
             }
             
+            # ============ FIX NGINX CONFIG ============
+            echo "8. Checking nginx configuration..."
+            
+            # Show current nginx config for debugging
+            echo "Current nginx sites-enabled:"
+            ls -la /etc/nginx/sites-enabled/ 2>/dev/null || true
+            
+            # Check if nginx serves directly or proxies to PM2
+            echo "Nginx root configuration:"
+            grep -r "root\|proxy_pass" /etc/nginx/sites-enabled/ 2>/dev/null | head -10 || true
+            
+            # If nginx serves static files directly, copy build there
+            if [ -d "/var/www/html" ]; then
+              echo "Copying build to /var/www/html..."
+              rm -rf /var/www/html/*
+              cp -r /opt/paramedic-care/frontend/build/* /var/www/html/
+            fi
+            
+            # Also try /var/www/paramedic-care if it exists
+            if [ -d "/var/www/paramedic-care" ]; then
+              echo "Copying build to /var/www/paramedic-care..."
+              rm -rf /var/www/paramedic-care/*
+              cp -r /opt/paramedic-care/frontend/build/* /var/www/paramedic-care/
+            fi
+            
             systemctl restart nginx 2>/dev/null || true
             
             # Clear any nginx cache
@@ -120,4 +145,5 @@ jobs:
             
             echo "=========================================="
             echo "DEPLOYMENT COMPLETE!"
+            echo "New JS bundle: $(ls /opt/paramedic-care/frontend/build/static/js/main.*.js 2>/dev/null | head -1)"
             echo "==========================================" 
