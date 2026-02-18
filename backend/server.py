@@ -4176,6 +4176,11 @@ async def generate_patient_report(
     return report_data
 
 
+# NOTE: DRIVER APP ROUTES have been extracted to routes/driver.py
+# The routes below are DEPRECATED duplicates. They are kept temporarily for safety
+# and will be removed after full testing confirms the new routers work correctly.
+# TODO: Remove after verification - lines 4179-4918
+
 # ============ DRIVER APP ROUTES ============
 
 @api_router.get("/driver/profile")
