@@ -5545,6 +5545,67 @@ async def delete_image(
     
     return {"success": True, "message": "Image deleted"}
 
+# ============ GALLERY MANAGEMENT ============
+
+@api_router.get("/gallery")
+async def get_gallery():
+    """Get all gallery images"""
+    images = await db.gallery.find({}, {"_id": 0}).sort("order", 1).to_list(100)
+    return images
+
+@api_router.post("/gallery")
+async def add_gallery_image(
+    image_url: str = Form(...),
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Add a new image to the gallery"""
+    # Get max order
+    last_image = await db.gallery.find_one(sort=[("order", -1)])
+    next_order = (last_image.get("order", 0) + 1) if last_image else 1
+    
+    image_id = str(uuid.uuid4())
+    gallery_image = {
+        "id": image_id,
+        "image_url": image_url,
+        "order": next_order,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_by": user.get("email", "unknown")
+    }
+    
+    await db.gallery.insert_one(gallery_image)
+    logger.info(f"Gallery image added: {image_id} by {user.get('email', 'unknown')}")
+    
+    return {"success": True, "id": image_id, "image_url": image_url, "order": next_order}
+
+@api_router.delete("/gallery/{image_id}")
+async def delete_gallery_image(
+    image_id: str,
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Delete a gallery image"""
+    image = await db.gallery.find_one({"id": image_id})
+    if not image:
+        raise HTTPException(status_code=404, detail="Gallery image not found")
+    
+    await db.gallery.delete_one({"id": image_id})
+    logger.info(f"Gallery image deleted: {image_id} by {user.get('email', 'unknown')}")
+    
+    return {"success": True, "message": "Gallery image deleted"}
+
+@api_router.put("/gallery/reorder")
+async def reorder_gallery(
+    image_orders: List[dict],
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Reorder gallery images. Expects list of {id: string, order: number}"""
+    for item in image_orders:
+        await db.gallery.update_one(
+            {"id": item["id"]},
+            {"$set": {"order": item["order"]}}
+        )
+    logger.info(f"Gallery reordered by {user.get('email', 'unknown')}")
+    return {"success": True, "message": "Gallery order updated"}
+
 # ============ SERVICES MANAGEMENT ============
 
 @api_router.get("/services")
