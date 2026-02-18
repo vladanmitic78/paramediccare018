@@ -132,16 +132,14 @@ const About = () => {
         <div className="section-container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              {missionImage ? (
+              {pageContent && missionImage ? (
                 <img
                   src={missionImage}
                   alt="Medical care"
                   className="rounded-2xl shadow-xl w-full h-[400px] object-cover"
                 />
               ) : (
-                <div className="rounded-2xl shadow-xl w-full h-[400px] bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center">
-                  <Target className="w-24 h-24 text-white/30" />
-                </div>
+                <div className="rounded-2xl shadow-xl w-full h-[400px] bg-slate-100" />
               )}
             </div>
             <div>
