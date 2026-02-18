@@ -3,19 +3,34 @@
 ## Overview
 A comprehensive medical transport system including a public website, patient portal, real-time mobile applications (PWA) for admins, drivers, and medical staff, invoice management, location tracking, live map, staff availability management, EMR-style medical dashboard, and vehicle-centric team assignment module.
 
-## Recent Changes (December 2025)
+## Recent Changes (February 2025)
+
+### Gallery System - COMPLETED
+**Date:** February 18, 2025
+**Feature:** Replaced confusing fixed gallery sections with a dynamic gallery management system
+- Created `/api/gallery` endpoints (GET, POST, DELETE, PUT reorder)
+- Created `GalleryManager.jsx` component for admin dashboard
+- Updated `Home.jsx` to use dynamic gallery API
+- Gallery accessible via Admin Dashboard > Podešavanja > Galerija
+**Status:** ✅ Verified working
 
 ### Demo Access Section Removal - COMPLETED
-**Date:** December 2025
-**Issue:** The login page was showing a "DEMO ACCESS" section with test credentials that should have been removed in a previous session. This was a code regression.
-**Fix:** Removed lines 291-322 from `/app/frontend/src/pages/Login.jsx` containing the demo credentials section.
+**Date:** February 18, 2025
+**Issue:** Login page showing demo credentials
+**Fix:** Removed demo access section from Login.jsx
+**Status:** ✅ Verified working
+
+### Super Admin Setup - COMPLETED
+**Date:** February 18, 2025
+- Created single super admin: `vladanmitic@gmail.com` / `Ipponluka_78`
+- Removed other test super admin accounts
 **Status:** ✅ Verified working
 
 ### Features Pending Deployment
-- CMS "Add Guide" improvements (`CMSManager.jsx`)
-- Content formatting with line breaks/bullets (`formatContent.js` utility)
-- PWA install detection improvements (`PWAContext.js`)
-- Safe deployment workflow (`.github/workflows/deploy.yml`)
+- CMS "Add Guide" improvements
+- Content formatting utilities
+- PWA install detection improvements
+- Safe deployment workflow
 
 ## Core Features Implemented
 
