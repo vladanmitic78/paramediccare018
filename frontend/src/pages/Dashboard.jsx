@@ -1752,7 +1752,6 @@ const Dashboard = () => {
 
           {/* Availability Section - StaffAvailabilityCalendar is rendered above at line 1197 */}
         </main>
-      </div>
 
       {/* Delete User Confirmation Dialog */}
       <Dialog open={showDeleteUserDialog} onOpenChange={setShowDeleteUserDialog}>
