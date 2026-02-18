@@ -24,8 +24,6 @@ const Home = () => {
   const { t, language } = useLanguage();
   const [homeContent, setHomeContent] = useState(null);
   const [galleryImages, setGalleryImages] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [heroImageLoaded, setHeroImageLoaded] = useState(false);
 
   // Fetch home page content from CMS
   useEffect(() => {
@@ -37,22 +35,8 @@ const Home = () => {
           content[item.section] = item;
         });
         setHomeContent(content);
-        
-        // Preload hero image if exists
-        const heroImg = content?.hero?.image_url;
-        if (heroImg) {
-          const img = new Image();
-          img.onload = () => setHeroImageLoaded(true);
-          img.onerror = () => setHeroImageLoaded(true);
-          img.src = heroImg;
-        } else {
-          setHeroImageLoaded(true);
-        }
       } catch (error) {
         console.log('Using default home content');
-        setHeroImageLoaded(true);
-      } finally {
-        setIsLoading(false);
       }
     };
     fetchHomeContent();
