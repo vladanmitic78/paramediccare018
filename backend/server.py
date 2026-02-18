@@ -386,7 +386,7 @@ def get_registration_email_template(full_name: str, email: str, language: str = 
                 
                 <!-- CTA Button -->
                 <div style="text-align: center; margin: 40px 0;">
-                    <a href="https://paramedic-care018.rs/login" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 50px; font-size: 18px; font-weight: 600; box-shadow: 0 4px 20px rgba(14, 165, 233, 0.4);">
+                    <a href="{FRONTEND_URL}/login" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 50px; font-size: 18px; font-weight: 600; box-shadow: 0 4px 20px rgba(14, 165, 233, 0.4);">
                         Idi na Moj Panel →
                     </a>
                 </div>
