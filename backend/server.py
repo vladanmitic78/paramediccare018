@@ -918,12 +918,7 @@ async def login(credentials: UserLogin):
     email = credentials.email.strip().lower()
     password = credentials.password.strip() if credentials.password else ""
     
-    logger.info(f"Login attempt for email: {email}")
     user = await db.users.find_one({"email": email}, {"_id": 0})
-    logger.info(f"User found: {user is not None}")
-    if user:
-        pwd_match = verify_password(password, user["password"])
-        logger.info(f"Password match: {pwd_match}")
     if not user or not verify_password(password, user["password"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     if not user.get("is_active", True):
