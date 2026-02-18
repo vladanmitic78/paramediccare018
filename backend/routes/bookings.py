@@ -736,7 +736,6 @@ async def update_patient_booking_status(
         "updated_at": datetime.now(timezone.utc).isoformat()
     }
     
-    old_status = booking.get("status")
     old_driver = booking.get("assigned_driver_id")
     
     # Reset old driver status if changing driver or cancelling
