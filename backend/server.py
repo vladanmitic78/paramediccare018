@@ -87,6 +87,7 @@ from routes.schedule import router as schedule_router
 from routes.bookings import router as bookings_router
 from routes.driver import router as driver_router
 from routes.driver import set_websocket_manager
+from routes.medical import router as medical_router
 
 # Create the main app
 app = FastAPI(title="Paramedic Care 018 API")
@@ -97,6 +98,7 @@ api_router.include_router(fleet_router)
 api_router.include_router(schedule_router)
 api_router.include_router(bookings_router)
 api_router.include_router(driver_router)
+api_router.include_router(medical_router)
 
 # WebSocket connection manager instance
 manager = ConnectionManager()
