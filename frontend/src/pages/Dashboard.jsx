@@ -922,29 +922,34 @@ const Dashboard = () => {
             </button>
           </div>
         </aside>
+      </div>
 
-        {/* Mobile Navigation */}
-        <div className="lg:hidden w-full">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="w-full overflow-x-auto flex justify-start p-2 bg-slate-900 border-b">
-              {navigationGroups.flatMap(group => group.items).map((item) => (
-                <TabsTrigger key={item.id} value={item.id} className="flex-shrink-0 text-white data-[state=active]:bg-white/10">
-                  <item.icon className="w-4 h-4 mr-2" />
-                  {item.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-        </div>
+      {/* Mobile Navigation Tabs - outside flex container */}
+      <div className="lg:hidden w-full sticky top-12 z-30">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="w-full overflow-x-auto flex justify-start p-1 bg-slate-800">
+            {navigationGroups.flatMap(group => group.items).slice(0, 8).map((item) => (
+              <TabsTrigger 
+                key={item.id} 
+                value={item.id} 
+                className="flex-shrink-0 px-3 py-2 text-xs text-white data-[state=active]:bg-sky-600 data-[state=active]:text-white rounded-lg"
+              >
+                <item.icon className="w-4 h-4 mr-1" />
+                <span className="truncate max-w-16">{item.label}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+      </div>
 
-        {/* Main Content */}
-        <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
-          {/* Overview */}
-          {activeTab === 'overview' && (
-            <div className="space-y-6">
-              <h1 className="text-2xl font-bold text-slate-900">
-                {language === 'sr' ? 'Dobrodošli,' : 'Welcome,'} {user?.full_name}
-              </h1>
+      {/* Main Content - outside flex container for proper mobile layout */}
+      <main className="flex-1 p-4 lg:p-8 overflow-y-auto bg-slate-50 min-h-[calc(100vh-120px)] lg:ml-72">
+        {/* Overview */}
+        {activeTab === 'overview' && (
+          <div className="space-y-6">
+            <h1 className="text-2xl font-bold text-slate-900">
+              {language === 'sr' ? 'Dobrodošli,' : 'Welcome,'} {user?.full_name}
+            </h1>
 
               {isAdmin() && stats && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
