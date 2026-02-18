@@ -66,11 +66,13 @@ import {
   RefreshCw,
   Shield,
   ExternalLink,
-  Phone
+  Phone,
+  Image as ImageIcon
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
 import CMSManager from '../components/CMSManager';
+import GalleryManager from '../components/GalleryManager';
 import OperationsDashboard from '../components/OperationsDashboard';
 import AdminBookingNotifications from '../components/AdminBookingNotifications';
 import StaffAvailabilityCalendar from '../components/StaffAvailabilityCalendar';
