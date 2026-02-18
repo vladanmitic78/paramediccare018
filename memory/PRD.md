@@ -372,3 +372,38 @@ A comprehensive medical transport system including a public website, patient por
 
 **Test Status:** All 17 backend tests passed (100%), Frontend UI fully tested
 
+
+
+## Backend Refactoring - Phase 1 (Feb 18, 2025)
+
+**Objective:** Modularize the monolithic server.py (~5,675 lines) into domain-specific routers for improved maintainability and scalability.
+
+**Completed:**
+1. Created `routes/bookings.py` (~800 lines)
+   - Public booking CRUD: POST/GET/PUT/DELETE /bookings
+   - Patient portal: /patient/* endpoints
+   - Admin patient bookings: /admin/patient-bookings/*
+   - Transport reasons: /patient/transport-reasons
+
+2. Created `routes/driver.py` (~640 lines)
+   - Driver profile & status: /driver/profile, /driver/status
+   - Driver location: /driver/location
+   - Driver assignments: /driver/assignment, accept/reject/complete
+   - Admin driver management: /admin/drivers, /admin/assign-driver*
+
+**Bug Fixed:**
+- AttributeError in routes/bookings.py line 270: Changed `booking.pickup_time` to `booking.booking_time` to match BookingCreate model
+
+**Test Status:** All 18 backend tests passed (100%)
+
+**Files Updated:**
+- `/app/backend/routes/bookings.py` (NEW)
+- `/app/backend/routes/driver.py` (NEW)
+- `/app/backend/routes/__init__.py` (updated exports)
+- `/app/backend/server.py` (added router includes, marked duplicates for removal)
+
+**Remaining Refactoring Tasks:**
+- [ ] Extract medical routes to routes/medical.py
+- [ ] Extract CMS routes to routes/cms.py
+- [ ] Extract SMS routes to routes/sms.py
+- [ ] Remove deprecated duplicate routes from server.py
