@@ -7,6 +7,7 @@ from .schedule import router as schedule_router
 from .bookings import router as bookings_router
 from .driver import router as driver_router
 from .medical import router as medical_router
+from .cms import router as cms_router
 
 __all__ = [
     'auth_router',
@@ -14,5 +15,6 @@ __all__ = [
     'schedule_router',
     'bookings_router',
     'driver_router',
-    'medical_router'
+    'medical_router',
+    'cms_router'
 ]
