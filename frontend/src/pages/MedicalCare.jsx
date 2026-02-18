@@ -148,16 +148,14 @@ const MedicalCare = () => {
             </div>
 
             <div className="relative">
-              {pageContent && heroImage ? (
+              {heroImage && (
                 <img
                   src={heroImage}
                   alt="Doctor"
                   className="rounded-2xl shadow-2xl w-full h-[400px] object-cover"
                 />
-              ) : (
-                <div className="rounded-2xl shadow-2xl w-full h-[400px] bg-slate-100" />
               )}
-              {pageContent && (
+              {heroImage && (
                 <div className="absolute -bottom-6 -right-6 bg-white rounded-xl shadow-xl p-4 border border-slate-100">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-sky-100 rounded-full flex items-center justify-center">
