@@ -6,11 +6,13 @@ from .fleet import router as fleet_router
 from .schedule import router as schedule_router
 from .bookings import router as bookings_router
 from .driver import router as driver_router
+from .medical import router as medical_router
 
 __all__ = [
     'auth_router',
     'fleet_router', 
     'schedule_router',
     'bookings_router',
-    'driver_router'
+    'driver_router',
+    'medical_router'
 ]
