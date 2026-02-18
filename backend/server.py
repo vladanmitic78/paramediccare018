@@ -4991,6 +4991,12 @@ async def mark_contact_read(contact_id: str, user: dict = Depends(require_roles(
     await db.contacts.update_one({"id": contact_id}, {"$set": {"is_read": True}})
     return {"success": True}
 
+
+# NOTE: CMS ROUTES (content, pages, gallery, services, upload) have been extracted to routes/cms.py
+# The routes below are DEPRECATED duplicates. They are kept temporarily for safety
+# and will be removed after full testing confirms the new routers work correctly.
+# TODO: Remove after verification - lines 4994-5614
+
 # ============ CONTENT MANAGEMENT ============
 
 @api_router.get("/content")
