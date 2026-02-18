@@ -123,24 +123,29 @@ A comprehensive medical transport system including a public website, patient por
 │   └── vehicle.py
 ├── routes/
 │   ├── __init__.py
-│   ├── auth.py         # Authentication routes (~260 lines)
-│   ├── bookings.py     # NEW - Booking & patient portal routes (~800 lines)
-│   ├── driver.py       # NEW - Driver app routes (~640 lines)
+│   ├── auth.py         # Authentication routes (~263 lines)
+│   ├── bookings.py     # Booking & patient portal routes (~800 lines)
+│   ├── cms.py          # CMS, gallery, services routes (~322 lines)
+│   ├── driver.py       # Driver app routes (~640 lines)
 │   ├── fleet.py        # Fleet management routes (~935 lines)
+│   ├── medical.py      # Medical patients, vitals, checks (~1,166 lines)
 │   └── schedule.py     # Vehicle scheduling routes (~848 lines)
 ├── services/
 │   └── sms_service.py  # SMS integration service
 ├── utils/
 │   ├── auth.py         # Auth utilities
 │   └── email.py        # Email utilities
-└── server.py           # Main server (~5,675 lines) - contains duplicates marked for removal
+└── server.py           # Main server (~5,688 lines) - contains deprecated duplicates
 ```
 
 **Refactoring Progress (Feb 18, 2025):**
-- Created `routes/bookings.py` - handles all booking CRUD, patient portal, and admin patient booking routes
-- Created `routes/driver.py` - handles driver profile, status, location, assignments, and admin driver management
-- Duplicate routes in `server.py` are marked with TODO comments for removal after testing
-- Next: Extract medical, CMS, SMS routes to complete the modular architecture
+- Created `routes/bookings.py` - booking CRUD, patient portal, admin patient bookings
+- Created `routes/driver.py` - driver profile, status, location, assignments
+- Created `routes/medical.py` - medical patients, vitals, checks, medications, diagnoses, dashboard
+- Created `routes/cms.py` - content management, gallery, services, file uploads
+- Total extracted: ~4,994 lines into organized router files
+- Duplicate routes in `server.py` marked with TODO comments for removal
+- All 7 routers tested and working
 
 ## Database Schema
 - **users**: User accounts with roles
