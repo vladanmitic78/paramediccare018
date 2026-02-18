@@ -727,6 +727,7 @@ const Dashboard = () => {
       items: [
         { id: 'users', icon: Users, label: t('dashboard_users') },
         { id: 'cms', icon: Globe, label: language === 'sr' ? 'Web stranica' : 'Website' },
+        { id: 'gallery', icon: ImageIcon, label: language === 'sr' ? 'Galerija' : 'Gallery' },
         { id: 'contacts', icon: MessageSquare, label: language === 'sr' ? 'Poruke' : 'Messages' },
         ...(isSuperAdmin() ? [
           { id: 'api-settings', icon: Key, label: language === 'sr' ? 'API Podešavanja' : 'API Settings' },
