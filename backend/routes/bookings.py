@@ -267,7 +267,7 @@ async def create_booking(booking: BookingCreate, user: dict = Depends(get_option
         sms_message = SMSTemplates.booking_confirmation(
             booking.patient_name,
             booking.booking_date,
-            booking.pickup_time or "TBD",
+            booking.booking_time or "TBD",
             booking.language or 'sr'
         )
         await send_sms_notification(booking.contact_phone, sms_message, booking_id)
