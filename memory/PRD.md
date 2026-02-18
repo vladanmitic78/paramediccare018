@@ -135,17 +135,15 @@ A comprehensive medical transport system including a public website, patient por
 ├── utils/
 │   ├── auth.py         # Auth utilities
 │   └── email.py        # Email utilities
-└── server.py           # Main server (~5,688 lines) - contains deprecated duplicates
+└── server.py           # Main server (~2,103 lines) - cleaned up!
 ```
 
-**Refactoring Progress (Feb 18, 2025):**
-- Created `routes/bookings.py` - booking CRUD, patient portal, admin patient bookings
-- Created `routes/driver.py` - driver profile, status, location, assignments
-- Created `routes/medical.py` - medical patients, vitals, checks, medications, diagnoses, dashboard
-- Created `routes/cms.py` - content management, gallery, services, file uploads
-- Total extracted: ~4,994 lines into organized router files
-- Duplicate routes in `server.py` marked with TODO comments for removal
-- All 7 routers tested and working
+**Refactoring Complete (Feb 18, 2025):**
+- Created 7 domain-specific routers totaling ~4,994 lines
+- Cleaned up server.py: reduced from 5,688 lines to 2,103 lines (63% reduction)
+- Removed 3,585 lines of duplicate code
+- All endpoints tested and working
+- server.py now contains: health, auth, password reset, user management, SMS settings, API keys, OSRM routing, staff availability, contacts, statistics, seed data
 
 ## Database Schema
 - **users**: User accounts with roles
