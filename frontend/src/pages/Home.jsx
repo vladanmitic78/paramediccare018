@@ -182,7 +182,12 @@ const Home = () => {
             {/* Hero Image */}
             <div className="relative animate-slide-up" style={{ animationDelay: '0.2s' }}>
               <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-                {heroImage ? (
+                {!heroImageLoaded ? (
+                  // Loading skeleton
+                  <div className="w-full h-[400px] lg:h-[500px] bg-slate-200 animate-pulse flex items-center justify-center">
+                    <Ambulance className="w-16 h-16 text-slate-300" />
+                  </div>
+                ) : heroImage ? (
                   <img
                     src={heroImage}
                     alt="Ambulance"
