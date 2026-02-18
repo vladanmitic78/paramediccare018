@@ -99,14 +99,12 @@ const About = () => {
             </div>
 
             <div className="relative">
-              {pageContent && heroImage ? (
+              {heroImage && (
                 <img
                   src={heroImage}
                   alt="Our team"
                   className="rounded-2xl shadow-2xl w-full h-[400px] object-cover"
                 />
-              ) : (
-                <div className="rounded-2xl shadow-2xl w-full h-[400px] bg-slate-100" />
               )}
             </div>
           </div>
