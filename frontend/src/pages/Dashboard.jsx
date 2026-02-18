@@ -113,6 +113,7 @@ const Dashboard = () => {
   const [services, setServices] = useState([]);
   const [staff, setStaff] = useState([]);
   const [selectedPatientBooking, setSelectedPatientBooking] = useState(null);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [availableDrivers, setAvailableDrivers] = useState([]);
   const [assigningDriver, setAssigningDriver] = useState(null);
   
