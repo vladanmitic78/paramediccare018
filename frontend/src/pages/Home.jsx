@@ -23,6 +23,7 @@ const API = process.env.REACT_APP_BACKEND_URL;
 const Home = () => {
   const { t, language } = useLanguage();
   const [homeContent, setHomeContent] = useState(null);
+  const [galleryImages, setGalleryImages] = useState([]);
 
   // Fetch home page content from CMS
   useEffect(() => {
@@ -39,6 +40,19 @@ const Home = () => {
       }
     };
     fetchHomeContent();
+  }, []);
+
+  // Fetch gallery images
+  useEffect(() => {
+    const fetchGallery = async () => {
+      try {
+        const response = await axios.get(`${API}/api/gallery`);
+        setGalleryImages(response.data || []);
+      } catch (error) {
+        console.log('Could not load gallery');
+      }
+    };
+    fetchGallery();
   }, []);
 
   // Get content from CMS or use defaults
@@ -61,34 +75,6 @@ const Home = () => {
   // Gallery section title from CMS
   const galleryTitle = homeContent?.['gallery-title']?.[language === 'sr' ? 'title_sr' : 'title_en'] || 
     (language === 'sr' ? 'Galerija' : 'Gallery');
-
-  // Gallery images from CMS (gallery-1, gallery-2, gallery-3, gallery-4) - only show if loaded
-  const galleryImages = [
-    {
-      src: homeContent?.['gallery-1']?.image_url || null,
-      alt: homeContent?.['gallery-1']?.[language === 'sr' ? 'title_sr' : 'title_en'] || 'Paramedic team',
-      className: 'col-span-2 row-span-2',
-      imgClassName: 'w-full h-full object-cover'
-    },
-    {
-      src: homeContent?.['gallery-2']?.image_url || null,
-      alt: homeContent?.['gallery-2']?.[language === 'sr' ? 'title_sr' : 'title_en'] || 'Doctor',
-      className: '',
-      imgClassName: 'w-full h-48 object-cover'
-    },
-    {
-      src: homeContent?.['gallery-3']?.image_url || null,
-      alt: homeContent?.['gallery-3']?.[language === 'sr' ? 'title_sr' : 'title_en'] || 'Nurse',
-      className: '',
-      imgClassName: 'w-full h-48 object-cover'
-    },
-    {
-      src: homeContent?.['gallery-4']?.image_url || null,
-      alt: homeContent?.['gallery-4']?.[language === 'sr' ? 'title_sr' : 'title_en'] || 'Hospital',
-      className: 'col-span-2',
-      imgClassName: 'w-full h-48 object-cover'
-    }
-  ].filter(img => img.src); // Filter out images without src
 
   const medicalServices = [
     { 
