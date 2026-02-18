@@ -40,7 +40,8 @@ const PWAInstallBanner = ({ language = 'en', forceShow = false }) => {
 
   const handleDismiss = () => {
     setLocalDismissed(true);
-    dismissBanner();
+    // Permanently dismiss the banner so it doesn't show again
+    dismissBanner(true);
   };
 
   // Don't show if already installed or running standalone
