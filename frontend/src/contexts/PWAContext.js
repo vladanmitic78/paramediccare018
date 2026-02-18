@@ -148,9 +148,12 @@ export const PWAProvider = ({ children }) => {
     }
   };
 
-  const dismissBanner = () => {
+  const dismissBanner = (permanent = false) => {
     setIsDismissed(true);
     sessionStorage.setItem('pwa-banner-dismissed', 'true');
+    if (permanent) {
+      localStorage.setItem('pwa-banner-permanently-dismissed', 'true');
+    }
   };
 
   const value = {
