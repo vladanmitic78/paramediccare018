@@ -348,11 +348,15 @@ const Transport = () => {
               </div>
             </div>
             <div className="order-1 lg:order-2">
-              <img
-                src={fleetImage}
-                alt="Paramedic team"
-                className="rounded-2xl shadow-xl w-full h-[400px] object-cover"
-              />
+              {pageContent && fleetImage ? (
+                <img
+                  src={fleetImage}
+                  alt="Paramedic team"
+                  className="rounded-2xl shadow-xl w-full h-[400px] object-cover"
+                />
+              ) : (
+                <div className="rounded-2xl shadow-xl w-full h-[400px] bg-slate-100" />
+              )}
             </div>
           </div>
         </div>
