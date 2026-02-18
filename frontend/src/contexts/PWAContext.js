@@ -11,10 +11,20 @@ const getWasInstalled = () => {
   }
 };
 
+// Check if banner was permanently dismissed by user
+const getIsPermanentlyDismissed = () => {
+  try {
+    return localStorage.getItem('pwa-banner-permanently-dismissed') === 'true';
+  } catch {
+    return false;
+  }
+};
+
 // Helper functions to get initial values (run only once during initialization)
 const getInitialDismissed = () => {
   try {
-    return sessionStorage.getItem('pwa-banner-dismissed') === 'true';
+    // Check both session and permanent dismissal
+    return sessionStorage.getItem('pwa-banner-dismissed') === 'true' || getIsPermanentlyDismissed();
   } catch {
     return false;
   }
