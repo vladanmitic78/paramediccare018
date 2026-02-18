@@ -72,9 +72,8 @@ const Home = () => {
   
   const emergencyPhone = homeContent?.['emergency-phone']?.[language === 'sr' ? 'content_sr' : 'content_en'] || '+381 66 81 01 007';
 
-  // Gallery section title from CMS
-  const galleryTitle = homeContent?.['gallery-title']?.[language === 'sr' ? 'title_sr' : 'title_en'] || 
-    (language === 'sr' ? 'Galerija' : 'Gallery');
+  // Gallery section title (static - gallery is now managed separately)
+  const galleryTitle = language === 'sr' ? 'Galerija' : 'Gallery';
 
   const medicalServices = [
     { 
