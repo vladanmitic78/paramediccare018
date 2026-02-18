@@ -303,29 +303,31 @@ const Home = () => {
       </section>
 
       {/* Image Gallery */}
-      <section className="section-spacing bg-slate-50" data-testid="gallery-section">
-        <div className="section-container">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
-              {galleryTitle}
-            </h2>
+      {galleryImages.length > 0 && (
+        <section className="section-spacing bg-slate-50" data-testid="gallery-section">
+          <div className="section-container">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
+                {galleryTitle}
+              </h2>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {galleryImages.map((img, index) => (
+                <div 
+                  key={img.id || index} 
+                  className="aspect-square rounded-xl overflow-hidden bg-slate-200 shadow-md hover:shadow-lg transition-shadow"
+                >
+                  <img
+                    src={img.image_url}
+                    alt={`Gallery ${index + 1}`}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px]">
-            {galleryImages.map((img, index) => (
-              <div 
-                key={index} 
-                className={`rounded-xl overflow-hidden ${img.className} bg-slate-200`}
-              >
-                <img
-                  src={img.src}
-                  alt={img.alt}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* PWA Install Banner - Shows on supported browsers */}
       <PWAInstallBanner language={language} forceShow={true} />
