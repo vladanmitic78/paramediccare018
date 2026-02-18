@@ -1,11 +1,13 @@
 """
-Booking routes - /bookings/*, /admin/patient-bookings/*
-Handles: Public bookings, Patient portal bookings, Admin booking management
+Booking routes - /bookings/*, /admin/patient-bookings/*, /admin/invoices/*
+Handles: Public bookings, Patient portal bookings, Admin booking management, Invoices
 """
 from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi.responses import StreamingResponse
 from datetime import datetime, timezone
 from typing import List, Optional
 import uuid
+import io
 
 from config import db, TRANSPORT_EMAIL, MEDICAL_EMAIL, logger
 from models import (
