@@ -241,14 +241,12 @@ const MedicalCare = () => {
         <div className="section-container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              {pageContent && teamImage ? (
+              {teamImage && (
                 <img
                   src={teamImage}
                   alt="Medical team"
                   className="rounded-2xl shadow-xl w-full h-[400px] object-cover"
                 />
-              ) : (
-                <div className="rounded-2xl shadow-xl w-full h-[400px] bg-slate-100" />
               )}
             </div>
             <div>
