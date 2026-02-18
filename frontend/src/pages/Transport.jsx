@@ -212,16 +212,14 @@ const Transport = () => {
             </div>
 
             <div className="relative">
-              {pageContent && heroImage ? (
+              {heroImage && (
                 <img
                   src={heroImage}
                   alt="Ambulance"
                   className="rounded-2xl shadow-2xl w-full h-[400px] object-cover"
                 />
-              ) : (
-                <div className="rounded-2xl shadow-2xl w-full h-[400px] bg-slate-100" />
               )}
-              {pageContent && (
+              {heroImage && (
                 <a 
                   href={`tel:${emergencyPhone.replace(/\s/g, '')}`}
                   className="absolute -bottom-6 -left-6 bg-white rounded-xl shadow-xl p-4 border border-slate-100 hover:shadow-2xl hover:scale-105 transition-all cursor-pointer group"
