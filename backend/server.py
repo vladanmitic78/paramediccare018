@@ -84,6 +84,9 @@ from services.sms_service import SMSService, SMSConfig, SMSProvider, SMSTemplate
 # Import extracted routers
 from routes.fleet import router as fleet_router
 from routes.schedule import router as schedule_router
+from routes.bookings import router as bookings_router
+from routes.driver import router as driver_router
+from routes.driver import set_websocket_manager
 
 # Create the main app
 app = FastAPI(title="Paramedic Care 018 API")
@@ -92,9 +95,14 @@ api_router = APIRouter(prefix="/api")
 # Include extracted routers
 api_router.include_router(fleet_router)
 api_router.include_router(schedule_router)
+api_router.include_router(bookings_router)
+api_router.include_router(driver_router)
 
 # WebSocket connection manager instance
 manager = ConnectionManager()
+
+# Set WebSocket manager for driver router
+set_websocket_manager(manager)
 
 # ============ EMAIL TEMPLATES (not yet fully extracted) ============
 # Note: get_email_header, get_email_footer, send_email, and get_internal_notification_template
