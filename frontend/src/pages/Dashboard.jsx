@@ -994,6 +994,10 @@ const Dashboard = () => {
             <CMSManager />
           )}
 
+          {/* Gallery Management */}
+          {activeTab === 'gallery' && isAdmin() && (
+            <GalleryManager />
+          )}
 
           {/* Bookings are now integrated into FleetDispatch (Vehicles & Bookings) */}
 
