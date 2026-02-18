@@ -291,12 +291,14 @@ A comprehensive medical transport system including a public website, patient por
 - [x] Fix logout on refresh issue - Extended session duration
 - [x] Patient Diagnoses Management - ICD-10 diagnoses with typeahead search (Jan 28, 2026)
 - [x] Forgot Password Feature - Email-based password reset flow (Feb 4, 2026)
+- [x] Backend Refactoring Phase 1 - Extract bookings & driver routes from server.py (Feb 18, 2025)
 
 ### P1 - High Priority
 - [ ] Timeline-Based Vehicle Scheduling - Phase 4: Admin Gantt View
-- [ ] Continue backend refactoring (extract medical, driver, users, bookings routes from server.py)
+- [ ] Continue backend refactoring (extract medical, CMS, SMS routes from server.py)
 - [ ] Doctor Decision Panel - live instructions from Medical Dashboard
 - [ ] Refactor UnifiedPWA.jsx (~2,200 lines) into smaller components
+- [ ] Remove deprecated duplicate routes from server.py after testing
 
 ### P2 - Medium Priority
 - [ ] Calendar view for bookings (`OPERACIJE -> Kalendar`)
