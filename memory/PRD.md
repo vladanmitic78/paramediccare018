@@ -309,7 +309,8 @@ A comprehensive medical transport system including a public website, patient por
 - [x] Fix logout on refresh issue - Extended session duration
 - [x] Patient Diagnoses Management - ICD-10 diagnoses with typeahead search (Jan 28, 2026)
 - [x] Forgot Password Feature - Email-based password reset flow (Feb 4, 2026)
-- [x] Backend Refactoring Phase 1 - Extract bookings & driver routes from server.py (Feb 18, 2025)
+- [x] Backend Refactoring Phase 1 - Extract bookings, driver, medical, cms routes (Feb 18, 2025)
+- [x] Fix PWA install banner - Now permanently dismisses when user clicks X (Feb 18, 2025)
 
 ### P1 - High Priority
 - [ ] Timeline-Based Vehicle Scheduling - Phase 4: Admin Gantt View
