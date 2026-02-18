@@ -753,20 +753,55 @@ const Dashboard = () => {
         <CriticalAlertsPanel language={language} darkMode={darkMode} />
       )}
       
+      {/* Mobile Header with Hamburger */}
+      <div className="lg:hidden bg-slate-900 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg overflow-hidden">
+            <img src="/logo.jpg" alt="Paramedic Care 018" className="w-full h-full object-cover" />
+          </div>
+          <span className="font-bold text-white">Paramedic Care 018</span>
+        </div>
+        <button 
+          onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+          className="p-2 text-white hover:bg-slate-800 rounded-lg"
+        >
+          {mobileSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+      </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {mobileSidebarOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setMobileSidebarOpen(false)}
+        />
+      )}
+      
       <div className="flex">
-        {/* Sidebar - New Professional Design */}
-        <aside className="w-72 bg-slate-900 min-h-screen hidden lg:flex lg:flex-col" style={{ fontFamily: 'Inter, sans-serif' }}>
+        {/* Sidebar - Desktop: always visible, Mobile: slide-in */}
+        <aside className={`
+          w-72 bg-slate-900 min-h-screen flex-col
+          lg:flex
+          ${mobileSidebarOpen ? 'fixed inset-y-0 left-0 z-50 flex' : 'hidden'}
+        `} style={{ fontFamily: 'Inter, sans-serif' }}>
           {/* Logo Header */}
           <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-800">
             <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0">
               <img src="/logo.jpg" alt="Paramedic Care 018" className="w-full h-full object-cover" />
             </div>
-            <div>
+            <div className="flex-1">
               <h1 className="font-bold text-white text-lg leading-tight" style={{ fontFamily: 'Manrope, sans-serif' }}>
                 Paramedic Care
               </h1>
               <p className="text-xs text-slate-500">018</p>
             </div>
+            {/* Close button for mobile */}
+            <button 
+              onClick={() => setMobileSidebarOpen(false)}
+              className="lg:hidden p-1 text-slate-400 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
 
           {/* Navigation */}
