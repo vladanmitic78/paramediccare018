@@ -314,10 +314,9 @@ A comprehensive medical transport system including a public website, patient por
 
 ### P1 - High Priority
 - [ ] Timeline-Based Vehicle Scheduling - Phase 4: Admin Gantt View
-- [ ] Continue backend refactoring (extract medical, CMS, SMS routes from server.py)
+- [ ] Remove deprecated duplicate routes from server.py after full testing
 - [ ] Doctor Decision Panel - live instructions from Medical Dashboard
 - [ ] Refactor UnifiedPWA.jsx (~2,200 lines) into smaller components
-- [ ] Remove deprecated duplicate routes from server.py after testing
 
 ### P2 - Medium Priority
 - [ ] Calendar view for bookings (`OPERACIJE -> Kalendar`)
