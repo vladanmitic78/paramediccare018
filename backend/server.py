@@ -1743,6 +1743,10 @@ async def update_booking_eta(
         logger.error(f"OSRM request error: {e}")
         raise HTTPException(status_code=503, detail="Route calculation service unavailable")
 
+# NOTE: BOOKING ROUTES, PATIENT PORTAL ROUTES have been extracted to routes/bookings.py
+# The routes below are DEPRECATED duplicates. They are kept temporarily for safety
+# and will be removed after full testing confirms the new routers work correctly.
+# TODO: Remove after verification - lines 1747-2627
 
 # ============ BOOKING ROUTES ============
 
