@@ -148,26 +148,32 @@ const MedicalCare = () => {
             </div>
 
             <div className="relative">
-              <img
-                src={heroImage}
-                alt="Doctor"
-                className="rounded-2xl shadow-2xl w-full h-[400px] object-cover"
-              />
-              <div className="absolute -bottom-6 -right-6 bg-white rounded-xl shadow-xl p-4 border border-slate-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-sky-100 rounded-full flex items-center justify-center">
-                    <Shield className="w-6 h-6 text-sky-600" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-slate-900">
-                      {language === 'sr' ? 'Poverenje' : 'Trust'}
-                    </p>
-                    <p className="text-sm text-slate-500">
-                      {language === 'sr' ? '15+ godina' : '15+ years'}
-                    </p>
+              {pageContent && heroImage ? (
+                <img
+                  src={heroImage}
+                  alt="Doctor"
+                  className="rounded-2xl shadow-2xl w-full h-[400px] object-cover"
+                />
+              ) : (
+                <div className="rounded-2xl shadow-2xl w-full h-[400px] bg-slate-100" />
+              )}
+              {pageContent && (
+                <div className="absolute -bottom-6 -right-6 bg-white rounded-xl shadow-xl p-4 border border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-sky-100 rounded-full flex items-center justify-center">
+                      <Shield className="w-6 h-6 text-sky-600" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-900">
+                        {language === 'sr' ? 'Poverenje' : 'Trust'}
+                      </p>
+                      <p className="text-sm text-slate-500">
+                        {language === 'sr' ? '15+ godina' : '15+ years'}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
