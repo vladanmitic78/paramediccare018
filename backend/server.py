@@ -2859,6 +2859,12 @@ async def get_staff_list(
     ).to_list(100)
     return staff
 
+
+# NOTE: MEDICAL PATIENT PROFILE ROUTES have been extracted to routes/medical.py
+# The routes below are DEPRECATED duplicates. They are kept temporarily for safety
+# and will be removed after full testing confirms the new routers work correctly.
+# TODO: Remove after verification - lines 2862-4182
+
 # ============ MEDICAL PATIENT PROFILE ROUTES ============
 
 def calculate_age(birth_date_str: str) -> int:
