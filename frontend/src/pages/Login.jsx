@@ -47,8 +47,14 @@ const Login = () => {
         
         // Redirect based on role and device
         if (isMobile) {
-          // All mobile users go to unified PWA
-          navigate('/app');
+          // Admin/superadmin can choose - for now redirect to responsive dashboard
+          if (['admin', 'superadmin'].includes(user.role)) {
+            // Admin on mobile goes to dashboard (it has mobile responsive design)
+            navigate('/dashboard');
+          } else {
+            // Other mobile users go to unified PWA
+            navigate('/app');
+          }
         } else {
           // Desktop users go to role-specific pages
           if (user.role === 'driver') {
