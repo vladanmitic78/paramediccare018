@@ -798,3 +798,110 @@ async def get_bookings_for_invoice(
     
     bookings = await db.patient_bookings.find(query, {"_id": 0}).sort("created_at", -1).limit(100).to_list(100)
     return bookings
+
+
+
+# ============ ADMIN INVOICES ============
+
+@router.post("/admin/invoices")
+async def create_invoice(
+    booking_id: str,
+    amount: float,
+    service_description: str,
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Create invoice for a completed booking"""
+    from datetime import timedelta
+    
+    booking = await db.patient_bookings.find_one({"id": booking_id})
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    # Generate invoice number
+    invoice_count = await db.invoices.count_documents({})
+    invoice_number = f"PC018-{datetime.now().year}-{str(invoice_count + 1).zfill(5)}"
+    
+    tax = round(amount * 0.20, 2)  # 20% VAT
+    total = round(amount + tax, 2)
+    
+    invoice = {
+        "id": str(uuid.uuid4()),
+        "invoice_number": invoice_number,
+        "booking_id": booking_id,
+        "user_id": booking.get("user_id"),
+        "patient_name": booking.get("patient_name"),
+        "patient_email": booking.get("contact_email"),
+        "service_type": "medical_transport",
+        "service_date": booking.get("preferred_date"),
+        "service_description": service_description,
+        "pickup_address": booking.get("pickup_address"),
+        "destination_address": booking.get("destination_address"),
+        "amount": amount,
+        "tax": tax,
+        "total": total,
+        "payment_status": "pending",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "due_date": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
+    }
+    
+    await db.invoices.insert_one(invoice)
+    
+    # Update booking with invoice ID
+    await db.patient_bookings.update_one(
+        {"id": booking_id},
+        {"$set": {"invoice_id": invoice["id"]}}
+    )
+    
+    # Notify patient if user_id exists
+    if booking.get("user_id"):
+        await create_notification(
+            booking["user_id"],
+            "admin_message",
+            "Nova faktura",
+            "New Invoice",
+            f"Faktura {invoice_number} za vaš transport je kreirana.",
+            f"Invoice {invoice_number} for your transport has been created.",
+            booking_id
+        )
+    
+    return {k: v for k, v in invoice.items() if k != "_id"}
+
+
+@router.get("/admin/invoices")
+async def get_all_invoices(
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN])),
+    status: Optional[str] = None,
+    limit: int = 100
+):
+    """Get all invoices for admin"""
+    query = {}
+    if status:
+        query["payment_status"] = status
+    
+    invoices = await db.invoices.find(query, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
+    return invoices
+
+
+@router.put("/admin/invoices/{invoice_id}/status")
+async def update_invoice_status(
+    invoice_id: str,
+    payment_status: str,
+    user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
+):
+    """Update invoice payment status"""
+    if payment_status not in ["pending", "paid", "cancelled", "overdue"]:
+        raise HTTPException(status_code=400, detail="Invalid status")
+    
+    result = await db.invoices.update_one(
+        {"id": invoice_id},
+        {"$set": {
+            "payment_status": payment_status,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "paid_at": datetime.now(timezone.utc).isoformat() if payment_status == "paid" else None
+        }}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    
+    return {"success": True, "status": payment_status}
