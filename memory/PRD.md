@@ -110,7 +110,7 @@ A comprehensive medical transport system including a public website, patient por
 3. Improved loading state logic
 4. Bumped service worker cache version (v4) to force refresh
 
-## Backend Route Structure
+## Backend Route Structure (Updated Feb 2025)
 ```
 /app/backend/
 ├── models/
@@ -118,16 +118,29 @@ A comprehensive medical transport system including a public website, patient por
 │   ├── booking.py
 │   ├── driver.py
 │   ├── medical.py
-│   ├── schedule.py     # NEW - Timeline-based scheduling models
+│   ├── schedule.py     # Timeline-based scheduling models
 │   ├── user.py
 │   └── vehicle.py
 ├── routes/
 │   ├── __init__.py
 │   ├── auth.py         # Authentication routes (~260 lines)
-│   ├── fleet.py        # Fleet management routes (~950 lines)
-│   └── schedule.py     # NEW - Vehicle scheduling routes (~600 lines)
-└── server.py           # Main server (~4,600 lines) - needs further refactoring
+│   ├── bookings.py     # NEW - Booking & patient portal routes (~800 lines)
+│   ├── driver.py       # NEW - Driver app routes (~640 lines)
+│   ├── fleet.py        # Fleet management routes (~935 lines)
+│   └── schedule.py     # Vehicle scheduling routes (~848 lines)
+├── services/
+│   └── sms_service.py  # SMS integration service
+├── utils/
+│   ├── auth.py         # Auth utilities
+│   └── email.py        # Email utilities
+└── server.py           # Main server (~5,675 lines) - contains duplicates marked for removal
 ```
+
+**Refactoring Progress (Feb 18, 2025):**
+- Created `routes/bookings.py` - handles all booking CRUD, patient portal, and admin patient booking routes
+- Created `routes/driver.py` - handles driver profile, status, location, assignments, and admin driver management
+- Duplicate routes in `server.py` are marked with TODO comments for removal after testing
+- Next: Extract medical, CMS, SMS routes to complete the modular architecture
 
 ## Database Schema
 - **users**: User accounts with roles
