@@ -2055,6 +2055,39 @@ async def get_dashboard_stats(user: dict = Depends(require_roles([UserRole.ADMIN
 
 # ============ SEED DATA ============
 
+@api_router.post("/fix-image-urls")
+async def fix_image_urls(user: dict = Depends(require_roles([UserRole.SUPERADMIN]))):
+    """Fix CMS image URLs - converts absolute URLs to relative paths"""
+    # Find all documents with old preview/deployment URLs
+    old_patterns = [
+        "paramedic-care-018-1.preview.emergentagent.com",
+        "paramedic-care-018-1.emergent.host",
+        "care-dispatch-hub.preview.emergentagent.com"
+    ]
+    
+    fixed_count = 0
+    
+    for pattern in old_patterns:
+        docs = await db.page_content.find(
+            {"image_url": {"$regex": pattern}},
+            {"id": 1, "image_url": 1}
+        ).to_list(100)
+        
+        for doc in docs:
+            old_url = doc.get('image_url', '')
+            if '/api/uploads/' in old_url:
+                filename = old_url.split('/api/uploads/')[-1]
+                new_url = f"/api/uploads/{filename}"
+                
+                await db.page_content.update_one(
+                    {"id": doc['id']},
+                    {"$set": {"image_url": new_url}}
+                )
+                fixed_count += 1
+    
+    return {"success": True, "fixed_count": fixed_count, "message": f"Fixed {fixed_count} image URLs"}
+
+
 @api_router.post("/seed")
 async def seed_data():
     # Create super admin if not exists
