@@ -403,6 +403,16 @@ const Dashboard = () => {
     }
   };
 
+  const deleteContact = async (contactId) => {
+    try {
+      await axios.delete(`${API}/contacts/${contactId}`);
+      toast.success(language === 'sr' ? 'Poruka obrisana' : 'Message deleted');
+      fetchData();
+    } catch (error) {
+      toast.error(language === 'sr' ? 'Greška pri brisanju' : 'Delete error');
+    }
+  };
+
   const updateUserRole = async (userId, newRole) => {
     try {
       await axios.put(`${API}/users/${userId}/role`, { role: newRole });
