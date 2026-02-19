@@ -31,9 +31,12 @@ const ScheduleGantt = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
+      const token = localStorage.getItem('token');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      
       const [vehiclesRes, bookingsRes] = await Promise.all([
-        axios.get(`${API}/fleet/vehicles`),
-        axios.get(`${API}/bookings`)
+        axios.get(`${API}/fleet/vehicles`, { headers }),
+        axios.get(`${API}/bookings`, { headers })
       ]);
       setVehicles(vehiclesRes.data || []);
       setBookings(bookingsRes.data || []);
