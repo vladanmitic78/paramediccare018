@@ -294,7 +294,7 @@ const AdminLiveMap = () => {
       </div>
 
       {/* Map */}
-      <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm" style={{ height: '500px' }}>
+      <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm" style={{ height: '600px', minHeight: '400px' }}>
         <MapContainer
           center={defaultCenter}
           zoom={12}
