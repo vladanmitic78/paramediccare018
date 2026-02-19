@@ -68,7 +68,8 @@ import {
   ExternalLink,
   Phone,
   Image as ImageIcon,
-  Menu
+  Menu,
+  CalendarDays
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
