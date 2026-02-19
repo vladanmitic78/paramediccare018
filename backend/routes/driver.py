@@ -559,7 +559,20 @@ async def assign_driver_to_public_booking(
     user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))
 ):
     """Assign a driver to a public booking"""
+    # First check if user has driver role in users collection
     driver = await db.users.find_one({"id": driver_id, "role": UserRole.DRIVER})
+    
+    # If not found as driver, check if they're assigned as driver in any vehicle team
+    if not driver:
+        team_assignment = await db.vehicle_teams.find_one({
+            "user_id": driver_id, 
+            "role": "driver",
+            "is_active": True
+        })
+        if team_assignment:
+            # User is assigned as driver in a vehicle team, get their user record
+            driver = await db.users.find_one({"id": driver_id})
+    
     if not driver:
         raise HTTPException(status_code=404, detail="Driver not found")
     
