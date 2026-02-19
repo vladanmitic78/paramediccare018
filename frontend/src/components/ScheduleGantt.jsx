@@ -31,18 +31,18 @@ const ScheduleGantt = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      
       const [vehiclesRes, bookingsRes] = await Promise.all([
-        axios.get(`${API}/fleet/vehicles`, { headers }),
-        axios.get(`${API}/bookings`, { headers })
+        axios.get(`${API}/fleet/vehicles`),
+        axios.get(`${API}/bookings`)
       ]);
       setVehicles(vehiclesRes.data || []);
       setBookings(bookingsRes.data || []);
     } catch (error) {
       console.error('Error fetching schedule data:', error);
-      toast.error(language === 'sr' ? 'Greška pri učitavanju' : 'Error loading data');
+      // Don't show error toast on auth issues - user might not have access
+      if (error.response?.status !== 401 && error.response?.status !== 403) {
+        toast.error(language === 'sr' ? 'Greška pri učitavanju' : 'Error loading data');
+      }
     } finally {
       setLoading(false);
     }
