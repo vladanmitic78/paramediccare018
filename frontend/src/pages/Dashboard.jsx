@@ -1003,8 +1003,16 @@ const Dashboard = () => {
                     </TableHeader>
                     <TableBody>
                       {bookings.slice(0, 5).map((booking) => (
-                        <TableRow key={booking.id}>
-                          <TableCell className="font-medium">{booking.patient_name}</TableCell>
+                        <TableRow 
+                          key={booking.id} 
+                          className="cursor-pointer hover:bg-sky-50 transition-colors"
+                          onClick={() => {
+                            setActiveTab('vehicles');
+                            // Store the booking ID to highlight it in FleetDispatch
+                            sessionStorage.setItem('highlightBookingId', booking.id);
+                          }}
+                        >
+                          <TableCell className="font-medium text-sky-600 hover:text-sky-800">{booking.patient_name}</TableCell>
                           <TableCell>{booking.booking_date}</TableCell>
                           <TableCell>{getStatusBadge(booking.status)}</TableCell>
                           <TableCell className="max-w-xs truncate">
