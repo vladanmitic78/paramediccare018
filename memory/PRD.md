@@ -3,7 +3,24 @@
 ## Overview
 A comprehensive medical transport system including a public website, patient portal, real-time mobile applications (PWA) for admins, drivers, and medical staff, invoice management, location tracking, live map, staff availability management, EMR-style medical dashboard, and vehicle-centric team assignment module.
 
-## Recent Changes (February 2025)
+## Recent Changes (February 2026)
+
+### Schedule (Gantt) View - COMPLETED
+**Date:** February 19, 2026
+**Feature:** Fixed and enhanced the Vehicle Schedule (Gantt) view in Admin Dashboard
+- Fixed critical bug: API calls were missing `/api` prefix causing authentication failures
+- Implemented weekly view (Mon-Sun) matching live site design
+- Added "Nedodeljeno" (Unassigned) row showing unassigned bookings count
+- Added current time indicator (red vertical line on current day)
+- Added status filter dropdown (All Status/Pending/Confirmed/Assigned/En Route/In Transit/Arrived)
+- Added zoom controls (50%-200%)
+- Added Drag & Drop toggle for rescheduling
+- Added vehicle count badge
+- Added full legend with status colors
+- Added proper Serbian translations
+**Status:** ✅ Verified working - Shows all 4 vehicles and 13 unassigned bookings
+
+## Previous Changes (February 2025)
 
 ### Gallery System - COMPLETED
 **Date:** February 18, 2025
