@@ -79,6 +79,7 @@ import OperationsDashboard from '../components/OperationsDashboard';
 import AdminBookingNotifications from '../components/AdminBookingNotifications';
 import StaffAvailabilityCalendar from '../components/StaffAvailabilityCalendar';
 import InvoiceManager from '../components/InvoiceManager';
+import ScheduleGantt from '../components/ScheduleGantt';
 import AdminLiveMap from '../components/AdminLiveMap';
 import SMSSettings from '../components/SMSSettings';
 
