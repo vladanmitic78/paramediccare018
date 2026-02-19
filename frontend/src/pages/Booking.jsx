@@ -116,8 +116,14 @@ const Booking = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Validate all required fields
     if (!startLocation.address || !endLocation.address || !date) {
-      toast.error(language === 'sr' ? 'Molimo popunite sva obavezna polja' : 'Please fill in all required fields');
+      toast.error(language === 'sr' ? 'Molimo popunite adrese i datum' : 'Please fill in addresses and date');
+      return;
+    }
+    
+    if (!formData.patient_name || !formData.contact_phone || !formData.contact_email) {
+      toast.error(language === 'sr' ? 'Molimo popunite ime, telefon i email' : 'Please fill in name, phone and email');
       return;
     }
 
