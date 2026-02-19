@@ -938,22 +938,22 @@ const Dashboard = () => {
 
         {/* Main Content - inside flex for proper layout */}
         <div className="flex-1 flex flex-col min-h-screen">
-          {/* Mobile Navigation Tabs */}
-          <div className="lg:hidden w-full sticky top-0 z-30 bg-white shadow-sm">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="w-full overflow-x-auto flex justify-start gap-1 p-2 bg-slate-800">
-                {navigationGroups.flatMap(group => group.items).slice(0, 6).map((item) => (
-                  <TabsTrigger 
-                    key={item.id} 
-                    value={item.id} 
-                    className="flex-shrink-0 px-2 py-1.5 text-xs text-white data-[state=active]:bg-sky-600 data-[state=active]:text-white rounded"
-                  >
-                    <item.icon className="w-3 h-3 mr-1" />
-                    <span className="truncate">{item.label.split(' ')[0]}</span>
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
+          {/* Mobile Header with Sandwich Menu Only */}
+          <div className="lg:hidden w-full sticky top-0 z-30 bg-slate-800 shadow-sm">
+            <div className="flex items-center justify-between px-4 py-3">
+              <div className="flex items-center gap-3">
+                <img src="/logo.jpg" alt="PC018" className="w-8 h-8 rounded-lg" />
+                <span className="font-semibold text-white">Paramedic Care 018</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSidebarOpen(true)}
+                className="text-white hover:bg-slate-700"
+              >
+                <Menu className="w-6 h-6" />
+              </Button>
+            </div>
           </div>
 
           <main className="flex-1 p-4 lg:p-8 overflow-y-auto bg-slate-50">
