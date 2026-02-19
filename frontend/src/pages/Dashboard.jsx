@@ -938,24 +938,6 @@ const Dashboard = () => {
 
         {/* Main Content - inside flex for proper layout */}
         <div className="flex-1 flex flex-col min-h-screen">
-          {/* Mobile Header with Sandwich Menu Only */}
-          <div className="lg:hidden w-full sticky top-0 z-30 bg-slate-800 shadow-sm">
-            <div className="flex items-center justify-between px-4 py-3">
-              <div className="flex items-center gap-3">
-                <img src="/logo.jpg" alt="PC018" className="w-8 h-8 rounded-lg" />
-                <span className="font-semibold text-white">Paramedic Care 018</span>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setMobileSidebarOpen(true)}
-                className="text-white hover:bg-slate-700"
-              >
-                <Menu className="w-6 h-6" />
-              </Button>
-            </div>
-          </div>
-
           <main className="flex-1 p-4 lg:p-8 overflow-y-auto bg-slate-50">
             {/* Overview */}
             {activeTab === 'overview' && (
