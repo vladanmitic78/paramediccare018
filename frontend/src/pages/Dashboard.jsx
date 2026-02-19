@@ -1745,6 +1745,92 @@ const Dashboard = () => {
             </div>
           )}
 
+          {/* Contacts/Messages Section */}
+          {activeTab === 'contacts' && isAdmin() && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-slate-900">
+                  {language === 'sr' ? 'Poruke sa kontakt forme' : 'Contact Form Messages'}
+                </h2>
+                <Badge variant="outline" className="text-slate-600">
+                  {contacts.filter(c => !c.is_read).length} {language === 'sr' ? 'nepročitanih' : 'unread'}
+                </Badge>
+              </div>
+              
+              {contacts.length === 0 ? (
+                <div className="card-base text-center py-12">
+                  <MessageSquare className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                  <p className="text-slate-500">
+                    {language === 'sr' ? 'Nema poruka' : 'No messages'}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {contacts.map((contact) => (
+                    <div 
+                      key={contact.id} 
+                      className={`card-base ${!contact.is_read ? 'border-l-4 border-l-sky-500 bg-sky-50/50' : ''}`}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <h3 className="font-semibold text-slate-900">{contact.name}</h3>
+                          <p className="text-sm text-slate-500">{contact.email}</p>
+                          {contact.phone && (
+                            <p className="text-sm text-slate-500">{contact.phone}</p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {!contact.is_read && (
+                            <Badge className="bg-sky-100 text-sky-700">
+                              {language === 'sr' ? 'Novo' : 'New'}
+                            </Badge>
+                          )}
+                          <span className="text-xs text-slate-400">
+                            {new Date(contact.created_at).toLocaleDateString('sr-RS', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      {contact.subject && (
+                        <p className="text-sm font-medium text-slate-700 mb-2">
+                          {language === 'sr' ? 'Tema' : 'Subject'}: {contact.subject}
+                        </p>
+                      )}
+                      
+                      <p className="text-slate-600 whitespace-pre-wrap">{contact.message}</p>
+                      
+                      <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100">
+                        {!contact.is_read && (
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => markContactRead(contact.id)}
+                            className="text-sky-600 hover:text-sky-700"
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            {language === 'sr' ? 'Označi kao pročitano' : 'Mark as read'}
+                          </Button>
+                        )}
+                        <a href={`mailto:${contact.email}`}>
+                          <Button size="sm" variant="outline">
+                            <MessageSquare className="w-4 h-4 mr-1" />
+                            {language === 'sr' ? 'Odgovori' : 'Reply'}
+                          </Button>
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* SMS Gateway Settings (Super Admin only) */}
           {activeTab === 'sms-settings' && isSuperAdmin() && (
             <SMSSettings language={language} />
