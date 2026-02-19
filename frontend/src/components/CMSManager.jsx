@@ -218,6 +218,39 @@ const CMSManager = () => {
     }
   };
 
+  const handleFixImageUrls = async () => {
+    try {
+      setSaving(true);
+      const response = await axios.post(`${API}/fix-image-urls`);
+      const { fixed_count } = response.data;
+      
+      if (fixed_count > 0) {
+        toast.success(
+          language === 'sr' 
+            ? `Popravljeno ${fixed_count} URL-ova slika` 
+            : `Fixed ${fixed_count} image URLs`
+        );
+        // Refresh content to show updated URLs
+        await fetchContent();
+      } else {
+        toast.info(
+          language === 'sr' 
+            ? 'Sve slike su već ispravne' 
+            : 'All images are already correct'
+        );
+      }
+    } catch (error) {
+      console.error('Error fixing image URLs:', error);
+      toast.error(
+        language === 'sr' 
+          ? 'Greška pri popravljanju slika' 
+          : 'Error fixing images'
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
