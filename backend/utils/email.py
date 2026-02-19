@@ -10,6 +10,7 @@ from config import SMTP_HOST, SMTP_PORT, INFO_EMAIL, INFO_PASS, logger
 
 async def send_email(to_email: str, subject: str, body_html: str):
     """Send email from info@paramedic-care018.rs"""
+    logger.info(f"Attempting to send email to {to_email} with subject: {subject}")
     try:
         message = MIMEMultipart("alternative")
         message["From"] = INFO_EMAIL
@@ -25,10 +26,10 @@ async def send_email(to_email: str, subject: str, body_html: str):
             password=INFO_PASS,
             use_tls=True
         )
-        logger.info(f"Email sent to {to_email} from {INFO_EMAIL}")
+        logger.info(f"Email successfully sent to {to_email} from {INFO_EMAIL}")
         return True
     except Exception as e:
-        logger.error(f"Email failed: {e}")
+        logger.error(f"Email failed to {to_email}: {str(e)}")
         return False
 
 
