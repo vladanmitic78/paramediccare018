@@ -13,6 +13,7 @@ from models import (
     DriverLocationUpdate, DriverStatusUpdate
 )
 from utils.auth import get_current_user, require_roles
+from utils.email import send_email, get_booking_confirmation_email_template
 
 router = APIRouter(tags=["Driver"])
 
