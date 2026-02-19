@@ -1833,6 +1833,19 @@ const Dashboard = () => {
                             {language === 'sr' ? 'Odgovori' : 'Reply'}
                           </Button>
                         </a>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            if (window.confirm(language === 'sr' ? 'Da li ste sigurni da želite da obrišete ovu poruku?' : 'Are you sure you want to delete this message?')) {
+                              deleteContact(contact.id);
+                            }
+                          }}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-4 h-4 mr-1" />
+                          {language === 'sr' ? 'Obriši' : 'Delete'}
+                        </Button>
                       </div>
                     </div>
                   ))}
