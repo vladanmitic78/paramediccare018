@@ -440,10 +440,23 @@ const CMSManager = () => {
               : 'Edit page content in Serbian and English languages'}
           </p>
         </div>
-        <Button onClick={openAddDialog} className="btn-primary gap-2" data-testid="add-content-btn">
-          <Plus className="w-4 h-4" />
-          {language === 'sr' ? 'Dodaj Sadržaj' : 'Add Content'}
-        </Button>
+        <div className="flex items-center gap-2">
+          {isSuperAdmin && (
+            <Button 
+              variant="outline" 
+              onClick={handleFixImageUrls} 
+              className="gap-2 text-orange-600 border-orange-300 hover:bg-orange-50"
+              data-testid="fix-images-btn"
+            >
+              <ImageIcon className="w-4 h-4" />
+              {language === 'sr' ? 'Popravi Slike' : 'Fix Images'}
+            </Button>
+          )}
+          <Button onClick={openAddDialog} className="btn-primary gap-2" data-testid="add-content-btn">
+            <Plus className="w-4 h-4" />
+            {language === 'sr' ? 'Dodaj Sadržaj' : 'Add Content'}
+          </Button>
+        </div>
       </div>
 
       {/* Page Tabs */}
