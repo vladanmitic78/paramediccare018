@@ -147,7 +147,7 @@ const Booking = () => {
             setUploadProgress(Math.round(overallProgress));
           }
         });
-        uploadedFileIds.push(uploadRes.data.file_id);
+        uploadedFileIds.push(uploadRes.data.id);
       }
       
       setUploadProgress(100);
