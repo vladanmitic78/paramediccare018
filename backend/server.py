@@ -2029,6 +2029,13 @@ async def mark_contact_read(contact_id: str, user: dict = Depends(require_roles(
     await db.contacts.update_one({"id": contact_id}, {"$set": {"is_read": True}})
     return {"success": True}
 
+@api_router.delete("/contacts/{contact_id}")
+async def delete_contact(contact_id: str, user: dict = Depends(require_roles([UserRole.ADMIN, UserRole.SUPERADMIN]))):
+    result = await db.contacts.delete_one({"id": contact_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Contact not found")
+    return {"success": True}
+
 
 # ============ STATISTICS ============
 
