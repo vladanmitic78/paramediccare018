@@ -639,6 +639,31 @@ async def assign_driver_to_public_booking(
     
     booking = await db.bookings.find_one({"id": booking_id}, {"_id": 0})
     
+    # Send confirmation email to the customer
+    if booking and booking.get("contact_email"):
+        try:
+            # Get vehicle info if available
+            vehicle_info = "Ambulance"
+            if booking.get("assigned_vehicle_id"):
+                vehicle = await db.vehicles.find_one({"id": booking.get("assigned_vehicle_id")})
+                if vehicle:
+                    vehicle_info = f"{vehicle.get('name', 'Ambulance')} ({vehicle.get('registration', '')})"
+            
+            from utils.email import get_transport_email_template, send_email
+            language = booking.get("language", "sr")
+            subject, body = get_transport_email_template("driver_assigned", {
+                "patient_name": booking.get("patient_name", ""),
+                "driver_name": driver.get("full_name", ""),
+                "vehicle_info": vehicle_info,
+                "booking_date": booking.get("booking_date", ""),
+                "pickup_time": booking.get("booking_time") or booking.get("pickup_time", "TBD")
+            }, language)
+            
+            await send_email(booking["contact_email"], subject, body)
+            logger.info(f"Driver assignment confirmation email sent to {booking['contact_email']}")
+        except Exception as e:
+            logger.error(f"Failed to send driver assignment email: {e}")
+    
     if manager:
         await manager.send_to_driver(driver_id, {
             "type": "new_assignment",
