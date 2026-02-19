@@ -1045,6 +1045,11 @@ const Dashboard = () => {
             <FleetDispatch />
           )}
 
+          {/* Schedule Gantt */}
+          {activeTab === 'schedule' && isAdmin() && (
+            <ScheduleGantt />
+          )}
+
           {/* Fleet History */}
           {activeTab === 'fleet-history' && isAdmin() && (
             <FleetHistory language={language} />
