@@ -948,7 +948,7 @@ const Dashboard = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setSidebarOpen(true)}
+                onClick={() => setMobileSidebarOpen(true)}
                 className="text-white hover:bg-slate-700"
               >
                 <Menu className="w-6 h-6" />
