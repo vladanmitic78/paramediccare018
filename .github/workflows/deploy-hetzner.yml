@@ -1,0 +1,90 @@
+name: Deploy to Hetzner VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  SERVER_IP: 178.104.38.153
+  SERVER_USER: root
+  APP_DIR: /var/www/paramedic-care018
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+          cache-dependency-path: frontend/yarn.lock
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: yarn install --frozen-lockfile
+
+      - name: Build frontend
+        working-directory: frontend
+        env:
+          REACT_APP_BACKEND_URL: https://paramedic-care018.rs
+        run: yarn build
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ env.SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: Deploy backend
+        run: |
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            --exclude '__pycache__' \
+            --exclude '*.pyc' \
+            --exclude '.env' \
+            --exclude 'uploads/*' \
+            backend/ ${{ env.SERVER_USER }}@${{ env.SERVER_IP }}:${{ env.APP_DIR }}/backend/
+
+      - name: Deploy frontend build
+        run: |
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            frontend/build/ ${{ env.SERVER_USER }}@${{ env.SERVER_IP }}:${{ env.APP_DIR }}/frontend/build/
+
+      - name: Install backend dependencies and restart services
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ env.SERVER_USER }}@${{ env.SERVER_IP }} << 'ENDSSH'
+            cd /var/www/paramedic-care018/backend
+            
+            # Create virtual environment if it doesn't exist
+            if [ ! -d "venv" ]; then
+              python3 -m venv venv
+            fi
+            
+            # Activate and install dependencies
+            source venv/bin/activate
+            pip install --upgrade pip
+            pip install -r requirements.txt
+            pip install emergentintegrations --extra-index-url https://d33sy5i8bnduwe.cloudfront.net/simple/
+            
+            # Restart backend with PM2
+            pm2 delete paramedic-backend 2>/dev/null || true
+            pm2 start "source venv/bin/activate && uvicorn server:app --host 0.0.0.0 --port 8001" \
+              --name paramedic-backend \
+              --cwd /var/www/paramedic-care018/backend
+            pm2 save
+            
+            echo "Deployment complete!"
+          ENDSSH
+
+      - name: Health check
+        run: |
+          sleep 10
+          curl -f http://${{ env.SERVER_IP }}/api/health || echo "Health check failed - server may still be starting"
