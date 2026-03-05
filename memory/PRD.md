@@ -3,6 +3,20 @@
 ## Overview
 A comprehensive medical transport system including a public website, patient portal, real-time mobile applications (PWA) for admins, drivers, and medical staff, invoice management, location tracking, live map, staff availability management, EMR-style medical dashboard, and vehicle-centric team assignment module.
 
+## Recent Changes (March 2025)
+
+### Image Saving Bug Investigation - VERIFIED WORKING
+**Date:** March 5, 2025
+**Issue Reported:** User reported images cannot be saved from Admin panel (Gallery/Hero sections)
+**Investigation Results:**
+- Tested Gallery upload via `/api/upload/image` + `/api/gallery` → **WORKING**
+- Tested CMS Hero image upload → **WORKING**
+- Root cause of broken images on public pages: Stale database entries with URLs pointing to defunct preview servers
+- Fixed homepage hero image by updating to current preview URL
+**Status:** ✅ All image upload and save functionality verified working
+
+---
+
 ## Recent Changes (February 2025)
 
 ### Gallery System - COMPLETED
