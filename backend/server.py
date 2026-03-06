@@ -138,13 +138,13 @@ def get_verification_email_template(full_name: str, verification_link: str, lang
                 
                 <!-- CTA Button -->
                 <div style="text-align: center; margin: 40px 0;">
-                    <a href="{verification_link}" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: #ffffff; text-decoration: none; padding: 18px 50px; border-radius: 50px; font-size: 18px; font-weight: 600; box-shadow: 0 4px 20px rgba(14, 165, 233, 0.4);">
+                    <a href="{verification_link}" style="display: inline-block; background-color: #0ea5e9; color: #ffffff; text-decoration: none; padding: 18px 50px; border-radius: 8px; font-size: 18px; font-weight: bold; border: 2px solid #0284c7;">
                         Verify Email Here
                     </a>
                 </div>
                 
                 <!-- Security Note -->
-                <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 20px; margin: 20px 0;">
+                <div style="background-color: #fef3c7; border-radius: 12px; padding: 20px; margin: 20px 0;">
                     <p style="margin: 0; color: #92400e; font-size: 14px;">
                         <strong>⚠️ Security Note:</strong> This verification link will expire in 24 hours. If you didn't create an account with us, please ignore this email.
                     </p>
@@ -183,13 +183,13 @@ def get_verification_email_template(full_name: str, verification_link: str, lang
                 
                 <!-- CTA Button -->
                 <div style="text-align: center; margin: 40px 0;">
-                    <a href="{verification_link}" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: #ffffff; text-decoration: none; padding: 18px 50px; border-radius: 50px; font-size: 18px; font-weight: 600; box-shadow: 0 4px 20px rgba(14, 165, 233, 0.4);">
+                    <a href="{verification_link}" style="display: inline-block; background-color: #0ea5e9; color: #ffffff; text-decoration: none; padding: 18px 50px; border-radius: 8px; font-size: 18px; font-weight: bold; border: 2px solid #0284c7;">
                         Verifikuj Email Ovde
                     </a>
                 </div>
                 
                 <!-- Security Note -->
-                <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 20px; margin: 20px 0;">
+                <div style="background-color: #fef3c7; border-radius: 12px; padding: 20px; margin: 20px 0;">
                     <p style="margin: 0; color: #92400e; font-size: 14px;">
                         <strong>⚠️ Bezbednosna napomena:</strong> Ovaj link za verifikaciju ističe za 24 sata. Ako niste kreirali nalog kod nas, molimo vas da ignorišete ovaj email.
                     </p>

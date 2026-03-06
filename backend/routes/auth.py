@@ -55,7 +55,7 @@ def get_verification_email_template(full_name: str, verification_link: str, lang
                 <p style="color: #475569; line-height: 1.8; text-align: center;">Hello <strong>{full_name}</strong>,</p>
                 <p style="color: #475569; line-height: 1.8; text-align: center;">Please click the button below to verify your email:</p>
                 <div style="text-align: center; margin: 35px 0;">
-                    <a href="{verification_link}" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: bold;">Verify Email Here</a>
+                    <a href="{verification_link}" style="display: inline-block; background-color: #0ea5e9; color: #ffffff; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; border: 2px solid #0284c7;">Verify Email Here</a>
                 </div>
                 <p style="color: #94a3b8; font-size: 13px; text-align: center;">This link will expire in {VERIFICATION_TOKEN_HOURS} hours.</p>
             </div>
@@ -74,7 +74,7 @@ def get_verification_email_template(full_name: str, verification_link: str, lang
                 <p style="color: #475569; line-height: 1.8; text-align: center;">Poštovani <strong>{full_name}</strong>,</p>
                 <p style="color: #475569; line-height: 1.8; text-align: center;">Kliknite na dugme ispod da biste potvrdili svoju email adresu:</p>
                 <div style="text-align: center; margin: 35px 0;">
-                    <a href="{verification_link}" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: bold;">Verifikuj Email Ovde</a>
+                    <a href="{verification_link}" style="display: inline-block; background-color: #0ea5e9; color: #ffffff; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; border: 2px solid #0284c7;">Verifikuj Email Ovde</a>
                 </div>
                 <p style="color: #94a3b8; font-size: 13px; text-align: center;">Link ističe za {VERIFICATION_TOKEN_HOURS} sati.</p>
             </div>
