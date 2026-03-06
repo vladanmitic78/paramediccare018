@@ -231,7 +231,8 @@ async def delete_service(service_id: str, user: dict = Depends(require_roles([Us
 
 # ============ FILE UPLOAD ============
 
-UPLOAD_DIR = "/app/backend/uploads"
+# Use dynamic path relative to this file's location
+UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
