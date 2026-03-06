@@ -138,15 +138,9 @@ def get_verification_email_template(full_name: str, verification_link: str, lang
                 
                 <!-- CTA Button -->
                 <div style="text-align: center; margin: 40px 0;">
-                    <a href="{verification_link}" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 50px; font-size: 18px; font-weight: 600; box-shadow: 0 4px 20px rgba(14, 165, 233, 0.4); transition: all 0.3s;">
-                        ✓ Verify My Email
+                    <a href="{verification_link}" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: #ffffff; text-decoration: none; padding: 18px 50px; border-radius: 50px; font-size: 18px; font-weight: 600; box-shadow: 0 4px 20px rgba(14, 165, 233, 0.4);">
+                        Verify Email Here
                     </a>
-                </div>
-                
-                <!-- Alternative Link -->
-                <div style="background-color: #f8fafc; border-radius: 12px; padding: 20px; margin: 30px 0;">
-                    <p style="color: #64748b; font-size: 14px; margin: 0 0 10px 0;">If the button doesn't work, copy and paste this link into your browser:</p>
-                    <p style="color: #0ea5e9; font-size: 12px; word-break: break-all; margin: 0; background-color: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">{verification_link}</p>
                 </div>
                 
                 <!-- Security Note -->
@@ -189,15 +183,9 @@ def get_verification_email_template(full_name: str, verification_link: str, lang
                 
                 <!-- CTA Button -->
                 <div style="text-align: center; margin: 40px 0;">
-                    <a href="{verification_link}" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 50px; font-size: 18px; font-weight: 600; box-shadow: 0 4px 20px rgba(14, 165, 233, 0.4); transition: all 0.3s;">
-                        ✓ Potvrdi Email
+                    <a href="{verification_link}" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: #ffffff; text-decoration: none; padding: 18px 50px; border-radius: 50px; font-size: 18px; font-weight: 600; box-shadow: 0 4px 20px rgba(14, 165, 233, 0.4);">
+                        Verifikuj Email Ovde
                     </a>
-                </div>
-                
-                <!-- Alternative Link -->
-                <div style="background-color: #f8fafc; border-radius: 12px; padding: 20px; margin: 30px 0;">
-                    <p style="color: #64748b; font-size: 14px; margin: 0 0 10px 0;">Ako dugme ne radi, kopirajte i nalepite ovaj link u vaš pretraživač:</p>
-                    <p style="color: #0ea5e9; font-size: 12px; word-break: break-all; margin: 0; background-color: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">{verification_link}</p>
                 </div>
                 
                 <!-- Security Note -->
