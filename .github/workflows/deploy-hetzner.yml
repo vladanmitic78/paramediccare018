@@ -27,12 +27,13 @@ jobs:
         working-directory: frontend
         run: |
           npm install -g yarn
-          yarn install
+          yarn install --network-timeout 100000
 
       - name: Build frontend
         working-directory: frontend
         env:
           REACT_APP_BACKEND_URL: https://paramedic-care018.rs
+          CI: false
         run: yarn build
 
       - name: Setup SSH key
@@ -45,46 +46,39 @@ jobs:
       - name: Deploy backend
         run: |
           rsync -avz --delete \
-            -e "ssh -i ~/.ssh/deploy_key" \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
             --exclude '__pycache__' \
             --exclude '*.pyc' \
             --exclude '.env' \
-            --exclude 'uploads/*' \
+            --exclude 'uploads' \
+            --exclude 'venv' \
             backend/ ${{ env.SERVER_USER }}@${{ env.SERVER_IP }}:${{ env.APP_DIR }}/backend/
 
       - name: Deploy frontend build
         run: |
           rsync -avz --delete \
-            -e "ssh -i ~/.ssh/deploy_key" \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
             frontend/build/ ${{ env.SERVER_USER }}@${{ env.SERVER_IP }}:${{ env.APP_DIR }}/frontend/build/
 
-      - name: Install backend dependencies and restart services
+      - name: Install dependencies and restart backend
         run: |
-          ssh -i ~/.ssh/deploy_key ${{ env.SERVER_USER }}@${{ env.SERVER_IP }} << 'ENDSSH'
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ env.SERVER_USER }}@${{ env.SERVER_IP }} 'bash -s' << 'ENDSSH'
             cd /var/www/paramedic-care018/backend
             
-            # Create virtual environment if it doesn't exist
-            if [ ! -d "venv" ]; then
-              python3 -m venv venv
-            fi
-            
-            # Activate and install dependencies
+            # Activate virtual environment
             source venv/bin/activate
-            pip install --upgrade pip
-            pip install -r requirements.txt
-            pip install emergentintegrations --extra-index-url https://d33sy5i8bnduwe.cloudfront.net/simple/
+            
+            # Install dependencies quietly
+            pip install -r requirements.txt -q
             
             # Restart backend with PM2
-            pm2 delete paramedic-backend 2>/dev/null || true
-            pm2 start "source venv/bin/activate && uvicorn server:app --host 0.0.0.0 --port 8001" \
-              --name paramedic-backend \
-              --cwd /var/www/paramedic-care018/backend
+            pm2 restart paramedic-backend || pm2 start ./start_backend.sh --name paramedic-backend
             pm2 save
             
-            echo "Deployment complete!"
+            echo "Backend restarted!"
           ENDSSH
 
       - name: Health check
         run: |
-          sleep 10
-          curl -f http://${{ env.SERVER_IP }}/api/health || echo "Health check failed - server may still be starting"
+          sleep 5
+          curl -sf https://paramedic-care018.rs/api/health && echo " - OK" || echo "Health check pending"
